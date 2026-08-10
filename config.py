@@ -24,8 +24,8 @@ STOR_SANKNING_KR = 15000
 
 # --- Notifiering ---
 NOTIS_METOD = "epost"  # "epost" | "logg"
-EPOST_TILL = "din@epost.se"       # ÄNDRA: din mottagaradress
-EPOST_FRAN = "avsandare@epost.se"  # ÄNDRA: skickande konto (t.ex. Gmail-app-lösenord)
+EPOST_TILL = "ronnie.engstrand@gmail.com"       # ÄNDRA: din mottagaradress
+EPOST_FRAN = "ronnie.engstrand@gmail.com"  # ÄNDRA: skickande konto (t.ex. Gmail-app-lösenord)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
