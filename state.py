@@ -1,8 +1,10 @@
 """
-Sparar historik mellan dagliga körningar (i en enkel JSON-fil) så vi kan:
+Sparar historik mellan körningar (i en enkel JSON-fil) så vi kan:
 - upptäcka prissänkningar
 - veta hur länge en annons legat ute
-- undvika att skicka notis för samma fynd flera dagar i rad
+- se till att varje bil ALDRIG notifieras mer än en gång, oavsett
+  hur många gånger den dyker upp i senare körningar eller om den
+  senare kvalar in på en högre fyndnivå
 """
 
 import json
@@ -39,8 +41,6 @@ def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
     - prissankning_relevant: bool, True om sänkningen skedde efter att
       bilen legat ute ett tag (dvs inte bara en ny annons redan
       prissatt lågt)
-    - redan_notifierad: bool, om vi redan larmat om den här bilen
-      på samma nivå tidigare
     """
     idag = date.today().isoformat()
     resultat = []
@@ -55,7 +55,7 @@ def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
                 "forsta_pris": bil["annonspris"],
                 "senaste_pris": bil["annonspris"],
                 "senast_sedd": idag,
-                "notifierad_nivaer": [],
+                "notifierad": False,
             }
             bil["dagar_ute"] = 0
             bil["prissankning_kr"] = 0
@@ -80,15 +80,14 @@ def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
     return resultat
 
 
-def redan_notifierad(bil: dict, state: dict, niva: str) -> bool:
+def redan_notifierad(bil: dict, state: dict) -> bool:
+    """True om vi NÅGONSIN tidigare skickat notis om den här bilen -
+    oavsett fyndnivå. En bil notifieras alltså max en gång, totalt."""
     nyckel = _nyckel(bil)
-    historik = state.get(nyckel, {})
-    return niva in historik.get("notifierad_nivaer", [])
+    return state.get(nyckel, {}).get("notifierad", False)
 
 
-def markera_notifierad(bil: dict, state: dict, niva: str) -> None:
+def markera_notifierad(bil: dict, state: dict) -> None:
     nyckel = _nyckel(bil)
     if nyckel in state:
-        nivaer = state[nyckel].setdefault("notifierad_nivaer", [])
-        if niva not in nivaer:
-            nivaer.append(niva)
+        state[nyckel]["notifierad"] = True
