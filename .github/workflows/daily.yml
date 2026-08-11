@@ -31,7 +31,7 @@ jobs:
       - name: Kör fyndfilter
         env:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
-        run: python main.py
+        run: python -u main.py
 
       - name: Spara historik (state.json)
         uses: stefanzweifel/git-auto-commit-action@v5
