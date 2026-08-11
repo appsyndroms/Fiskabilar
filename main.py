@@ -10,8 +10,11 @@ Flöde:
 2. Deduplicera (samma bil på flera sajter -> en post)
 3. Berika med historik (dagar ute, prissänkning)
 4. Beräkna marknadsvärde och fyndnivå per bil
-5. Filtrera fram FYND / EXTREMT FYND (som inte redan notifierats)
-6. Skicka notis
+5. För varje NY bil (aldrig notifierad förut) som är FYND/EXTREMT FYND:
+   skicka ett eget mejl DIREKT och markera den som notifierad omedelbart
+   - varje bil notifieras alltså max en gång totalt, någonsin, och
+     mejlet går ut så fort fyndet upptäcks istället för att samlas
+     ihop och skickas som en sammanfattning i slutet
 """
 
 from datetime import datetime
@@ -83,38 +86,38 @@ def main():
     state = ladda_state()
     bilar = uppdatera_och_berika(bilar, state)
 
-    notiser_att_skicka = []
+    antal_skickade = 0
 
     for bil in bilar:
         vardering = berakna_fynd(bil)
         if vardering["niva"] is None:
             continue
 
-        if redan_notifierad(bil, state, vardering["niva"]):
-            continue
+        if redan_notifierad(bil, state):
+            continue  # den här bilen har redan mejlats en gång - aldrig igen
 
         score = berakna_fyndscore(bil, vardering)
         text = formatera_notis(bil, vardering, score)
-        notiser_att_skicka.append((bil, vardering, text))
-        markera_notifierad(bil, state, vardering["niva"])
 
-    spara_state(state)
+        niva_etikett = "EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "FYND"
+        amne = f"🚨 {niva_etikett}: {bil.get('variant', 'V60')} {bil.get('arsmodell')} - {vardering['diff']:,} kr under marknad".replace(",", " ")
 
-    if not notiser_att_skicka:
-        print("Inga nya fynd idag.")
-        return
+        # Skicka DIREKT, en bil i taget - inte samlat i en sammanfattning
+        skicka_epost(amne, text)
+        print(f"Mejl skickat: {amne}")
 
-    # Sortera högsta fyndscore först
-    notiser_att_skicka.sort(key=lambda x: x[2], reverse=True)
+        # Markera och spara state OMEDELBART så samma bil garanterat
+        # aldrig notifieras två gånger, även om skriptet skulle
+        # krascha eller avbrytas innan resten av bilarna är klara
+        markera_notifierad(bil, state)
+        spara_state(state)
 
-    antal_extrema = sum(1 for _, v, _ in notiser_att_skicka if v["niva"] == "EXTREMT_FYND")
-    amne = f"V60-fyndfilter: {len(notiser_att_skicka)} nya fynd" + (
-        f" ({antal_extrema} extrema!)" if antal_extrema else ""
-    )
-    brodtext = "\n\n---\n\n".join(text for _, _, text in notiser_att_skicka)
+        antal_skickade += 1
 
-    skicka_epost(amne, brodtext)
-    print(f"Skickade notis med {len(notiser_att_skicka)} fynd.")
+    if antal_skickade == 0:
+        print("Inga nya fynd denna körning.")
+    else:
+        print(f"Totalt {antal_skickade} nya fynd mejlade denna körning.")
 
 
 if __name__ == "__main__":
