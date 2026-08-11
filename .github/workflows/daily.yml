@@ -8,7 +8,7 @@ on:
   # (mot Europe/Stockholm) om det faktiskt är 06:00-22:00 lokal tid
   # och avslutar tyst annars - så du får ingen spam nattetid.
   schedule:
-    - cron: "*/30 4-21 * * *"
+    - cron: "*/15 4-21 * * *"
   workflow_dispatch: {}  # gör så du kan trigga manuellt från GitHub-appen
 
 permissions:
