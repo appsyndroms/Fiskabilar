@@ -47,4 +47,57 @@ def _inom_aktiv_tid() -> bool:
     Beräknas dynamiskt mot Europe/Stockholm så att sommar-/vintertid
     (CEST/CET) hanteras korrekt automatiskt - workflow-schemat i
     .github/workflows/daily.yml triggar oftare än så här (för att
-    täcka båda t
+    täcka båda tidszonlägena) och den här funktionen är den som
+    faktiskt avgör om en körning ska göra något.
+    """
+    nu = datetime.now(TIDSZON)
+    return AKTIV_TID_START <= nu.hour < AKTIV_TID_SLUT
+
+
+def hamta_alla_annonser() -> list[dict]:
+    alla = []
+    for kalla in AKTIVA_KALLOR:
+        modul = KALLA_TILL_MODUL.get(kalla)
+        if modul is None:
+            print(f"Okänd källa i config: {kalla}")
+            continue
+        try:
+            alla.extend(modul.hamta_annonser())
+        except Exception as e:
+            print(f"FEL i källa '{kalla}': {e}")
+    return alla
+
+
+def main():
+    print("=== V60-fyndfilter startar ===")
+
+    if not _inom_aktiv_tid():
+        nu = datetime.now(TIDSZON)
+        print(f"Utanför aktiv tid ({nu.strftime('%H:%M')} svensk tid, "
+              f"fönster är {AKTIV_TID_START:02d}:00-{AKTIV_TID_SLUT:02d}:00). Avslutar utan att göra något.")
+        return
+
+    raa_annonser = hamta_alla_annonser()
+    print(f"Totalt {len(raa_annonser)} annonser innan dedup")
+
+    bilar = deduplicera(raa_annonser)
+    print(f"{len(bilar)} unika bilar efter dedup")
+
+    state = ladda_state()
+    bilar = uppdatera_och_berika(bilar, state)
+
+    antal_skickade = 0
+
+    for bil in bilar:
+        vardering = berakna_fynd(bil)
+        if vardering["niva"] is None:
+            continue
+
+        if redan_notifierad(bil, state):
+            continue  # den här bilen har redan mejlats en gång - aldrig igen
+
+        score = berakna_fyndscore(bil, vardering)
+        text = formatera_notis(bil, vardering, score)
+
+        niva_etikett = "EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "FYND"
+        amne = f
