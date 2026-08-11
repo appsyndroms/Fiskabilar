@@ -100,4 +100,31 @@ def main():
         text = formatera_notis(bil, vardering, score)
 
         niva_etikett = "EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "FYND"
-        amne = f
+        amne = f"🚨 {niva_etikett}: {bil.get('variant', 'V60')} {bil.get('arsmodell')} - {vardering['diff']:,} kr under marknad".replace(",", " ")
+
+        # Skicka DIREKT, en bil i taget - inte samlat i en sammanfattning
+        skickat = skicka_epost(amne, text)
+
+        if skickat:
+            print(f"Mejl skickat: {amne}")
+            # Markera och spara state OMEDELBART så samma bil garanterat
+            # aldrig notifieras två gånger, även om skriptet skulle
+            # krascha eller avbrytas innan resten av bilarna är klara
+            markera_notifierad(bil, state)
+            spara_state(state)
+            antal_skickade += 1
+        else:
+            # VIKTIGT: bilen markeras INTE som notifierad om mejlet
+            # misslyckades (t.ex. saknad EPOST_LOSENORD-secret) - då
+            # försöker vi igen automatiskt nästa körning istället för
+            # att fyndet går förlorat för alltid.
+            print(f"OBS: mejl INTE skickat, försöker igen nästa körning: {amne}")
+
+    if antal_skickade == 0:
+        print("Inga nya fynd denna körning.")
+    else:
+        print(f"Totalt {antal_skickade} nya fynd mejlade denna körning.")
+
+
+if __name__ == "__main__":
+    main()
