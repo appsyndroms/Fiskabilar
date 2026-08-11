@@ -11,6 +11,9 @@ on:
     - cron: "*/30 4-21 * * *"
   workflow_dispatch: {}  # gör så du kan trigga manuellt från GitHub-appen
 
+permissions:
+  contents: write  # krävs för att git-auto-commit-action ska kunna pusha tillbaka state.json
+
 jobs:
   kontrollera-fynd:
     runs-on: ubuntu-latest
