@@ -4,8 +4,8 @@ Justera fritt utan att röra övrig kod.
 """
 
 # --- Grundkrav ---
-MODELL = "Volvo V60"
-VARIANT_KRAV = ["T6 AWD", "T8 AWD"]  # accepterade drivlinor (Recharge)
+MODELLER = ["v60", "v90"]
+VARIANT_KRAV = ["T6 AWD", "T8 AWD"]  # accepterade drivlinor (Recharge) - samma för båda modellerna
 ARSMODELL_MIN = 2022
 ARSMODELL_MAX = 2024
 MAX_MIL = 12000
