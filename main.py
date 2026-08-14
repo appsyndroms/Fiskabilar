@@ -24,7 +24,7 @@ from config import AKTIVA_KALLOR
 from dedup import deduplicera
 from state import ladda_state, spara_state, uppdatera_och_berika, redan_notifierad, markera_notifierad
 from valuation import berakna_fynd
-from scoring import berakna_fyndscore, formatera_notis
+from scoring import berakna_fyndscore, formatera_notis, bil_rubrik
 from notify import skicka_epost
 
 from scrapers import blocket, wayke, bytbil, bilweb
@@ -69,7 +69,7 @@ def hamta_alla_annonser() -> list[dict]:
 
 
 def main():
-    print("=== V60-fyndfilter startar ===")
+    print("=== Bilfyndfilter startar ===")
 
     if not _inom_aktiv_tid():
         nu = datetime.now(TIDSZON)
@@ -100,7 +100,7 @@ def main():
         text = formatera_notis(bil, vardering, score)
 
         niva_etikett = "EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "FYND"
-        amne = f"🚨 {niva_etikett}: {bil.get('variant', 'V60')} {bil.get('arsmodell')} - {vardering['diff']:,} kr under marknad".replace(",", " ")
+        amne = f"🚨 {niva_etikett}: {bil_rubrik(bil)} {bil.get('arsmodell')} - {vardering['diff']:,} kr under marknad".replace(",", " ")
 
         # Skicka DIREKT, en bil i taget - inte samlat i en sammanfattning
         skickat = skicka_epost(amne, text)

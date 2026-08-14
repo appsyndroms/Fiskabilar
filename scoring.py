@@ -1,5 +1,26 @@
 """Fyndscore (0-100) och formatering av meddelandetext."""
 
+from config import BILAR
+
+# Snabbuppslag: (marke_slug, modell_slug) -> (marke_visning, modell_visning)
+_VISNINGSNAMN = {
+    (b["marke_slug"], b["modell_slug"]): (b["marke_visning"], b["modell_visning"])
+    for b in BILAR
+}
+
+
+def bil_rubrik(bil: dict) -> str:
+    """Bygger 'Volvo V60 T6 AWD' resp. 'BMW 530e xDrive Touring' utan
+    att dubblera variantnamnet när modell och variant redan är samma
+    text (som för BMW, där sökningen redan är variant-specifik)."""
+    nyckel = (bil.get("marke_slug"), bil.get("modell_slug"))
+    marke_visning, modell_visning = _VISNINGSNAMN.get(nyckel, ("", (bil.get("modell") or "").upper()))
+    variant = bil.get("variant", "")
+
+    if variant and variant.lower() != modell_visning.lower():
+        return f"{marke_visning} {modell_visning} {variant}".strip()
+    return f"{marke_visning} {modell_visning}".strip()
+
 
 def berakna_fyndscore(bil: dict, vardering: dict) -> int:
     score = 0
@@ -34,10 +55,9 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
 
 def formatera_notis(bil: dict, vardering: dict, score: int) -> str:
     niva_emoji = "🚨 EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "🔥 FYND"
-    modell_visning = (bil.get("modell") or "v60").upper()
 
     rader = [
-        f"{niva_emoji} – Volvo {modell_visning} {bil.get('variant', '')}",
+        f"{niva_emoji} – {bil_rubrik(bil)}",
         f"{bil.get('arsmodell')} · {bil.get('miltal'):,} mil · {bil.get('annonspris'):,} kr".replace(",", " "),
         f"Marknadsvärde: ~{vardering['marknadsvarde']:,} kr".replace(",", " "),
         f"Ca {vardering['diff']:,} kr under marknad".replace(",", " "),
