@@ -116,6 +116,10 @@ def hamta_annonser() -> list[dict]:
             print(f"[bilweb] Snutt av rå HTML runt första '-kombi-' (för felsökning): {snutt!r}")
 
         sedda_id = set()
+        rak_variant = 0
+        rak_rad_pris = 0
+        rak_grundkrav = 0
+        exempel_avvisade_slugs = []
 
         for m in url_regex.finditer(html):
             annons_id = m.group("id")
@@ -126,7 +130,10 @@ def hamta_annonser() -> list[dict]:
             slug_text = m.group("slug").replace("-", " ")
             variant = identifiera_variant(bilkonfig, slug_text)
             if variant is None:
+                if len(exempel_avvisade_slugs) < 3:
+                    exempel_avvisade_slugs.append(slug_text)
                 continue  # matchar ingen önskad variant - hoppa över
+            rak_variant += 1
 
             # VIKTIGT: annons-ID:t finns bara i URL:en (href-attributet),
             # inte i den synliga texten - därför letar vi upp positionen
@@ -141,6 +148,7 @@ def hamta_annonser() -> list[dict]:
 
             if not rad_match or not pris_match:
                 continue  # kunde inte tolka - hoppa över hellre än gissa fel
+            rak_rad_pris += 1
 
             bil = {
                 "kalla": "bilweb",
@@ -171,7 +179,14 @@ def hamta_annonser() -> list[dict]:
             bil = berika_fran_fritext(bil, bil["utrustningsniva"])
 
             if matchar_grundkrav(bil):
+                rak_grundkrav += 1
                 bilar.append(bil)
+
+        print(f"[bilweb] {bilkonfig['marke_visning']} {bilkonfig['modell_visning']}: "
+              f"{antal_url_traffar} rå-URL:er -> {rak_variant} matchade variant -> "
+              f"{rak_rad_pris} kunde tolka pris/mil -> {rak_grundkrav} klarade grundkraven")
+        if exempel_avvisade_slugs:
+            print(f"[bilweb] Exempel på slugs som INTE matchade någon variant: {exempel_avvisade_slugs}")
 
     print(f"[bilweb] {len(bilar)} annonser matchade grundkraven")
     return bilar
