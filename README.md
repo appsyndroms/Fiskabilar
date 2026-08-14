@@ -1,37 +1,52 @@
-# V60-fyndfilter
+# V60/V90-fyndfilter
 
-Dagligt automatiskt filter som letar efter Volvo V60 Recharge (T6/T8 AWD),
-räknar fram ett marknadsvärde per bil och mejlar dig när en annons ligger
-tydligt under vad den borde kosta.
+Automatiskt filter (kör var 15:e minut, mål ~30 min, 06-22 svensk tid)
+som letar efter Volvo V60 och V90 Recharge (T6/T8 AWD), räknar fram
+ett marknadsvärde per bil och mejlar dig **direkt** när en annons
+ligger tydligt under vad den borde kosta.
 
-## Status per källa (uppdaterad 2026-08-09)
+**Notisregel: varje bil mejlas max EN gång, någonsin.** Så fort ett
+fynd upptäcks skickas ett eget mejl direkt för just den bilen (inte
+en samlad sammanfattning i slutet). Nästa körning ser samma bil igen
+men skickar inget nytt mejl om den - historiken i `data/state.json`
+kommer ihåg vilka bilar som redan mejlats, permanent.
+
+**Modeller styrs av `MODELLER` i `config.py`** (just nu `["v60", "v90"]`).
+Kriterierna (T6/T8 AWD, årsmodell, max mil osv.) är identiska för båda
+modellerna. Vill du bara ha en av dem, ta bort den andra ur listan.
+
+⚠️ **Migrationsnotis (2026-08-12):** historiknyckeln i `state.json`
+ändrades för att skilja V60 från V90 (annars hade en V60 och en V90
+med råkat lika variant/år/mil kunnat räknas som samma bil). Det gör
+att de V60-bilar som redan notifierats med den GAMLA nyckeln ser ut
+som nya igen och kan mejlas EN gång till efter den här uppdateringen.
+Efter det första varvet fungerar "aldrig upprepning" som vanligt igen.
+
+## Status per källa (uppdaterad 2026-08-12)
 
 | Källa | Status | Kommentar |
 |---|---|---|
-| **Wayke** | ✅ Verifierad | Server-renderad, fungerar med `requests`. Textmönster-baserad parser (etiketter som "Mätarställning:" ändras sällan). |
-| **Bilweb** | ✅ Verifierad | Fungerar UTAN JavaScript (bekräftat - sidan visar full data trots att JS är avstängt). Variant/år/ID läses direkt ur annons-URL:en, vilket är extra robust. |
-| **Bytbil** | ⚠️ Ej verifierad | Websökningen hittade inte Bytbils faktiska sökresultat den här sessionen. Koden är fortfarande en overifierad mall. Avaktiverad som standard i `config.py`. |
-| **Blocket** | ⚠️ Ej verifierad, avaktiverad | Aktivt anti-bot-skydd (Datadome). Kräver mer jobb och försiktighet. Avaktiverad som standard. |
-
-**Med Wayke + Bilweb aktiva täcker du redan en stor del av marknaden** -
-Bilweb ensam hade 1 300+ V60-annonser vid testet. Det är en solid start.
+| **Wayke** | ✅ Verifierad (V60+V90) | Server-renderad, fungerar med `requests`. Textmönster-baserad parser, samma mall för båda modellerna. |
+| **Bilweb** | ✅ Verifierad (V60+V90) | Fungerar UTAN JavaScript. Modell/variant/år/ID läses direkt ur annons-URL:en. |
+| **Bytbil** | ⚠️ Ej verifierad | Websökningen hittade inte Bytbils faktiska sökresultat. Koden är fortfarande en overifierad mall. Avaktiverad som standard. |
+| **Blocket** | ⚠️ Ej verifierad, avaktiverad | Aktivt anti-bot-skydd (Datadome). Avaktiverad som standard. |
 
 Om du vill lägga till Bytbil eller Blocket senare:
-1. Öppna sajten i en vanlig webbläsare, sök fram V60 Recharge
+1. Öppna sajten i en vanlig webbläsare, sök fram V60/V90 Recharge
 2. Testa om `curl` eller Pythons `requests` (utan webbläsare) ger samma
    innehåll som webbläsaren visar - om ja, samma teknik som Wayke/Bilweb
    fungerar. Om sidan bara visar en tom "laddar..."-platshållare utan JS
    behöver du ett verktyg som kör JavaScript (t.ex. Playwright)
-3. Leta efter stabila textetiketter (som "Mätarställning:") eller mönster
-   i URL:en (som Bilwebs årsmodell-i-slug) att bygga en regex-parser kring,
-   istället för att lita på CSS-klasser som ändras ofta
+3. Leta efter stabila textetiketter eller mönster i URL:en att bygga en
+   regex-parser kring, istället för att lita på CSS-klasser som ändras ofta
 4. Lägg till källan i `AKTIVA_KALLOR` i `config.py` när den är klar
 
 ## Snabbstart
 
 1. **Skapa ett GitHub-repo** och lägg in alla filer i det här projektet.
 2. **Sätt upp e-post:**
-   - Redigera `config.py`: `EPOST_TILL` och `EPOST_FRAN`
+   - Mottagaradress är redan ifylld i `config.py` (`fazzious@hotmail.com`)
+   - Redigera `EPOST_FRAN` i `config.py` till det konto som ska skicka
    - Om du använder Gmail: skapa ett "app-lösenord" (inte ditt vanliga
      lösenord) under Google-kontots säkerhetsinställningar
    - I GitHub-repot: Settings → Secrets and variables → Actions →
@@ -53,13 +68,16 @@ Om du vill lägga till Bytbil eller Blocket senare:
 
 ## Om Actions-minuter (viktigt om du gör repot privat)
 
-Med 30-minuters intervall 06-22 blir det ~36 körningar/dag, vardera en
-knapp minut = ungefär 1 000-1 500 minuter/månad.
+Schemat begär körningar var 15:e minut (för att i praktiken hamna nära
+30 minuter, se kommentar i `daily.yml`) 06-22 svensk tid, vilket ger
+upp till ~72 körningar/dag, vardera 30-80 sekunder enligt loggarna =
+ungefär 1 500-2 500 minuter/månad.
 - **Publikt repo:** GitHub Actions är gratis och obegränsat.
-- **Privat repo:** Gratisnivån ger 2 000 minuter/månad, så du ligger
-  nära taket men bör klara dig. Om du vill vara säker: gör repot
-  publikt (koden avslöjar inget känsligt - lösenordet ligger som
-  secret, inte i koden) eller dra ner till t.ex. var 45:e minut.
+- **Privat repo:** Gratisnivån ger 2 000 minuter/månad - med det här
+  schemat kan du faktiskt nå taket. Om du märker att körningar slutar
+  triggas mot slutet av månaden: gör repot publikt (koden avslöjar
+  inget känsligt - lösenordet ligger som secret, inte i koden), eller
+  dra ner till `*/20` istället för `*/15` i `daily.yml`.
 
 ## Justera reglerna
 
@@ -68,9 +86,13 @@ Allt du troligen vill ändra finns i `config.py`:
 - Max miltal, årsmodellintervall
 - Vilka källor som är aktiva
 
-Marknadsvärderingen (basprisnivåer per år/variant) finns i `valuation.py`
-och bör uppdateras efter vad du faktiskt ser på marknaden de första
-veckorna - modellen är en rimlig startpunkt, inte facit.
+Marknadsvärderingen (basprisnivåer per modell/år/variant) finns i
+`valuation.py` och bör uppdateras efter vad du faktiskt ser på
+marknaden de första veckorna - modellen är en rimlig startpunkt, inte
+facit. V90-baspriserna sattes efter en snabb koll av verkliga
+Wayke-annonser (visade sig ligga bara måttligt över V60, +15-20k,
+inte den stora premie man kanske skulle gissa) - kalibrera vidare med
+egen data.
 
 **Känd begränsning (upptäckt vid testkörning):** utrustningsjusteringen
 i `valuation.py` matchar bara exakta ord som "core"/"ultimate"/

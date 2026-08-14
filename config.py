@@ -1,9 +1,11 @@
 """
-Konfiguration för V60-fyndfiltret.
+Konfiguration för V60/V90-fyndfiltret.
 Justera fritt utan att röra övrig kod.
 """
 
 # --- Grundkrav ---
+# Modeller att bevaka - slug matchar sökvägen på Wayke/Bilweb
+# (wayke.se/sok/volvo/{slug}/{år}, bilweb.se/sok/volvo/{slug}/kombi)
 MODELLER = ["v60", "v90"]
 VARIANT_KRAV = ["T6 AWD", "T8 AWD"]  # accepterade drivlinor (Recharge) - samma för båda modellerna
 ARSMODELL_MIN = 2022
@@ -24,8 +26,8 @@ STOR_SANKNING_KR = 15000
 
 # --- Notifiering ---
 NOTIS_METOD = "epost"  # "epost" | "logg"
-EPOST_TILL = "ronnie.engstrand@gmail.com"       # ÄNDRA: din mottagaradress
-EPOST_FRAN = "ronnie.engstrand@gmail.com"  # ÄNDRA: skickande konto (t.ex. Gmail-app-lösenord)
+EPOST_TILL = "ronnie.engstrand@gmail.com"       # mottagaradress
+EPOST_FRAN = "ronnie.engstrand@gmail.com"  # skickande konto (Gmail-app-lösenord i secret EPOST_LOSENORD)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 

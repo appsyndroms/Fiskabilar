@@ -34,9 +34,10 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
 
 def formatera_notis(bil: dict, vardering: dict, score: int) -> str:
     niva_emoji = "🚨 EXTREMT FYND" if vardering["niva"] == "EXTREMT_FYND" else "🔥 FYND"
+    modell_visning = (bil.get("modell") or "v60").upper()
 
     rader = [
-        f"{niva_emoji} – Volvo V60 {bil.get('variant', '')}",
+        f"{niva_emoji} – Volvo {modell_visning} {bil.get('variant', '')}",
         f"{bil.get('arsmodell')} · {bil.get('miltal'):,} mil · {bil.get('annonspris'):,} kr".replace(",", " "),
         f"Marknadsvärde: ~{vardering['marknadsvarde']:,} kr".replace(",", " "),
         f"Ca {vardering['diff']:,} kr under marknad".replace(",", " "),

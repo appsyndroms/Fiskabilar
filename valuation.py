@@ -1,5 +1,6 @@
 """
-Enkel men transparent marknadsvärdesmodell för V60 Recharge (T6/T8).
+Enkel men transparent marknadsvärdesmodell för Volvo V60/V90 Recharge
+(T6/T8).
 
 Modellen är medvetet regelbaserad (inte ML) så att du begriper och
 kan justera VARJE parameter. När du har samlat ~30-50 riktiga
@@ -8,7 +9,7 @@ annonser kan du med fördel byta ut detta mot en regression
 men regelmodellen ger vettiga resultat direkt.
 
 Grundtanke:
-1. Baspris per variant och årsmodell (nypris minus generell depreciering)
+1. Baspris per modell, variant och årsmodell (nypris minus generell depreciering)
 2. Avdrag per mil utöver "normalt" miltal för åldern
 3. Justering för utrustningsnivå (Inscription/Plus/Core etc)
 4. Justering för dragkrok, värmare, Volvo Selekt, batteristorlek
@@ -18,13 +19,26 @@ from datetime import date
 
 # Ungefärliga baspriser (kr) vid ~7000 mil/år, medelutrustning.
 # Dessa ÄR grova uppskattningar - uppdatera efter vad du ser på marknaden.
+#
+# V90-siffrorna är satta efter en snabb koll av verkliga Wayke-annonser
+# (2026-08-12): V90 T6/T8 Recharge visade sig ligga bara måttligt över
+# V60 för motsvarande årsmodell/utrustning (+15-20k), INTE den stora
+# premie man kanske skulle gissa för en större/dyrare flaggskeppsbil.
+# Kalibrera vidare när du har egen data.
 BASPRIS = {
-    ("T6 AWD", 2022): 335000,
-    ("T6 AWD", 2023): 375000,
-    ("T6 AWD", 2024): 420000,
-    ("T8 AWD", 2022): 375000,
-    ("T8 AWD", 2023): 415000,
-    ("T8 AWD", 2024): 460000,
+    ("v60", "T6 AWD", 2022): 335000,
+    ("v60", "T6 AWD", 2023): 375000,
+    ("v60", "T6 AWD", 2024): 420000,
+    ("v60", "T8 AWD", 2022): 375000,
+    ("v60", "T8 AWD", 2023): 415000,
+    ("v60", "T8 AWD", 2024): 460000,
+
+    ("v90", "T6 AWD", 2022): 355000,
+    ("v90", "T6 AWD", 2023): 395000,
+    ("v90", "T6 AWD", 2024): 440000,
+    ("v90", "T8 AWD", 2022): 395000,
+    ("v90", "T8 AWD", 2023): 435000,
+    ("v90", "T8 AWD", 2024): 480000,
 }
 
 # Kr per mil över/under förväntat miltal för åldern
@@ -66,17 +80,19 @@ def _ar_sedan_arsmodell(arsmodell: int) -> float:
 def berakna_marknadsvarde(bil: dict) -> int:
     """
     bil förväntas innehålla nycklarna:
-    variant (str, "T6 AWD"/"T8 AWD"), arsmodell (int), miltal (int),
-    utrustningsniva (str, valfri), dragkrok (bool), varmare (bool),
-    volvo_selekt (bool), stor_batteri (bool)
+    modell (str, "v60"/"v90"), variant (str, "T6 AWD"/"T8 AWD"),
+    arsmodell (int), miltal (int), utrustningsniva (str, valfri),
+    dragkrok (bool), varmare (bool), volvo_selekt (bool),
+    stor_batteri (bool)
     """
+    modell = (bil.get("modell") or "v60").lower()
     variant = bil.get("variant")
     arsmodell = bil.get("arsmodell")
 
-    baspris = BASPRIS.get((variant, arsmodell))
+    baspris = BASPRIS.get((modell, variant, arsmodell))
     if baspris is None:
-        # okänd kombination -> interpolera grovt från närmaste årsmodell
-        kandidater = [v for (var, ar), v in BASPRIS.items() if var == variant]
+        # okänd kombination -> interpolera grovt från närmaste årsmodell inom samma modell+variant
+        kandidater = [v for (mod, var, ar), v in BASPRIS.items() if mod == modell and var == variant]
         if not kandidater:
             return 0
         baspris = sorted(kandidater)[len(kandidater) // 2]
