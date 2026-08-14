@@ -1,6 +1,6 @@
 """
 Scraper för Bilweb - VERIFIERAD mot verklig sidstruktur 2026-08-09,
-utökad till V60+V90 2026-08-12, bugfixad 2026-08-12.
+utökad till V60+V90 2026-08-12.
 
 Bekräftat: Bilweb fungerar UTAN JavaScript (sidan visade fullständiga
 annonser trots texten "Du har Javascript inaktiverat"), så vanlig
@@ -18,13 +18,6 @@ CSS-klasser bytts ut). Pris och miltal hämtas ur den kompakta raden
 
 URL för sökning per modell (verifierat för både v60 och v90):
   https://bilweb.se/sok/volvo/{modell}/kombi
-
-BUGFIX 2026-08-12: tidigare letade koden efter annons-ID:t i en redan
-HTML-taggrensad text (via BeautifulSoup.get_text()), men ID:t finns
-bara i href-attributet - som försvinner helt när taggar rensas bort.
-Det gjorde att Bilweb aldrig gav en enda träff. Nu används positionen
-i den RÅA HTML:n istället (där URL-matchningen redan sker), och bara
-ett lokalt fönster runt den positionen taggrensas.
 """
 
 import re
@@ -101,7 +94,9 @@ def hamta_annonser() -> list[dict]:
             # VIKTIGT: annons-ID:t finns bara i URL:en (href-attributet),
             # inte i den synliga texten - därför letar vi upp positionen
             # i den RÅA HTML:n (där matchningen redan skedde) och rensar
-            # taggar bara i ett lokalt fönster runt den positionen.
+            # taggar bara i ett lokalt fönster runt den positionen, istället
+            # för att försöka hitta ID:t i en redan tagg-rensad heltext
+            # (vilket aldrig kan lyckas eftersom get_text() slänger href).
             start = m.start()
             html_fonster = html[max(0, start - 2000):start + 2000]
             lokal_text = BeautifulSoup(html_fonster, "html.parser").get_text(separator=" ")
