@@ -17,7 +17,8 @@ from config import STATE_FIL, MIN_DAGAR_FOR_SANKNING_RELEVANT, STOR_SANKNING_KR
 def _nyckel(bil: dict) -> str:
     if bil.get("regnr"):
         return f"reg:{bil['regnr'].upper().replace(' ', '')}"
-    return f"kal:{bil.get('variant')}:{bil.get('arsmodell')}:{bil.get('miltal')}"
+    modell = (bil.get("modell") or "v60").lower()
+    return f"kal:{modell}:{bil.get('variant')}:{bil.get('arsmodell')}:{bil.get('miltal')}"
 
 
 def ladda_state() -> dict:

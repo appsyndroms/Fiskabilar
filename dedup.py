@@ -7,8 +7,11 @@ och helst behålla den annons som har mest komplett information.
 
 Matchningsstrategi (i turordning, mest tillförlitlig först):
 1. Registreringsnummer om det finns i annonsen (starkast signal)
-2. Kombination av: variant + årsmodell + miltal (±100 mil) + pris (±2000 kr)
-   -> om alla stämmer inom marginal räknas det som samma bil
+2. Kombination av: modell + variant + årsmodell + miltal (±100 mil) +
+   pris (±2000 kr) -> om alla stämmer inom marginal räknas det som
+   samma bil. Modell måste också matcha exakt (v60 ≠ v90) - annars
+   riskerar en V60 och V90 med råkat lika mil/pris/år att slås ihop
+   felaktigt.
 """
 
 MIL_MARGINAL = 100
@@ -19,6 +22,8 @@ def _matchar(a: dict, b: dict) -> bool:
     if a.get("regnr") and b.get("regnr"):
         return a["regnr"].upper().replace(" ", "") == b["regnr"].upper().replace(" ", "")
 
+    if (a.get("modell") or "").lower() != (b.get("modell") or "").lower():
+        return False
     if a.get("variant") != b.get("variant"):
         return False
     if a.get("arsmodell") != b.get("arsmodell"):

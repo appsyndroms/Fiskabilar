@@ -1,6 +1,6 @@
 """
-Enkel men transparent marknadsvärdesmodell för Volvo V60/V90 Recharge
-(T6/T8).
+Enkel men transparent marknadsvärdesmodell för fyndfiltrets bevakade
+bilar (Volvo V60/V90 Recharge T6/T8, BMW 530e xDrive Touring).
 
 Modellen är medvetet regelbaserad (inte ML) så att du begriper och
 kan justera VARJE parameter. När du har samlat ~30-50 riktiga
@@ -11,7 +11,7 @@ men regelmodellen ger vettiga resultat direkt.
 Grundtanke:
 1. Baspris per modell, variant och årsmodell (nypris minus generell depreciering)
 2. Avdrag per mil utöver "normalt" miltal för åldern
-3. Justering för utrustningsnivå (Inscription/Plus/Core etc)
+3. Justering för utrustningsnivå (Inscription/Plus/Core etc - Volvo-specifikt)
 4. Justering för dragkrok, värmare, Volvo Selekt, batteristorlek
 """
 
@@ -19,12 +19,17 @@ from datetime import date
 
 # Ungefärliga baspriser (kr) vid ~7000 mil/år, medelutrustning.
 # Dessa ÄR grova uppskattningar - uppdatera efter vad du ser på marknaden.
+# Nyckel: (modell_slug, variant, arsmodell)
 #
 # V90-siffrorna är satta efter en snabb koll av verkliga Wayke-annonser
 # (2026-08-12): V90 T6/T8 Recharge visade sig ligga bara måttligt över
 # V60 för motsvarande årsmodell/utrustning (+15-20k), INTE den stora
 # premie man kanske skulle gissa för en större/dyrare flaggskeppsbil.
-# Kalibrera vidare när du har egen data.
+#
+# BMW 530e xDrive Touring-siffrorna är satta efter en koll av 31 riktiga
+# Wayke-annonser för 2023 (2026-08-13): priser 239 900-415 990 kr,
+# median runt 350 000 kr vid blandat miltal 2 700-17 500 mil.
+# Kalibrera vidare när du har egen data - för alla modeller.
 BASPRIS = {
     ("v60", "T6 AWD", 2022): 335000,
     ("v60", "T6 AWD", 2023): 375000,
@@ -39,6 +44,10 @@ BASPRIS = {
     ("v90", "T8 AWD", 2022): 395000,
     ("v90", "T8 AWD", 2023): 435000,
     ("v90", "T8 AWD", 2024): 480000,
+
+    ("530e-xdrive-touring", "530e xDrive Touring", 2022): 315000,
+    ("530e-xdrive-touring", "530e xDrive Touring", 2023): 355000,
+    ("530e-xdrive-touring", "530e xDrive Touring", 2024): 395000,
 }
 
 # Kr per mil över/under förväntat miltal för åldern
@@ -80,10 +89,10 @@ def _ar_sedan_arsmodell(arsmodell: int) -> float:
 def berakna_marknadsvarde(bil: dict) -> int:
     """
     bil förväntas innehålla nycklarna:
-    modell (str, "v60"/"v90"), variant (str, "T6 AWD"/"T8 AWD"),
-    arsmodell (int), miltal (int), utrustningsniva (str, valfri),
-    dragkrok (bool), varmare (bool), volvo_selekt (bool),
-    stor_batteri (bool)
+    modell (str, modell_slug t.ex. "v60"/"v90"/"530e-xdrive-touring"),
+    variant (str), arsmodell (int), miltal (int),
+    utrustningsniva (str, valfri), dragkrok (bool), varmare (bool),
+    volvo_selekt (bool), stor_batteri (bool)
     """
     modell = (bil.get("modell") or "v60").lower()
     variant = bil.get("variant")

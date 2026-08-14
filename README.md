@@ -1,9 +1,9 @@
-# V60/V90-fyndfilter
+# V60/V90/BMW 530e-fyndfilter
 
 Automatiskt filter (kör var 15:e minut, mål ~30 min, 06-22 svensk tid)
-som letar efter Volvo V60 och V90 Recharge (T6/T8 AWD), räknar fram
-ett marknadsvärde per bil och mejlar dig **direkt** när en annons
-ligger tydligt under vad den borde kosta.
+som letar efter Volvo V60/V90 Recharge (T6/T8 AWD) och BMW 530e xDrive
+Touring, räknar fram ett marknadsvärde per bil och mejlar dig
+**direkt** när en annons ligger tydligt under vad den borde kosta.
 
 **Notisregel: varje bil mejlas max EN gång, någonsin.** Så fort ett
 fynd upptäcks skickas ett eget mejl direkt för just den bilen (inte
@@ -11,9 +11,11 @@ en samlad sammanfattning i slutet). Nästa körning ser samma bil igen
 men skickar inget nytt mejl om den - historiken i `data/state.json`
 kommer ihåg vilka bilar som redan mejlats, permanent.
 
-**Modeller styrs av `MODELLER` i `config.py`** (just nu `["v60", "v90"]`).
-Kriterierna (T6/T8 AWD, årsmodell, max mil osv.) är identiska för båda
-modellerna. Vill du bara ha en av dem, ta bort den andra ur listan.
+**Bilar styrs av `BILAR` i `config.py`** - en lista där varje post
+beskriver märke, modell, sökvägar för Wayke/Bilweb och vilka varianter
+som räknas som träff. Lägg till fler bilar genom att lägga till fler
+poster i listan; ta bort genom att ta bort en post. Se kommentarerna
+i `config.py` för hur varje fält används.
 
 ⚠️ **Migrationsnotis (2026-08-12):** historiknyckeln i `state.json`
 ändrades för att skilja V60 från V90 (annars hade en V60 och en V90
