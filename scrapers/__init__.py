@@ -2,14 +2,25 @@
 Gemensam filtreringslogik som alla scrapers kör sina råa resultat genom.
 """
 
+import re
+
 from config import (
-    ARSMODELL_MIN, ARSMODELL_MAX, MAX_MIL, VARIANT_KRAV, UTESLUT_SKADAD,
+    ARSMODELL_MIN, ARSMODELL_MAX, MAX_MIL, BILAR, UTESLUT_SKADAD,
     HYRBIL_NYCKELORD, SELEKT_NYCKELORD,
 )
 
+# Snabbuppslag: (marke_slug, modell_slug) -> giltiga variantnamn, för
+# matchar_grundkrav(). Byggs en gång vid import.
+_GILTIGA_VARIANTER_PER_BIL = {
+    (b["marke_slug"], b["modell_slug"]): set(b["variant_kraven"].keys())
+    for b in BILAR
+}
+
 
 def matchar_grundkrav(bil: dict) -> bool:
-    if bil.get("variant") not in VARIANT_KRAV:
+    nyckel = (bil.get("marke_slug"), bil.get("modell_slug"))
+    giltiga_varianter = _GILTIGA_VARIANTER_PER_BIL.get(nyckel)
+    if giltiga_varianter is None or bil.get("variant") not in giltiga_varianter:
         return False
     ar = bil.get("arsmodell")
     if ar is None or not (ARSMODELL_MIN <= ar <= ARSMODELL_MAX):
@@ -21,6 +32,20 @@ def matchar_grundkrav(bil: dict) -> bool:
     if UTESLUT_SKADAD and bil.get("skadad"):
         return False
     return True
+
+
+def identifiera_variant(bilkonfig: dict, text: str) -> str | None:
+    """
+    Går igenom variant_kraven för en bilkonfig (se config.BILAR) och
+    returnerar namnet på FÖRSTA varianten där ALLA regex-mönster
+    matchar den givna texten (t.ex. annonstiteln eller URL-sluggen).
+    Returnerar None om ingen variant matchar.
+    """
+    text_lower = (text or "").lower()
+    for variantnamn, monster in bilkonfig["variant_kraven"].items():
+        if all(re.search(m, text_lower, re.IGNORECASE) for m in monster):
+            return variantnamn
+    return None
 
 
 def berika_fran_fritext(bil: dict, fritext: str) -> dict:
