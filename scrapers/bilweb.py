@@ -59,9 +59,16 @@ def _bygg_url_regex(marke_slug: str) -> re.Pattern:
     formateringen varierar, t.ex. BMW:s "530-e" vs "530e") - vi filtrerar
     på INNEHÅLLET i den fångade sluggen efteråt via variant_kraven,
     istället för att försöka bygga ett exakt mönster per modell.
+
+    Breddad 2026-08-14: tillåter valfritt "www.", både http/https, och
+    diakritiska tecken (å/ä/ö) i länsdelen av URL:en (t.ex.
+    "västra-götalands-lan") - tidigare versionen krävde strikt [a-z-]+
+    vilket kan ha missat län med sådana tecken om Bilweb inte alltid
+    translittererar dem till orebro/skane-stil ASCII.
     """
     return re.compile(
-        rf"https://bilweb\.se/[a-z-]+-lan/{re.escape(marke_slug)}-(?P<slug>[a-z0-9-]+?)-(?P<ar>\d{{4}})-kombi-(?P<id>\d+)"
+        rf"https?://(?:www\.)?bilweb\.se/[a-zA-ZåäöÅÄÖ-]+-lan/{re.escape(marke_slug)}-(?P<slug>[a-z0-9-]+?)-(?P<ar>\d{{4}})-kombi-(?P<id>\d+)",
+        re.IGNORECASE,
     )
 
 
@@ -92,14 +99,21 @@ def hamta_annonser() -> list[dict]:
 
         html = resp.text
 
-        # DIAGNOSTIK: om sidan konsekvent ger 0 träffar utan fel är
-        # misstanken att Bilweb bot-blockerar GitHub Actions IP-intervall
-        # (returnerar 200 OK men en annan/tom sida). Dessa loggrader
-        # avslöjar om vi ens fick förväntat innehåll tillbaka.
+        # DIAGNOSTIK: räkna faktiska regex-träffar och, om noll, visa en
+        # bit av HTML:en runt "kombi-" så vi ser exakt hur en riktig
+        # annons-URL faktiskt ser ut i den råa källkoden. Det avslöjar
+        # om regexen bara missar formatet (t.ex. "www.", andra tecken i
+        # länsdelen) eller om innehållet verkligen saknar annonser.
+        forekomster_kombi = html.lower().count("-kombi-")
+        antal_url_traffar = len(list(url_regex.finditer(html)))
         print(f"[bilweb] {bilkonfig['marke_visning']} {bilkonfig['modell_visning']}: "
-              f"{len(html)} tecken HTML, innehåller '{marke_slug}-': {marke_slug + '-' in html.lower()}, "
-              f"innehåller 'kombi': {'kombi' in html.lower()}, "
-              f"innehåller 'captcha/blocked': {'captcha' in html.lower() or 'blocked' in html.lower() or 'access denied' in html.lower()}")
+              f"{len(html)} tecken HTML, '-kombi-' förekommer {forekomster_kombi} ggr, "
+              f"url_regex matchade {antal_url_traffar} ggr")
+
+        if antal_url_traffar == 0 and forekomster_kombi > 0:
+            pos = html.lower().find("-kombi-")
+            snutt = html[max(0, pos - 200):pos + 50]
+            print(f"[bilweb] Snutt av rå HTML runt första '-kombi-' (för felsökning): {snutt!r}")
 
         sedda_id = set()
 
