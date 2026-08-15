@@ -1,3 +1,4 @@
+```python
 """
 Scraper för Bilweb - VERIFIERAD mot verklig sidstruktur 2026-08-09,
 utökad till V60+V90 2026-08-12, bugfixad 2026-08-12, generaliserad
@@ -151,8 +152,9 @@ def hamta_annonser() -> list[dict]:
                 if not diagnostik_utskriven:
                     diagnostik_utskriven = True
                     print(f"[bilweb] FELSÖKNING - lokal text runt en avvisad annons "
-                          f"(rad_match={rad_match is not None}, pris_match={pris_match is not None}):")
-                    print(f"[bilweb]   {lokal_text[3600:4800]!r}")
+                          f"(rad_match={rad_match is not None}, pris_match={pris_match is not None}, "
+                          f"lokal_text-längd={len(lokal_text)}):")
+                    print(f"[bilweb]   {lokal_text!r}")
                 continue  # kunde inte tolka - hoppa över hellre än gissa fel
             rak_rad_pris += 1
 
@@ -196,3 +198,4 @@ def hamta_annonser() -> list[dict]:
 
     print(f"[bilweb] {len(bilar)} annonser matchade grundkraven")
     return bilar
+```
