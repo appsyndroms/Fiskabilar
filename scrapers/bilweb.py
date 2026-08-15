@@ -125,6 +125,7 @@ def hamta_annonser() -> list[dict]:
         rak_grundkrav = 0
         exempel_avvisade_slugs = []
         diagnostik_utskriven = False
+        diagnostik_grundkrav_utskriven = False
 
         for m in url_regex.finditer(html):
             annons_id = m.group("id")
@@ -192,6 +193,11 @@ def hamta_annonser() -> list[dict]:
             if matchar_grundkrav(bil):
                 rak_grundkrav += 1
                 bilar.append(bil)
+            elif not diagnostik_grundkrav_utskriven:
+                diagnostik_grundkrav_utskriven = True
+                print(f"[bilweb] FELSÖKNING - avvisad av grundkraven: "
+                      f"arsmodell={bil['arsmodell']}, miltal={bil['miltal']}, "
+                      f"variant={bil['variant']}, vaxellada={bil['vaxellada']}, skadad={bil['skadad']}")
 
         print(f"[bilweb] {bilkonfig['marke_visning']} {bilkonfig['modell_visning']}: "
               f"{antal_url_traffar} rå-URL:er -> {rak_variant} matchade variant -> "
