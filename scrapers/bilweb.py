@@ -120,6 +120,7 @@ def hamta_annonser() -> list[dict]:
         rak_rad_pris = 0
         rak_grundkrav = 0
         exempel_avvisade_slugs = []
+        diagnostik_utskriven = False
 
         for m in url_regex.finditer(html):
             annons_id = m.group("id")
@@ -140,13 +141,18 @@ def hamta_annonser() -> list[dict]:
             # i den RÅA HTML:n (där matchningen redan skedde) och rensar
             # taggar bara i ett lokalt fönster runt den positionen.
             start = m.start()
-            html_fonster = html[max(0, start - 2000):start + 2000]
+            html_fonster = html[max(0, start - 4000):start + 4000]
             lokal_text = BeautifulSoup(html_fonster, "html.parser").get_text(separator=" ")
 
             rad_match = RAD_REGEX.search(lokal_text)
             pris_match = PRIS_REGEX.search(lokal_text)
 
             if not rad_match or not pris_match:
+                if not diagnostik_utskriven:
+                    diagnostik_utskriven = True
+                    print(f"[bilweb] FELSÖKNING - lokal text runt en avvisad annons "
+                          f"(rad_match={rad_match is not None}, pris_match={pris_match is not None}):")
+                    print(f"[bilweb]   {lokal_text[3600:4800]!r}")
                 continue  # kunde inte tolka - hoppa över hellre än gissa fel
             rak_rad_pris += 1
 
