@@ -54,7 +54,7 @@ BILAR = [
         # hybrid) och filtrerar bort allt som inte matchar variant_kraven.
         "bilweb_modell_slug": "530",
         "variant_kraven": {
-            "530e xDrive Touring": [r"530.?e", r"xdrive"],
+            "530e xDrive Touring": [r"530.?e", r"xdrive", r"touring"],
         },
     },
 ]
