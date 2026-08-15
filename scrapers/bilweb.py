@@ -1,4 +1,3 @@
-```python
 """
 Scraper för Bilweb - VERIFIERAD mot verklig sidstruktur 2026-08-09,
 utökad till V60+V90 2026-08-12, bugfixad 2026-08-12, generaliserad
@@ -198,4 +197,3 @@ def hamta_annonser() -> list[dict]:
 
     print(f"[bilweb] {len(bilar)} annonser matchade grundkraven")
     return bilar
-```
