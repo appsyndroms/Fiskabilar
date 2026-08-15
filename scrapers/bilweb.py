@@ -46,8 +46,12 @@ HEADERS = {
                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
 }
 
-# Kompakt rad "2024, 8 176 mil, Örebro" som brukar stå nära annonsen
-RAD_REGEX = re.compile(r"(\d{4}),\s*([\d\s]+)\s*mil,\s*([^\d,]+?)(?=Pris|Beräkna|$)")
+# Verkligt format (bekräftat 2026-08-15 via felsökningsutskrift mot skarp
+# sida): "Mil: \n 10 517 \n År: \n 2019 \n Drivmedel: ...". Fångar allt
+# mellan "Mil:" och "År:" och rensar bort icke-siffror efteråt (istället
+# för att försöka matcha exakta mellanslag/radbrytningar), så funkar det
+# oavsett whitespace-variationer.
+MIL_REGEX = re.compile(r"Mil:\s*(.*?)\s*År:", re.DOTALL)
 
 PRIS_REGEX = re.compile(r"Pris\s*([\d\s]+)\s*kr")
 
@@ -144,14 +148,14 @@ def hamta_annonser() -> list[dict]:
             html_fonster = html[max(0, start - 4000):start + 4000]
             lokal_text = BeautifulSoup(html_fonster, "html.parser").get_text(separator=" ")
 
-            rad_match = RAD_REGEX.search(lokal_text)
+            rad_match = MIL_REGEX.search(lokal_text)
             pris_match = PRIS_REGEX.search(lokal_text)
 
             if not rad_match or not pris_match:
                 if not diagnostik_utskriven:
                     diagnostik_utskriven = True
                     print(f"[bilweb] FELSÖKNING - lokal text runt en avvisad annons "
-                          f"(rad_match={rad_match is not None}, pris_match={pris_match is not None}, "
+                          f"(mil_match={rad_match is not None}, pris_match={pris_match is not None}, "
                           f"lokal_text-längd={len(lokal_text)}):")
                     print(f"[bilweb]   {lokal_text!r}")
                 continue  # kunde inte tolka - hoppa över hellre än gissa fel
@@ -167,7 +171,7 @@ def hamta_annonser() -> list[dict]:
                 "annonspris": _rensa_tal(pris_match.group(1)),
                 "variant": variant,
                 "arsmodell": int(m.group("ar")),
-                "miltal": _rensa_tal(rad_match.group(2)),
+                "miltal": _rensa_tal(rad_match.group(1)),
                 "vaxellada": "Automat",  # sökningen filtrerar redan på kombi; verifiera vid behov
                 "skadad": False,
                 "utrustningsniva": slug_text,
