@@ -2,48 +2,39 @@
 Scraper för Bilweb - VERIFIERAD mot verklig sidstruktur 2026-08-09,
 utökad till V60+V90 2026-08-12, bugfixad 2026-08-12, generaliserad
 till flera märken (inkl. BMW 530e xDrive Touring) 2026-08-13,
-omskriven till årsloop 2026-08-15.
+omskriven till årsloop 2026-08-15, omskriven till detaljsides-
+hämtning 2026-08-15 (se motivering nedan).
 
-Bekräftat: Bilweb fungerar UTAN JavaScript (sidan visade fullständiga
-annonser trots texten "Du har Javascript inaktiverat"), så vanlig
-requests.get() räcker.
+Bekräftat: Bilweb fungerar UTAN JavaScript, så vanlig requests.get()
+räcker - både för sökresultatsidan och för enskilda annonssidor.
 
-Bilweb kodar in märke, modell(grupp) och årsmodell direkt i annons-URL:en,
-t.ex.:
-  https://bilweb.se/orebro-lan/volvo-v60-recharge-t6-ii-ultimate-bright-2024-kombi-12825660
-  https://bilweb.se/hallands-lan/bmw-530-e-xdrive-touring-ink-vinterhjul-m-sport-stop-go-2023-kombi-9769933
+VIKTIGT ÄNDRING 2026-08-15 (årsloop): tidigare användes en enda
+sökning på bilweb.se/sok/{marke}/{modell}/kombi, som bara visar
+FÖRSTA SIDAN sorterad på senast publicerad annons - INTE på
+årsmodell. Bilweb har - precis som Wayke - en årsspecifik sökväg, så
+vi loopar nu över ARSMODELL_MIN..ARSMODELL_MAX.
 
-VIKTIGT ÄNDRING 2026-08-15: tidigare användes en enda sökning på
-bilweb.se/sok/{marke}/{modell}/kombi, som bara visar FÖRSTA SIDAN,
-sorterad på senast publicerad annons - INTE på årsmodell. Det gjorde
-att vi i praktiken bara såg de allra senaste/nyaste bilarna (t.ex.
-årsmodell 2025/2026), som sedan korrekt men poänglöst avvisades av
-årsmodellskravet (2022-2024). Bilweb har - precis som Wayke - en
-årsspecifik sökväg (bekräftat för volvo/v60/2023), så vi loopar nu
-över ARSMODELL_MIN..ARSMODELL_MAX precis som wayke.py gör.
+STÖRRE OMSKRIVNING 2026-08-15 (VIKTIGAST): två tidigare försök att
+läsa ut pris/mil direkt ur SÖKRESULTATSIDAN (dels teckenpositioner i
+rå HTML, dels DOM-uppåtvandring till närmaste förälder) visade sig
+båda kunna ge FEL värden - verifierat konkret mot en riktig annons
+(429 900 kr / 5 434 mil enligt annonsens egen sida, men 354 900 kr /
+5 692 mil extraherat från sökresultatlistan). Orsaken är att samma
+annons ofta länkas flera gånger på sökresultatsidan (kompakt rutnät +
+expanderad lista), och den kompakta representationen ibland saknar
+egen pris/mil-text helt - då "ärver" extraktionen av misstag en
+GRANNANNONS siffror istället, oavsett hur avgränsningslogiken byggs.
 
-BMW-specifikt: url-mönstret bilweb.se/sok/bmw/530/{lan} bekräftades
-fungera som eget filter (per län), vilket ger goda skäl att tro att
-bilweb.se/sok/bmw/530/{år} fungerar likadant - men det är INTE lika
-hundraprocentigt verifierat mot en riktig sida som volvo-mönstret.
-Om BMW ger 0 träffar efter den här ändringen medan Volvo fungerar,
-är det första man ska misstänka.
+Lösningen är att helt sluta gissa på sökresultatsidans struktur och
+istället hämta varje kandidat-annons EGEN detaljsida (verifierad
+otvetydig: "Pris 429 900 kr" och "Mil 5 434" förekommer där bara en
+gång var, ingen risk för sammanblandning). Sökresultatsidan används
+nu bara för att hitta KANDIDAT-URL:er (baserat på variant i sluggen),
+inte för att läsa ut pris/mil.
 
-Eftersom den årsspecifika sökningen inte kan kombineras med "kombi"-
-filtret (ospårat om det stödjer flera filter samtidigt) läggs "touring"
-till som ett extra krav i BMW:s variant_kraven (se config.py) istället
-- annars skulle BMW 530e xDrive SEDAN kunna smyga med, vilket du
-uttryckligen inte vill ha.
-
-BUGFIX 2026-08-12: tidigare letade koden efter annons-ID:t i en redan
-HTML-taggrensad text (via BeautifulSoup.get_text()), men ID:t finns
-bara i href-attributet - som försvinner helt när taggar rensas bort.
-Nu används positionen i den RÅA HTML:n istället.
-
-BUGFIX 2026-08-15: RAD_REGEX bytt till MIL_REGEX - det verkliga
-formatet på Bilweb är "Mil: ... År: ..." som separata etiketter, inte
-"ÅÅÅÅ, X XXX mil, Stad" i ett sammanhängande stycke som tidigare
-antaget utan verifiering.
+Konsekvens: fler HTTP-anrop (ett per kandidat, utöver själva
+sökningen) => längre körtid. Bedömd rimlig avvägning eftersom
+felaktiga pris/mil-siffror direkt påverkar ett köpbeslut.
 """
 
 import re
@@ -54,7 +45,9 @@ from bs4 import BeautifulSoup
 from config import BILAR, ARSMODELL_MIN, ARSMODELL_MAX
 from scrapers import matchar_grundkrav, berika_fran_fritext, identifiera_variant
 
-DELAY_SEKUNDER = 3.0
+SOK_DELAY_SEKUNDER = 3.0
+DETALJ_DELAY_SEKUNDER = 1.5  # kortare delay för detaljsidor, annars blir körtiden för lång
+
 SOK_URL_MALL = "https://bilweb.se/sok/{marke}/{modell}/{ar}"
 
 HEADERS = {
@@ -62,13 +55,14 @@ HEADERS = {
                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
 }
 
-MIL_REGEX = re.compile(r"Mil:\s*(.*?)\s*År:", re.DOTALL)
-PRIS_REGEX = re.compile(r"Pris\s*([\d\s]+)\s*kr")
+PRIS_DETALJ_REGEX = re.compile(r"Pris\s*\n*\s*([\d\s]+)\s*kr")
+MIL_DETALJ_REGEX = re.compile(r"Mil\s*\n+\s*([\d\s]+?)\s*\n+[-\s]*1:a regdatum")
+AGARE_DETALJ_REGEX = re.compile(r"Antal ägare\s*\n+\s*(\d+)")
 
 
-def _bygg_url_regex(marke_slug: str) -> re.Pattern:
+def _bygg_href_regex(marke_slug: str) -> re.Pattern:
     return re.compile(
-        rf"https?://(?:www\.)?bilweb\.se/[a-zA-ZåäöÅÄÖ-]+-lan/{re.escape(marke_slug)}-(?P<slug>[a-z0-9-]+?)-(?P<ar>\d{{4}})-kombi-(?P<id>\d+)",
+        rf"{re.escape(marke_slug)}-(?P<slug>[a-z0-9-]+?)-(?P<ar>\d{{4}})-kombi-(?P<id>\d+)",
         re.IGNORECASE,
     )
 
@@ -78,77 +72,118 @@ def _rensa_tal(text: str) -> int:
     return int(siffror) if siffror else 0
 
 
+def _hamta_kandidat_urler(bilkonfig: dict, ar: int) -> list[dict]:
+    marke_slug = bilkonfig["marke_slug"]
+    modell_slug = bilkonfig.get("bilweb_modell_slug", bilkonfig["modell_slug"])
+    sok_url = SOK_URL_MALL.format(marke=marke_slug, modell=modell_slug, ar=ar)
+    href_regex = _bygg_href_regex(marke_slug)
+
+    try:
+        resp = requests.get(sok_url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"[bilweb] FEL vid hämtning av söksida för {bilkonfig['marke_visning']} "
+              f"{bilkonfig['modell_visning']} årsmodell {ar}: {e}")
+        return []
+
+    time.sleep(SOK_DELAY_SEKUNDER)
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    sedda_id = set()
+    kandidater = []
+    avvisade_slugs = []
+
+    for a in soup.find_all("a", href=True):
+        m = href_regex.search(a["href"])
+        if not m:
+            continue
+        annons_id = m.group("id")
+        if annons_id in sedda_id:
+            continue
+        sedda_id.add(annons_id)
+
+        slug_text = m.group("slug").replace("-", " ")
+        variant = identifiera_variant(bilkonfig, slug_text)
+        if variant is None:
+            if len(avvisade_slugs) < 3:
+                avvisade_slugs.append(slug_text)
+            continue
+
+        href = a["href"]
+        full_url = f"https://bilweb.se{href}" if href.startswith("/") else href
+
+        kandidater.append({
+            "url": full_url,
+            "annons_id": annons_id,
+            "slug_text": slug_text,
+            "variant": variant,
+            "arsmodell": int(m.group("ar")),
+        })
+
+    print(f"[bilweb] {bilkonfig['marke_visning']} {bilkonfig['modell_visning']} {ar}: "
+          f"{len(sedda_id)} unika annons-URL:er -> {len(kandidater)} matchade variant")
+    if avvisade_slugs:
+        print(f"[bilweb]   Exempel på slugs som INTE matchade någon variant: {avvisade_slugs}")
+
+    return kandidater
+
+
+def _hamta_pris_mil_fran_detaljsida(url: str) -> tuple[int, int, int | None] | None:
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"[bilweb]   FEL vid hämtning av detaljsida {url}: {e}")
+        return None
+
+    text = BeautifulSoup(resp.text, "html.parser").get_text(separator=" ")
+
+    pris_match = PRIS_DETALJ_REGEX.search(text)
+    mil_match = MIL_DETALJ_REGEX.search(text)
+
+    if not pris_match or not mil_match:
+        print(f"[bilweb]   Kunde inte tolka pris/mil på detaljsidan: {url}")
+        return None
+
+    agare_match = AGARE_DETALJ_REGEX.search(text)
+    antal_agare = int(agare_match.group(1)) if agare_match else None
+
+    return _rensa_tal(pris_match.group(1)), _rensa_tal(mil_match.group(1)), antal_agare
+
+
 def hamta_annonser() -> list[dict]:
     print("[bilweb] hämtar annonser...")
     bilar = []
+    rak_grundkrav_totalt = 0
 
     for bilkonfig in BILAR:
-        marke_slug = bilkonfig["marke_slug"]
-        modell_slug = bilkonfig.get("bilweb_modell_slug", bilkonfig["modell_slug"])
-        url_regex = _bygg_url_regex(marke_slug)
-
         for ar in range(ARSMODELL_MIN, ARSMODELL_MAX + 1):
-            sok_url = SOK_URL_MALL.format(marke=marke_slug, modell=modell_slug, ar=ar)
-
-            try:
-                resp = requests.get(sok_url, headers=HEADERS, timeout=15)
-                resp.raise_for_status()
-            except Exception as e:
-                print(f"[bilweb] FEL vid hämtning av {bilkonfig['marke_visning']} "
-                      f"{bilkonfig['modell_visning']} årsmodell {ar}: {e}")
-                continue
-
-            time.sleep(DELAY_SEKUNDER)
-
-            html = resp.text
-            antal_url_traffar = len(list(url_regex.finditer(html)))
-
-            sedda_id = set()
-            rak_variant = 0
-            rak_rad_pris = 0
+            kandidater = _hamta_kandidat_urler(bilkonfig, ar)
             rak_grundkrav = 0
-            exempel_avvisade_slugs = []
 
-            for m in url_regex.finditer(html):
-                annons_id = m.group("id")
-                if annons_id in sedda_id:
+            for kandidat in kandidater:
+                resultat = _hamta_pris_mil_fran_detaljsida(kandidat["url"])
+                time.sleep(DETALJ_DELAY_SEKUNDER)
+
+                if resultat is None:
                     continue
-                sedda_id.add(annons_id)
-
-                slug_text = m.group("slug").replace("-", " ")
-                variant = identifiera_variant(bilkonfig, slug_text)
-                if variant is None:
-                    if len(exempel_avvisade_slugs) < 3:
-                        exempel_avvisade_slugs.append(slug_text)
-                    continue
-                rak_variant += 1
-
-                start = m.start()
-                html_fonster = html[max(0, start - 4000):start + 4000]
-                lokal_text = BeautifulSoup(html_fonster, "html.parser").get_text(separator=" ")
-
-                mil_match = MIL_REGEX.search(lokal_text)
-                pris_match = PRIS_REGEX.search(lokal_text)
-
-                if not mil_match or not pris_match:
-                    continue
-                rak_rad_pris += 1
+                pris, mil, antal_agare = resultat
 
                 bil = {
                     "kalla": "bilweb",
-                    "url": m.group(0),
+                    "url": kandidat["url"],
                     "regnr": None,
-                    "marke_slug": marke_slug,
+                    "marke_slug": bilkonfig["marke_slug"],
                     "modell_slug": bilkonfig["modell_slug"],
                     "modell": bilkonfig["modell_slug"],
-                    "annonspris": _rensa_tal(pris_match.group(1)),
-                    "variant": variant,
-                    "arsmodell": int(m.group("ar")),
-                    "miltal": _rensa_tal(mil_match.group(1)),
+                    "annonspris": pris,
+                    "variant": kandidat["variant"],
+                    "arsmodell": kandidat["arsmodell"],
+                    "miltal": mil,
                     "vaxellada": "Automat",
                     "skadad": False,
-                    "utrustningsniva": slug_text,
-                    "antal_agare": None,
+                    "utrustningsniva": kandidat["slug_text"],
+                    "antal_agare": antal_agare,
                     "import": None,
                     "hyrbil": None,
                     "servicehistorik": None,
@@ -164,13 +199,12 @@ def hamta_annonser() -> list[dict]:
 
                 if matchar_grundkrav(bil):
                     rak_grundkrav += 1
+                    rak_grundkrav_totalt += 1
                     bilar.append(bil)
 
-            print(f"[bilweb] {bilkonfig['marke_visning']} {bilkonfig['modell_visning']} {ar}: "
-                  f"{antal_url_traffar} rå-URL:er -> {rak_variant} matchade variant -> "
-                  f"{rak_rad_pris} kunde tolka pris/mil -> {rak_grundkrav} klarade grundkraven")
-            if exempel_avvisade_slugs:
-                print(f"[bilweb]   Exempel på slugs som INTE matchade någon variant: {exempel_avvisade_slugs}")
+            if kandidater:
+                print(f"[bilweb]   -> {rak_grundkrav} av {len(kandidater)} klarade grundkraven "
+                      f"efter kontroll av detaljsidor")
 
     print(f"[bilweb] {len(bilar)} annonser matchade grundkraven totalt")
     return bilar
