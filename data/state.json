@@ -1167,5 +1167,12 @@
     "senaste_pris": 399500,
     "senast_sedd": "2026-08-16",
     "notifierad": false
+  },
+  "kal:v60:T6 AWD:2024:5921": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 394000,
+    "senaste_pris": 394000,
+    "senast_sedd": "2026-08-16",
+    "notifierad": true
   }
 }
