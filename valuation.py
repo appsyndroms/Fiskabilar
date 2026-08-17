@@ -11,13 +11,6 @@ Grundtanke:
 
 VIKTIGT:
 Utrustningsnivå matchas med delsträngar i stället för exakt text.
-Det gör modellen betydligt mer robust mot annonstitlar som exempelvis:
-
-    "V60 T6 AWD Plus Dark Drag P-Värmare Kamera"
-
-i stället för exakt:
-
-    "plus, dark"
 """
 
 from datetime import date
@@ -26,15 +19,6 @@ from datetime import date
 # =========================================================
 # BASPRIS
 # =========================================================
-
-# Ungefärliga baspriser (kr) vid ~7000 mil/år,
-# medelutrustning.
-#
-# Nyckel:
-#     (modell_slug, variant, arsmodell)
-#
-# Dessa värden ska senare kalibreras mot insamlad
-# marknadsdata. Vi ändrar INTE dessa i denna iteration.
 
 BASPRIS = {
     ("v60", "T6 AWD", 2022): 335000,
@@ -77,29 +61,14 @@ BASPRIS = {
 # MILTAL
 # =========================================================
 
-# Värdeminskning per mil över/under förväntat miltal.
 KR_PER_MIL_AVVIKELSE = 2.5
 
-# Förväntat miltal per år.
 FORVANTAT_MIL_PER_AR = 1500
 
 
 # =========================================================
 # UTRUSTNING
 # =========================================================
-
-# Viktigt:
-#
-# Nycklarna är inte längre tänkta som exakt textmatchning.
-# Vi letar efter nyckelord i annonstexten.
-#
-# Mer specifika nivåer ska ligga före generella nivåer.
-#
-# Exempel:
-#
-# "plus, dark"
-#
-# ska ge +5000 och inte bara +0 för "plus".
 
 UTRUSTNINGSNIVA_JUSTERING = [
     (
@@ -177,11 +146,8 @@ UTRUSTNINGSNIVA_JUSTERING = [
 # =========================================================
 
 DRAGKROK_VARDE = 8000
-
 VARMARE_VARDE = 4000
-
 SELEKT_VARDE = 6000
-
 STOR_BATTERI_VARDE = 12000
 
 
@@ -234,10 +200,6 @@ def _hamta_utrustningsjustering(
 ) -> int:
     """
     Identifierar utrustningsnivå genom delsträngsmatchning.
-
-    Vi använder hela tillgänglig utrustningstext.
-    Den mest specifika träffen vinner eftersom listan
-    är ordnad från mest specifik till mest generell.
     """
 
     utrustning = _normalisera_text(
@@ -269,6 +231,75 @@ def _hamta_utrustningsjustering(
     return 0
 
 
+def berakna_miltalsdiagnostik(
+    bil: dict,
+) -> dict:
+    """
+    Returnerar detaljer om hur miltalsjusteringen beräknas.
+
+    Påverkar inte själva marknadsvärdet.
+    """
+
+    arsmodell = bil.get(
+        "arsmodell"
+    )
+
+    if not arsmodell:
+        return {
+            "arsmodell": None,
+            "alder_ar": 0,
+            "forvantat_mil": 0,
+            "faktiskt_miltal": bil.get(
+                "miltal",
+                0,
+            ),
+            "mil_avvikelse": 0,
+            "mil_justering": 0,
+        }
+
+    alder_ar = _ar_sedan_arsmodell(
+        arsmodell
+    )
+
+    forvantat_mil = (
+        alder_ar
+        * FORVANTAT_MIL_PER_AR
+    )
+
+    faktiskt_miltal = bil.get(
+        "miltal",
+        forvantat_mil,
+    )
+
+    mil_avvikelse = (
+        faktiskt_miltal
+        - forvantat_mil
+    )
+
+    mil_justering = (
+        -mil_avvikelse
+        * KR_PER_MIL_AVVIKELSE
+    )
+
+    return {
+        "arsmodell": arsmodell,
+        "alder_ar": round(
+            alder_ar,
+            2,
+        ),
+        "forvantat_mil": round(
+            forvantat_mil
+        ),
+        "faktiskt_miltal": faktiskt_miltal,
+        "mil_avvikelse": round(
+            mil_avvikelse
+        ),
+        "mil_justering": round(
+            mil_justering
+        ),
+    }
+
+
 # =========================================================
 # MARKNADSVÄRDE
 # =========================================================
@@ -278,18 +309,6 @@ def berakna_marknadsvarde(
 ) -> int:
     """
     Beräknar uppskattat marknadsvärde.
-
-    bil förväntas innehålla:
-
-        modell
-        variant
-        arsmodell
-        miltal
-        utrustningsniva
-        dragkrok
-        varmare
-        volvo_selekt
-        stor_batteri
     """
 
     modell = (
@@ -305,10 +324,6 @@ def berakna_marknadsvarde(
         "arsmodell"
     )
 
-    # -----------------------------------------------------
-    # Baspris
-    # -----------------------------------------------------
-
     baspris = BASPRIS.get(
         (
             modell,
@@ -318,10 +333,6 @@ def berakna_marknadsvarde(
     )
 
     if baspris is None:
-
-        # Okänd kombination:
-        # använd medianen av närmaste kända
-        # kombinationer för samma modell + variant.
 
         kandidater = [
             pris
@@ -435,10 +446,6 @@ def berakna_fynd(
         marknadsvarde
         diff
         niva
-
-    diff:
-        positivt = bilen är billigare än uppskattat
-        marknadsvärde.
     """
 
     marknadsvarde = (
