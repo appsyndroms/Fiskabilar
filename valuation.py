@@ -1,39 +1,46 @@
 """
-Enkel men transparent marknadsvärdesmodell för fyndfiltrets bevakade
-bilar (Volvo V60/V90 Recharge T6/T8, BMW 530e xDrive Touring).
+Transparent marknadsvärdesmodell för fyndfiltrets bevakade bilar.
 
-Modellen är medvetet regelbaserad (inte ML) så att du begriper och
-kan justera VARJE parameter. När du har samlat ~30-50 riktiga
-annonser kan du med fördel byta ut detta mot en regression
-(t.ex. sklearn LinearRegression på pris ~ ålder + mil + utrustning),
-men regelmodellen ger vettiga resultat direkt.
+Modellen är regelbaserad och medvetet enkel att kalibrera.
 
 Grundtanke:
-1. Baspris per modell, variant och årsmodell (nypris minus generell depreciering)
-2. Avdrag per mil utöver "normalt" miltal för åldern
-3. Justering för utrustningsnivå (Inscription/Plus/Core etc - Volvo-specifikt)
-4. Justering för dragkrok, värmare, Volvo Selekt, batteristorlek
+1. Baspris per modell, variant och årsmodell.
+2. Avdrag/tillägg beroende på miltal.
+3. Justering för utrustningsnivå.
+4. Justering för dragkrok, värmare, Volvo Selekt och batteristorlek.
+
+VIKTIGT:
+Utrustningsnivå matchas med delsträngar i stället för exakt text.
+Det gör modellen betydligt mer robust mot annonstitlar som exempelvis:
+
+    "V60 T6 AWD Plus Dark Drag P-Värmare Kamera"
+
+i stället för exakt:
+
+    "plus, dark"
 """
 
 from datetime import date
 
-# Ungefärliga baspriser (kr) vid ~7000 mil/år, medelutrustning.
-# Dessa ÄR grova uppskattningar - uppdatera efter vad du ser på marknaden.
-# Nyckel: (modell_slug, variant, arsmodell)
+
+# =========================================================
+# BASPRIS
+# =========================================================
+
+# Ungefärliga baspriser (kr) vid ~7000 mil/år,
+# medelutrustning.
 #
-# V90-siffrorna är satta efter en snabb koll av verkliga Wayke-annonser
-# (2026-08-12): V90 T6/T8 Recharge visade sig ligga bara måttligt över
-# V60 för motsvarande årsmodell/utrustning (+15-20k), INTE den stora
-# premie man kanske skulle gissa för en större/dyrare flaggskeppsbil.
+# Nyckel:
+#     (modell_slug, variant, arsmodell)
 #
-# BMW 530e xDrive Touring-siffrorna är satta efter en koll av 31 riktiga
-# Wayke-annonser för 2023 (2026-08-13): priser 239 900-415 990 kr,
-# median runt 350 000 kr vid blandat miltal 2 700-17 500 mil.
-# Kalibrera vidare när du har egen data - för alla modeller.
+# Dessa värden ska senare kalibreras mot insamlad
+# marknadsdata. Vi ändrar INTE dessa i denna iteration.
+
 BASPRIS = {
     ("v60", "T6 AWD", 2022): 335000,
     ("v60", "T6 AWD", 2023): 375000,
     ("v60", "T6 AWD", 2024): 420000,
+
     ("v60", "T8 AWD", 2022): 375000,
     ("v60", "T8 AWD", 2023): 415000,
     ("v60", "T8 AWD", 2024): 460000,
@@ -41,104 +48,427 @@ BASPRIS = {
     ("v90", "T6 AWD", 2022): 355000,
     ("v90", "T6 AWD", 2023): 395000,
     ("v90", "T6 AWD", 2024): 440000,
+
     ("v90", "T8 AWD", 2022): 395000,
     ("v90", "T8 AWD", 2023): 435000,
     ("v90", "T8 AWD", 2024): 480000,
 
-    ("530e-xdrive-touring", "530e xDrive Touring", 2022): 315000,
-    ("530e-xdrive-touring", "530e xDrive Touring", 2023): 355000,
-    ("530e-xdrive-touring", "530e xDrive Touring", 2024): 395000,
+    (
+        "530e-xdrive-touring",
+        "530e xDrive Touring",
+        2022,
+    ): 315000,
+
+    (
+        "530e-xdrive-touring",
+        "530e xDrive Touring",
+        2023,
+    ): 355000,
+
+    (
+        "530e-xdrive-touring",
+        "530e xDrive Touring",
+        2024,
+    ): 395000,
 }
 
-# Kr per mil över/under förväntat miltal för åldern
+
+# =========================================================
+# MILTAL
+# =========================================================
+
+# Värdeminskning per mil över/under förväntat miltal.
 KR_PER_MIL_AVVIKELSE = 4.5
 
-# Förväntat miltal per år i drift (schablon)
+# Förväntat miltal per år.
 FORVANTAT_MIL_PER_AR = 1500
 
-UTRUSTNINGSNIVA_JUSTERING = {
-    "core": -15000,
-    "plus": 0,
-    "plus, dark": 5000,
-    "ultimate": 15000,
-    "inscription": 20000,
-    "inscription expression": 25000,
-    "polestar engineered": 30000,
-}
-# KÄND BEGRÄNSNING (upptäckt vid testkörning mot riktiga annonser):
-# den här matchningen är exakt, inte "innehåller". En annonstitel som
-# "R-Design Pano Drag HK Elstol" matchar INGEN nyckel ovan och får då
-# ingen utrustningsjustering alls (0 kr), trots att R-Design normalt
-# är en premiumnivå. Det kan få välutrustade R-Design-bilar att se
-# dyrare/mindre attraktiva ut i jämförelsen än de borde. Åtgärda genom
-# att antingen lägga till fler nyckelord (t.ex. "r-design": 10000) eller
-# byta ut den exakta matchningen mot en delsträngssökning i titeln.
 
+# =========================================================
+# UTRUSTNING
+# =========================================================
+
+# Viktigt:
+#
+# Nycklarna är inte längre tänkta som exakt textmatchning.
+# Vi letar efter nyckelord i annonstexten.
+#
+# Mer specifika nivåer ska ligga före generella nivåer.
+#
+# Exempel:
+#
+# "plus, dark"
+#
+# ska ge +5000 och inte bara +0 för "plus".
+
+UTRUSTNINGSNIVA_JUSTERING = [
+    (
+        (
+            "polestar engineered",
+            "polestar-engineered",
+        ),
+        30000,
+    ),
+
+    (
+        (
+            "inscription expression",
+        ),
+        25000,
+    ),
+
+    (
+        (
+            "inscription",
+        ),
+        20000,
+    ),
+
+    (
+        (
+            "ultimate",
+        ),
+        15000,
+    ),
+
+    (
+        (
+            "r-design",
+            "r design",
+            "rdesign",
+        ),
+        10000,
+    ),
+
+    (
+        (
+            "plus, dark",
+            "plus dark",
+            "plus dark edition",
+        ),
+        5000,
+    ),
+
+    (
+        (
+            "plus",
+        ),
+        0,
+    ),
+
+    (
+        (
+            "momentum",
+        ),
+        0,
+    ),
+
+    (
+        (
+            "core",
+        ),
+        -15000,
+    ),
+]
+
+
+# =========================================================
+# TILLVAL
+# =========================================================
 
 DRAGKROK_VARDE = 8000
-VARMARE_VARDE = 4000  # motor-/kupévärmare
-SELEKT_VARDE = 6000   # certifierad begagnad, ger trygghet -> högre efterfrågan
-STOR_BATTERI_VARDE = 12000  # 2022/2023 med större batterimodell
+
+VARMARE_VARDE = 4000
+
+SELEKT_VARDE = 6000
+
+STOR_BATTERI_VARDE = 12000
 
 
-def _ar_sedan_arsmodell(arsmodell: int) -> float:
+# =========================================================
+# HJÄLPFUNKTIONER
+# =========================================================
+
+def _ar_sedan_arsmodell(
+    arsmodell: int,
+) -> float:
+    """
+    Beräknar ungefärlig ålder på bilen.
+
+    Vi använder juni som mittpunkt för årsmodellen.
+    """
+
     idag = date.today()
-    return max(0.0, (idag.year - arsmodell) + (idag.month - 6) / 12)
+
+    return max(
+        0.0,
+        (
+            idag.year
+            - arsmodell
+        )
+        + (
+            idag.month
+            - 6
+        ) / 12,
+    )
 
 
-def berakna_marknadsvarde(bil: dict) -> int:
+def _normalisera_text(
+    text: str,
+) -> str:
     """
-    bil förväntas innehålla nycklarna:
-    modell (str, modell_slug t.ex. "v60"/"v90"/"530e-xdrive-touring"),
-    variant (str), arsmodell (int), miltal (int),
-    utrustningsniva (str, valfri), dragkrok (bool), varmare (bool),
-    volvo_selekt (bool), stor_batteri (bool)
+    Normaliserar annonstext för robustare matchning.
     """
-    modell = (bil.get("modell") or "v60").lower()
-    variant = bil.get("variant")
-    arsmodell = bil.get("arsmodell")
 
-    baspris = BASPRIS.get((modell, variant, arsmodell))
+    return (
+        (text or "")
+        .strip()
+        .lower()
+        .replace("_", " ")
+        .replace("-", " ")
+    )
+
+
+def _hamta_utrustningsjustering(
+    bil: dict,
+) -> int:
+    """
+    Identifierar utrustningsnivå genom delsträngsmatchning.
+
+    Vi använder hela tillgänglig utrustningstext.
+    Den mest specifika träffen vinner eftersom listan
+    är ordnad från mest specifik till mest generell.
+    """
+
+    utrustning = _normalisera_text(
+        bil.get("utrustningsniva")
+        or ""
+    )
+
+    if not utrustning:
+        return 0
+
+    for nyckelord, justering in (
+        UTRUSTNINGSNIVA_JUSTERING
+    ):
+
+        for nyckel in nyckelord:
+
+            normaliserad_nyckel = (
+                _normalisera_text(
+                    nyckel
+                )
+            )
+
+            if (
+                normaliserad_nyckel
+                in utrustning
+            ):
+                return justering
+
+    return 0
+
+
+# =========================================================
+# MARKNADSVÄRDE
+# =========================================================
+
+def berakna_marknadsvarde(
+    bil: dict,
+) -> int:
+    """
+    Beräknar uppskattat marknadsvärde.
+
+    bil förväntas innehålla:
+
+        modell
+        variant
+        arsmodell
+        miltal
+        utrustningsniva
+        dragkrok
+        varmare
+        volvo_selekt
+        stor_batteri
+    """
+
+    modell = (
+        bil.get("modell")
+        or "v60"
+    ).lower()
+
+    variant = bil.get(
+        "variant"
+    )
+
+    arsmodell = bil.get(
+        "arsmodell"
+    )
+
+    # -----------------------------------------------------
+    # Baspris
+    # -----------------------------------------------------
+
+    baspris = BASPRIS.get(
+        (
+            modell,
+            variant,
+            arsmodell,
+        )
+    )
+
     if baspris is None:
-        # okänd kombination -> interpolera grovt från närmaste årsmodell inom samma modell+variant
-        kandidater = [v for (mod, var, ar), v in BASPRIS.items() if mod == modell and var == variant]
+
+        # Okänd kombination:
+        # använd medianen av närmaste kända
+        # kombinationer för samma modell + variant.
+
+        kandidater = [
+            pris
+            for (
+                mod,
+                var,
+                ar,
+            ), pris in BASPRIS.items()
+            if (
+                mod == modell
+                and var == variant
+            )
+        ]
+
         if not kandidater:
             return 0
-        baspris = sorted(kandidater)[len(kandidater) // 2]
 
-    alder_ar = _ar_sedan_arsmodell(arsmodell)
-    forvantat_mil = alder_ar * FORVANTAT_MIL_PER_AR
-    mil_avvikelse = bil.get("miltal", forvantat_mil) - forvantat_mil
-    mil_justering = -mil_avvikelse * KR_PER_MIL_AVVIKELSE
+        kandidater = sorted(
+            kandidater
+        )
 
-    utrustning = (bil.get("utrustningsniva") or "").strip().lower()
-    utrustning_justering = UTRUSTNINGSNIVA_JUSTERING.get(utrustning, 0)
+        baspris = kandidater[
+            len(kandidater) // 2
+        ]
+
+    # -----------------------------------------------------
+    # Miltal
+    # -----------------------------------------------------
+
+    alder_ar = _ar_sedan_arsmodell(
+        arsmodell
+    )
+
+    forvantat_mil = (
+        alder_ar
+        * FORVANTAT_MIL_PER_AR
+    )
+
+    faktiskt_miltal = bil.get(
+        "miltal",
+        forvantat_mil,
+    )
+
+    mil_avvikelse = (
+        faktiskt_miltal
+        - forvantat_mil
+    )
+
+    mil_justering = (
+        -mil_avvikelse
+        * KR_PER_MIL_AVVIKELSE
+    )
+
+    # -----------------------------------------------------
+    # Utrustning
+    # -----------------------------------------------------
+
+    utrustning_justering = (
+        _hamta_utrustningsjustering(
+            bil
+        )
+    )
+
+    # -----------------------------------------------------
+    # Tillval
+    # -----------------------------------------------------
 
     tillval = 0
+
     if bil.get("dragkrok"):
         tillval += DRAGKROK_VARDE
+
     if bil.get("varmare"):
         tillval += VARMARE_VARDE
+
     if bil.get("volvo_selekt"):
         tillval += SELEKT_VARDE
+
     if bil.get("stor_batteri"):
         tillval += STOR_BATTERI_VARDE
 
-    marknadsvarde = baspris + mil_justering + utrustning_justering + tillval
-    return round(marknadsvarde / 1000) * 1000  # avrunda till närmsta tusental
+    # -----------------------------------------------------
+    # Slutligt värde
+    # -----------------------------------------------------
+
+    marknadsvarde = (
+        baspris
+        + mil_justering
+        + utrustning_justering
+        + tillval
+    )
+
+    return (
+        round(
+            marknadsvarde / 1000
+        )
+        * 1000
+    )
 
 
-def berakna_fynd(bil: dict) -> dict:
-    """Returnerar dict med marknadsvarde, diff (kr under marknad) och nivå."""
-    marknadsvarde = berakna_marknadsvarde(bil)
-    annonspris = bil.get("annonspris", 0)
-    diff = marknadsvarde - annonspris  # positivt = bra fynd
+# =========================================================
+# FYND
+# =========================================================
+
+def berakna_fynd(
+    bil: dict,
+) -> dict:
+    """
+    Returnerar:
+
+        marknadsvarde
+        diff
+        niva
+
+    diff:
+        positivt = bilen är billigare än uppskattat
+        marknadsvärde.
+    """
+
+    marknadsvarde = (
+        berakna_marknadsvarde(
+            bil
+        )
+    )
+
+    annonspris = bil.get(
+        "annonspris",
+        0,
+    )
+
+    diff = (
+        marknadsvarde
+        - annonspris
+    )
 
     if diff >= 35000:
-        niva = "EXTREMT_FYND"
+
+        niva = (
+            "EXTREMT_FYND"
+        )
+
     elif diff >= 20000:
+
         niva = "FYND"
+
     else:
+
         niva = None
 
     return {
