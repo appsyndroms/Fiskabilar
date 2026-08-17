@@ -55,9 +55,27 @@ HEADERS = {
                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
 }
 
-PRIS_DETALJ_REGEX = re.compile(r"Pris\s*\n*\s*([\d\s]+)\s*kr")
+# Detaljsidans format (verifierat 2026-08-15 mot en riktig annons):
+# "Pris\n\n429 900 kr [Beräkna...]" samt i specifikationslistan
+# "- Mil\n    5 434\n- 1:a regdatum\n    2024-06-25". Pris förekommer
+# bara en gång (Pris-knappen längst ner visar samma värde igen, så
+# första träffen räcker). Mil måste ankras mot "1:a regdatum" som
+# alltid följer direkt efter i specifikationslistan - annars matchar
+# regexen av misstag "Mil från"/"Mil till"-filterrutan högst upp på
+# sidan (som innehåller MASSOR av "X Mil"-alternativ i en rullista).
+#
+# UPPTÄCKT 2026-08-16: Kvdbil-annonser (auktionsformat) skriver
+# "Pris (auktionsobjekt)" istället för bara "Pris", vilket bröt den
+# ursprungliga regexen helt (annonsen hoppades bara över tyst).
+# Regexen tillåter nu en valfri parentes mellan "Pris" och beloppet.
+# VIKTIGT ATT VETA: auktionspris är INTE ett fast köp-nu-pris - du kan
+# behöva buda över det visade beloppet för att vinna. Sådana annonser
+# flaggas nu explicit (se AUKTION_REGEX och "auktion"-fältet på bilen)
+# så du vet att priset är mer osäkert än för en vanlig fastprisannons.
+PRIS_DETALJ_REGEX = re.compile(r"Pris\s*(?:\([^)]*\))?\s*\n*\s*([\d\s]+)\s*kr")
 MIL_DETALJ_REGEX = re.compile(r"Mil\s*\n+\s*([\d\s]+?)\s*\n+[-\s]*1:a regdatum")
 AGARE_DETALJ_REGEX = re.compile(r"Antal ägare\s*\n+\s*(\d+)")
+AUKTION_REGEX = re.compile(r"auktionsobjekt", re.IGNORECASE)
 
 
 def _bygg_href_regex(marke_slug: str) -> re.Pattern:
@@ -73,6 +91,11 @@ def _rensa_tal(text: str) -> int:
 
 
 def _hamta_kandidat_urler(bilkonfig: dict, ar: int) -> list[dict]:
+    """
+    Hämtar sökresultatsidan för en modell/årsmodell och plockar ut
+    KANDIDAT-URL:er vars slug matchar önskad variant - läser INTE ut
+    pris/mil härifrån (se motivering i modulens docstring).
+    """
     marke_slug = bilkonfig["marke_slug"]
     modell_slug = bilkonfig.get("bilweb_modell_slug", bilkonfig["modell_slug"])
     sok_url = SOK_URL_MALL.format(marke=marke_slug, modell=modell_slug, ar=ar)
@@ -128,7 +151,15 @@ def _hamta_kandidat_urler(bilkonfig: dict, ar: int) -> list[dict]:
     return kandidater
 
 
-def _hamta_pris_mil_fran_detaljsida(url: str) -> tuple[int, int, int | None] | None:
+def _hamta_pris_mil_fran_detaljsida(url: str) -> tuple[int, int, int | None, bool] | None:
+    """
+    Hämtar en enskild annons egen sida och läser ut pris/mil (och
+    antal ägare om det står angivet) - garanterat otvetydigt eftersom
+    varje fält bara förekommer en gång på en annons egen sida.
+    Returnerar (pris, mil, antal_agare, ar_auktion) eller None om något
+    gick fel. ar_auktion=True betyder att priset är ett auktions-/
+    utropspris (t.ex. Kvdbil) - INTE ett fast köp-nu-pris.
+    """
     try:
         resp = requests.get(url, headers=HEADERS, timeout=15)
         resp.raise_for_status()
@@ -147,8 +178,9 @@ def _hamta_pris_mil_fran_detaljsida(url: str) -> tuple[int, int, int | None] | N
 
     agare_match = AGARE_DETALJ_REGEX.search(text)
     antal_agare = int(agare_match.group(1)) if agare_match else None
+    ar_auktion = AUKTION_REGEX.search(text) is not None
 
-    return _rensa_tal(pris_match.group(1)), _rensa_tal(mil_match.group(1)), antal_agare
+    return _rensa_tal(pris_match.group(1)), _rensa_tal(mil_match.group(1)), antal_agare, ar_auktion
 
 
 def hamta_annonser() -> list[dict]:
@@ -167,7 +199,7 @@ def hamta_annonser() -> list[dict]:
 
                 if resultat is None:
                     continue
-                pris, mil, antal_agare = resultat
+                pris, mil, antal_agare, ar_auktion = resultat
 
                 bil = {
                     "kalla": "bilweb",
@@ -175,7 +207,7 @@ def hamta_annonser() -> list[dict]:
                     "regnr": None,
                     "marke_slug": bilkonfig["marke_slug"],
                     "modell_slug": bilkonfig["modell_slug"],
-                    "modell": bilkonfig["modell_slug"],
+                    "modell": bilkonfig["modell_slug"],  # bakåtkompatibelt fältnamn
                     "annonspris": pris,
                     "variant": kandidat["variant"],
                     "arsmodell": kandidat["arsmodell"],
@@ -184,6 +216,7 @@ def hamta_annonser() -> list[dict]:
                     "skadad": False,
                     "utrustningsniva": kandidat["slug_text"],
                     "antal_agare": antal_agare,
+                    "auktion": ar_auktion,
                     "import": None,
                     "hyrbil": None,
                     "servicehistorik": None,
