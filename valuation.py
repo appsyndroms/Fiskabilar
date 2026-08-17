@@ -61,9 +61,14 @@ BASPRIS = {
 # MILTAL
 # =========================================================
 
-KR_PER_MIL_AVVIKELSE = 2.5
+# Tidigare modell använde 1 500 mil/år som normal körning.
+# Det ger för låg förväntad körsträcka på nyare bilar.
+#
+# Vi använder därför en högre normalnivå och en mildare
+# värdepåverkan per avvikande mil.
+FORVANTAT_MIL_PER_AR = 1800
 
-FORVANTAT_MIL_PER_AR = 1500
+KR_PER_MIL_AVVIKELSE = 2.0
 
 
 # =========================================================
