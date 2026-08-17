@@ -35,11 +35,12 @@ def bil_rubrik(bil: dict) -> str:
     return f"{marke_visning} {modell_visning}".strip()
 
 
-def berakna_fyndscore(bil: dict, vardering: dict) -> int:
+def berakna_fyndscore_breakdown(
+    bil: dict,
+    vardering: dict,
+) -> dict:
     """
-    Beräknar fyndscore 0-100.
-
-    Scoren beskriver hur attraktiv bilen är som köp.
+    Beräknar fyndscore och returnerar även komponenterna.
 
     Viktning:
         Prisvärde       60 p
@@ -47,19 +48,16 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
         Utrustning       5 p
         Trygghet        15 p
 
-    Prisvärdet är medvetet den klart största komponenten.
-    Utrustningsnivå ska påverka score, men inte kunna förstöra
-    ett bra köp.
+    Returnerar exempelvis:
 
-    Score:
-        90-100 = EXTREMT FYND
-        80-89  = RIKTIGT FYND
-        70-79  = MYCKET INTRESSANT
-        60-69  = INTRESSANT
-        <60    = BEVAKA
+        {
+            "pris": 34,
+            "miltal": 15,
+            "utrustning": 3,
+            "trygghet": 8,
+            "total": 60,
+        }
     """
-
-    score = 0
 
     # =========================================================
     # 1. PRISVÄRDE - MAX 60 POÄNG
@@ -70,50 +68,52 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
         vardering.get("diff", 0),
     )
 
+    prispoang = 0
+
     if diff >= 50000:
-        score += 60
+        prispoang = 60
 
     elif diff >= 45000:
-        score += 55
+        prispoang = 55
 
     elif diff >= 40000:
-        score += 50
+        prispoang = 50
 
     elif diff >= 35000:
-        score += 45
+        prispoang = 45
 
     elif diff >= 30000:
-        score += 40
+        prispoang = 40
 
     elif diff >= 27500:
-        score += 37
+        prispoang = 37
 
     elif diff >= 25000:
-        score += 34
+        prispoang = 34
 
     elif diff >= 22500:
-        score += 31
+        prispoang = 31
 
     elif diff >= 20000:
-        score += 28
+        prispoang = 28
 
     elif diff >= 17500:
-        score += 25
+        prispoang = 25
 
     elif diff >= 15000:
-        score += 22
+        prispoang = 22
 
     elif diff >= 12500:
-        score += 18
+        prispoang = 18
 
     elif diff >= 10000:
-        score += 14
+        prispoang = 14
 
     elif diff >= 7500:
-        score += 10
+        prispoang = 10
 
     elif diff >= 5000:
-        score += 6
+        prispoang = 6
 
     # =========================================================
     # 2. MILTAL - MAX 20 POÄNG
@@ -124,29 +124,31 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
         999999,
     )
 
+    miltalspoang = 0
+
     if miltal < 5000:
-        score += 20
+        miltalspoang = 20
 
     elif miltal < 6000:
-        score += 19
+        miltalspoang = 19
 
     elif miltal < 7000:
-        score += 17
+        miltalspoang = 17
 
     elif miltal < 8000:
-        score += 15
+        miltalspoang = 15
 
     elif miltal < 9000:
-        score += 12
+        miltalspoang = 12
 
     elif miltal < 10000:
-        score += 9
+        miltalspoang = 9
 
     elif miltal < 11000:
-        score += 6
+        miltalspoang = 6
 
     elif miltal < 12000:
-        score += 3
+        miltalspoang = 3
 
     # =========================================================
     # 3. UTRUSTNING - MAX 5 POÄNG
@@ -156,20 +158,22 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
         bil.get("utrustningsniva") or ""
     ).lower()
 
+    utrustningspoang = 0
+
     if "ultimate" in utrustningsniva:
-        score += 5
+        utrustningspoang = 5
 
     elif "plus" in utrustningsniva:
-        score += 4
+        utrustningspoang = 4
 
     elif "inscription" in utrustningsniva:
-        score += 3
+        utrustningspoang = 3
 
     elif "momentum" in utrustningsniva:
-        score += 2
+        utrustningspoang = 2
 
     elif "core" in utrustningsniva:
-        score += 1
+        utrustningspoang = 1
 
     # Viktiga tillval.
     #
@@ -184,73 +188,89 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
     if bil.get("varmare"):
         tillvalspoang += 1
 
-    # Lägg endast till så mycket som behövs för att nå max 5.
-    redan_uppnatt = 0
-
-    if "ultimate" in utrustningsniva:
-        redan_uppnatt = 5
-
-    elif "plus" in utrustningsniva:
-        redan_uppnatt = 4
-
-    elif "inscription" in utrustningsniva:
-        redan_uppnatt = 3
-
-    elif "momentum" in utrustningsniva:
-        redan_uppnatt = 2
-
-    elif "core" in utrustningsniva:
-        redan_uppnatt = 1
-
-    extra_utrustning = min(
+    utrustningspoang += min(
         tillvalspoang,
-        max(0, 5 - redan_uppnatt),
+        max(
+            0,
+            5 - utrustningspoang,
+        ),
     )
-
-    score += extra_utrustning
 
     # =========================================================
     # 4. TRYGGHET - MAX 15 POÄNG
     # =========================================================
 
+    trygghetspoang = 0
+
     if bil.get("volvo_selekt"):
-        score += 5
+        trygghetspoang += 5
 
     antal_agare = bil.get(
         "antal_agare"
     ) or 99
 
     if antal_agare <= 1:
-        score += 4
+        trygghetspoang += 4
 
     elif antal_agare == 2:
-        score += 2
+        trygghetspoang += 2
 
     # Ej hyrbil/tjänstebil är positivt.
     if not bil.get("hyrbil"):
-        score += 3
+        trygghetspoang += 3
 
     # Svensksåld/ej import är positivt.
     if not bil.get("import"):
-        score += 3
+        trygghetspoang += 3
 
     # =========================================================
     # 5. AUKTION
     # =========================================================
 
-    # Ett auktionspris är inte samma sak som ett faktiskt
-    # köp-nu-pris. Vi drar därför av 10 poäng.
+    auktion_avdrag = 0
+
     if bil.get("auktion"):
-        score -= 10
+        auktion_avdrag = 10
 
     # =========================================================
-    # SLUTLIG BEGRÄNSNING
+    # TOTAL
     # =========================================================
 
-    return max(
-        0,
-        min(100, score),
+    total = (
+        prispoang
+        + miltalspoang
+        + utrustningspoang
+        + trygghetspoang
+        - auktion_avdrag
     )
+
+    total = max(
+        0,
+        min(100, total),
+    )
+
+    return {
+        "pris": prispoang,
+        "miltal": miltalspoang,
+        "utrustning": utrustningspoang,
+        "trygghet": trygghetspoang,
+        "auktion_avdrag": auktion_avdrag,
+        "total": total,
+    }
+
+
+def berakna_fyndscore(
+    bil: dict,
+    vardering: dict,
+) -> int:
+    """Beräknar fyndscore 0-100."""
+
+    breakdown = berakna_fyndscore_breakdown(
+        bil,
+        vardering,
+    )
+
+    return breakdown["total"]
 
 
 def score_niva(score: int) -> str:
