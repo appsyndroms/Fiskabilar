@@ -4,7 +4,7 @@
     "forsta_pris": 309900,
     "senaste_pris": 309900,
     "senast_sedd": "2026-08-17",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:v60:T8 AWD:2022:5074": {
     "forsta_sedd": "2026-08-14",
@@ -72,7 +72,7 @@
   "kal:v60:T6 AWD:2023:10634": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 339000,
-    "senaste_pris": 339000,
+    "senaste_pris": 344900,
     "senast_sedd": "2026-08-17",
     "notifierad": false
   },
@@ -401,7 +401,7 @@
   "kal:v90:T6 AWD:2024:7480": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389000,
-    "senaste_pris": 389000,
+    "senaste_pris": 399900,
     "senast_sedd": "2026-08-17",
     "notifierad": true
   },
@@ -842,7 +842,7 @@
   "kal:v60:T6 AWD:2024:3230": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399000,
-    "senaste_pris": 399000,
+    "senaste_pris": 409900,
     "senast_sedd": "2026-08-17",
     "notifierad": true
   },
@@ -1249,6 +1249,27 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T8 AWD:2022:10973": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 319900,
+    "senaste_pris": 319900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": true
+  },
+  "kal:v90:T8 AWD:2022:11416": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 409500,
+    "senaste_pris": 409500,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T6 AWD:2023:8052": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
     "senast_sedd": "2026-08-17",
     "notifierad": false
   }
