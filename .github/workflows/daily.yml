@@ -1,4 +1,4 @@
-name: V60-fyndkontroll (var 30:e minut, 06-22 svensk tid)
+name: Fyndkontroll för bilar (var 30:e minut, 06-22 svensk tid)
 
 on:
   # Kör var 30:e minut, 04:00-21:59 UTC. Det här fönstret är medvetet
