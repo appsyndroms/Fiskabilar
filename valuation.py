@@ -78,7 +78,7 @@ BASPRIS = {
 # =========================================================
 
 # Värdeminskning per mil över/under förväntat miltal.
-KR_PER_MIL_AVVIKELSE = 4.5
+KR_PER_MIL_AVVIKELSE = 2.5
 
 # Förväntat miltal per år.
 FORVANTAT_MIL_PER_AR = 1500
