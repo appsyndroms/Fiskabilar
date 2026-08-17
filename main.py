@@ -28,7 +28,10 @@ from state import (
     redan_notifierad,
     markera_notifierad,
 )
-from valuation import berakna_fynd
+from valuation import (
+    berakna_fynd,
+    berakna_miltalsdiagnostik,
+)
 from scoring import (
     berakna_fyndscore,
     berakna_fyndscore_breakdown,
@@ -65,7 +68,6 @@ TIDSZON = ZoneInfo("Europe/Stockholm")
 MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 
-# Hur många kandidater som ska visas i diagnostiken.
 DIAGNOSTIK_ANTAL = 20
 
 
@@ -120,7 +122,10 @@ def _annons_namn(bil: dict) -> str:
     try:
         return bil_rubrik(bil)
     except Exception:
-        modell = bil.get("modell") or "Okänd modell"
+        modell = bil.get(
+            "modell"
+        ) or "Okänd modell"
+
         return str(modell)
 
 
@@ -137,6 +142,10 @@ def _logga_kandidat(
         vardering,
     )
 
+    miltalsdiagnostik = berakna_miltalsdiagnostik(
+        bil
+    )
+
     return {
         "score": score,
         "prispoang": breakdown["pris"],
@@ -144,7 +153,10 @@ def _logga_kandidat(
         "utrustningspoang": breakdown["utrustning"],
         "trygghetspoang": breakdown["trygghet"],
         "auktion_avdrag": breakdown["auktion_avdrag"],
-        "diff": vardering.get("diff", 0),
+        "diff": vardering.get(
+            "diff",
+            0,
+        ),
         "marknad": vardering.get(
             "marknadsvarde",
             0,
@@ -172,6 +184,18 @@ def _logga_kandidat(
             if bil.get("urls")
             else ""
         ),
+        "alder_ar": miltalsdiagnostik[
+            "alder_ar"
+        ],
+        "forvantat_mil": miltalsdiagnostik[
+            "forvantat_mil"
+        ],
+        "mil_avvikelse": miltalsdiagnostik[
+            "mil_avvikelse"
+        ],
+        "mil_justering": miltalsdiagnostik[
+            "mil_justering"
+        ],
     }
 
 
@@ -235,6 +259,16 @@ def _skriv_diagnostik(
                 if kandidat["auktion_avdrag"]
                 else ""
             )
+        )
+
+        print(
+            "    "
+            f"Ålder: {kandidat['alder_ar']:.2f} år | "
+            f"Förväntat: {kandidat['forvantat_mil']:,} mil | "
+            f"Faktiskt: {kandidat['miltal']:,} mil | "
+            f"Avvikelse: {kandidat['mil_avvikelse']:+,} mil | "
+            f"Miljustering: {kandidat['mil_justering']:+,} kr"
+            .replace(",", " ")
         )
 
         if kandidat["url"]:
@@ -331,6 +365,7 @@ def main():
             vardering = berakna_fynd(
                 bil
             )
+
         except Exception as e:
 
             print(
@@ -344,11 +379,15 @@ def main():
         # Valuation
         # -------------------------------------------------
 
-        if vardering.get("niva") is None:
+        if vardering.get(
+            "niva"
+        ) is None:
 
             continue
 
-        statistik["valuation_ok"] += 1
+        statistik[
+            "valuation_ok"
+        ] += 1
 
         diff = vardering.get(
             "diff",
@@ -363,7 +402,9 @@ def main():
 
             continue
 
-        statistik["under_diff"] += 1
+        statistik[
+            "under_diff"
+        ] += 1
 
         # -------------------------------------------------
         # Score
@@ -374,6 +415,7 @@ def main():
                 bil,
                 vardering,
             )
+
         except Exception as e:
 
             print(
@@ -403,7 +445,9 @@ def main():
 
             continue
 
-        statistik["score_ok"] += 1
+        statistik[
+            "score_ok"
+        ] += 1
 
         # -------------------------------------------------
         # Redan notifierad
@@ -414,7 +458,9 @@ def main():
             state,
         ):
 
-            statistik["redan_notifierade"] += 1
+            statistik[
+                "redan_notifierade"
+            ] += 1
 
             kandidater.append(
                 _logga_kandidat(
@@ -445,21 +491,27 @@ def main():
         # -------------------------------------------------
 
         if score >= 90:
+
             niva_etikett = (
                 "EXTREMT FYND"
             )
+
             emoji = "🚨"
 
         elif score >= 80:
+
             niva_etikett = (
                 "RIKTIGT FYND"
             )
+
             emoji = "🔥"
 
         else:
+
             niva_etikett = (
                 "MYCKET INTRESSANT"
             )
+
             emoji = "🟢"
 
         # -------------------------------------------------
@@ -509,7 +561,9 @@ def main():
                 state
             )
 
-            statistik["mejl_skickade"] += 1
+            statistik[
+                "mejl_skickade"
+            ] += 1
 
         else:
 
@@ -571,7 +625,9 @@ def main():
 
     print("=" * 70)
 
-    if statistik["mejl_skickade"] == 0:
+    if statistik[
+        "mejl_skickade"
+    ] == 0:
 
         print(
             "Inga nya fynd denna körning."
