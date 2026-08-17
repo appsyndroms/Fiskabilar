@@ -11,8 +11,9 @@ Flöde:
 4. Berika med historik.
 5. Beräkna marknadsvärde.
 6. Beräkna fyndscore.
-7. Skicka nya intressanta fynd direkt via mejl.
-8. Markera skickade annonser i state.
+7. Logga kandidater och filterresultat.
+8. Skicka nya intressanta fynd direkt via mejl.
+9. Markera skickade annonser i state.
 """
 
 from datetime import datetime
@@ -55,31 +56,20 @@ AKTIV_TID_START = 6
 AKTIV_TID_SLUT = 22
 TIDSZON = ZoneInfo("Europe/Stockholm")
 
-# ---------------------------------------------------------
-# FYNDSCORE
-# ---------------------------------------------------------
-#
-# Vi använder valuation som ett första grovt filter,
-# men fyndscore avgör om bilen faktiskt är intressant.
-#
-# 70+ = mejlas
-# 80+ = riktigt fynd
-# 90+ = extremt fynd
-#
-MIN_SCORE_FOR_NOTIS = 70
 
-# Valuation måste fortfarande ligga tillräckligt under
-# beräknat marknadsvärde för att bilen ska betraktas som
-# en kandidat.
+# =========================================================
+# FILTERGRÄNSER
+# =========================================================
+
+MIN_SCORE_FOR_NOTIS = 70
 MIN_DIFF_FOR_CANDIDATE = 15000
+
+# Hur många kandidater som ska visas i diagnostiken.
+DIAGNOSTIK_ANTAL = 20
 
 
 def _inom_aktiv_tid() -> bool:
-    """
-    Avgör om det just nu är mellan 06:00-22:00 svensk tid.
-
-    Europe/Stockholm hanterar automatiskt sommar-/vintertid.
-    """
+    """Avgör om det just nu är mellan 06:00-22:00 svensk tid."""
 
     nu = datetime.now(TIDSZON)
 
@@ -96,6 +86,7 @@ def hamta_alla_annonser() -> list[dict]:
     alla = []
 
     for kalla in AKTIVA_KALLOR:
+
         modul = KALLA_TILL_MODUL.get(kalla)
 
         if modul is None:
@@ -105,9 +96,15 @@ def hamta_alla_annonser() -> list[dict]:
             continue
 
         try:
-            alla.extend(
-                modul.hamta_annonser()
+            annonser = modul.hamta_annonser()
+
+            print(
+                f"[KÄLLA] {kalla}: "
+                f"{len(annonser)} annonser"
             )
+
+            alla.extend(annonser)
+
         except Exception as e:
             print(
                 f"FEL i källa '{kalla}': {e}"
@@ -116,14 +113,126 @@ def hamta_alla_annonser() -> list[dict]:
     return alla
 
 
-def main():
-    print("=== Bilfyndfilter startar ===")
+def _annons_namn(bil: dict) -> str:
+    """Försöker skapa en användbar kort rubrik för loggen."""
 
-    # -----------------------------------------------------
-    # Aktiv tid
-    # -----------------------------------------------------
+    try:
+        return bil_rubrik(bil)
+    except Exception:
+        modell = bil.get("modell") or "Okänd modell"
+        return str(modell)
+
+
+def _logga_kandidat(
+    bil: dict,
+    vardering: dict,
+    score: int,
+    status: str,
+) -> dict:
+    """Skapar en kompakt diagnostikpost."""
+
+    return {
+        "score": score,
+        "diff": vardering.get("diff", 0),
+        "marknad": vardering.get(
+            "marknadsvarde",
+            0,
+        ),
+        "pris": bil.get(
+            "annonspris",
+            0,
+        ),
+        "miltal": bil.get(
+            "miltal",
+            0,
+        ),
+        "arsmodell": bil.get(
+            "arsmodell",
+            "?",
+        ),
+        "modell": _annons_namn(bil),
+        "utrustning": bil.get(
+            "utrustningsniva",
+            "",
+        ),
+        "status": status,
+        "url": (
+            bil.get("urls", [""])[0]
+            if bil.get("urls")
+            else ""
+        ),
+    }
+
+
+def _skriv_diagnostik(
+    kandidater: list[dict],
+) -> None:
+    """
+    Skriver ut de bästa kandidaterna.
+
+    Dessa kan ha skickats, stoppats av score,
+    redan vara notifierade eller av annan anledning
+    inte blivit mejlade.
+    """
+
+    if not kandidater:
+        print("")
+        print("=== DIAGNOSTIK ===")
+        print("Inga kandidater passerade valuation.")
+        return
+
+    kandidater = sorted(
+        kandidater,
+        key=lambda x: (
+            x["score"],
+            x["diff"],
+        ),
+        reverse=True,
+    )
+
+    print("")
+    print("=" * 70)
+    print("=== DIAGNOSTIK: BÄSTA KANDIDATER ===")
+    print("=" * 70)
+
+    for index, kandidat in enumerate(
+        kandidater[:DIAGNOSTIK_ANTAL],
+        start=1,
+    ):
+
+        print(
+            f"{index:02d}. "
+            f"{kandidat['score']:3d}/100 | "
+            f"{kandidat['arsmodell']} | "
+            f"{kandidat['miltal']:,} mil | "
+            f"{kandidat['pris']:,} kr | "
+            f"diff +{kandidat['diff']:,} | "
+            f"{kandidat['modell']} | "
+            f"{kandidat['utrustning']} | "
+            f"{kandidat['status']}"
+        )
+
+        if kandidat["url"]:
+            print(
+                f"    {kandidat['url']}"
+            )
+
+    print("=" * 70)
+    print("")
+
+
+def main():
+
+    print("")
+    print("=== Bilfyndfilter startar ===")
+    print("")
+
+    # =====================================================
+    # AKTIV TID
+    # =====================================================
 
     if not _inom_aktiv_tid():
+
         nu = datetime.now(TIDSZON)
 
         print(
@@ -137,30 +246,33 @@ def main():
 
         return
 
-    # -----------------------------------------------------
-    # Hämta annonser
-    # -----------------------------------------------------
+    # =====================================================
+    # HÄMTA
+    # =====================================================
 
     raa_annonser = hamta_alla_annonser()
 
+    print("")
     print(
         f"Totalt {len(raa_annonser)} "
         "annonser innan dedup"
     )
 
-    # -----------------------------------------------------
-    # Deduplicera
-    # -----------------------------------------------------
+    # =====================================================
+    # DEDUP
+    # =====================================================
 
-    bilar = deduplicera(raa_annonser)
+    bilar = deduplicera(
+        raa_annonser
+    )
 
     print(
         f"{len(bilar)} unika bilar efter dedup"
     )
 
-    # -----------------------------------------------------
-    # Historik / state
-    # -----------------------------------------------------
+    # =====================================================
+    # STATE / HISTORIK
+    # =====================================================
 
     state = ladda_state()
 
@@ -169,51 +281,161 @@ def main():
         state,
     )
 
-    antal_skickade = 0
+    # =====================================================
+    # STATISTIK
+    # =====================================================
 
-    # -----------------------------------------------------
-    # Bedöm varje bil
-    # -----------------------------------------------------
+    statistik = {
+        "totalt": len(bilar),
+        "valuation_ok": 0,
+        "under_diff": 0,
+        "score_ok": 0,
+        "redan_notifierade": 0,
+        "mejl_skickade": 0,
+    }
+
+    kandidater = []
+
+    # =====================================================
+    # BEDÖM ALLA BILAR
+    # =====================================================
 
     for bil in bilar:
 
-        vardering = berakna_fynd(bil)
+        try:
+            vardering = berakna_fynd(
+                bil
+            )
+        except Exception as e:
 
-        # Ingen tillräckligt bra värdering.
+            print(
+                "[FEL valuation] "
+                f"{_annons_namn(bil)}: {e}"
+            )
+
+            continue
+
+        # -------------------------------------------------
+        # Valuation
+        # -------------------------------------------------
+
         if vardering.get("niva") is None:
+
             continue
 
-        # Första grova prisfiltret.
-        diff = vardering.get("diff", 0)
+        statistik["valuation_ok"] += 1
 
-        if diff < MIN_DIFF_FOR_CANDIDATE:
-            continue
-
-        # -------------------------------------------------
-        # Beräkna den riktiga fyndscoren.
-        # -------------------------------------------------
-
-        score = berakna_fyndscore(
-            bil,
-            vardering,
+        diff = vardering.get(
+            "diff",
+            0,
         )
 
-        # Score avgör om vi vill ha mejl.
-        if score < MIN_SCORE_FOR_NOTIS:
+        # -------------------------------------------------
+        # Prisfilter
+        # -------------------------------------------------
+
+        if diff < MIN_DIFF_FOR_CANDIDATE:
+
+            continue
+
+        statistik["under_diff"] += 1
+
+        # -------------------------------------------------
+        # Score
+        # -------------------------------------------------
+
+        try:
+            score = berakna_fyndscore(
+                bil,
+                vardering,
+            )
+        except Exception as e:
+
+            print(
+                "[FEL scoring] "
+                f"{_annons_namn(bil)}: {e}"
+            )
+
             continue
 
         # -------------------------------------------------
-        # Skicka aldrig samma bil flera gånger.
+        # Kandidat
+        # -------------------------------------------------
+
+        if score < MIN_SCORE_FOR_NOTIS:
+
+            kandidater.append(
+                _logga_kandidat(
+                    bil,
+                    vardering,
+                    score,
+                    "STOPP: score < 70",
+                )
+            )
+
+            continue
+
+        statistik["score_ok"] += 1
+
+        # -------------------------------------------------
+        # Redan notifierad
         # -------------------------------------------------
 
         if redan_notifierad(
             bil,
             state,
         ):
+
+            statistik["redan_notifierade"] += 1
+
+            kandidater.append(
+                _logga_kandidat(
+                    bil,
+                    vardering,
+                    score,
+                    "STOPP: redan notifierad",
+                )
+            )
+
             continue
 
         # -------------------------------------------------
-        # Formatera mejl
+        # Kandidat som faktiskt kan skickas
+        # -------------------------------------------------
+
+        kandidater.append(
+            _logga_kandidat(
+                bil,
+                vardering,
+                score,
+                "SKICKAS",
+            )
+        )
+
+        # -------------------------------------------------
+        # Mejlets nivå
+        # -------------------------------------------------
+
+        if score >= 90:
+            niva_etikett = (
+                "EXTREMT FYND"
+            )
+            emoji = "🚨"
+
+        elif score >= 80:
+            niva_etikett = (
+                "RIKTIGT FYND"
+            )
+            emoji = "🔥"
+
+        else:
+            niva_etikett = (
+                "MYCKET INTRESSANT"
+            )
+            emoji = "🟢"
+
+        # -------------------------------------------------
+        # Formatera
         # -------------------------------------------------
 
         text = formatera_notis(
@@ -222,27 +444,21 @@ def main():
             score,
         )
 
-        # -------------------------------------------------
-        # Ämnesrad baserad på score
-        # -------------------------------------------------
-
-        if score >= 90:
-            niva_etikett = "EXTREMT FYND"
-        elif score >= 80:
-            niva_etikett = "RIKTIGT FYND"
-        else:
-            niva_etikett = "MYCKET INTRESSANT"
+        diff_formaterad = (
+            f"{diff:,}"
+            .replace(",", " ")
+        )
 
         amne = (
-            f"{'🚨' if score >= 90 else '🔥' if score >= 80 else '🟢'} "
+            f"{emoji} "
             f"{niva_etikett}: "
             f"{bil_rubrik(bil)} "
             f"{bil.get('arsmodell')} - "
-            f"{diff:,} kr under marknad"
-        ).replace(",", " ")
+            f"{diff_formaterad} kr under marknad"
+        )
 
         # -------------------------------------------------
-        # Skicka direkt
+        # Skicka
         # -------------------------------------------------
 
         skickat = skicka_epost(
@@ -256,37 +472,88 @@ def main():
                 f"Mejl skickat: {amne}"
             )
 
-            # Markera direkt så bilen aldrig skickas igen.
             markera_notifierad(
                 bil,
                 state,
             )
 
-            spara_state(state)
+            spara_state(
+                state
+            )
 
-            antal_skickade += 1
+            statistik["mejl_skickade"] += 1
 
         else:
 
-            # Misslyckat mejl innebär att bilen INTE
-            # markeras som notifierad.
             print(
                 "OBS: mejl INTE skickat, "
                 "försöker igen nästa körning: "
                 f"{amne}"
             )
 
-    # -----------------------------------------------------
-    # Sammanfattning
-    # -----------------------------------------------------
+    # =====================================================
+    # DIAGNOSTIK
+    # =====================================================
 
-    if antal_skickade == 0:
+    _skriv_diagnostik(
+        kandidater
+    )
+
+    # =====================================================
+    # SAMMANFATTNING
+    # =====================================================
+
+    print("")
+    print("=" * 70)
+    print("=== SAMMANFATTNING ===")
+    print("=" * 70)
+
+    print(
+        f"Totalt efter dedup: "
+        f"{statistik['totalt']}"
+    )
+
+    print(
+        f"Valuation OK: "
+        f"{statistik['valuation_ok']}"
+    )
+
+    print(
+        f"Över prisdiff-gränsen "
+        f"({MIN_DIFF_FOR_CANDIDATE:,} kr): "
+        f"{statistik['under_diff']}"
+        .replace(",", " ")
+    )
+
+    print(
+        f"Score >= "
+        f"{MIN_SCORE_FOR_NOTIS}: "
+        f"{statistik['score_ok']}"
+    )
+
+    print(
+        f"Redan notifierade: "
+        f"{statistik['redan_notifierade']}"
+    )
+
+    print(
+        f"Mejl skickade: "
+        f"{statistik['mejl_skickade']}"
+    )
+
+    print("=" * 70)
+
+    if statistik["mejl_skickade"] == 0:
+
         print(
             "Inga nya fynd denna körning."
         )
+
     else:
+
         print(
-            f"Totalt {antal_skickade} "
+            f"Totalt "
+            f"{statistik['mejl_skickade']} "
             "nya fynd mejlade denna körning."
         )
 
