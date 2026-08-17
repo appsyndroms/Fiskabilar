@@ -61,7 +61,7 @@ TIDSZON = ZoneInfo("Europe/Stockholm")
 # FILTERGRÄNSER
 # =========================================================
 
-MIN_SCORE_FOR_NOTIS = 70
+MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 
 # Hur många kandidater som ska visas i diagnostiken.
@@ -369,7 +369,10 @@ def main():
                     bil,
                     vardering,
                     score,
-                    "STOPP: score < 70",
+                    (
+                        "STOPP: score < "
+                        f"{MIN_SCORE_FOR_NOTIS}"
+                    ),
                 )
             )
 
