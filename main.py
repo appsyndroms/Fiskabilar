@@ -31,6 +31,7 @@ from state import (
 from valuation import berakna_fynd
 from scoring import (
     berakna_fyndscore,
+    berakna_fyndscore_breakdown,
     formatera_notis,
     bil_rubrik,
 )
@@ -131,8 +132,18 @@ def _logga_kandidat(
 ) -> dict:
     """Skapar en kompakt diagnostikpost."""
 
+    breakdown = berakna_fyndscore_breakdown(
+        bil,
+        vardering,
+    )
+
     return {
         "score": score,
+        "prispoang": breakdown["pris"],
+        "miltalspoang": breakdown["miltal"],
+        "utrustningspoang": breakdown["utrustning"],
+        "trygghetspoang": breakdown["trygghet"],
+        "auktion_avdrag": breakdown["auktion_avdrag"],
         "diff": vardering.get("diff", 0),
         "marknad": vardering.get(
             "marknadsvarde",
@@ -191,9 +202,9 @@ def _skriv_diagnostik(
     )
 
     print("")
-    print("=" * 70)
+    print("=" * 80)
     print("=== DIAGNOSTIK: BÄSTA KANDIDATER ===")
-    print("=" * 70)
+    print("=" * 80)
 
     for index, kandidat in enumerate(
         kandidater[:DIAGNOSTIK_ANTAL],
@@ -212,12 +223,26 @@ def _skriv_diagnostik(
             f"{kandidat['status']}"
         )
 
+        print(
+            "    "
+            f"Pris: {kandidat['prispoang']}/60 | "
+            f"Miltal: {kandidat['miltalspoang']}/20 | "
+            f"Utrustning: {kandidat['utrustningspoang']}/5 | "
+            f"Trygghet: {kandidat['trygghetspoang']}/15"
+            + (
+                f" | Auktion: "
+                f"-{kandidat['auktion_avdrag']}"
+                if kandidat["auktion_avdrag"]
+                else ""
+            )
+        )
+
         if kandidat["url"]:
             print(
                 f"    {kandidat['url']}"
             )
 
-    print("=" * 70)
+    print("=" * 80)
     print("")
 
 
