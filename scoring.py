@@ -50,7 +50,14 @@ def berakna_fyndscore(bil: dict, vardering: dict) -> int:
     if not bil.get("import"):
         score += 2
 
-    return min(100, score)
+    # Auktionspris (t.ex. Kvdbil) är inte ett fast köp-nu-pris - du kan
+    # behöva buda över det visade beloppet för att vinna. Dra av poäng
+    # för att spegla den extra osäkerheten, men avvisa inte helt (kan
+    # ändå vara ett bra utgångsläge).
+    if bil.get("auktion"):
+        score -= 15
+
+    return max(0, min(100, score))
 
 
 def formatera_notis(bil: dict, vardering: dict, score: int) -> str:
@@ -62,6 +69,10 @@ def formatera_notis(bil: dict, vardering: dict, score: int) -> str:
         f"Marknadsvärde: ~{vardering['marknadsvarde']:,} kr".replace(",", " "),
         f"Ca {vardering['diff']:,} kr under marknad".replace(",", " "),
     ]
+
+    if bil.get("auktion"):
+        rader.append("⚠️ AUKTIONSPRIS (t.ex. Kvdbil) - INTE ett fast köp-nu-pris, "
+                      "du kan behöva buda över beloppet för att vinna")
 
     utrustning_bitar = []
     if bil.get("dragkrok"):
