@@ -541,7 +541,7 @@
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:9185": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 361990,
-    "senaste_pris": 361990,
+    "senaste_pris": 359990,
     "senast_sedd": "2026-08-17",
     "notifierad": false
   },
@@ -555,7 +555,7 @@
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:5929": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409990,
-    "senaste_pris": 409990,
+    "senaste_pris": 407990,
     "senast_sedd": "2026-08-17",
     "notifierad": false
   },
@@ -1200,6 +1200,55 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 387990,
     "senaste_pris": 387990,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T6 AWD:2022:9011": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T6 AWD:2023:9642": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 339000,
+    "senaste_pris": 339000,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T6 AWD:2023:3938": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 419900,
+    "senaste_pris": 419900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v60:T6 AWD:2024:7222": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 374900,
+    "senaste_pris": 374900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": true
+  },
+  "kal:v60:T6 AWD:2024:3655": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 424900,
+    "senaste_pris": 424900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:v90:T6 AWD:2023:7300": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-17",
+    "notifierad": false
+  },
+  "kal:530e-xdrive-touring:530e xDrive Touring:2022:7586": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
     "senast_sedd": "2026-08-17",
     "notifierad": false
   }
