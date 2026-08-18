@@ -9,11 +9,12 @@ Flöde:
 2. Hämta annonser från aktiva källor.
 3. Deduplicera annonser.
 4. Berika med historik.
-5. Beräkna marknadsvärde.
-6. Beräkna fyndscore.
-7. Logga kandidater och filterresultat.
-8. Skicka nya intressanta fynd direkt via mejl.
-9. Markera skickade annonser i state.
+5. Bygg marknadsunderlag.
+6. Beräkna marknadsvärde.
+7. Beräkna fyndscore.
+8. Logga kandidater och filterresultat.
+9. Skicka nya intressanta fynd direkt via mejl.
+10. Markera skickade annonser i state.
 """
 
 from datetime import datetime
@@ -29,6 +30,7 @@ from state import (
     markera_notifierad,
 )
 from valuation import (
+    bygg_marknadsunderlag,
     berakna_fynd,
     berakna_miltalsdiagnostik,
 )
@@ -341,6 +343,37 @@ def main():
     )
 
     # =====================================================
+    # MARKNADSUNDERLAG
+    # =====================================================
+
+    marknadsunderlag = bygg_marknadsunderlag(
+        bilar
+    )
+
+    print(
+        f"{len(marknadsunderlag)} "
+        "marknadskategorier byggda"
+    )
+
+    for kategori, annonser in (
+        marknadsunderlag.items()
+    ):
+
+        if len(annonser) >= 3:
+
+            modell, variant, arsmodell = (
+                kategori
+            )
+
+            print(
+                f"[MARKNAD] "
+                f"{modell} | "
+                f"{variant} | "
+                f"{arsmodell}: "
+                f"{len(annonser)} jämförelsebilar"
+            )
+
+    # =====================================================
     # STATISTIK
     # =====================================================
 
@@ -363,7 +396,8 @@ def main():
 
         try:
             vardering = berakna_fynd(
-                bil
+                bil,
+                marknadsunderlag,
             )
 
         except Exception as e:
