@@ -667,7 +667,7 @@ def _bygg_marknadsdiagnostik(
             "malpris": bil.get(
                 "annonspris"
             ),
-            "miltal": None,
+            "milmalspris": None,
             "median_justerat": None,
             "jamforelser": [],
         }
