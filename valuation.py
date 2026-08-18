@@ -99,6 +99,12 @@ MAX_JAMFORELSEBILAR = 15
 
 KR_PER_MIL_AVVIKELSE = 2.0
 
+# Jämförelsebilar måste ligga inom detta miltal
+# från den aktuella bilen. Detta hindrar exempelvis
+# en bil på 7 000 mil från att värderas huvudsakligen
+# mot bilar på 3 000 mil eller 12 000 mil.
+MAX_MILTALSSKILLNAD = 3000
+
 MIN_MILTAL = 1000
 
 MIN_KONTANTPRIS = 100000
@@ -410,10 +416,28 @@ def _hamta_jamforelsebilar(
 
     target_mil = bil.get("miltal")
 
+    # -----------------------------------------------------
+    # NYTT:
+    # Begränsa jämförelsebilar till ett rimligt
+    # miltalsintervall runt aktuell bil.
+    #
+    # Exempel:
+    # En bil på 7 383 mil jämförs endast med bilar
+    # mellan 4 383 och 10 383 mil.
+    # -----------------------------------------------------
+
     if isinstance(
         target_mil,
         (int, float)
     ):
+
+        jamforelser = [
+            x
+            for x in jamforelser
+            if abs(
+                x["miltal"] - target_mil
+            ) <= MAX_MILTALSSKILLNAD
+        ]
 
         jamforelser.sort(
             key=lambda x: abs(
@@ -737,7 +761,8 @@ def _bygg_marknadsdiagnostik(
                 ),
 
                 "justerat_pris": int(
-                    round(justerat_pris
+                    round(
+                        justerat_pris
                     )
                 ),
 
