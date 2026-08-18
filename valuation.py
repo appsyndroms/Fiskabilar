@@ -9,14 +9,12 @@ Grundtanke:
 2. Ta bort annonser där priset faktiskt är ett leasing-/månadspris.
 3. Ta bort orimliga kontantpriser.
 4. Ta bort bilar under 1 000 mil från marknadsunderlaget.
-5. Ta alltid bort aktuell bil från sina egna jämförelser.
+5. Ta bort aktuell bil från sina egna jämförelser.
 6. Justera jämförelsepris efter skillnad i miltal.
 7. Normalisera jämförelsebilarnas utrustning mot aktuell bil.
 8. Begränsa orimligt stora utrustningsjusteringar.
 9. Använd medianen av de justerade jämförelsepriserna.
-10. Kräva minst tre verkliga jämförelsebilar för att klassificera
-    bilen som FYND eller EXTREMT_FYND.
-11. Falla tillbaka till ett manuellt baspris om tillräckligt många
+10. Falla tillbaka till ett manuellt baspris om tillräckligt många
     jämförelsebilar saknas.
 
 VIKTIGT:
@@ -28,6 +26,19 @@ med försäljningspriser.
 
 Att en bil tidigare varit leasingbil innebär däremot INTE att
 annonsen ska filtreras bort.
+
+MARKNADSVÄRDERING:
+Den aktuella annonsen får aldrig användas som sin egen jämförelsebil.
+
+Exkludering sker i följande ordning:
+1. Annons-ID.
+2. Annons-URL.
+3. Som sista fallback: samma modell, variant, årsmodell,
+   exakt pris och exakt miltal.
+
+Det sista steget behövs eftersom vissa annonskällor inte alltid
+levererar ett stabilt annons-ID eller URL i det data som når
+värderingsmodellen.
 
 Marknadsmodellen är avsiktligt enkel och transparent. Den ska kunna
 förbättras när vi får större historiskt underlag.
@@ -163,6 +174,60 @@ def _normalisera_text(text: str) -> str:
         .replace("_", " ")
         .replace("-", " ")
     )
+
+
+def _normalisera_url(url) -> str | None:
+    """
+    Normalisera URL för jämförelse.
+
+    Tar bort:
+    - whitespace
+    - avslutande /
+    - fragment
+
+    Detta gör URL-jämförelsen mindre känslig för små skillnader
+    i hur samma annons levereras från olika delar av programmet.
+    """
+
+    if not url:
+        return None
+
+    text = str(url).strip()
+
+    if not text:
+        return None
+
+    text = text.split("#", 1)[0]
+    text = text.rstrip("/")
+
+    return text
+
+
+def _hamta_annons_url(
+    bil: dict,
+):
+    """
+    Hämta annonsens URL så stabilt som möjligt.
+    """
+
+    url = bil.get("url")
+
+    if url:
+        return _normalisera_url(url)
+
+    urls = bil.get("urls")
+
+    if urls:
+        for kandidat in urls:
+
+            normaliserad = _normalisera_url(
+                kandidat
+            )
+
+            if normaliserad:
+                return normaliserad
+
+    return None
 
 
 def _ar_sant(value) -> bool:
@@ -310,7 +375,7 @@ def _ar_rimligt_kontantpris(
 
 
 # =========================================================
-# ANNONS-ID / ANNONSIDENTITET
+# ANNONS-ID
 # =========================================================
 
 def _hamta_annons_id(
@@ -344,115 +409,169 @@ def _hamta_annons_id(
             annons_id
         ).strip()
 
-    url = bil.get(
-        "url"
+    url = _hamta_annons_url(
+        bil
     )
 
     if url:
-        return str(
-            url
-        ).strip()
-
-    urls = bil.get(
-        "urls"
-    )
-
-    if urls:
-
-        return str(
-            urls[0]
-        ).strip()
+        return url
 
     return None
 
 
-def _hamta_annonsidentiteter(
-    bil: dict,
-) -> set[str]:
-    """
-    Returnerar alla identifierare som kan användas för att
-    avgöra om två poster är samma annons.
-
-    Vi använder flera identifierare eftersom aktuell annons
-    ibland kan ha ett annons-ID medan marknadsunderlaget
-    endast innehåller URL, eller tvärtom.
-    """
-
-    identiteter = set()
-
-    for falt in (
-        "annons_id",
-        "id",
-        "url",
-    ):
-
-        value = bil.get(
-            falt
-        )
-
-        if value:
-
-            identiteter.add(
-                _normalisera_text(
-                    value
-                )
-            )
-
-    urls = bil.get(
-        "urls"
-    )
-
-    if urls:
-
-        for url in urls:
-
-            if url:
-
-                identiteter.add(
-                    _normalisera_text(
-                        url
-                    )
-                )
-
-    return identiteter
-
+# =========================================================
+# JÄMFÖRELSE AV AKTUELL ANNONS
+# =========================================================
 
 def _ar_samma_annons(
     aktuell_bil: dict,
     jamforelse: dict,
 ) -> bool:
     """
-    Avgör om aktuell bil och jämförelsebil är samma annons.
+    Avgör om en jämförelsebil egentligen är samma annons
+    som bilen som värderas.
 
-    Först används stabila ID/URL-identiteter.
+    Matchning sker i prioriterad ordning:
 
-    Om aktuell annons saknar identifierare kan vi inte säkert
-    säga att två annonser är samma. Då lämnas jämförelsen kvar
-    istället för att riskera att ta bort en legitim annons.
+    1. Annons-ID.
+    2. URL.
+    3. Fallback på exakt:
+       modell + variant + årsmodell + pris + miltal.
+
+    Fallbacken används endast när ID och URL saknas.
+
+    Detta förhindrar framför allt problemet där aktuell annons
+    råkar sakna annons-ID men ändå hamnar i marknadsunderlaget.
     """
 
-    aktuell_identiteter = (
-        _hamta_annonsidentiteter(
-            aktuell_bil
+    aktuell_id = _hamta_annons_id(
+        aktuell_bil
+    )
+
+    jamforelse_id = jamforelse.get(
+        "annons_id"
+    )
+
+    if (
+        aktuell_id
+        and jamforelse_id
+        and str(aktuell_id).strip()
+        == str(jamforelse_id).strip()
+    ):
+        return True
+
+    aktuell_url = _hamta_annons_url(
+        aktuell_bil
+    )
+
+    jamforelse_url = _normalisera_url(
+        jamforelse.get("annons_url")
+    )
+
+    if (
+        aktuell_url
+        and jamforelse_url
+        and aktuell_url == jamforelse_url
+    ):
+        return True
+
+    # -----------------------------------------------------
+    # SISTA FALLBACK
+    #
+    # Om ingen identifierare finns kan vi fortfarande
+    # upptäcka samma annons när samtliga kärnvärden är
+    # identiska.
+    # -----------------------------------------------------
+
+    if (
+        not aktuell_id
+        and not aktuell_url
+    ) or (
+        not jamforelse_id
+        and not jamforelse_url
+    ):
+
+        aktuell_modell = (
+            str(
+                aktuell_bil.get(
+                    "modell",
+                    "",
+                )
+            ).lower()
         )
-    )
 
-    jamforelse_identiteter = (
-        _hamta_annonsidentiteter(
-            jamforelse
+        jamforelse_modell = (
+            str(
+                jamforelse.get(
+                    "modell",
+                    aktuell_modell,
+                )
+            ).lower()
         )
-    )
 
-    if not aktuell_identiteter:
-        return False
+        aktuell_variant = aktuell_bil.get(
+            "variant"
+        )
 
-    if not jamforelse_identiteter:
-        return False
+        jamforelse_variant = jamforelse.get(
+            "variant"
+        )
 
-    return bool(
-        aktuell_identiteter
-        & jamforelse_identiteter
-    )
+        aktuell_arsmodell = aktuell_bil.get(
+            "arsmodell"
+        )
+
+        jamforelse_arsmodell = jamforelse.get(
+            "arsmodell"
+        )
+
+        aktuell_pris = aktuell_bil.get(
+            "annonspris"
+        )
+
+        jamforelse_pris = jamforelse.get(
+            "pris"
+        )
+
+        aktuell_miltal = aktuell_bil.get(
+            "miltal"
+        )
+
+        jamforelse_miltal = jamforelse.get(
+            "miltal"
+        )
+
+        if (
+            aktuell_modell
+            == jamforelse_modell
+            and aktuell_variant
+            == jamforelse_variant
+            and aktuell_arsmodell
+            == jamforelse_arsmodell
+            and isinstance(
+                aktuell_pris,
+                (int, float),
+            )
+            and isinstance(
+                jamforelse_pris,
+                (int, float),
+            )
+            and aktuell_pris
+            == jamforelse_pris
+            and isinstance(
+                aktuell_miltal,
+                (int, float),
+            )
+            and isinstance(
+                jamforelse_miltal,
+                (int, float),
+            )
+            and aktuell_miltal
+            == jamforelse_miltal
+        ):
+            return True
+
+    return False
 
 
 # =========================================================
@@ -544,6 +663,10 @@ def bygg_marknadsunderlag(
             bil
         )
 
+        annons_url = _hamta_annons_url(
+            bil
+        )
+
         underlag.setdefault(
             kategori,
             [],
@@ -559,16 +682,18 @@ def bygg_marknadsunderlag(
 
                 "annons_id": annons_id,
 
-                "id": bil.get(
-                    "id"
+                "annons_url": annons_url,
+
+                "modell": bil.get(
+                    "modell"
                 ),
 
-                "url": bil.get(
-                    "url"
+                "variant": bil.get(
+                    "variant"
                 ),
 
-                "urls": bil.get(
-                    "urls"
+                "arsmodell": bil.get(
+                    "arsmodell"
                 ),
 
                 "utrustningsniva": bil.get(
@@ -664,24 +789,40 @@ def _hamta_jamforelsebilar(
     # -----------------------------------------------------
     # VIKTIGT:
     #
-    # Aktuell annons får ALDRIG användas som jämförelsebil.
-    #
-    # Tidigare kod förlitade sig huvudsakligen på annons_id.
-    # Här jämförs istället ID, annons_id och URL.
+    # Ta bort aktuell annons innan miltalsurvalet görs.
     # -----------------------------------------------------
 
-    jamforelser_utan_aktuell = [
-        jamforelse
-        for jamforelse in jamforelser
-        if not _ar_samma_annons(
+    exkluderade = []
+
+    filtrerade = []
+
+    for jamforelse in jamforelser:
+
+        if _ar_samma_annons(
             bil,
             jamforelse,
-        )
-    ]
+        ):
 
-    jamforelser = (
-        jamforelser_utan_aktuell
-    )
+            exkluderade.append(
+                jamforelse
+            )
+
+        else:
+
+            filtrerade.append(
+                jamforelse
+            )
+
+    jamforelser = filtrerade
+
+    if exkluderade:
+
+        print(
+            "[MARKNAD] "
+            f"Aktuell annons exkluderad från "
+            f"jämförelseunderlag: "
+            f"{len(exkluderade)} st"
+        )
 
     target_mil = bil.get(
         "miltal"
@@ -983,10 +1124,6 @@ def _berakna_marknadspris_fran_jamforelser(
             "miltal"
         ]
 
-        # -------------------------------------------------
-        # MILTALSJUSTERING
-        # -------------------------------------------------
-
         miljustering = (
             miltal
             - target_mil
@@ -996,10 +1133,6 @@ def _berakna_marknadspris_fran_jamforelser(
             pris
             + miljustering
         )
-
-        # -------------------------------------------------
-        # UTRUSTNINGSNORMALISERING
-        # -------------------------------------------------
 
         jamforelse_utrustning = (
             _hamta_total_utrustningsjustering(
@@ -1069,13 +1202,9 @@ def _bygg_marknadsdiagnostik(
         "miltal"
     )
 
-    antal = len(
-        jamforelser
-    )
-
     underlagsstyrka = (
         _bestam_underlagsstyrka(
-            antal
+            len(jamforelser)
         )
     )
 
@@ -1085,15 +1214,12 @@ def _bygg_marknadsdiagnostik(
     ):
 
         return {
-            "antal": antal,
+            "antal": len(
+                jamforelser
+            ),
 
             "underlagsstyrka": (
                 underlagsstyrka
-            ),
-
-            "empiriskt_underlag": (
-                antal
-                >= MIN_JAMFORELSEBILAR
             ),
 
             "malpris": bil.get(
@@ -1103,8 +1229,6 @@ def _bygg_marknadsdiagnostik(
             "miltal": None,
 
             "median_justerat": None,
-
-            "aktuell_annons_exkluderad": True,
 
             "jamforelser": [],
         }
@@ -1206,8 +1330,8 @@ def _bygg_marknadsdiagnostik(
                     "annons_id"
                 ),
 
-                "url": jamforelse.get(
-                    "url"
+                "annons_url": jamforelse.get(
+                    "annons_url"
                 ),
             }
         )
@@ -1236,11 +1360,6 @@ def _bygg_marknadsdiagnostik(
             underlagsstyrka
         ),
 
-        "empiriskt_underlag": (
-            len(detaljer)
-            >= MIN_JAMFORELSEBILAR
-        ),
-
         "malpris": bil.get(
             "annonspris"
         ),
@@ -1266,8 +1385,6 @@ def _bygg_marknadsdiagnostik(
             if median_justerat is not None
             else None
         ),
-
-        "aktuell_annons_exkluderad": True,
 
         "jamforelser": detaljer,
     }
@@ -1591,12 +1708,6 @@ def berakna_fynd(
 
     # -----------------------------------------------------
     # EMPIRISKT UNDERLAG
-    #
-    # Minst tre verkliga jämförelsebilar krävs.
-    #
-    # Om färre än tre finns får bilen fortfarande ett
-    # beräknat marknadsvärde via fallback, men den får
-    # INTE klassas som FYND.
     # -----------------------------------------------------
 
     empiriskt_underlag = (
