@@ -615,6 +615,128 @@ def _berakna_marknadspris_fran_jamforelser(
     )
 
 
+def _bygg_marknadsdiagnostik(
+    bil: dict,
+    jamforelser: list[dict],
+) -> dict:
+    """
+    Bygger transparent diagnostik för marknadsvärderingen.
+
+    Diagnostiken ändrar inte värderingen.
+
+    Den visar exakt hur varje jämförelsebil påverkar
+    medianen efter miltalsjustering.
+    """
+
+    target_mil = bil.get(
+        "miltal"
+    )
+
+    detaljer = []
+
+    if not isinstance(
+        target_mil,
+        (int, float)
+    ):
+
+        return {
+            "antal": len(jamforelser),
+            "malpris": bil.get(
+                "annonspris"
+            ),
+            "milmalspris": None,
+            "median_justerat": None,
+            "jamforelser": [],
+        }
+
+    for jamforelse in jamforelser:
+
+        pris = jamforelse[
+            "pris"
+        ]
+
+        miltal = jamforelse[
+            "miltal"
+        ]
+
+        miljustering = (
+            miltal
+            - target_mil
+        ) * KR_PER_MIL_AVVIKELSE
+
+        justerat_pris = (
+            pris
+            + miljustering
+        )
+
+        detaljer.append(
+            {
+                "pris": int(
+                    round(pris)
+                ),
+                "miltal": int(
+                    round(miltal)
+                ),
+                "milskillnad": int(
+                    round(
+                        miltal
+                        - target_mil
+                    )
+                ),
+                "miljustering": int(
+                    round(
+                        miljustering
+                    )
+                ),
+                "justerat_pris": int(
+                    round(
+                        justerat_pris
+                    )
+                ),
+                "annons_id": jamforelse.get(
+                    "annons_id"
+                ),
+            }
+        )
+
+    justerade = [
+        x[
+            "justerat_pris"
+        ]
+        for x in detaljer
+    ]
+
+    median_justerat = (
+        median(justerade)
+        if justerade
+        else None
+    )
+
+    return {
+        "antal": len(
+            detaljer
+        ),
+        "malpris": bil.get(
+            "annonspris"
+        ),
+        "miltal": int(
+            round(
+                target_mil
+            )
+        ),
+        "median_justerat": (
+            int(
+                round(
+                    median_justerat
+                )
+            )
+            if median_justerat is not None
+            else None
+        ),
+        "jamforelser": detaljer,
+    }
+
+
 # =========================================================
 # MILTAL - FALLBACK
 # =========================================================
@@ -1055,6 +1177,11 @@ def berakna_fynd(
         niva
         jamforelseantal
         empiriskt_underlag
+        marknadsdiagnostik
+
+    Marknadsdiagnostiken påverkar inte själva värderingen.
+    Den används för att kunna granska exakt vilka annonser
+    som ligger bakom marknadsvärdet.
     """
 
     marknadsvarde = (
@@ -1086,6 +1213,13 @@ def berakna_fynd(
         >= MIN_JAMFORELSEBILAR
     )
 
+    marknadsdiagnostik = (
+        _bygg_marknadsdiagnostik(
+            bil,
+            jamforelser,
+        )
+    )
+
     if diff >= 35000:
 
         niva = (
@@ -1109,5 +1243,8 @@ def berakna_fynd(
         ),
         "empiriskt_underlag": (
             empiriskt_underlag
+        ),
+        "marknadsdiagnostik": (
+            marknadsdiagnostik
         ),
     }
