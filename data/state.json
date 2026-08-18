@@ -4,7 +4,9 @@
     "forsta_pris": 309900,
     "senaste_pris": 309900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 309900,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:9840"
   },
   "kal:v60:T8 AWD:2022:5074": {
     "forsta_sedd": "2026-08-14",
@@ -18,21 +20,24 @@
     "forsta_pris": 439000,
     "senaste_pris": 439000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10082"
   },
   "kal:v60:T8 AWD:2022:7959": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 443990,
     "senaste_pris": 439990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:7959"
   },
   "kal:v60:T8 AWD:2022:5633": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 419700,
     "senaste_pris": 419700,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:5633"
   },
   "kal:v60:T8 AWD:2022:10234": {
     "forsta_sedd": "2026-08-14",
@@ -46,14 +51,17 @@
     "forsta_pris": 336700,
     "senaste_pris": 336700,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 336700,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:6200"
   },
   "kal:v60:T6 AWD:2023:7368": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 359800,
     "senaste_pris": 359800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:7368"
   },
   "kal:v60:T6 AWD:2023:6550": {
     "forsta_sedd": "2026-08-14",
@@ -67,21 +75,24 @@
     "forsta_pris": 336990,
     "senaste_pris": 334990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:10702"
   },
   "kal:v60:T6 AWD:2023:10634": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 339000,
     "senaste_pris": 344900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:10634"
   },
   "kal:v60:T6 AWD:2023:4923": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 459800,
     "senaste_pris": 459800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4923"
   },
   "kal:v60:T6 AWD:2023:5087": {
     "forsta_sedd": "2026-08-14",
@@ -102,56 +113,65 @@
     "forsta_pris": 389900,
     "senaste_pris": 389900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:9554"
   },
   "kal:v60:T6 AWD:2024:7753": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 419900,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7753"
   },
   "kal:v60:T6 AWD:2024:5153": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5153"
   },
   "kal:v60:T8 AWD:2024:5839": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:5839"
   },
   "kal:v60:T6 AWD:2024:7540": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 394900,
     "senaste_pris": 394900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7540"
   },
   "kal:v60:T8 AWD:2024:3601": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:3601"
   },
   "kal:v60:T6 AWD:2024:4589": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 469900,
     "senaste_pris": 469900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:4589"
   },
   "kal:v60:T8 AWD:2024:8814": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 429500,
     "senaste_pris": 429500,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 429500,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:8814"
   },
   "kal:v60:T6 AWD:2024:7218": {
     "forsta_sedd": "2026-08-14",
@@ -165,56 +185,67 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5943"
   },
   "kal:v60:T6 AWD:2024:11587": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 353990,
     "senaste_pris": 351990,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 351990,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11587"
   },
   "kal:v60:T8 AWD:2024:4241": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 519900,
     "senaste_pris": 519900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:4241"
   },
   "kal:v90:T6 AWD:2022:10320": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 339900,
     "senaste_pris": 339900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:10320"
   },
   "kal:v90:T6 AWD:2022:6047": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 388900,
     "senaste_pris": 388900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 388900,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:6047"
   },
   "kal:v90:T8 AWD:2022:9883": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:9883"
   },
   "kal:v90:T6 AWD:2022:9700": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 359900,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:9700"
   },
   "kal:v90:T6 AWD:2022:8346": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:8346"
   },
   "kal:v90:T6 AWD:2022:5800": {
     "forsta_sedd": "2026-08-14",
@@ -235,14 +266,16 @@
     "forsta_pris": 389000,
     "senaste_pris": 389000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:4866"
   },
   "kal:v90:T6 AWD:2022:8600": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 369900,
     "senaste_pris": 369900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:8600"
   },
   "kal:v90:T6 AWD:2022:10517": {
     "forsta_sedd": "2026-08-14",
@@ -256,28 +289,32 @@
     "forsta_pris": 449900,
     "senaste_pris": 449900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6506"
   },
   "kal:v90:T8 AWD:2023:6149": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2023:6149"
   },
   "kal:v90:T6 AWD:2023:7672": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 374800,
     "senaste_pris": 374800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7672"
   },
   "kal:v90:T6 AWD:2023:9001": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 359000,
     "senaste_pris": 359000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9001"
   },
   "kal:v90:T6 AWD:2023:8488": {
     "forsta_sedd": "2026-08-14",
@@ -291,189 +328,222 @@
     "forsta_pris": 409900,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10022"
   },
   "kal:v90:T6 AWD:2023:5900": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:5900"
   },
   "kal:v90:T6 AWD:2023:9267": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 388900,
     "senaste_pris": 388900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9267"
   },
   "kal:v90:T6 AWD:2023:9986": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 424900,
     "senaste_pris": 424900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9986"
   },
   "kal:v90:T6 AWD:2023:7500": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7500"
   },
   "kal:v90:T6 AWD:2023:6371": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389000,
     "senaste_pris": 389000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6371"
   },
   "kal:v90:T6 AWD:2023:5273": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:5273"
   },
   "kal:v90:T6 AWD:2024:11336": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 369000,
     "senaste_pris": 369000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 369000,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:11336"
   },
   "kal:v90:T6 AWD:2024:4919": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 444000,
     "senaste_pris": 444000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:4919"
   },
   "kal:v90:T6 AWD:2024:5434": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5434"
   },
   "kal:v90:T6 AWD:2024:10929": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409990,
     "senaste_pris": 409990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:10929"
   },
   "kal:v90:T6 AWD:2024:5611": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 425990,
     "senaste_pris": 419990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5611"
   },
   "kal:v90:T6 AWD:2024:7546": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
     "senast_sedd": "2026-08-14",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399000
   },
   "kal:v90:T6 AWD:2024:11962": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 369000,
     "senaste_pris": 369000,
     "senast_sedd": "2026-08-14",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 369000
   },
   "kal:v90:T6 AWD:2024:8570": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 414990,
     "senaste_pris": 408990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:8570"
   },
   "kal:v90:T6 AWD:2024:6090": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399800
   },
   "kal:v90:T6 AWD:2024:7480": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389000,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7480"
   },
   "kal:v90:T6 AWD:2024:5300": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5300"
   },
   "kal:v90:T6 AWD:2024:7287": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 455000,
     "senaste_pris": 459900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7287"
   },
   "kal:v90:T8 AWD:2024:6700": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 539600,
     "senaste_pris": 539600,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2024:6700"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:11053": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 319000,
     "senaste_pris": 319000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 319000,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:11053"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:7176": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:7176"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:5557": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389900,
     "senaste_pris": 389900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 389900,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:5557"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:10111": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:10111"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:8387": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 349900,
     "senaste_pris": 349900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 349900,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:8387"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:10500": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 345000,
     "senaste_pris": 345000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:10500"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:9991": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 349800,
     "senaste_pris": 349800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:9991"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:10675": {
     "forsta_sedd": "2026-08-14",
@@ -487,35 +557,41 @@
     "forsta_pris": 359900,
     "senaste_pris": 359900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11573"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 349900,
     "senaste_pris": 359000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:7713": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 339800,
     "senaste_pris": 339800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 339800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:7713"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:6680": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 394900,
     "senaste_pris": 394900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:6680"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:11715": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 334900,
     "senaste_pris": 334900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11715"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:5215": {
     "forsta_sedd": "2026-08-14",
@@ -529,42 +605,49 @@
     "forsta_pris": 389900,
     "senaste_pris": 389900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8131"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:8116": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8116"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:9185": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 361990,
     "senaste_pris": 359990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:9185"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:8927": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 378900,
     "senaste_pris": 378900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8927"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:5929": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409990,
     "senaste_pris": 407990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:5929"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:6402": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 354800,
     "senaste_pris": 354800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 354800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:6402"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2024:6237": {
     "forsta_sedd": "2026-08-14",
@@ -578,77 +661,90 @@
     "forsta_pris": 499800,
     "senaste_pris": 499800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:7354"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2024:10924": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:10924"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2024:5276": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:5276"
   },
   "kal:v60:T6 AWD:2022:6852": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 369800,
     "senaste_pris": 369800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:6852"
   },
   "kal:v60:T6 AWD:2022:5700": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 385000,
     "senaste_pris": 385000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:5700"
   },
   "kal:v60:T6 AWD:2022:8900": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 324000,
     "senaste_pris": 324000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 324000,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8900"
   },
   "kal:v60:T6 AWD:2023:9925": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 369800,
     "senaste_pris": 369800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:9925"
   },
   "kal:v60:T6 AWD:2023:4757": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4757"
   },
   "kal:v60:T8 AWD:2024:9778": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 414900,
     "senaste_pris": 414900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 414900,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:9778"
   },
   "kal:v60:T6 AWD:2024:8659": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 419900,
     "senaste_pris": 419900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:8659"
   },
   "kal:v90:T6 AWD:2022:6739": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:6739"
   },
   "kal:v90:T6 AWD:2024:2757": {
     "forsta_sedd": "2026-08-15",
@@ -662,21 +758,25 @@
     "forsta_pris": 449900,
     "senaste_pris": 449900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 449900,
+    "migrerad_fran": "kal:v90:T8 AWD:2024:9505"
   },
   "kal:v90:T6 AWD:2024:9465": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:9465"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:11686": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 369900,
     "senaste_pris": 369900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11686"
   },
   "kal:v60:T8 AWD:2022:11978": {
     "forsta_sedd": "2026-08-15",
@@ -690,14 +790,16 @@
     "forsta_pris": 278700,
     "senaste_pris": 278700,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 278700
   },
   "kal:v60:T8 AWD:2022:6360": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 312000,
     "senaste_pris": 312000,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 312000
   },
   "kal:v60:T6 AWD:2023:3882": {
     "forsta_sedd": "2026-08-15",
@@ -718,7 +820,8 @@
     "forsta_pris": 399000,
     "senaste_pris": 399000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:8985"
   },
   "kal:v60:T6 AWD:2023:3149": {
     "forsta_sedd": "2026-08-15",
@@ -760,7 +863,8 @@
     "forsta_pris": 409900,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 409900
   },
   "kal:v60:T6 AWD:2024:3601": {
     "forsta_sedd": "2026-08-15",
@@ -774,7 +878,8 @@
     "forsta_pris": 359000,
     "senaste_pris": 359000,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 359000
   },
   "kal:v60:T8 AWD:2024:8176": {
     "forsta_sedd": "2026-08-15",
@@ -795,35 +900,40 @@
     "forsta_pris": 354800,
     "senaste_pris": 354800,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 354800
   },
   "kal:v60:T6 AWD:2024:3805": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3805"
   },
   "kal:v60:T6 AWD:2024:6541": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 329000,
     "senaste_pris": 329000,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 329000
   },
   "kal:v60:T6 AWD:2024:10498": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 309900,
     "senaste_pris": 309900,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 309900
   },
   "kal:v60:T8 AWD:2024:8077": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 319900,
     "senaste_pris": 319900,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 319900
   },
   "kal:v60:T6 AWD:2024:4241": {
     "forsta_sedd": "2026-08-15",
@@ -837,21 +947,26 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3839"
   },
   "kal:v60:T6 AWD:2024:3230": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399000,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3230"
   },
   "kal:v60:T6 AWD:2024:3169": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 428900,
     "senaste_pris": 428900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3169"
   },
   "kal:v90:T6 AWD:2022:9883": {
     "forsta_sedd": "2026-08-15",
@@ -879,14 +994,17 @@
     "forsta_pris": 347900,
     "senaste_pris": 347900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 347900,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10220"
   },
   "kal:v90:T6 AWD:2023:11397": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 389900,
     "senaste_pris": 389900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:11397"
   },
   "kal:v90:T6 AWD:2023:9514": {
     "forsta_sedd": "2026-08-15",
@@ -928,21 +1046,25 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:10512"
   },
   "kal:v90:T6 AWD:2024:5500": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 454000,
     "senaste_pris": 454000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5500"
   },
   "kal:v90:T6 AWD:2024:6476": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399800,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:6476"
   },
   "kal:v90:T6 AWD:2024:8364": {
     "forsta_sedd": "2026-08-15",
@@ -956,7 +1078,8 @@
     "forsta_pris": 349900,
     "senaste_pris": 349900,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 349900
   },
   "kal:v90:T6 AWD:2024:6700": {
     "forsta_sedd": "2026-08-15",
@@ -984,28 +1107,33 @@
     "forsta_pris": 444000,
     "senaste_pris": 444000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7700"
   },
   "kal:v90:T6 AWD:2024:3999": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 418800,
     "senaste_pris": 418800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 418800,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3999"
   },
   "kal:v90:T6 AWD:2024:5692": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 354900,
     "senaste_pris": 354900,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 354900
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:11600": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 269500,
     "senaste_pris": 269500,
     "senast_sedd": "2026-08-15",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 269500
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:11518": {
     "forsta_sedd": "2026-08-15",
@@ -1026,7 +1154,8 @@
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:7176"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:5744": {
     "forsta_sedd": "2026-08-15",
@@ -1047,49 +1176,60 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:6800"
   },
   "kal:v60:T6 AWD:2022:8374": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 349900,
     "senaste_pris": 349900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8374"
   },
   "kal:v60:T6 AWD:2023:3344": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3344"
   },
   "kal:v60:T6 AWD:2023:3461": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 390990,
     "senaste_pris": 390990,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 390990,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3461"
   },
   "kal:v60:T6 AWD:2024:8176": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:8176"
   },
   "kal:v60:T6 AWD:2024:5922": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 394000,
     "senaste_pris": 394000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 394000,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5922"
   },
   "kal:v60:T6 AWD:2024:4291": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:4291"
   },
   "kal:v60:T6 AWD:2024:4067": {
     "forsta_sedd": "2026-08-16",
@@ -1103,63 +1243,72 @@
     "forsta_pris": 398900,
     "senaste_pris": 398900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:9238"
   },
   "kal:v60:T6 AWD:2024:5354": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5354"
   },
   "kal:v90:T6 AWD:2022:11650": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 379900,
     "senaste_pris": 379900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:11650"
   },
   "kal:v90:T8 AWD:2022:5815": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 479000,
     "senaste_pris": 479000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:5815"
   },
   "kal:v90:T6 AWD:2023:11694": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 409800,
     "senaste_pris": 409800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:11694"
   },
   "kal:v90:T6 AWD:2023:10634": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 358800,
     "senaste_pris": 358800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10634"
   },
   "kal:v90:T6 AWD:2023:9412": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 359500,
     "senaste_pris": 359500,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9412"
   },
   "kal:v90:T6 AWD:2023:2273": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 424900,
     "senaste_pris": 424900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:2273"
   },
   "kal:v90:T6 AWD:2024:3200": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 459000,
     "senaste_pris": 459000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3200"
   },
   "kal:v90:T6 AWD:2024:8052": {
     "forsta_sedd": "2026-08-16",
@@ -1173,21 +1322,24 @@
     "forsta_pris": 394000,
     "senaste_pris": 394000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 394000
   },
   "kal:v60:T6 AWD:2024:11607": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 379900,
     "senaste_pris": 379900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11607"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:11922": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 297800,
     "senaste_pris": 297800,
     "senast_sedd": "2026-08-17",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 297800
   },
   "kal:v60:T6 AWD:2023:7290": {
     "forsta_sedd": "2026-08-17",
@@ -1208,63 +1360,74 @@
     "forsta_pris": 359900,
     "senaste_pris": 359900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:9011"
   },
   "kal:v60:T6 AWD:2023:9642": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 339000,
     "senaste_pris": 339000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:9642"
   },
   "kal:v60:T6 AWD:2023:3938": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 419900,
     "senaste_pris": 419900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3938"
   },
   "kal:v60:T6 AWD:2024:7222": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 374900,
     "senaste_pris": 374900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 374900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7222"
   },
   "kal:v60:T6 AWD:2024:3655": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 424900,
     "senaste_pris": 424900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3655"
   },
   "kal:v90:T6 AWD:2023:7300": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 389900,
     "senaste_pris": 389900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7300"
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:7586": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:7586"
   },
   "kal:v60:T8 AWD:2022:10973": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 319900,
     "senaste_pris": 319900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 319900,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10973"
   },
   "kal:v90:T8 AWD:2022:11416": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 409500,
     "senaste_pris": 409500,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:11416"
   },
   "kal:v60:T6 AWD:2023:8052": {
     "forsta_sedd": "2026-08-17",
@@ -1278,21 +1441,25 @@
     "forsta_pris": 309400,
     "senaste_pris": 309400,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 309400,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11120"
   },
   "kal:v90:T6 AWD:2024:4495": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 469800,
     "senaste_pris": 469800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:4495"
   },
   "kal:v60:T8 AWD:2022:5439": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:5439"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:4100": {
     "forsta_sedd": "2026-08-18",
@@ -1306,14 +1473,17 @@
     "forsta_pris": 319800,
     "senaste_pris": 319800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 319800,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:9669"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 439000,
     "senaste_pris": 439000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:7350": {
     "forsta_sedd": "2026-08-18",
@@ -1327,21 +1497,25 @@
     "forsta_pris": 438990,
     "senaste_pris": 438990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:5812"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:11759": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 307900,
     "senaste_pris": 307900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 307900,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:11759"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:3191": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 447990,
     "senaste_pris": 447990,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3191"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:10170": {
     "forsta_sedd": "2026-08-18",
@@ -1355,21 +1529,25 @@
     "forsta_pris": 359900,
     "senaste_pris": 5425,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 5425,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:6085"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 424800,
     "senaste_pris": 424800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:7383": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 339800,
     "senaste_pris": 339800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 339800
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:6105": {
     "forsta_sedd": "2026-08-18",
@@ -1383,175 +1561,210 @@
     "forsta_pris": 445000,
     "senaste_pris": 445000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3800"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:5770": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5770"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:1740": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:1740"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:2140": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 499800,
     "senaste_pris": 499800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2140"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:502": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 489000,
     "senaste_pris": 489000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 489000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:502"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 528600,
     "senaste_pris": 528600,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:2300": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2300"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:484": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:484"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:5350": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509500,
     "senaste_pris": 509500,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5350"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:0": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 629200,
     "senaste_pris": 629200,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:0"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:0": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 597500,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 548700,
     "senaste_pris": 548700,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 548700,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1357": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 598700,
     "senaste_pris": 598700,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 598700,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1357"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1010": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 548700,
     "senaste_pris": 548700,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 548700
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1000": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 658900,
     "senaste_pris": 658900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1000"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:720": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 628700,
     "senaste_pris": 628700,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:720"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:500": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 639900,
     "senaste_pris": 639900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:500"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:2": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 589000,
     "senaste_pris": 589000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 589000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:2"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1200": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 549800,
     "senaste_pris": 549800,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 549800,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1200"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:799": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 569000,
     "senaste_pris": 569000,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 569000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:799"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:8860": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:8860"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 359900,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:550": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 659000,
     "senaste_pris": 659000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:550"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2025:2": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 4495,
     "senaste_pris": 4495,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 4495,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2"
   },
   "kal:v60:T8 AWD:2024:8474": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 439900,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:8474"
   },
   "kal:v60:T6 AWD:2022:9000": {
     "forsta_sedd": "2026-08-18",
@@ -1565,20 +1778,1415 @@
     "forsta_pris": 299900,
     "senaste_pris": 299900,
     "senast_sedd": "2026-08-18",
-    "notifierad": true
+    "notifierad": true,
+    "notifierad_pris": 299900,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:11580"
   },
   "kal:v60:T6 AWD:2022:8887": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 347900,
     "senaste_pris": 347900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8887"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:918": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 598700,
     "senaste_pris": 548700,
     "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:918"
+  },
+  "url:https://www.wayke.se/objekt/a1369836-d00e-44f3-b547-79655dc96e46": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 347900,
+    "senaste_pris": 347900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8887"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-r-design-2022-kombi-12837822": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 419000,
+    "senaste_pris": 419000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:5439"
+  },
+  "url:https://www.wayke.se/objekt/dda02358-a518-48d9-be5a-0583338ce378": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 319900,
+    "senaste_pris": 319900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 319900,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10973"
+  },
+  "url:https://bilweb.se/norrbottens-lan/volvo-v60-t6-awd-drag-sov-dack-navi-hk-ljud-kamera-elstol-2022-kombi-12837665": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:9011"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v60-t6-awd-r-design-voc-kamera-varm-dragkrok-carplay-2022-kombi-12834625": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 369800,
+    "senaste_pris": 369800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:6852"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-awd-inscription-expression-voc-rattvarme-2022-kombi-12834622": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 385000,
+    "senaste_pris": 385000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:5700"
+  },
+  "url:https://bilweb.se/vastmanlands-lan/volvo-v60-recharge-t6-inscription-exp-drag-nav-backkamera-2022-kombi-12833980": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 324000,
+    "senaste_pris": 324000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 324000,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8900"
+  },
+  "url:https://www.wayke.se/objekt/34a25871-4fd5-4d30-ab77-0f6d46603544": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 309900,
+    "senaste_pris": 309900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 309900,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:9840"
+  },
+  "url:https://www.wayke.se/objekt/56b25d79-d8d2-48b1-aa02-d4f90f8b8b7a": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 439000,
+    "senaste_pris": 439000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10082"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-core-edition-selekt-2023-kombi-12838202": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
     "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/936142a5-2f58-4389-be5b-71cd18c2b3a4": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 339000,
+    "senaste_pris": 339000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:9642"
+  },
+  "url:https://www.wayke.se/objekt/e7c61647-5c89-41bf-a706-5522fff8774c": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 419900,
+    "senaste_pris": 419900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3938"
+  },
+  "url:https://www.wayke.se/objekt/5c2f1a95-2d06-4422-adf9-7498a3d841a8": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 369800,
+    "senaste_pris": 369800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:9925"
+  },
+  "url:https://www.wayke.se/objekt/9d64448e-9221-4cda-bdc1-8adea8cbe913": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399800,
+    "senaste_pris": 399800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4757"
+  },
+  "url:https://www.wayke.se/objekt/6751ea17-31cc-45f1-8ab7-bddf525012a5": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 336700,
+    "senaste_pris": 336700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 336700,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:6200"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/volvo-v60-recharge-t6-awd-core-bright-kamera-navi-drag-2023-kombi-12822724": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 359800,
+    "senaste_pris": 359800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:7368"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-core-bright-kamera-adapfarth-2023-kombi-12812099": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 336990,
+    "senaste_pris": 334990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:10702"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v60-recharge-t8-plus-dark-2024-kombi-12837802": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 439900,
+    "senaste_pris": 439900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 439900,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:8474"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-core-drag-p-varme-kamera-carplay-2024-kombi-12837510": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 374900,
+    "senaste_pris": 374900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 374900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7222"
+  },
+  "url:https://www.wayke.se/objekt/253ad87d-1547-4d2e-bdac-259a42092a1c": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 424900,
+    "senaste_pris": 424900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3655"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v60-recharge-t6-plus-dark-2024-kombi-12836445": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 379900,
+    "senaste_pris": 379900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11607"
+  },
+  "url:https://bilweb.se/kalmar-lan/volvo-v60-recharge-t8-awd-plus-dark-dragkrok-2024-kombi-12837890": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 414900,
+    "senaste_pris": 414900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 414900,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:9778"
+  },
+  "url:https://www.wayke.se/objekt/cb671301-f338-497c-9b6b-fb68b2be8115": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:9554"
+  },
+  "url:https://www.wayke.se/objekt/3837d3b6-144a-425f-8801-b41e482c0a27": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 419900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7753"
+  },
+  "url:https://www.wayke.se/objekt/44bcc2d4-021c-44fe-8f40-dc5986d53110": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 449900,
+    "senaste_pris": 449900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5153"
+  },
+  "url:https://www.wayke.se/objekt/2e5336d2-8dbe-489e-9c73-350c0e5c2ab9": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 489900,
+    "senaste_pris": 489900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:5839"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v60-recharge-t6-awd-core-edition-drag-gps-skinn-blis-2024-kombi-12830541": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 394900,
+    "senaste_pris": 394900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:7540"
+  },
+  "url:https://www.wayke.se/objekt/5f92b555-fba3-4eff-92dc-679a09666473": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5354"
+  },
+  "url:https://www.wayke.se/objekt/9736cc39-498a-42f9-9334-66df5cef03e6": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 419900,
+    "senaste_pris": 419900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:8659"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-ultimate-dark-drag-panorama-360kame-2024-kombi-12830960": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 519000,
+    "senaste_pris": 519000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:3601"
+  },
+  "url:https://bilweb.se/ostergotlands-lan/volvo-v60-recharge-t6-ii-ultimate-bright-2024-kombi-12829054": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 469900,
+    "senaste_pris": 469900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:4589"
+  },
+  "url:https://bilweb.se/dalarnas-lan/volvo-v60-recharge-t8-plus-dark-2024-kombi-12825408": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 429500,
+    "senaste_pris": 429500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 429500,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:8814"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v60-recharge-t6-core-bright-dragkrok-360-kamera-2024-kombi-12826150": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5943"
+  },
+  "url:https://www.wayke.se/objekt/8e77887e-44ee-4a1c-99d1-4136ef83c44f": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 339900,
+    "senaste_pris": 339900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:10320"
+  },
+  "url:https://www.wayke.se/objekt/426137de-5edb-449f-98c8-20094e770c2d": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 388900,
+    "senaste_pris": 388900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 388900,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:6047"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t8-ii-r-design-dragkrok-head-up-harman-2022-kombi-12829992": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 419000,
+    "senaste_pris": 419000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:9883"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-awd-inscription-h-k-kamera-drag-keyless-skinn-2022-kombi-12829607": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 359900,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:9700"
+  },
+  "url:https://bilweb.se/jonkopings-lan/volvo-v90-recharge-t6-inscription-2022-kombi-12827935": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:8346"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-inscription-2022-kombi-12826800": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:6739"
+  },
+  "url:https://www.wayke.se/objekt/7c2c4619-7def-4cbb-b5d3-a15e6dc616e3": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389000,
+    "senaste_pris": 389000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:4866"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-awd-r-design-p-varme-adap-f-drag-kamera-2022-kombi-12807765": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 369900,
+    "senaste_pris": 369900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:8600"
+  },
+  "url:https://www.wayke.se/objekt/b5a74ee2-4b4c-43e1-b50e-a64d6d63329c": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 409500,
+    "senaste_pris": 409500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:11416"
+  },
+  "url:https://www.wayke.se/objekt/ba744391-1c81-45c1-bb44-61ee1fa5198a": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 379500,
+    "senaste_pris": 379500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/76a73f13-09dd-428d-83ae-a4efd59f24d1": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7300"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v90-recharge-t6-plus-dark-2023-kombi-12784692": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 449900,
+    "senaste_pris": 449900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6506"
+  },
+  "url:https://www.wayke.se/objekt/06ee0fd5-0bfc-489f-86f8-00ca09899912": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 489900,
+    "senaste_pris": 489900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2023:6149"
+  },
+  "url:https://bilweb.se/jonkopings-lan/volvo-v90-recharge-t6-core-edt-lader-drag-360kamera-h-k-2023-kombi-12832283": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 374800,
+    "senaste_pris": 374800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7672"
+  },
+  "url:https://www.wayke.se/objekt/1668463e-1afa-47e9-82ad-16650d3451dd": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 359000,
+    "senaste_pris": 359000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9001"
+  },
+  "url:https://bilweb.se/vasterbottens-lan/volvo-v90-recharge-t6-awd-plus-dark-mvarme-drag-bkamera-s-v-dack-2023-kombi-12815168": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10022"
+  },
+  "url:https://www.wayke.se/objekt/9abbea7c-1509-48a3-a201-8ad295a58b0d": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:5900"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-awd-plus-kamera-h-k-skinn-drag-2023-kombi-12810462": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 388900,
+    "senaste_pris": 388900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9267"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t6-ultimate-dark-360-h-k-2023-kombi-12808719": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 424900,
+    "senaste_pris": 424900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9986"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-recharge-core-bright-plug-in-awd-4x4-2023-kombi-12803461": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:7500"
+  },
+  "url:https://www.wayke.se/objekt/b3431479-da7a-4950-8055-9f2d4c2f10ff": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 459500,
+    "senaste_pris": 459500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "url:https://bilweb.se/sodermanlands-lan/volvo-v90-recharge-t6-awd-plus-dark-pano-h-k-360-navi-drag-2024-kombi-12837544": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 469800,
+    "senaste_pris": 469800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:4495"
+  },
+  "url:https://www.wayke.se/objekt/6181502b-a405-44ca-aaea-52bfb53d72cf": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 369000,
+    "senaste_pris": 369000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 369000,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:11336"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-12831852": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 444000,
+    "senaste_pris": 444000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:4919"
+  },
+  "url:https://bilweb.se/ostergotlands-lan/volvo-v90-recharge-t6-core-edition-ii-2024-kombi-12785290": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 429900,
+    "senaste_pris": 429900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5434"
+  },
+  "url:https://bilweb.se/jonkopings-lan/volvo-v90-recharge-t6-core-edition-ii-2024-kombi-12827934": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409990,
+    "senaste_pris": 409990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:10929"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-awd-core-bright-drag-blis-kamera-navi-2024-kombi-12827406": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 425990,
+    "senaste_pris": 419990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5611"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-awd-core-drag-blis-kamera-navi-2024-kombi-12819912": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 414990,
+    "senaste_pris": 408990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:8570"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v90-recharge-t6-core-edition-2024-kombi-12814451": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389000,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7480"
+  },
+  "url:https://www.wayke.se/objekt/483393d3-aa80-462f-81e4-b6e1fd27da58": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5300"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-12809967": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 455000,
+    "senaste_pris": 459900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7287"
+  },
+  "url:https://bilweb.se/ostergotlands-lan/volvo-v90-recharge-t8-ultimate-dark-2024-kombi-12808742": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 539600,
+    "senaste_pris": 539600,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2024:6700"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-lader-drag-b-kamera-2022-kombi-12836746": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:7586"
+  },
+  "url:https://bilweb.se/hallands-lan/bmw-530-e-xdrive-touring-m-sport-connected-drag-2022-kombi-12832656": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 319000,
+    "senaste_pris": 319000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 319000,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:11053"
+  },
+  "url:https://www.wayke.se/objekt/8e90ea71-331c-4600-9794-f5a3580d0ca2": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 399800,
+    "senaste_pris": 399800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:7176"
+  },
+  "url:https://www.wayke.se/objekt/62a71021-6a3d-4a89-b0f0-0a96d286c61d": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 389900,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:5557"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-drag-hifi-head-up-panorama-2022-kombi-12749807": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:10111"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-navigation-dragkrok-backkamera-2022-kombi-12824476": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 349900,
+    "senaste_pris": 349900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 349900,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:8387"
+  },
+  "url:https://bilweb.se/kronobergs-lan/bmw-530-e-touring-xdrive-plug-in-4x4-lader-2022-kombi-12304179": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 345000,
+    "senaste_pris": 345000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2022:10500"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-360-hud-h-k-drag-2023-kombi-12834994": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 369900,
+    "senaste_pris": 369900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11686"
+  },
+  "url:https://www.wayke.se/objekt/5f8a0747-2cea-4d42-84da-42ded6437f05": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 349800,
+    "senaste_pris": 349800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:9991"
+  },
+  "url:https://www.wayke.se/objekt/95d93226-8fb1-4266-b495-351c3f410b28": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 344900,
+    "senaste_pris": 344900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/b2ea7635-592a-45a5-be6f-0de4f8c9ccff": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11573"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-530-e-xdrive-touring-dragkrok-kamera-skinn-2023-kombi-12828266": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 339800,
+    "senaste_pris": 339800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 339800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:7713"
+  },
+  "url:https://bilweb.se/hallands-lan/bmw-530-e-xdrive-touring-steptronic-m-sport-drag-backkamera-2023-kombi-12824727": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 394900,
+    "senaste_pris": 394900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:6680"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-530-e-xdrive-touring-m-sport-vinterhjul-2023-kombi-12818580": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 334900,
+    "senaste_pris": 334900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11715"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-lader-b-kamera-2023-kombi-12814245": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8131"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-drag-hifi-backkamera-2023-kombi-12808446": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8116"
+  },
+  "url:https://www.wayke.se/objekt/b9e6e2a7-891b-466c-b402-f83d595d86f6": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 361990,
+    "senaste_pris": 359990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:9185"
+  },
+  "url:https://www.wayke.se/objekt/808cf5f0-3ea4-44a2-b190-b2d969f43b7e": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 378900,
+    "senaste_pris": 378900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8927"
+  },
+  "url:https://www.wayke.se/objekt/ca407bf8-34a2-41b3-bdc2-dfb0f3d3065a": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409990,
+    "senaste_pris": 407990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:5929"
+  },
+  "url:https://bilweb.se/orebro-lan/bmw-530-e-xdrive-touring-kamera-keyless-carplay-2023-kombi-12799627": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 354800,
+    "senaste_pris": 354800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 354800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:6402"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/bmw-530-e-xdrive-touring-m-sport-pano-h-k-hud-360-minne-2024-kombi-12809334": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 499800,
+    "senaste_pris": 499800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:7354"
+  },
+  "url:https://www.wayke.se/objekt/759a6979-c5ea-49e2-a20d-f29092899a63": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 419000,
+    "senaste_pris": 419000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:10924"
+  },
+  "url:https://bilweb.se/vasterbottens-lan/bmw-530-e-xdrive-touring-drag-kamera-rattvarme-navi-s-v-dack-2024-kombi-12714736": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 439900,
+    "senaste_pris": 439900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:5276"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-widescreen-2024-kombi-12832265": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 319800,
+    "senaste_pris": 319800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 319800,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:9669"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-panorama-carplay-dragkrok-2024-kombi-12829620": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 439000,
+    "senaste_pris": 439000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-m-sport-dap-kamera-adapfarth-blis-2024-kombi-12827667": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 438990,
+    "senaste_pris": 438990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:5812"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-drag-widescreen-navi-kamera-cockpit-p-kl-2024-kombi-12822112": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 307900,
+    "senaste_pris": 307900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 307900,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:11759"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-m-sport-elstol-lader-adapfarth-navi-2024-kombi-12800630": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 447990,
+    "senaste_pris": 447990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3191"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/bmw-330-e-xdrive-touring-m-sport-innovation-wide-hifi-drag-2024-kombi-12817345": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 424800,
+    "senaste_pris": 424800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999"
+  },
+  "url:https://bilweb.se/kronobergs-lan/bmw-330-e-touring-xdrive-plug-in-4x4-panorama-lader-2024-kombi-12763493": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 445000,
+    "senaste_pris": 445000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3800"
+  },
+  "url:https://bilweb.se/jonkopings-lan/bmw-330-e-xdrive-touring-m-sport-active-edition-aktiv-fart-drag-hifi-2025-kombi-12837932": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5770"
+  },
+  "url:https://bilweb.se/jonkopings-lan/bmw-330-e-xdrive-touring-m-sport-active-edt-drag-fartpilot-hifi-pa-2025-kombi-12827579": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:1740"
+  },
+  "url:https://bilweb.se/ostergotlands-lan/bmw-330-e-xdrive-touring-m-sport-hifi-aktiv-fart-19-2025-kombi-12820705": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 499800,
+    "senaste_pris": 499800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2140"
+  },
+  "url:https://www.wayke.se/objekt/ac2421ff-e63b-4c4d-b24b-5367ed6ae2ca": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 489000,
+    "senaste_pris": 489000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 489000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:502"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-business-elstolar-driving-prof-2025-kombi-12809472": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 528600,
+    "senaste_pris": 528600,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-2025-kombi-12747181": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2300"
+  },
+  "url:https://www.wayke.se/objekt/1d95376e-642b-4ffe-b9d1-dbfcd416278e": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:484"
+  },
+  "url:https://bilweb.se/jonkopings-lan/bmw-330-e-xdrive-touring-m-sport-business-innovation-fartpilot-drag-2025-kombi-12702061": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509500,
+    "senaste_pris": 509500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5350"
+  },
+  "url:https://bilweb.se/skane-lan/bmw-330-e-xdrive-touring-m-sport-hifi-drag-adpt-farth-2025-kombi-12636910": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 629200,
+    "senaste_pris": 629200,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:0"
+  },
+  "url:https://www.wayke.se/objekt/f61a98bc-b8e4-41d6-9d87-1a2505aa12fc": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 598700,
+    "senaste_pris": 548700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:918"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-2026-kombi-12836973": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/65c95e99-4205-487f-8a6c-8d873d0316d2": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 548700,
+    "senaste_pris": 548700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 548700,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348"
+  },
+  "url:https://www.wayke.se/objekt/c15f2657-8a48-45e5-9092-fb7642e4f8ed": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 598700,
+    "senaste_pris": 598700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 598700,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1357"
+  },
+  "url:https://www.wayke.se/objekt/575787f6-12bf-475c-a420-328a0a7fa8b0": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 658900,
+    "senaste_pris": 658900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1000"
+  },
+  "url:https://www.wayke.se/objekt/c795065e-5201-4f8b-81cf-5fdb341d20f4": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/9bba4f63-db60-446b-b99e-a4e17eda2df1": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/a503a2d7-6620-4e71-947b-22667b59a068": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/eeee6569-e0bb-4326-ae69-3c1a5bb23e53": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/eb59c6c8-2385-432e-904e-ff1f1c3d327c": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/48041b24-7787-4c43-b4f4-304d3a9566cb": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 628700,
+    "senaste_pris": 628700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:720"
+  },
+  "url:https://www.wayke.se/objekt/e9238afd-fa9c-496b-972e-401f223952ea": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 639900,
+    "senaste_pris": 639900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:500"
+  },
+  "url:https://www.wayke.se/objekt/94655323-772d-40ac-8241-4f922ab722c2": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 589000,
+    "senaste_pris": 589000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 589000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:2"
+  },
+  "url:https://www.wayke.se/objekt/cc490933-579a-427e-8900-8780f8b4bd73": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/234f80bf-f8f4-4a1c-b8f5-e075773ebdee": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 549800,
+    "senaste_pris": 549800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 549800,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1200"
+  },
+  "url:https://www.wayke.se/objekt/99306ace-34b9-4561-9378-7d6da43b7259": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://www.wayke.se/objekt/fecb1786-4b2d-43dc-bbf3-5b10f6e8916a": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 569000,
+    "senaste_pris": 569000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 569000,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:799"
+  },
+  "url:https://www.wayke.se/objekt/9e12f608-2f76-4451-a10f-0441769e0d26": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0"
+  },
+  "url:https://bilweb.se/vastmanlands-lan/volvo-v60-recharge-t8-awd-inscription-plug-in-hybrid-2022-kombi-12834771": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:6800"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v60-recharge-t6-awd-inscription-exp-kamera-pano-2022-kombi-12826300": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 349900,
+    "senaste_pris": 349900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:8374"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-awd-r-design-pano-drag-hk-elstol-2022-kombi-12818413": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 443990,
+    "senaste_pris": 439990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:7959"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-awd-r-design-pano-h-k-360-kam-navi-2022-kombi-12813516": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 419700,
+    "senaste_pris": 419700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:5633"
+  },
+  "url:https://bilweb.se/vasterbottens-lan/volvo-v60-t6-awd-recharge-2023-kombi-12838013": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 299900,
+    "senaste_pris": 299900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 299900,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:11580"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-inscription-drag-long-range-2023-kombi-12832449": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:8985"
+  },
+  "url:https://bilweb.se/hallands-lan/volvo-v60-recharge-t6-awd-ultimate-bright-360-panorama-hud-eu6-2023-kombi-12828445": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 439900,
+    "senaste_pris": 439900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3344"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v60-recharge-t6-core-edition-2023-kombi-12809164": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 339000,
+    "senaste_pris": 344900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:10634"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-awd-ultimate-dark-varmare-pano-h-k-hud-2023-kombi-12804390": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 459800,
+    "senaste_pris": 459800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4923"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-core-bright-kamera-blis-adapfarth-2023-kombi-12787479": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 390990,
+    "senaste_pris": 390990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 390990,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:3461"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-awd-recharge-2024-kombi-12837149": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 309400,
+    "senaste_pris": 309400,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 309400,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11120"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v60-recharge-t6-ii-ultimate-bright-2024-kombi-12825832": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 429900,
+    "senaste_pris": 429900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:8176"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v60-recharge-t6-awd-core-bright-dragkrok-2024-kombi-12823820": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 394000,
+    "senaste_pris": 394000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 394000,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5922"
+  },
+  "url:https://bilweb.se/kalmar-lan/volvo-v60-recharge-t6-awd-core-bright-dragkrok-kamera-2024-kombi-12821968": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3805"
+  },
+  "url:https://bilweb.se/kalmar-lan/volvo-v60-recharge-t6-awd-core-bright-dragkrok-2024-kombi-12820533": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:4291"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-re-t6-awd-plus-bright-blis-adapfarth-elstol-2024-kombi-12814567": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 353990,
+    "senaste_pris": 351990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 351990,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:11587"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v60-recharge-t8-ultimate-dark-massage-360-hud-2024-kombi-12811758": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 519900,
+    "senaste_pris": 519900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2024:4241"
+  },
+  "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-awd-plus-dark-skinn-360-varmare-drag-2024-kombi-12810673": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 398900,
+    "senaste_pris": 398900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:9238"
+  },
+  "url:https://bilweb.se/vasternorrlands-lan/volvo-v60-recharge-t6-awd-2024-kombi-12808564": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 399900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3839"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v60-recharge-t6-ii-core-bright-2024-kombi-12808403": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399000,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3230"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v60-recharge-t6-awd-core-bright-blis-drag-storabatteri-2024-kombi-12808314": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 428900,
+    "senaste_pris": 428900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:3169"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t6-awd-geartronic-r-design-2022-kombi-12814464": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 379900,
+    "senaste_pris": 379900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:11650"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-recharge-t8-awd-geartronic-r-design-panorama-drag-2022-kombi-12811421": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 479000,
+    "senaste_pris": 479000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T8 AWD:2022:5815"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v90-recharge-t6-awd-ultimate-dark-pano-se-spec-2023-kombi-12831839": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 409800,
+    "senaste_pris": 409800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:11694"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-recharge-t6-awd-drag-adaptiv-fart-motorvarmare-tidur-2023-kombi-12822528": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 347900,
+    "senaste_pris": 347900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 347900,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10220"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t6-awd-plus-dark-kamera-varmare-gps-2023-kombi-12816219": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 389900,
+    "senaste_pris": 389900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:11397"
+  },
+  "url:https://bilweb.se/orebro-lan/volvo-v90-recharge-t6-awd-core-bright-skinn-kamera-se-spec-2023-kombi-12814431": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 358800,
+    "senaste_pris": 358800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:10634"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-ii-t6-awd-drag-kamera-blis-soh-1-agare-2023-kombi-12812889": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 359500,
+    "senaste_pris": 359500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9412"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-recharge-t6-awd-aut-core-edition-adaptiv-fart-helskinn-2023-kombi-12809429": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 424900,
+    "senaste_pris": 424900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:2273"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-core-bright-2023-kombi-12790575": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389000,
+    "senaste_pris": 389000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6371"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/volvo-v90-recharge-t6-350-18-8-kwh-awd-plus-dark-drag-varm-navi-2023-kombi-12784756": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 429900,
+    "senaste_pris": 429900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:5273"
+  },
+  "url:https://bilweb.se/kalmar-lan/volvo-v90-recharge-t6-awd-plus-bright-360-kamera-drag-2024-kombi-12821382": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:10512"
+  },
+  "url:https://bilweb.se/skane-lan/volvo-v90-recharge-t6-awd-geartronic-plus-dark-2024-kombi-12820328": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 454000,
+    "senaste_pris": 454000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5500"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/volvo-v90-recharge-t6-awd-core-kamera-rattvarme-carplay-2024-kombi-12819000": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399800,
+    "senaste_pris": 399800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 399800,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:6476"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t8-ultimate-bright-dragkrok-harmanka-2024-kombi-12800306": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 449900,
+    "senaste_pris": 449900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 449900,
+    "migrerad_fran": "kal:v90:T8 AWD:2024:9505"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-recharge-core-bright-plug-in-awd-4x4-2024-kombi-12798690": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:9465"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-recharge-plus-dark-plug-in-awd-4x4-lader-360-2024-kombi-12790870": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 444000,
+    "senaste_pris": 444000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:7700"
+  },
+  "url:https://bilweb.se/uppsala-lan/volvo-v90-recharge-t6-awd-core-edition-blis-2024-kombi-12788325": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 418800,
+    "senaste_pris": 418800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 418800,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3999"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-recharge-core-bright-plug-in-awd-4x4-2024-kombi-12787905": {
+    "forsta_sedd": "2026-08-16",
+    "forsta_pris": 459000,
+    "senaste_pris": 459000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3200"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-m-sport-hifi-drag-navi-lader-ambient-2023-kombi-12831993": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 399800,
+    "senaste_pris": 399800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:7176"
+  },
+  "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-g31-12kwh-lci-2023-kombi-12827812": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 349900,
+    "senaste_pris": 359000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688"
+  },
+  "url:https://bilweb.se/hallands-lan/bmw-330-e-m-sport-xdrive-touring-steptronic-drag-2024-kombi-12793126": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:8860"
+  },
+  "url:https://bilweb.se/sodermanlands-lan/bmw-330-e-xdrive-touring-drag-varmare-kamera-navi-carplay-sov-2024-kombi-12783245": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 359900,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098"
+  },
+  "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-privat-foretagsleasing-2024-kombi-12789387": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 359900,
+    "senaste_pris": 5425,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 5425,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:6085"
+  },
+  "url:https://bilweb.se/hallands-lan/bmw-330-e-xdrive-touring-m-sport-business-launch-2025-kombi-12596744": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 659000,
+    "senaste_pris": 659000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:550"
+  },
+  "url:https://bilweb.se/varmlands-lan/bmw-330-e-xdrive-touring-m-sport-privatleasing-2025-kombi-12492897": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 4495,
+    "senaste_pris": 4495,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 4495,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2"
   }
 }
