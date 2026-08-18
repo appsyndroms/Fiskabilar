@@ -262,21 +262,50 @@ def _hamta_pris_mil_fran_detaljsida(
         )
         return None
 
-    text = BeautifulSoup(
+    soup = BeautifulSoup(
         resp.text,
         "html.parser"
-    ).get_text(
-        separator=" ",
+    )
+
+    # Behåll radstrukturen från Bilwebs HTML.
+    # Detta är viktigt eftersom fälten på detaljsidan ofta ligger
+    # som separata textblock, t.ex.:
+    #
+    #   Mil
+    #   0
+    #
+    # Tidigare användes separator=" ", vilket förstörde denna
+    # struktur och gjorde MIL-regexen onödigt känslig.
+    text = soup.get_text(
+        separator="\n",
         strip=True
     )
 
-    pris_match = PRIS_DETALJ_REGEX.search(
-        text
+    # Försök först läsa pris och mil via de tydliga etikettblocken.
+    pris_match = re.search(
+        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
+        text,
+        re.IGNORECASE
     )
 
-    mil_match = MIL_DETALJ_REGEX.search(
-        text
+    mil_match = re.search(
+        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
+        text,
+        re.IGNORECASE
     )
+
+    # Fallback för pris om Bilweb har lagt etikett och värde
+    # på samma rad.
+    if not pris_match:
+        pris_match = PRIS_DETALJ_REGEX.search(
+            text.replace("\n", " ")
+        )
+
+    # Fallback för mil om Bilweb ändrar HTML-strukturen.
+    if not mil_match:
+        mil_match = MIL_DETALJ_REGEX.search(
+            text
+        )
 
     if not pris_match or not mil_match:
         print(
@@ -286,7 +315,7 @@ def _hamta_pris_mil_fran_detaljsida(
         return None
 
     agare_match = AGARE_DETALJ_REGEX.search(
-        text
+        text.replace("\n", " ")
     )
 
     antal_agare = (
