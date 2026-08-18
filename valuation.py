@@ -9,12 +9,14 @@ Grundtanke:
 2. Ta bort annonser där priset faktiskt är ett leasing-/månadspris.
 3. Ta bort orimliga kontantpriser.
 4. Ta bort bilar under 1 000 mil från marknadsunderlaget.
-5. Ta bort aktuell bil från sina egna jämförelser.
+5. Ta alltid bort aktuell bil från sina egna jämförelser.
 6. Justera jämförelsepris efter skillnad i miltal.
 7. Normalisera jämförelsebilarnas utrustning mot aktuell bil.
 8. Begränsa orimligt stora utrustningsjusteringar.
 9. Använd medianen av de justerade jämförelsepriserna.
-10. Falla tillbaka till ett manuellt baspris om tillräckligt många
+10. Kräva minst tre verkliga jämförelsebilar för att klassificera
+    bilen som FYND eller EXTREMT_FYND.
+11. Falla tillbaka till ett manuellt baspris om tillräckligt många
     jämförelsebilar saknas.
 
 VIKTIGT:
@@ -101,24 +103,11 @@ BASPRIS = {
 MIN_JAMFORELSEBILAR = 3
 MAX_JAMFORELSEBILAR = 15
 
-# Först försöker modellen hitta jämförelsebilar inom
-# detta miltalsintervall.
-#
-# Om färre än MIN_JAMFORELSEBILAR hittas utökas intervallet
-# till MAX_MILTALSSKILLNAD.
 PRIMAR_MAX_MILTALSSKILLNAD = 1500
 MAX_MILTALSSKILLNAD = 3000
 
-# Prisjustering per mils skillnad mellan aktuell bil
-# och jämförelsebil.
-#
-# Exempel:
-# 1 000 mil skillnad = 12 000 kr
-# 2 000 mil skillnad = 24 000 kr
-# 3 000 mil skillnad = 36 000 kr
 KR_PER_MIL_AVVIKELSE = 12.0
 
-# Bilar under 1 000 mil används inte som marknadsunderlag.
 MIN_MILTAL = 1000
 
 MIN_KONTANTPRIS = 100000
@@ -128,16 +117,6 @@ MAX_KONTANTPRIS = 2000000
 # =========================================================
 # LEASING / MÅNADSPRIS
 # =========================================================
-
-# Viktigt:
-#
-# Vi letar inte längre efter ordet "leasing" var som helst
-# i annonsen.
-#
-# "Tidigare leasingbil" ska exempelvis INTE filtreras bort.
-#
-# Däremot ska en annons som faktiskt anger leasingpris,
-# månadspris eller leasingkostnad filtreras bort.
 
 LEASING_NYCKELORD = (
     "privatleasing",
@@ -165,9 +144,6 @@ LEASING_NYCKELORD = (
 )
 
 
-# Formuleringar som normalt innebär att leasing endast
-# beskriver bilens historik och därför INTE ska filtrera bort
-# annonsen.
 TIDIGARE_LEASING_NYCKELORD = (
     "tidigare leasingbil",
     "tidigare leasing",
@@ -302,8 +278,6 @@ def _ar_leasingannons(
     if not text:
         return False
 
-    # Om texten uttryckligen beskriver bilen som tidigare
-    # leasingbil är det historik och inte ett leasingpris.
     for nyckel in TIDIGARE_LEASING_NYCKELORD:
 
         if nyckel in text:
@@ -336,7 +310,7 @@ def _ar_rimligt_kontantpris(
 
 
 # =========================================================
-# ANNONS-ID
+# ANNONS-ID / ANNONSIDENTITET
 # =========================================================
 
 def _hamta_annons_id(
@@ -390,6 +364,95 @@ def _hamta_annons_id(
         ).strip()
 
     return None
+
+
+def _hamta_annonsidentiteter(
+    bil: dict,
+) -> set[str]:
+    """
+    Returnerar alla identifierare som kan användas för att
+    avgöra om två poster är samma annons.
+
+    Vi använder flera identifierare eftersom aktuell annons
+    ibland kan ha ett annons-ID medan marknadsunderlaget
+    endast innehåller URL, eller tvärtom.
+    """
+
+    identiteter = set()
+
+    for falt in (
+        "annons_id",
+        "id",
+        "url",
+    ):
+
+        value = bil.get(
+            falt
+        )
+
+        if value:
+
+            identiteter.add(
+                _normalisera_text(
+                    value
+                )
+            )
+
+    urls = bil.get(
+        "urls"
+    )
+
+    if urls:
+
+        for url in urls:
+
+            if url:
+
+                identiteter.add(
+                    _normalisera_text(
+                        url
+                    )
+                )
+
+    return identiteter
+
+
+def _ar_samma_annons(
+    aktuell_bil: dict,
+    jamforelse: dict,
+) -> bool:
+    """
+    Avgör om aktuell bil och jämförelsebil är samma annons.
+
+    Först används stabila ID/URL-identiteter.
+
+    Om aktuell annons saknar identifierare kan vi inte säkert
+    säga att två annonser är samma. Då lämnas jämförelsen kvar
+    istället för att riskera att ta bort en legitim annons.
+    """
+
+    aktuell_identiteter = (
+        _hamta_annonsidentiteter(
+            aktuell_bil
+        )
+    )
+
+    jamforelse_identiteter = (
+        _hamta_annonsidentiteter(
+            jamforelse
+        )
+    )
+
+    if not aktuell_identiteter:
+        return False
+
+    if not jamforelse_identiteter:
+        return False
+
+    return bool(
+        aktuell_identiteter
+        & jamforelse_identiteter
+    )
 
 
 # =========================================================
@@ -496,9 +559,18 @@ def bygg_marknadsunderlag(
 
                 "annons_id": annons_id,
 
-                # Behåll information om utrustning
-                # så att jämförelsepriset senare
-                # kan normaliseras mot aktuell bil.
+                "id": bil.get(
+                    "id"
+                ),
+
+                "url": bil.get(
+                    "url"
+                ),
+
+                "urls": bil.get(
+                    "urls"
+                ),
+
                 "utrustningsniva": bil.get(
                     "utrustningsniva"
                 ),
@@ -589,20 +661,27 @@ def _hamta_jamforelsebilar(
     if not jamforelser:
         return []
 
-    aktuell_id = _hamta_annons_id(
-        bil
+    # -----------------------------------------------------
+    # VIKTIGT:
+    #
+    # Aktuell annons får ALDRIG användas som jämförelsebil.
+    #
+    # Tidigare kod förlitade sig huvudsakligen på annons_id.
+    # Här jämförs istället ID, annons_id och URL.
+    # -----------------------------------------------------
+
+    jamforelser_utan_aktuell = [
+        jamforelse
+        for jamforelse in jamforelser
+        if not _ar_samma_annons(
+            bil,
+            jamforelse,
+        )
+    ]
+
+    jamforelser = (
+        jamforelser_utan_aktuell
     )
-
-    if aktuell_id:
-
-        jamforelser = [
-            x
-            for x in jamforelser
-            if (
-                x.get("annons_id")
-                != aktuell_id
-            )
-        ]
 
     target_mil = bil.get(
         "miltal"
@@ -618,7 +697,6 @@ def _hamta_jamforelsebilar(
     # STEG 1
     #
     # Försök först hitta minst tre bilar inom ±1 500 mil.
-    # Detta ger normalt betydligt bättre jämförelser.
     # -----------------------------------------------------
 
     primara = [
@@ -753,11 +831,6 @@ SELEKT_VARDE = 6000
 STOR_BATTERI_VARDE = 12000
 
 
-# Maximal total utrustningsjustering.
-#
-# Detta är viktigt eftersom en kombination av många
-# utrustningsposter annars kan flytta ett jämförelsepris
-# orimligt långt från dess faktiska marknadspris.
 MAX_TOTAL_UTRUSTNINGSJUSTERING = 40000
 
 
@@ -996,9 +1069,13 @@ def _bygg_marknadsdiagnostik(
         "miltal"
     )
 
+    antal = len(
+        jamforelser
+    )
+
     underlagsstyrka = (
         _bestam_underlagsstyrka(
-            len(jamforelser)
+            antal
         )
     )
 
@@ -1008,12 +1085,15 @@ def _bygg_marknadsdiagnostik(
     ):
 
         return {
-            "antal": len(
-                jamforelser
-            ),
+            "antal": antal,
 
             "underlagsstyrka": (
                 underlagsstyrka
+            ),
+
+            "empiriskt_underlag": (
+                antal
+                >= MIN_JAMFORELSEBILAR
             ),
 
             "malpris": bil.get(
@@ -1023,6 +1103,8 @@ def _bygg_marknadsdiagnostik(
             "miltal": None,
 
             "median_justerat": None,
+
+            "aktuell_annons_exkluderad": True,
 
             "jamforelser": [],
         }
@@ -1123,6 +1205,10 @@ def _bygg_marknadsdiagnostik(
                 "annons_id": jamforelse.get(
                     "annons_id"
                 ),
+
+                "url": jamforelse.get(
+                    "url"
+                ),
             }
         )
 
@@ -1150,6 +1236,11 @@ def _bygg_marknadsdiagnostik(
             underlagsstyrka
         ),
 
+        "empiriskt_underlag": (
+            len(detaljer)
+            >= MIN_JAMFORELSEBILAR
+        ),
+
         "malpris": bil.get(
             "annonspris"
         ),
@@ -1175,6 +1266,8 @@ def _bygg_marknadsdiagnostik(
             if median_justerat is not None
             else None
         ),
+
+        "aktuell_annons_exkluderad": True,
 
         "jamforelser": detaljer,
     }
@@ -1371,8 +1464,6 @@ def berakna_marknadsvarde(
 
     if marknadspris is not None:
 
-        # Utrustningen är redan normaliserad
-        # i jämförelsepriset.
         marknadsvarde = (
             marknadspris
         )
@@ -1467,13 +1558,6 @@ def berakna_fynd(
 
     # -----------------------------------------------------
     # FYNDPROCENT
-    #
-    # Exempel:
-    # marknadsvärde 350 000
-    # annonspris    315 000
-    # diff           35 000
-    #
-    # fyndprocent = 10 %
     # -----------------------------------------------------
 
     if (
@@ -1508,11 +1592,11 @@ def berakna_fynd(
     # -----------------------------------------------------
     # EMPIRISKT UNDERLAG
     #
-    # Ett fynd får endast klassas som FYND om det finns
-    # minst tre faktiska jämförelsebilar.
+    # Minst tre verkliga jämförelsebilar krävs.
     #
-    # Detta förhindrar att ett manuellt BASPRIS ensamt
-    # kan skapa ett fynd.
+    # Om färre än tre finns får bilen fortfarande ett
+    # beräknat marknadsvärde via fallback, men den får
+    # INTE klassas som FYND.
     # -----------------------------------------------------
 
     empiriskt_underlag = (
@@ -1535,20 +1619,6 @@ def berakna_fynd(
 
     # =====================================================
     # FYNDKLASSNING
-    # =====================================================
-    #
-    # Vanligt FYND:
-    # minst 20 000 kr under marknadsvärdet,
-    # minst 5 % under marknadsvärdet,
-    # OCH minst tre faktiska jämförelsebilar.
-    #
-    # EXTREMT_FYND:
-    # minst 35 000 kr och dessutom minst 8 %
-    # under marknadsvärdet samt minst GODKÄNT empiriskt
-    # underlag.
-    #
-    # Detta gör att varken FYND eller EXTREMT_FYND
-    # kan uppstå enbart på grund av ett manuellt baspris.
     # =====================================================
 
     if (
