@@ -87,14 +87,17 @@ def _extrahera_lankar(html: str, forvantat_antal: int) -> list[str | None]:
     """
     lankar = OBJEKT_LANK_REGEX.findall(html)
     unika_i_ordning = []
+
     for lank in lankar:
         if not unika_i_ordning or unika_i_ordning[-1] != lank:
             unika_i_ordning.append(lank)
 
     if len(unika_i_ordning) != forvantat_antal:
-        print(f"[wayke] varning: {len(unika_i_ordning)} länkar hittade men "
-              f"{forvantat_antal} annonser tolkade - hoppar över länkning "
-              f"denna körning för att undvika felaktiga länkar.")
+        print(
+            f"[wayke] varning: {len(unika_i_ordning)} länkar hittade men "
+            f"{forvantat_antal} annonser tolkade - hoppar över länkning "
+            f"denna körning för att undvika felaktiga länkar."
+        )
         return [None] * forvantat_antal
 
     return [WAYKE_BAS + lank for lank in unika_i_ordning]
@@ -105,11 +108,18 @@ def _rensa_tal(text: str) -> int:
     return int(siffror) if siffror else 0
 
 
-def _tolka_titel(bilkonfig: dict, titel: str, plats: str, dealer: str) -> dict | None:
-    # Sålda bilar smyger med i dealer-fältet som "...SåldVolvo V60..." eftersom
-    # "Sålt"-statusen ersätter "I lager" i texten men fångas ändå av regexen
-    # (som har "I lager" som frivilligt). Filtrera bort dem explicit här -
-    # annars riskerar vi att mejla ut fynd på bilar som redan är sålda.
+def _tolka_titel(
+    bilkonfig: dict,
+    titel: str,
+    plats: str,
+    dealer: str
+) -> dict | None:
+
+    # Sålda bilar smyger med i dealer-fältet som "...SåldVolvo V60..."
+    # eftersom "Sålt"-statusen ersätter "I lager" i texten men fångas ändå
+    # av regexen (som har "I lager" som frivilligt). Filtrera bort dem
+    # explicit här - annars riskerar vi att mejla ut fynd på bilar som
+    # redan är sålda.
     if re.search(r"sål[dt]", dealer, re.IGNORECASE):
         return None
 
@@ -118,16 +128,20 @@ def _tolka_titel(bilkonfig: dict, titel: str, plats: str, dealer: str) -> dict |
     # BMW ligger hela variantnamnet ("530e xDrive Touring") redan i
     # ankartexten - resttexten (titel) innehåller bara utrustningsdetaljer
     # som "M Sport, Drag" och skulle aldrig matcha på egen hand.
-    variant = identifiera_variant(bilkonfig, f"{bilkonfig['wayke_anchor']} {titel}")
+    variant = identifiera_variant(
+        bilkonfig,
+        f"{bilkonfig['wayke_anchor']} {titel}"
+    )
+
     if variant is None:
-        return None  # matchar ingen av de önskade varianterna - hoppa över
+        return None
 
     return {
         "kalla": "wayke",
-        "regnr": None,  # Wayke visar inte regnr i listvyn
+        "regnr": None,
         "marke_slug": bilkonfig["marke_slug"],
         "modell_slug": bilkonfig["modell_slug"],
-        "modell": bilkonfig["modell_slug"],  # bakåtkompatibelt fältnamn
+        "modell": bilkonfig["modell_slug"],
         "variant": variant,
         "utrustningsniva": titel.strip()[:60] or None,
         "plats": plats.strip(),
@@ -135,42 +149,121 @@ def _tolka_titel(bilkonfig: dict, titel: str, plats: str, dealer: str) -> dict |
     }
 
 
-def _hamta_sida(marke: str, modell: str, arsmodell: int) -> str:
-    url = BAS_URL.format(marke=marke, modell=modell, ar=arsmodell)
-    resp = requests.get(url, headers=HEADERS, timeout=15)
+def _hamta_sida(
+    marke: str,
+    modell: str,
+    arsmodell: int
+) -> str:
+
+    url = BAS_URL.format(
+        marke=marke,
+        modell=modell,
+        ar=arsmodell
+    )
+
+    resp = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=15
+    )
+
     resp.raise_for_status()
+
     return resp.text
 
 
 def hamta_annonser() -> list[dict]:
     print("[wayke] hämtar annonser...")
+
     bilar = []
 
     for bilkonfig in BILAR:
-        annons_regex = _bygg_annons_regex(bilkonfig["wayke_anchor"])
 
-        for ar in range(ARSMODELL_MIN, ARSMODELL_MAX + 1):
+        annons_regex = _bygg_annons_regex(
+            bilkonfig["wayke_anchor"]
+        )
+
+        # Varje bilmodell kan ha ett eget årsintervall.
+        # Om det inte anges används de globala standardvärdena.
+        arsmodell_min = bilkonfig.get(
+            "arsmodell_min",
+            ARSMODELL_MIN
+        )
+
+        arsmodell_max = bilkonfig.get(
+            "arsmodell_max",
+            ARSMODELL_MAX
+        )
+
+        for ar in range(
+            arsmodell_min,
+            arsmodell_max + 1
+        ):
+
             try:
-                html = _hamta_sida(bilkonfig["marke_slug"], bilkonfig["modell_slug"], ar)
+                html = _hamta_sida(
+                    bilkonfig["marke_slug"],
+                    bilkonfig["modell_slug"],
+                    ar
+                )
+
             except Exception as e:
-                print(f"[wayke] FEL vid hämtning av {bilkonfig['marke_visning']} "
-                      f"{bilkonfig['modell_visning']} årsmodell {ar}: {e}")
+                print(
+                    f"[wayke] FEL vid hämtning av "
+                    f"{bilkonfig['marke_visning']} "
+                    f"{bilkonfig['modell_visning']} "
+                    f"årsmodell {ar}: {e}"
+                )
                 continue
 
-            text = BeautifulSoup(html, "html.parser").get_text(separator="")
-            traffar = list(annons_regex.finditer(text))
-            lankar = _extrahera_lankar(html, len(traffar))
+            text = BeautifulSoup(
+                html,
+                "html.parser"
+            ).get_text(separator="")
 
-            for m, lank in zip(traffar, lankar):
-                bil = _tolka_titel(bilkonfig, m.group("titel"), m.group("plats"), m.group("dealer"))
+            traffar = list(
+                annons_regex.finditer(text)
+            )
+
+            lankar = _extrahera_lankar(
+                html,
+                len(traffar)
+            )
+
+            for m, lank in zip(
+                traffar,
+                lankar
+            ):
+
+                bil = _tolka_titel(
+                    bilkonfig,
+                    m.group("titel"),
+                    m.group("plats"),
+                    m.group("dealer")
+                )
+
                 if bil is None:
                     continue
 
                 bil.update({
-                    "annonspris": _rensa_tal(m.group("pris")),
-                    "arsmodell": int(m.group("ar")),
-                    "miltal": _rensa_tal(m.group("mil")),
-                    "vaxellada": "Automat" if "aut" in m.group("gearbox").lower() else m.group("gearbox").strip(),
+                    "annonspris": _rensa_tal(
+                        m.group("pris")
+                    ),
+
+                    "arsmodell": int(
+                        m.group("ar")
+                    ),
+
+                    "miltal": _rensa_tal(
+                        m.group("mil")
+                    ),
+
+                    "vaxellada": (
+                        "Automat"
+                        if "aut" in m.group("gearbox").lower()
+                        else m.group("gearbox").strip()
+                    ),
+
                     "skadad": False,
                     "antal_agare": None,
                     "import": None,
@@ -185,12 +278,25 @@ def hamta_annonser() -> list[dict]:
                     "stor_batteri": None,
                     "url": lank,
                 })
-                bil = berika_fran_fritext(bil, bil.get("utrustningsniva", ""))
+
+                bil = berika_fran_fritext(
+                    bil,
+                    bil.get(
+                        "utrustningsniva",
+                        ""
+                    )
+                )
 
                 if matchar_grundkrav(bil):
                     bilar.append(bil)
 
-            time.sleep(DELAY_SEKUNDER)
+            time.sleep(
+                DELAY_SEKUNDER
+            )
 
-    print(f"[wayke] {len(bilar)} annonser matchade grundkraven")
+    print(
+        f"[wayke] {len(bilar)} annonser "
+        f"matchade grundkraven"
+    )
+
     return bilar
