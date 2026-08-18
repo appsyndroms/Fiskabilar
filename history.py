@@ -50,6 +50,7 @@ def _nu() -> str:
 
 def _annonsnyckel(bil: dict) -> str:
     regnr = bil.get("regnr")
+
     if regnr:
         return f"reg:{str(regnr).upper().replace(' ', '')}"
 
@@ -426,6 +427,166 @@ def _analysera_trendsegment(
     return resultat
 
 
+# ---------------------------------------------------------------------------
+# Trendloggning
+# ---------------------------------------------------------------------------
+
+
+def _formatera_kr(value) -> str:
+    """Formaterar kronor för diagnostikloggar."""
+
+    if not isinstance(value, (int, float)):
+        return "?"
+
+    return f"{value:,.0f} kr".replace(",", " ")
+
+
+def _formatera_procent(value) -> str:
+    """Formaterar procent för diagnostikloggar."""
+
+    if not isinstance(value, (int, float)):
+        return "?"
+
+    return f"{value:+.2f} %"
+
+
+def _kort_kategori(kategori: str) -> str:
+    """
+    Gör kategorinamnet lättare att läsa i Actions-loggen.
+
+    Kategorin sparas oförändrad internt.
+    """
+
+    delar = kategori.split("|")
+
+    if len(delar) != 3:
+        return kategori
+
+    modell, variant, arsmodell = delar
+
+    modell = modell.strip()
+    variant = variant.strip()
+
+    if len(variant) > 80:
+        variant = variant[:77] + "..."
+
+    return f"{modell} | {variant} | {arsmodell}"
+
+
+def _logga_trendkategori(
+    kategori: str,
+    analys: dict,
+) -> None:
+    """Skriver detaljerad diagnostik för en enskild marknadskategori."""
+
+    trend = analys.get("trend")
+    styrka = analys.get("trendstyrka", 0)
+    dagar = analys.get("trend_observationsdagar", 0)
+    forandring_kr = analys.get("trendforandring_kr", 0)
+    forandring_procent = analys.get(
+        "trendforandring_procent",
+        0.0,
+    )
+
+    dagliga_priser = analys.get("dagliga_priser") or []
+
+    print(
+        "[TREND] "
+        f"{_kort_kategori(kategori)} | "
+        f"{trend.upper()} | "
+        f"dagar={dagar} | "
+        f"steg={styrka} | "
+        f"förändring={_formatera_kr(forandring_kr)} "
+        f"({_formatera_procent(forandring_procent)})"
+    )
+
+    if analys.get("trend_start_dag"):
+        print(
+            "[TREND]   period: "
+            f"{analys['trend_start_dag']} -> "
+            f"{analys['trend_slut_dag']}"
+        )
+
+    if dagliga_priser:
+        senaste = dagliga_priser[-1]
+
+        print(
+            "[TREND]   senaste: "
+            f"{senaste['dag']} | "
+            f"{_formatera_kr(senaste['pris'])} | "
+            f"{senaste['antal_observationer']} observationer"
+        )
+
+    if len(dagliga_priser) >= 2:
+        for tidigare, senare in zip(
+            dagliga_priser[-4:],
+            dagliga_priser[-3:],
+        ):
+            steg_kr = senare["pris"] - tidigare["pris"]
+            steg_procent = _prisforandring_procent(
+                tidigare["pris"],
+                senare["pris"],
+            )
+
+            riktning = _klassificera_riktning(
+                steg_procent
+            )
+
+            print(
+                "[TREND]   steg "
+                f"{tidigare['dag']} -> {senare['dag']}: "
+                f"{_formatera_kr(steg_kr)} "
+                f"({_formatera_procent(steg_procent)}) "
+                f"[{riktning}]"
+            )
+
+
+def _logga_trendsammanfattning(
+    trender: dict[str, dict],
+) -> None:
+    """Skriver en sammanfattning av hela marknadens riktning."""
+
+    antal_upp = 0
+    antal_ned = 0
+    antal_stabil = 0
+    antal_otillrackligt = 0
+
+    for analys in trender.values():
+        trend = analys.get("trend")
+
+        if trend == "upp":
+            antal_upp += 1
+
+        elif trend == "ned":
+            antal_ned += 1
+
+        elif trend == "stabil":
+            antal_stabil += 1
+
+        else:
+            antal_otillrackligt += 1
+
+    print(
+        "[TREND] Lägesbild: "
+        f"UPP={antal_upp} | "
+        f"NED={antal_ned} | "
+        f"STABIL={antal_stabil} | "
+        f"OTILLRÄCKLIGT={antal_otillrackligt}"
+    )
+
+    if antal_ned:
+        print(
+            "[TREND] ⚠ Det finns marknadskategorier "
+            "med identifierad prisnedgång."
+        )
+
+    if antal_upp:
+        print(
+            "[TREND] Det finns marknadskategorier "
+            "med identifierad prisuppgång."
+        )
+
+
 def bygg_marknadstrender() -> dict[str, dict]:
     """
     Analyserar hela historiken och bygger marknadstrender.
@@ -445,6 +606,57 @@ def bygg_marknadstrender() -> dict[str, dict]:
 
     observationer = _las_observationer()
 
+    print(
+        "[TREND] =================================================="
+    )
+    print(
+        "[TREND] Startar trendanalys."
+    )
+    print(
+        "[TREND] Historikfil: "
+        f"{HISTORIK_FIL}"
+    )
+    print(
+        "[TREND] Totalt antal historiska poster: "
+        f"{len(observationer)}"
+    )
+
+    if not observationer:
+        print(
+            "[TREND] Ingen historik hittades."
+        )
+        print(
+            "[TREND] Trendanalys avslutad: "
+            "otillräckligt underlag."
+        )
+        print(
+            "[TREND] =================================================="
+        )
+
+        return {}
+
+    antal_annonsobservationer = sum(
+        1
+        for post in observationer
+        if post.get("typ") == "annons"
+    )
+
+    antal_marknadsvardeobservationer = sum(
+        1
+        for post in observationer
+        if post.get("typ") == "marknadsvarde"
+    )
+
+    print(
+        "[TREND] Annonsobservationer: "
+        f"{antal_annonsobservationer}"
+    )
+
+    print(
+        "[TREND] Marknadsvärdesobservationer: "
+        f"{antal_marknadsvardeobservationer}"
+    )
+
     per_kategori: dict[str, list[dict]] = defaultdict(list)
 
     for post in observationer:
@@ -458,10 +670,27 @@ def bygg_marknadstrender() -> dict[str, dict]:
 
         per_kategori[kategori].append(post)
 
+    print(
+        "[TREND] Marknadskategorier: "
+        f"{len(per_kategori)}"
+    )
+
+    print(
+        "[TREND] Premisser: "
+        f"minst {MIN_TREND_DAGAR} separata observationsdagar, "
+        f"minst {MIN_TREND_STEG} konsekutiva steg, "
+        f"minst {TREND_MIN_FORANDRING_PROCENT:.1f} % "
+        "förändring per steg."
+    )
+
     trender = {}
 
-    for kategori, poster in per_kategori.items():
-        dagliga_priser = _bygg_dagliga_priser(poster)
+    for kategori, poster in sorted(
+        per_kategori.items()
+    ):
+        dagliga_priser = _bygg_dagliga_priser(
+            poster
+        )
 
         analys = _analysera_trendsegment(
             dagliga_priser
@@ -471,6 +700,24 @@ def bygg_marknadstrender() -> dict[str, dict]:
         analys["dagliga_priser"] = dagliga_priser
 
         trender[kategori] = analys
+
+        _logga_trendkategori(
+            kategori,
+            analys,
+        )
+
+    _logga_trendsammanfattning(
+        trender
+    )
+
+    print(
+        "[TREND] Trendanalys påverkar INTE "
+        "100-poängsscore eller valuation."
+    )
+
+    print(
+        "[TREND] =================================================="
+    )
 
     return trender
 
@@ -537,22 +784,38 @@ def berakna_historik(
     """
 
     nyckel = _annonsnyckel(bil)
+
     data = historikindex.get(nyckel) or {}
 
-    annonser = list(data.get("annonser") or [])
-    varderingar = list(data.get("varderingar") or [])
+    annonser = list(
+        data.get("annonser") or []
+    )
 
-    annonser.sort(key=lambda x: x.get("tid") or "")
-    varderingar.sort(key=lambda x: x.get("tid") or "")
+    varderingar = list(
+        data.get("varderingar") or []
+    )
+
+    annonser.sort(
+        key=lambda x: x.get("tid") or ""
+    )
+
+    varderingar.sort(
+        key=lambda x: x.get("tid") or ""
+    )
 
     priser = [
         post.get("pris")
         for post in annonser
-        if isinstance(post.get("pris"), (int, float))
+        if isinstance(
+            post.get("pris"),
+            (int, float),
+        )
     ]
 
     historik = {
-        "historik_observationer": len(annonser),
+        "historik_observationer": len(
+            annonser
+        ),
         "historik_dagar": 0,
         "historik_forsta_pris": None,
         "historik_senaste_pris": None,
@@ -566,22 +829,36 @@ def berakna_historik(
     }
 
     if annonser:
-        historik["historik_forsta_pris"] = (
-            priser[0] if priser else None
+        historik[
+            "historik_forsta_pris"
+        ] = (
+            priser[0]
+            if priser
+            else None
         )
 
-        historik["historik_senaste_pris"] = (
-            priser[-1] if priser else None
+        historik[
+            "historik_senaste_pris"
+        ] = (
+            priser[-1]
+            if priser
+            else None
         )
 
         if priser:
-            historik["historik_prisforandring"] = (
-                priser[-1] - priser[0]
+            historik[
+                "historik_prisforandring"
+            ] = (
+                priser[-1]
+                - priser[0]
             )
 
-            historik["historik_prisfall"] = max(
+            historik[
+                "historik_prisfall"
+            ] = max(
                 0,
-                priser[0] - priser[-1],
+                priser[0]
+                - priser[-1],
             )
 
         forsta_tid = _parse_tid(
@@ -589,9 +866,13 @@ def berakna_historik(
         )
 
         if forsta_tid:
-            nu = datetime.now(TIDSZON)
+            nu = datetime.now(
+                TIDSZON
+            )
 
-            historik["historik_dagar"] = max(
+            historik[
+                "historik_dagar"
+            ] = max(
                 0,
                 (nu - forsta_tid).days,
             )
@@ -606,7 +887,9 @@ def berakna_historik(
     ]
 
     if marknadsvarden:
-        historik["historik_marknadsvarde"] = (
+        historik[
+            "historik_marknadsvarde"
+        ] = (
             marknadsvarden[-1]
         )
 
