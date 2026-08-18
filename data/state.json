@@ -43,8 +43,9 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389800,
     "senaste_pris": 389800,
-    "senast_sedd": "2026-08-17",
-    "notifierad": false
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10234"
   },
   "kal:v60:T6 AWD:2023:6200": {
     "forsta_sedd": "2026-08-14",
@@ -563,7 +564,7 @@
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 349900,
-    "senaste_pris": 359000,
+    "senaste_pris": 344900,
     "senast_sedd": "2026-08-18",
     "notifierad": false,
     "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688"
@@ -1337,9 +1338,10 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 297800,
     "senaste_pris": 297800,
-    "senast_sedd": "2026-08-17",
+    "senast_sedd": "2026-08-18",
     "notifierad": true,
-    "notifierad_pris": 297800
+    "notifierad_pris": 297800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11922"
   },
   "kal:v60:T6 AWD:2023:7290": {
     "forsta_sedd": "2026-08-17",
@@ -3203,5 +3205,45 @@
     "senaste_pris": 459500,
     "senast_sedd": "2026-08-18",
     "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/9e04a24e-8cbe-4dec-a886-758733931ca5": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2022:9011"
+  },
+  "url:https://www.wayke.se/objekt/2b6eae14-02b5-4f54-90e6-27b8563eaca5": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 449000,
+    "senaste_pris": 449000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/e9f2ce0f-5215-41a6-92a0-c162107d51a6": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 349900,
+    "senaste_pris": 344900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:10688"
+  },
+  "url:https://www.wayke.se/objekt/023e30f1-4d99-4b7c-b57b-2f8ff6a60577": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 297800,
+    "senaste_pris": 297800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 297800,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:11922"
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-awd-r-design-varmare-panorama-h-k-360-2022-kombi-12811155": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 389800,
+    "senaste_pris": 389800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T8 AWD:2022:10234"
   }
 }
