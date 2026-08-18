@@ -55,7 +55,17 @@ dedupliceringen och långtidshistoriken när det finns tillgängligt.
 
 Om Bilweb inte visar registreringsnummer lämnas fältet None och
 befintlig dedupliceringslogik används som fallback.
+
+ÄNDRING 2026-08-18:
+Registreringsnummer får ENDAST identifieras när Bilwebs detaljsida
+innehåller en uttrycklig etikett för registreringsnummer och ett
+registreringsnummer direkt efter etiketten.
+
+Den tidigare försiktiga fallback-sökningen i hela sidans text är
+borttagen. Det förhindrar att andra sex- eller sjuteckenssträngar,
+exempelvis BMW530 eller BMW330, feltolkas som registreringsnummer.
 """
+
 
 import re
 import time
@@ -115,9 +125,8 @@ AUKTION_REGEX = re.compile(
 #   ABC12A
 #   ABC 12A
 #
-# Vi använder detta bara efter att vi först har hittat en relevant
-# etikett på detaljsidan. Det minskar risken att råka tolka andra
-# sexteckenssträngar, exempelvis delar av VIN/chassinummer.
+# Vi använder detta ENDAST efter att vi först har hittat en relevant
+# etikett på detaljsidan.
 REGNR_REGEX = re.compile(
     r"\b([A-ZÅÄÖ]{3})[\s-]?(\d{2,3}|"
     r"\d{2}[A-Z])\b",
@@ -190,66 +199,46 @@ def _extrahera_regnr(text: str) -> str | None:
     Funktionen arbetar ENDAST på text som redan hämtats från
     detaljsidan. Den gör alltså inget extra HTTP-anrop.
 
-    Först letar vi efter registreringsnummer nära en tydlig etikett.
-    Därefter görs en försiktig fallback-sökning i hela texten.
+    Registreringsnummer accepteras ENDAST om det finns en uttrycklig
+    registreringsnummer-etikett och ett giltigt registreringsnummer
+    direkt efter etiketten.
+
+    Ingen fallback-sökning görs i hela sidans text.
     """
 
     # ------------------------------------------------------------
-    # 1. Starkaste signalen:
-    #    registreringsnummer direkt efter relevant etikett.
+    # Endast stark signal:
+    # registreringsnummer direkt efter relevant etikett.
     # ------------------------------------------------------------
 
     etikett_match = REGNR_ETIKETT_REGEX.search(text)
 
-    if etikett_match:
-        efter = text[
-            etikett_match.end():
-        ]
+    if not etikett_match:
+        return None
 
-        # Begränsa sökningen till ett kort område efter etiketten.
-        # Det minskar risken för falska träffar längre ner på sidan.
-        efter = efter[:200]
+    efter = text[
+        etikett_match.end():
+    ]
 
-        match = REGNR_REGEX.search(
-            efter
-        )
+    # Begränsa sökningen till ett kort område efter etiketten.
+    # Det minskar risken för att träffa text längre ner på sidan.
+    efter = efter[:200]
 
-        if match:
-            kandidat = (
-                f"{match.group(1)}"
-                f"{match.group(2)}"
-            )
+    match = REGNR_REGEX.search(
+        efter
+    )
 
-            normaliserat = _normalisera_regnr(
-                kandidat
-            )
+    if not match:
+        return None
 
-            if normaliserat:
-                return normaliserat
+    kandidat = (
+        f"{match.group(1)}"
+        f"{match.group(2)}"
+    )
 
-    # ------------------------------------------------------------
-    # 2. Fallback:
-    #    leta efter ett rimligt svenskt registreringsnummer i
-    #    texten.
-    #
-    #    Denna fallback är medvetet försiktig.
-    # ------------------------------------------------------------
-
-    for match in REGNR_REGEX.finditer(text):
-
-        kandidat = (
-            f"{match.group(1)}"
-            f"{match.group(2)}"
-        )
-
-        normaliserat = _normalisera_regnr(
-            kandidat
-        )
-
-        if normaliserat:
-            return normaliserat
-
-    return None
+    return _normalisera_regnr(
+        kandidat
+    )
 
 
 def _hamta_kandidat_urler(
@@ -431,7 +420,6 @@ def _hamta_pris_mil_fran_detaljsida(
         "html.parser"
     )
 
-    # Behåll radstrukturen från Bilwebs HTML.
     text = soup.get_text(
         separator="\n",
         strip=True
@@ -457,15 +445,10 @@ def _hamta_pris_mil_fran_detaljsida(
         re.IGNORECASE
     )
 
-    # Fallback för pris om Bilweb har lagt etikett och värde
-    # på samma rad.
-
     if not pris_match:
         pris_match = PRIS_DETALJ_REGEX.search(
             text.replace("\n", " ")
         )
-
-    # Fallback för mil om Bilweb ändrar HTML-strukturen.
 
     if not mil_match:
         mil_match = MIL_DETALJ_REGEX.search(
@@ -508,6 +491,8 @@ def _hamta_pris_mil_fran_detaljsida(
     # OBS:
     # Detta använder samma "text" som redan hämtats.
     # Ingen ny requests.get().
+    #
+    # Endast explicit etikett accepteras.
     # ------------------------------------------------------------
 
     regnr = _extrahera_regnr(
@@ -547,26 +532,14 @@ def hamta_annonser() -> list[dict]:
     bilar = []
     rak_grundkrav_totalt = 0
 
-    # Diagnostik för registreringsnummer.
     regnr_detaljsidor = 0
     regnr_hittade = 0
 
     # Cache för detaljsidor under denna körning.
-    #
-    # Nyckel:
-    #     annonsens URL
-    #
-    # Värde:
-    #     resultatet från
-    #     _hamta_pris_mil_fran_detaljsida()
-    #
-    # None cachelagras också.
-
     detaljsida_cache = {}
 
     for bilkonfig in BILAR:
 
-        # Varje bilmodell kan ha ett eget årsintervall.
         arsmodell_min = bilkonfig.get(
             "arsmodell_min",
             ARSMODELL_MIN
@@ -642,8 +615,6 @@ def hamta_annonser() -> list[dict]:
                     "kalla": "bilweb",
                     "url": url,
 
-                    # Registreringsnumret kommer från samma
-                    # detaljsida som pris och miltal.
                     "regnr": regnr,
 
                     "marke_slug":
