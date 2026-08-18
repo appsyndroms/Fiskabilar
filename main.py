@@ -11,8 +11,11 @@ Flöde:
 7. Bygg marknadsunderlag.
 8. Beräkna marknadsvärde/fynd.
 9. Spara marknadsvärdesobservationer.
-10. Skicka nya fynd.
-11. Spara state även när inget mejl skickats.
+10. Kör trendanalys exakt en gång efter att dagens historik sparats.
+11. Skicka nya fynd.
+12. Spara state även när inget mejl skickats.
+
+Trendanalysen påverkar inte score eller valuation.
 """
 
 from datetime import datetime
@@ -46,6 +49,7 @@ from history import (
     spara_marknadsvardesobservation,
     bygg_historikindex,
     berika_med_historik,
+    bygg_marknadstrender,
 )
 from scrapers import blocket, wayke, bytbil, bilweb
 
@@ -495,6 +499,29 @@ def main():
                 "försöker igen nästa körning: "
                 f"{amne}"
             )
+
+    # ------------------------------------------------------------
+    # TRENDANALYS
+    #
+    # Körs exakt EN gång per huvudkörning.
+    #
+    # Viktigt:
+    # - dagens annonsobservationer är redan sparade
+    # - dagens marknadsvärdesobservationer är redan sparade
+    # - trendanalysen läser därför hela aktuella historiken
+    # - trendanalysen påverkar INTE valuation
+    # - trendanalysen påverkar INTE score
+    # - trendanalysen används endast som separat marknadsdiagnostik
+    # ------------------------------------------------------------
+
+    try:
+        bygg_marknadstrender()
+
+    except Exception as e:
+        print(
+            "[TREND] Kunde inte köra trendanalysen: "
+            f"{e}"
+        )
 
     # State sparas alltid.
     #
