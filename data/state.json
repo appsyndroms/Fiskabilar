@@ -4736,5 +4736,49 @@
     "notifierad": true,
     "notifierad_pris": 359900,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098"
+  },
+  "annons:12838971": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 379500,
+    "senaste_pris": 379500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "annons:12838989": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 449000,
+    "senaste_pris": 449000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "annons:12839212": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 329000,
+    "senaste_pris": 329000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "annons:12752821": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409990,
+    "senaste_pris": 407990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:5929"
+  },
+  "url:https://www.wayke.se/objekt/0c0dac82-7d79-4c9e-ac69-5afcc1fa77c6": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 459900,
+    "senaste_pris": 459900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 459900
+  },
+  "annons:12790870": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 444000,
+    "senaste_pris": 444000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
   }
 }
