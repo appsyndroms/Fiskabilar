@@ -62,15 +62,18 @@ HEADERS = {
 
 
 PRIS_DETALJ_REGEX = re.compile(
-    r"Pris\s*(?:\([^)]*\))?\s*\n*\s*([\d\s]+)\s*kr"
+    r"Pris\s*(?:\([^)]*\))?\s*([\d\s]+?)\s*kr",
+    re.IGNORECASE
 )
 
 MIL_DETALJ_REGEX = re.compile(
-    r"Mil\s*\n+\s*([\d\s]+?)\s*\n+[-\s]*1:a regdatum"
+    r"Mil\s+([\d\s]+?)\s+1:a\s+regdatum",
+    re.IGNORECASE
 )
 
 AGARE_DETALJ_REGEX = re.compile(
-    r"Antal ägare\s*\n+\s*(\d+)"
+    r"Antal\s+ägare\s+(\d+)",
+    re.IGNORECASE
 )
 
 AUKTION_REGEX = re.compile(
@@ -263,7 +266,8 @@ def _hamta_pris_mil_fran_detaljsida(
         resp.text,
         "html.parser"
     ).get_text(
-        separator=" "
+        separator=" ",
+        strip=True
     )
 
     pris_match = PRIS_DETALJ_REGEX.search(
