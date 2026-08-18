@@ -2470,7 +2470,7 @@
   "url:https://www.wayke.se/objekt/808cf5f0-3ea4-44a2-b190-b2d969f43b7e": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 378900,
-    "senaste_pris": 378900,
+    "senaste_pris": 374800,
     "senast_sedd": "2026-08-18",
     "notifierad": false,
     "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2023:8927"
@@ -3196,5 +3196,12 @@
     "senast_sedd": "2026-08-18",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:5434"
+  },
+  "url:https://bilweb.se/kronobergs-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-12838451": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 459500,
+    "senaste_pris": 459500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
   }
 }
