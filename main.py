@@ -40,6 +40,7 @@ from scoring import (
     berakna_fyndscore_breakdown,
     formatera_notis,
     bil_rubrik,
+    score_niva,
 )
 from notify import skicka_epost
 
@@ -716,29 +717,16 @@ def main():
         # Mejlets nivå
         # -------------------------------------------------
 
-        if score >= 90:
+        score_niva_text = score_niva(
+            score
+        )
 
-            niva_etikett = (
-                "EXTREMT FYND"
+        emoji, niva_etikett = (
+            score_niva_text.split(
+                " ",
+                1,
             )
-
-            emoji = "🚨"
-
-        elif score >= 80:
-
-            niva_etikett = (
-                "RIKTIGT FYND"
-            )
-
-            emoji = "🔥"
-
-        else:
-
-            niva_etikett = (
-                "MYCKET INTRESSANT"
-            )
-
-            emoji = "🟢"
+        )
 
         # -------------------------------------------------
         # Formatera
