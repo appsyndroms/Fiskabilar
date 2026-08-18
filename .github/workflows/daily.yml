@@ -1,22 +1,27 @@
 name: Fyndkontroll för bilar (var 30:e minut, 06-22 svensk tid)
 
 on:
-  # Kör var 30:e minut, 04:00-21:59 UTC. Det här fönstret är medvetet
-  # bredare än 06:00-22:00 svensk tid för att täcka BÅDE sommartid
-  # (CEST, UTC+2) och vintertid (CET, UTC+1) utan att cron-schemat
-  # behöver ändras manuellt två gånger om året. main.py avgör sedan
-  # (mot Europe/Stockholm) om det faktiskt är 06:00-22:00 lokal tid
-  # och avslutar tyst annars - så du får ingen spam nattetid.
+  # Kör var 15:e minut, 04:00-21:59 UTC. Det här fönstret är medvetet
+  # bredare än 06:00-22:00 svensk tid för att täcka både sommartid
+  # (CEST, UTC+2) och vintertid (CET, UTC+1).
+  #
+  # main.py avgör sedan, mot Europe/Stockholm, om det faktiskt är
+  # inom det tillåtna lokala tidsfönstret.
   schedule:
     - cron: "*/15 4-21 * * *"
-  workflow_dispatch: {}  # gör så du kan trigga manuellt från GitHub-appen
+
+  # Gör det möjligt att starta körningen manuellt från GitHub.
+  workflow_dispatch: {}
 
 permissions:
-  contents: write  # krävs för att git-auto-commit-action ska kunna pusha tillbaka state.json
+  # Krävs för att workflowen ska kunna committa tillbaka
+  # uppdaterad historik och state till repot.
+  contents: write
 
 jobs:
   kontrollera-fynd:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,8 +38,11 @@ jobs:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
         run: python -u main.py
 
-      - name: Spara historik (state.json)
+      # main.py uppdaterar historiken under körningen.
+      # Den måste sedan sparas tillbaka till GitHub så att nästa
+      # körning kan läsa tidigare observationer.
+      - name: Spara historik och state
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Uppdaterar fyndhistorik"
-          file_pattern: "data/state.json"
+          file_pattern: "data/state.json data/market_history.jsonl"
