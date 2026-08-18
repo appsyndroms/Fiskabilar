@@ -1,23 +1,31 @@
 """
 Transparent marknadsvärdesmodell för fyndfiltrets bevakade bilar.
 
-Modellen är regelbaserad och medvetet enkel att kalibrera.
+Modellen använder i första hand aktuella marknadsannonser som
+jämförelseunderlag.
 
 Grundtanke:
-1. Baspris per modell, variant och årsmodell.
-2. Avdrag/tillägg beroende på miltal.
-3. Justering för utrustningsnivå.
-4. Justering för dragkrok, värmare, Volvo Selekt och batteristorlek.
+1. Hitta jämförbara bilar med samma modell, variant och årsmodell.
+2. Justera jämförelsepris efter skillnad i miltal.
+3. Använd medianen av de justerade jämförelsepriserna.
+4. Justera för utrustningsnivå.
+5. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
+6. Falla tillbaka till ett manuellt baspris om tillräckligt många
+   jämförelsebilar saknas.
 
 VIKTIGT:
 Utrustningsnivå matchas med delsträngar i stället för exakt text.
+
+Marknadsmodellen är avsiktligt enkel och transparent. Den ska kunna
+förbättras när vi får större historiskt underlag.
 """
 
 from datetime import date
+from statistics import median
 
 
 # =========================================================
-# BASPRIS
+# BASPRIS - FALLBACK
 # =========================================================
 
 BASPRIS = {
@@ -54,21 +62,262 @@ BASPRIS = {
         "530e xDrive Touring",
         2024,
     ): 395000,
+
+    (
+        "330e-xdrive-touring",
+        "330e xDrive Touring",
+        2024,
+    ): 430000,
+
+    (
+        "330e-xdrive-touring",
+        "330e xDrive Touring",
+        2025,
+    ): 470000,
+
+    (
+        "330e-xdrive-touring",
+        "330e xDrive Touring",
+        2026,
+    ): 520000,
 }
 
 
 # =========================================================
-# MILTAL
+# MARKNADSUNDERLAG
+# =========================================================
+
+MIN_JAMFORELSEBILAR = 3
+
+MAX_JAMFORELSEBILAR = 15
+
+KR_PER_MIL_AVVIKELSE = 2.0
+
+
+def _marknadskategori(
+    bil: dict,
+) -> tuple:
+    """
+    Skapar nyckeln som används för att hitta jämförbara bilar.
+
+    Vi använder modell, variant och årsmodell.
+    """
+
+    return (
+        str(
+            bil.get(
+                "modell",
+                ""
+            )
+        ).lower(),
+
+        bil.get(
+            "variant"
+        ),
+
+        bil.get(
+            "arsmodell"
+        ),
+    )
+
+
+def bygg_marknadsunderlag(
+    bilar: list[dict],
+) -> dict:
+    """
+    Bygger ett marknadsunderlag från de annonser som samlats in
+    under aktuell körning.
+
+    Resultatet grupperas på:
+
+        modell
+        variant
+        årsmodell
+
+    Varje grupp innehåller pris och miltal för de faktiska
+    annonserna.
+
+    Endast annonser med giltigt pris och miltal används.
+    """
+
+    underlag = {}
+
+    for bil in bilar:
+
+        pris = bil.get(
+            "annonspris"
+        )
+
+        miltal = bil.get(
+            "miltal"
+        )
+
+        if (
+            not isinstance(
+                pris,
+                (int, float)
+            )
+            or pris <= 0
+        ):
+            continue
+
+        if (
+            not isinstance(
+                miltal,
+                (int, float)
+            )
+            or miltal < 0
+        ):
+            continue
+
+        kategori = _marknadskategori(
+            bil
+        )
+
+        underlag.setdefault(
+            kategori,
+            []
+        ).append(
+            {
+                "pris": float(pris),
+                "miltal": float(miltal),
+            }
+        )
+
+    return underlag
+
+
+def _hamta_jamforelsebilar(
+    bil: dict,
+    marknadsunderlag: dict | None,
+) -> list[dict]:
+    """
+    Hämtar jämförelsebilar för aktuell bil.
+
+    I första hand används exakt samma:
+        modell + variant + årsmodell
+
+    Om det finns fler än MAX_JAMFORELSEBILAR används de närmaste
+    i miltal.
+    """
+
+    if not marknadsunderlag:
+        return []
+
+    kategori = _marknadskategori(
+        bil
+    )
+
+    jamforelser = list(
+        marknadsunderlag.get(
+            kategori,
+            []
+        )
+    )
+
+    if not jamforelser:
+        return []
+
+    target_mil = bil.get(
+        "miltal"
+    )
+
+    if isinstance(
+        target_mil,
+        (int, float)
+    ):
+
+        jamforelser.sort(
+            key=lambda x: abs(
+                x["miltal"]
+                - target_mil
+            )
+        )
+
+    return jamforelser[
+        :MAX_JAMFORELSEBILAR
+    ]
+
+
+def _berakna_marknadspris_fran_jamforelser(
+    bil: dict,
+    jamforelser: list[dict],
+) -> int | None:
+    """
+    Beräknar marknadsvärde från faktiska jämförelseannonser.
+
+    Varje jämförelsepris justeras med KR_PER_MIL_AVVIKELSE för
+    skillnaden i miltal mellan jämförelsebilen och mål-bilen.
+
+    Därefter används medianen, vilket gör modellen mindre känslig
+    för enstaka extremt dyra eller billiga annonser.
+    """
+
+    if len(
+        jamforelser
+    ) < MIN_JAMFORELSEBILAR:
+        return None
+
+    target_mil = bil.get(
+        "miltal"
+    )
+
+    if not isinstance(
+        target_mil,
+        (int, float)
+    ):
+        return None
+
+    justerade_priser = []
+
+    for jamforelse in jamforelser:
+
+        pris = jamforelse[
+            "pris"
+        ]
+
+        miltal = jamforelse[
+            "miltal"
+        ]
+
+        # Om jämförelsebilen har fler mil än mål-bilen ska dess
+        # pris justeras uppåt.
+        #
+        # Om jämförelsebilen har färre mil ska dess pris justeras
+        # nedåt.
+        miljustering = (
+            miltal
+            - target_mil
+        ) * KR_PER_MIL_AVVIKELSE
+
+        justerat_pris = (
+            pris
+            + miljustering
+        )
+
+        justerade_priser.append(
+            justerat_pris
+        )
+
+    return int(
+        round(
+            median(
+                justerade_priser
+            ) / 1000
+        )
+        * 1000
+    )
+
+
+# =========================================================
+# MILTAL - FALLBACK
 # =========================================================
 
 # Tidigare modell använde 1 500 mil/år som normal körning.
-# Det ger för låg förväntad körsträcka på nyare bilar.
 #
 # Vi använder därför en högre normalnivå och en mildare
 # värdepåverkan per avvikande mil.
 FORVANTAT_MIL_PER_AR = 1800
-
-KR_PER_MIL_AVVIKELSE = 2.0
 
 
 # =========================================================
@@ -306,18 +555,23 @@ def berakna_miltalsdiagnostik(
 
 
 # =========================================================
-# MARKNADSVÄRDE
+# MANUELLT BASPRIS
 # =========================================================
 
-def berakna_marknadsvarde(
+def _hamta_baspris(
     bil: dict,
-) -> int:
+) -> int | None:
     """
-    Beräknar uppskattat marknadsvärde.
+    Hämtar manuellt baspris som fallback.
+
+    Om exakt årsmodell saknas används medianen av tillgängliga
+    årsmodeller för samma modell och variant.
     """
 
     modell = (
-        bil.get("modell")
+        bil.get(
+            "modell"
+        )
         or "v60"
     ).lower()
 
@@ -337,59 +591,117 @@ def berakna_marknadsvarde(
         )
     )
 
-    if baspris is None:
+    if baspris is not None:
+        return baspris
 
-        kandidater = [
-            pris
-            for (
-                mod,
-                var,
-                ar,
-            ), pris in BASPRIS.items()
-            if (
-                mod == modell
-                and var == variant
-            )
-        ]
+    kandidater = [
+        pris
+        for (
+            mod,
+            var,
+            ar,
+        ), pris in BASPRIS.items()
+        if (
+            mod == modell
+            and var == variant
+        )
+    ]
 
-        if not kandidater:
-            return 0
+    if not kandidater:
+        return None
 
-        kandidater = sorted(
+    return int(
+        median(
             kandidater
         )
+    )
 
-        baspris = kandidater[
-            len(kandidater) // 2
-        ]
+
+# =========================================================
+# MARKNADSVÄRDE
+# =========================================================
+
+def berakna_marknadsvarde(
+    bil: dict,
+    marknadsunderlag: dict | None = None,
+) -> int:
+    """
+    Beräknar uppskattat marknadsvärde.
+
+    Om minst MIN_JAMFORELSEBILAR relevanta annonser finns används
+    deras faktiska marknadspriser.
+
+    Annars används den manuella fallback-modellen.
+    """
 
     # -----------------------------------------------------
-    # Miltal
+    # EMPIRISKT MARKNADSVÄRDE
     # -----------------------------------------------------
 
-    alder_ar = _ar_sedan_arsmodell(
-        arsmodell
+    jamforelser = (
+        _hamta_jamforelsebilar(
+            bil,
+            marknadsunderlag,
+        )
     )
 
-    forvantat_mil = (
-        alder_ar
-        * FORVANTAT_MIL_PER_AR
+    marknadspris = (
+        _berakna_marknadspris_fran_jamforelser(
+            bil,
+            jamforelser,
+        )
     )
 
-    faktiskt_miltal = bil.get(
-        "miltal",
-        forvantat_mil,
+    anvander_empiriskt_underlag = (
+        marknadspris is not None
     )
 
-    mil_avvikelse = (
-        faktiskt_miltal
-        - forvantat_mil
-    )
+    if anvander_empiriskt_underlag:
 
-    mil_justering = (
-        -mil_avvikelse
-        * KR_PER_MIL_AVVIKELSE
-    )
+        baspris = marknadspris
+
+    else:
+
+        baspris = _hamta_baspris(
+            bil
+        )
+
+        if baspris is None:
+            return 0
+
+        # -------------------------------------------------
+        # Miltal - endast fallback-modellen
+        # -------------------------------------------------
+
+        arsmodell = bil.get(
+            "arsmodell"
+        )
+
+        alder_ar = _ar_sedan_arsmodell(
+            arsmodell
+        )
+
+        forvantat_mil = (
+            alder_ar
+            * FORVANTAT_MIL_PER_AR
+        )
+
+        faktiskt_miltal = bil.get(
+            "miltal",
+            forvantat_mil,
+        )
+
+        mil_avvikelse = (
+            faktiskt_miltal
+            - forvantat_mil
+        )
+
+        mil_justering = (
+            -mil_avvikelse
+            * KR_PER_MIL_AVVIKELSE
+        )
+
+        baspris += mil_justering
 
     # -----------------------------------------------------
     # Utrustning
@@ -425,7 +737,6 @@ def berakna_marknadsvarde(
 
     marknadsvarde = (
         baspris
-        + mil_justering
         + utrustning_justering
         + tillval
     )
@@ -444,6 +755,7 @@ def berakna_marknadsvarde(
 
 def berakna_fynd(
     bil: dict,
+    marknadsunderlag: dict | None = None,
 ) -> dict:
     """
     Returnerar:
@@ -451,11 +763,14 @@ def berakna_fynd(
         marknadsvarde
         diff
         niva
+        jamforelseantal
+        empiriskt_underlag
     """
 
     marknadsvarde = (
         berakna_marknadsvarde(
-            bil
+            bil,
+            marknadsunderlag,
         )
     )
 
@@ -467,6 +782,18 @@ def berakna_fynd(
     diff = (
         marknadsvarde
         - annonspris
+    )
+
+    jamforelser = (
+        _hamta_jamforelsebilar(
+            bil,
+            marknadsunderlag,
+        )
+    )
+
+    empiriskt_underlag = (
+        len(jamforelser)
+        >= MIN_JAMFORELSEBILAR
     )
 
     if diff >= 35000:
@@ -487,4 +814,10 @@ def berakna_fynd(
         "marknadsvarde": marknadsvarde,
         "diff": diff,
         "niva": niva,
+        "jamforelseantal": len(
+            jamforelser
+        ),
+        "empiriskt_underlag": (
+            empiriskt_underlag
+        ),
     }
