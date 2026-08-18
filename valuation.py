@@ -11,11 +11,10 @@ Grundtanke:
 4. Ta bort bilar under 1 000 mil från marknadsunderlaget.
 5. Ta bort aktuell bil från sina egna jämförelser.
 6. Justera jämförelsepris efter skillnad i miltal.
-7. Använd medianen av de justerade jämförelsepriserna.
-8. Justera för utrustningsnivå.
-9. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
-10. Falla tillbaka till ett manuellt baspris om tillräckligt många
-    jämförelsebilar saknas.
+7. Normalisera jämförelsebilarnas utrustning mot aktuell bil.
+8. Använd medianen av de justerade jämförelsepriserna.
+9. Falla tillbaka till ett manuellt baspris om tillräckligt många
+   jämförelsebilar saknas.
 
 VIKTIGT:
 Marknadsunderlaget ska endast innehålla faktiska kontantpriser för
@@ -298,6 +297,25 @@ def bygg_marknadsunderlag(
                 "pris": float(pris),
                 "miltal": float(miltal),
                 "annons_id": annons_id,
+
+                # Behåll information om utrustning
+                # så att jämförelsepriset senare
+                # kan normaliseras mot aktuell bil.
+                "utrustningsniva": bil.get(
+                    "utrustningsniva"
+                ),
+                "dragkrok": bool(
+                    bil.get("dragkrok")
+                ),
+                "varmare": bool(
+                    bil.get("varmare")
+                ),
+                "volvo_selekt": bool(
+                    bil.get("volvo_selekt")
+                ),
+                "stor_batteri": bool(
+                    bil.get("stor_batteri")
+                ),
             }
         )
 
@@ -410,143 +428,7 @@ def _hamta_jamforelsebilar(
 
 
 # =========================================================
-# MARKNADSPRIS
-# =========================================================
-
-def _berakna_marknadspris_fran_jamforelser(
-    bil: dict,
-    jamforelser: list[dict],
-) -> int | None:
-
-    if len(jamforelser) < MIN_JAMFORELSEBILAR:
-        return None
-
-    target_mil = bil.get("miltal")
-
-    if not isinstance(
-        target_mil,
-        (int, float)
-    ):
-        return None
-
-    justerade_priser = []
-
-    for jamforelse in jamforelser:
-
-        pris = jamforelse["pris"]
-        miltal = jamforelse["miltal"]
-
-        miljustering = (
-            miltal - target_mil
-        ) * KR_PER_MIL_AVVIKELSE
-
-        justerat_pris = (
-            pris + miljustering
-        )
-
-        justerade_priser.append(
-            justerat_pris
-        )
-
-    if not justerade_priser:
-        return None
-
-    return int(
-        round(
-            median(justerade_priser) / 1000
-        ) * 1000
-    )
-
-
-def _bygg_marknadsdiagnostik(
-    bil: dict,
-    jamforelser: list[dict],
-) -> dict:
-
-    target_mil = bil.get("miltal")
-
-    detaljer = []
-
-    if not isinstance(
-        target_mil,
-        (int, float)
-    ):
-
-        return {
-            "antal": len(jamforelser),
-            "malpris": bil.get("annonspris"),
-            "milmalspris": None,
-            "median_justerat": None,
-            "jamforelser": [],
-        }
-
-    for jamforelse in jamforelser:
-
-        pris = jamforelse["pris"]
-        miltal = jamforelse["miltal"]
-
-        miljustering = (
-            miltal - target_mil
-        ) * KR_PER_MIL_AVVIKELSE
-
-        justerat_pris = (
-            pris + miljustering
-        )
-
-        detaljer.append(
-            {
-                "pris": int(round(pris)),
-                "miltal": int(round(miltal)),
-                "milskillnad": int(
-                    round(
-                        miltal - target_mil
-                    )
-                ),
-                "miljustering": int(
-                    round(miljustering)
-                ),
-                "justerat_pris": int(
-                    round(justerat_pris)
-                ),
-                "annons_id": jamforelse.get(
-                    "annons_id"
-                ),
-            }
-        )
-
-    justerade = [
-        x["justerat_pris"]
-        for x in detaljer
-    ]
-
-    median_justerat = (
-        median(justerade)
-        if justerade
-        else None
-    )
-
-    return {
-        "antal": len(detaljer),
-        "malpris": bil.get("annonspris"),
-        "miltal": int(round(target_mil)),
-        "median_justerat": (
-            int(round(median_justerat))
-            if median_justerat is not None
-            else None
-        ),
-        "jamforelser": detaljer,
-    }
-
-
-# =========================================================
-# MILTAL - FALLBACK
-# =========================================================
-
-FORVANTAT_MIL_PER_AR = 1800
-
-
-# =========================================================
-# UTRUSTNING
+# UTRUSTNINGSNIVÅ
 # =========================================================
 
 UTRUSTNINGSNIVA_JUSTERING = [
@@ -618,27 +500,6 @@ SELEKT_VARDE = 6000
 STOR_BATTERI_VARDE = 12000
 
 
-# =========================================================
-# HJÄLPFUNKTIONER
-# =========================================================
-
-def _ar_sedan_arsmodell(
-    arsmodell: int,
-) -> float:
-
-    idag = date.today()
-
-    return max(
-        0.0,
-        (
-            idag.year - arsmodell
-        )
-        + (
-            idag.month - 6
-        ) / 12,
-    )
-
-
 def _hamta_utrustningsjustering(
     bil: dict,
 ) -> int:
@@ -665,6 +526,293 @@ def _hamta_utrustningsjustering(
                 return justering
 
     return 0
+
+
+def _hamta_tillvalsjustering(
+    bil: dict,
+) -> int:
+
+    justering = 0
+
+    if bil.get("dragkrok"):
+        justering += DRAGKROK_VARDE
+
+    if bil.get("varmare"):
+        justering += VARMARE_VARDE
+
+    if bil.get("volvo_selekt"):
+        justering += SELEKT_VARDE
+
+    if bil.get("stor_batteri"):
+        justering += STOR_BATTERI_VARDE
+
+    return justering
+
+
+def _hamta_total_utrustningsjustering(
+    bil: dict,
+) -> int:
+
+    return (
+        _hamta_utrustningsjustering(bil)
+        + _hamta_tillvalsjustering(bil)
+    )
+
+
+# =========================================================
+# MARKNADSPRIS
+# =========================================================
+
+def _berakna_marknadspris_fran_jamforelser(
+    bil: dict,
+    jamforelser: list[dict],
+) -> int | None:
+
+    if len(jamforelser) < MIN_JAMFORELSEBILAR:
+        return None
+
+    target_mil = bil.get("miltal")
+
+    if not isinstance(
+        target_mil,
+        (int, float)
+    ):
+        return None
+
+    target_utrustning = (
+        _hamta_total_utrustningsjustering(
+            bil
+        )
+    )
+
+    justerade_priser = []
+
+    for jamforelse in jamforelser:
+
+        pris = jamforelse["pris"]
+        miltal = jamforelse["miltal"]
+
+        # -------------------------------------------------
+        # Miltalsjustering
+        # -------------------------------------------------
+
+        miljustering = (
+            miltal - target_mil
+        ) * KR_PER_MIL_AVVIKELSE
+
+        pris_efter_miltal = (
+            pris + miljustering
+        )
+
+        # -------------------------------------------------
+        # Utrustningsnormalisering
+        #
+        # Vi räknar om jämförelsebilen till samma
+        # utrustningsnivå som den aktuella bilen.
+        # -------------------------------------------------
+
+        jamforelse_utrustning = (
+            _hamta_total_utrustningsjustering(
+                jamforelse
+            )
+        )
+
+        utrustningsjustering = (
+            target_utrustning
+            - jamforelse_utrustning
+        )
+
+        justerat_pris = (
+            pris_efter_miltal
+            + utrustningsjustering
+        )
+
+        justerade_priser.append(
+            justerat_pris
+        )
+
+    if not justerade_priser:
+        return None
+
+    return int(
+        round(
+            median(justerade_priser) / 1000
+        ) * 1000
+    )
+
+
+def _bygg_marknadsdiagnostik(
+    bil: dict,
+    jamforelser: list[dict],
+) -> dict:
+
+    target_mil = bil.get("miltal")
+
+    detaljer = []
+
+    if not isinstance(
+        target_mil,
+        (int, float)
+    ):
+
+        return {
+            "antal": len(jamforelser),
+            "malpris": bil.get("annonspris"),
+            "miltal": None,
+            "median_justerat": None,
+            "jamforelser": [],
+        }
+
+    target_utrustning = (
+        _hamta_total_utrustningsjustering(
+            bil
+        )
+    )
+
+    for jamforelse in jamforelser:
+
+        pris = jamforelse["pris"]
+        miltal = jamforelse["miltal"]
+
+        milskillnad = (
+            miltal - target_mil
+        )
+
+        miljustering = (
+            milskillnad
+            * KR_PER_MIL_AVVIKELSE
+        )
+
+        jamforelse_utrustning = (
+            _hamta_total_utrustningsjustering(
+                jamforelse
+            )
+        )
+
+        utrustningsjustering = (
+            target_utrustning
+            - jamforelse_utrustning
+        )
+
+        justerat_pris = (
+            pris
+            + miljustering
+            + utrustningsjustering
+        )
+
+        detaljer.append(
+            {
+                "pris": int(
+                    round(pris)
+                ),
+
+                "miltal": int(
+                    round(miltal)
+                ),
+
+                "milskillnad": int(
+                    round(milskillnad)
+                ),
+
+                "miljustering": int(
+                    round(miljustering)
+                ),
+
+                "jamforelse_utrustning": int(
+                    round(
+                        jamforelse_utrustning
+                    )
+                ),
+
+                "malbil_utrustning": int(
+                    round(
+                        target_utrustning
+                    )
+                ),
+
+                "utrustningsjustering": int(
+                    round(
+                        utrustningsjustering
+                    )
+                ),
+
+                "justerat_pris": int(
+                    round(justerat_pris
+                    )
+                ),
+
+                "annons_id": jamforelse.get(
+                    "annons_id"
+                ),
+            }
+        )
+
+    justerade = [
+        x["justerat_pris"]
+        for x in detaljer
+    ]
+
+    median_justerat = (
+        median(justerade)
+        if justerade
+        else None
+    )
+
+    return {
+        "antal": len(detaljer),
+
+        "malpris": bil.get(
+            "annonspris"
+        ),
+
+        "miltal": int(
+            round(target_mil)
+        ),
+
+        "malbil_utrustning": int(
+            round(target_utrustning)
+        ),
+
+        "median_justerat": (
+            int(
+                round(
+                    median_justerat
+                )
+            )
+            if median_justerat is not None
+            else None
+        ),
+
+        "jamforelser": detaljer,
+    }
+
+
+# =========================================================
+# MILTAL - FALLBACK
+# =========================================================
+
+FORVANTAT_MIL_PER_AR = 1800
+
+
+# =========================================================
+# MILTALSDIAGNOSTIK
+# =========================================================
+
+def _ar_sedan_arsmodell(
+    arsmodell: int,
+) -> float:
+
+    idag = date.today()
+
+    return max(
+        0.0,
+        (
+            idag.year - arsmodell
+        )
+        + (
+            idag.month - 6
+        ) / 12,
+    )
 
 
 def berakna_miltalsdiagnostik(
@@ -713,11 +861,25 @@ def berakna_miltalsdiagnostik(
 
     return {
         "arsmodell": arsmodell,
-        "alder_ar": round(alder_ar, 2),
-        "forvantat_mil": round(forvantat_mil),
+
+        "alder_ar": round(
+            alder_ar,
+            2,
+        ),
+
+        "forvantat_mil": round(
+            forvantat_mil
+        ),
+
         "faktiskt_miltal": faktiskt_miltal,
-        "mil_avvikelse": round(mil_avvikelse),
-        "mil_justering": round(mil_justering),
+
+        "mil_avvikelse": round(
+            mil_avvikelse
+        ),
+
+        "mil_justering": round(
+            mil_justering
+        ),
     }
 
 
@@ -764,7 +926,9 @@ def _hamta_baspris(
     if not kandidater:
         return None
 
-    return int(median(kandidater))
+    return int(
+        median(kandidater)
+    )
 
 
 # =========================================================
@@ -790,18 +954,32 @@ def berakna_marknadsvarde(
         )
     )
 
+    # =====================================================
+    # EMPIRISKT MARKNADSVÄRDE
+    # =====================================================
+
     if marknadspris is not None:
 
-        baspris = marknadspris
+        # Utrustningen är redan normaliserad i
+        # jämförelsepriset.
+        marknadsvarde = marknadspris
+
+    # =====================================================
+    # FALLBACK
+    # =====================================================
 
     else:
 
-        baspris = _hamta_baspris(bil)
+        baspris = _hamta_baspris(
+            bil
+        )
 
         if baspris is None:
             return 0
 
-        arsmodell = bil.get("arsmodell")
+        arsmodell = bil.get(
+            "arsmodell"
+        )
 
         alder_ar = _ar_sedan_arsmodell(
             arsmodell
@@ -827,34 +1005,22 @@ def berakna_marknadsvarde(
             * KR_PER_MIL_AVVIKELSE
         )
 
-        baspris += mil_justering
+        utrustning_justering = (
+            _hamta_total_utrustningsjustering(
+                bil
+            )
+        )
 
-    utrustning_justering = (
-        _hamta_utrustningsjustering(bil)
-    )
-
-    tillval = 0
-
-    if bil.get("dragkrok"):
-        tillval += DRAGKROK_VARDE
-
-    if bil.get("varmare"):
-        tillval += VARMARE_VARDE
-
-    if bil.get("volvo_selekt"):
-        tillval += SELEKT_VARDE
-
-    if bil.get("stor_batteri"):
-        tillval += STOR_BATTERI_VARDE
-
-    marknadsvarde = (
-        baspris
-        + utrustning_justering
-        + tillval
-    )
+        marknadsvarde = (
+            baspris
+            + mil_justering
+            + utrustning_justering
+        )
 
     return (
-        round(marknadsvarde / 1000)
+        round(
+            marknadsvarde / 1000
+        )
         * 1000
     )
 
@@ -917,12 +1083,15 @@ def berakna_fynd(
         "marknadsvarde": marknadsvarde,
         "diff": diff,
         "niva": niva,
+
         "jamforelseantal": len(
             jamforelser
         ),
+
         "empiriskt_underlag": (
             empiriskt_underlag
         ),
+
         "marknadsdiagnostik": (
             marknadsdiagnostik
         ),
