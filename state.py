@@ -1,54 +1,137 @@
 """
-Sparar historik mellan körningar (i en enkel JSON-fil) så vi kan:
-- upptäcka prissänkningar
-- veta hur länge en annons legat ute
-- se till att varje bil ALDRIG notifieras mer än en gång, oavsett
-  hur många gånger den dyker upp i senare körningar eller om den
-  senare kvalar in på en högre fyndnivå
+Sparar kortsiktig körnings-/notifieringsstate.
+
+Den långsiktiga marknadshistoriken ligger separat i
+data/market_history.jsonl och ska aldrig behöva migreras tillsammans
+med state.json.
 """
 
 import json
 import os
 from datetime import date
 
-from config import STATE_FIL, MIN_DAGAR_FOR_SANKNING_RELEVANT, STOR_SANKNING_KR
+from config import (
+    STATE_FIL,
+    MIN_DAGAR_FOR_SANKNING_RELEVANT,
+    STOR_SANKNING_KR,
+    MIN_PRISSANKNING_FOR_NY_NOTIS,
+)
 
 
 def _nyckel(bil: dict) -> str:
+    """Stabil nyckel för samma annons över tid."""
     if bil.get("regnr"):
-        return f"reg:{bil['regnr'].upper().replace(' ', '')}"
+        return f"reg:{str(bil['regnr']).upper().replace(' ', '')}"
+
+    if bil.get("annons_id"):
+        return f"annons:{str(bil['annons_id']).strip()}"
+
+    url = bil.get("url")
+    if url:
+        return f"url:{str(url).strip().rstrip('/')}"
+
+    urls = bil.get("urls") or []
+    for kandidat in urls:
+        if kandidat:
+            return f"url:{str(kandidat).strip().rstrip('/')}"
+
+    # Sista fallback för gamla/inkompletta datakällor.
     modell = (bil.get("modell") or "v60").lower()
-    return f"kal:{modell}:{bil.get('variant')}:{bil.get('arsmodell')}:{bil.get('miltal')}"
+    return (
+        f"kal:{modell}:{bil.get('variant')}:"
+        f"{bil.get('arsmodell')}:{bil.get('miltal')}"
+    )
+
+
+def _gammal_nyckel(bil: dict) -> str:
+    modell = (bil.get("modell") or "v60").lower()
+    return (
+        f"kal:{modell}:{bil.get('variant')}:"
+        f"{bil.get('arsmodell')}:{bil.get('miltal')}"
+    )
+
+
+def _hamta_historik(bil: dict, state: dict):
+    nyckel = _nyckel(bil)
+    historik = state.get(nyckel)
+
+    if historik is not None:
+        return nyckel, historik
+
+    # Försiktig migration av gamla state-poster. Vi migrerar endast
+    # när den gamla nyckeln matchar exakt. Vi gissar aldrig mellan
+    # flera möjliga bilar.
+    gammal = _gammal_nyckel(bil)
+    historik = state.get(gammal)
+
+    if historik is not None and nyckel != gammal:
+        state[nyckel] = historik
+        state[nyckel]["migrerad_fran"] = gammal
+        return nyckel, historik
+
+    return nyckel, None
 
 
 def ladda_state() -> dict:
     if not os.path.exists(STATE_FIL):
         return {}
+
     with open(STATE_FIL, "r", encoding="utf-8") as f:
-        return json.load(f)
+        state = json.load(f)
+
+    migrerade = False
+
+    # Försiktig migration:
+    # gamla notifierade poster får senaste pris som första kända
+    # notifieringsnivå. Därmed skickas inga gamla fynd ut igen direkt.
+    for historik in state.values():
+        if not isinstance(historik, dict):
+            continue
+
+        if historik.get("notifierad") is True:
+            if "notifierad_pris" not in historik:
+                pris = historik.get("senaste_pris")
+                if isinstance(pris, (int, float)):
+                    historik["notifierad_pris"] = pris
+                    migrerade = True
+
+    if migrerade:
+        print(
+            "[STATE] Migrering klar: gamla notifieringar har fått "
+            "notifierad_pris baserat på senaste kända pris."
+        )
+
+    return state
 
 
 def spara_state(state: dict) -> None:
     os.makedirs(os.path.dirname(STATE_FIL), exist_ok=True)
+
     with open(STATE_FIL, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
+        json.dump(
+            state,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
-def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
+def uppdatera_och_berika(
+    bilar: list[dict],
+    state: dict,
+) -> list[dict]:
     """
-    Jämför dagens bilar mot sparad historik. Lägger till på varje bil:
-    - dagar_ute: hur många dagar annonsen synts i filtret
-    - prissankning_kr: total sänkning sedan första observation
-    - prissankning_relevant: bool, True om sänkningen skedde efter att
-      bilen legat ute ett tag (dvs inte bara en ny annons redan
-      prissatt lågt)
+    Jämför dagens bilar mot sparad state och lägger till:
+    - dagar_ute
+    - prissankning_kr
+    - prissankning_relevant
     """
+
     idag = date.today().isoformat()
     resultat = []
 
     for bil in bilar:
-        nyckel = _nyckel(bil)
-        historik = state.get(nyckel)
+        nyckel, historik = _hamta_historik(bil, state)
 
         if historik is None:
             state[nyckel] = {
@@ -58,13 +141,24 @@ def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
                 "senast_sedd": idag,
                 "notifierad": False,
             }
+
             bil["dagar_ute"] = 0
             bil["prissankning_kr"] = 0
             bil["prissankning_relevant"] = False
+
         else:
-            forsta_sedd = date.fromisoformat(historik["forsta_sedd"])
-            dagar_ute = (date.today() - forsta_sedd).days
-            sankning = historik["forsta_pris"] - bil["annonspris"]
+            forsta_sedd = date.fromisoformat(
+                historik["forsta_sedd"]
+            )
+
+            dagar_ute = (
+                date.today() - forsta_sedd
+            ).days
+
+            sankning = (
+                historik["forsta_pris"]
+                - bil["annonspris"]
+            )
 
             bil["dagar_ute"] = dagar_ute
             bil["prissankning_kr"] = sankning
@@ -81,14 +175,54 @@ def uppdatera_och_berika(bilar: list[dict], state: dict) -> list[dict]:
     return resultat
 
 
-def redan_notifierad(bil: dict, state: dict) -> bool:
-    """True om vi NÅGONSIN tidigare skickat notis om den här bilen -
-    oavsett fyndnivå. En bil notifieras alltså max en gång, totalt."""
-    nyckel = _nyckel(bil)
-    return state.get(nyckel, {}).get("notifierad", False)
+def redan_notifierad(
+    bil: dict,
+    state: dict,
+) -> bool:
+    """
+    True om bilen fortfarande ligger på samma notifieringsnivå.
+
+    En gammal notifierad=True utan notifierad_pris migreras i ladda_state()
+    och spärras därför tills bilen faktiskt blivit minst 15 000 kr billigare.
+    """
+
+    nyckel, historik = _hamta_historik(bil, state)
+    historik = historik or {}
+
+    if not historik.get("notifierad", False):
+        return False
+
+    notifierad_pris = historik.get("notifierad_pris")
+
+    if not isinstance(
+        notifierad_pris,
+        (int, float),
+    ):
+        # Säkerhetsfallback: gammal post utan pris ska inte orsaka spam.
+        return True
+
+    aktuellt_pris = bil.get("annonspris")
+
+    if not isinstance(
+        aktuellt_pris,
+        (int, float),
+    ):
+        return True
+
+    return (
+        aktuellt_pris
+        > notifierad_pris - MIN_PRISSANKNING_FOR_NY_NOTIS
+    )
 
 
-def markera_notifierad(bil: dict, state: dict) -> None:
-    nyckel = _nyckel(bil)
-    if nyckel in state:
+def markera_notifierad(
+    bil: dict,
+    state: dict,
+) -> None:
+    nyckel, historik = _hamta_historik(bil, state)
+
+    if historik is not None:
         state[nyckel]["notifierad"] = True
+        state[nyckel]["notifierad_pris"] = bil.get(
+            "annonspris"
+        )

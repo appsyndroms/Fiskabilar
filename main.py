@@ -1,20 +1,17 @@
 """
-V60-fyndfilter - huvudscript.
-
-Kör:
-    python main.py
+Fiskabilar - huvudscript.
 
 Flöde:
 1. Kontrollera aktiv tid.
-2. Hämta annonser från aktiva källor.
-3. Deduplicera annonser.
-4. Berika med historik.
-5. Bygg marknadsunderlag.
-6. Beräkna marknadsvärde.
-7. Beräkna fyndscore.
-8. Logga kandidater och filterresultat.
-9. Skicka nya intressanta fynd direkt via mejl.
-10. Markera skickade annonser i state.
+2. Hämta annonser.
+3. Deduplicera.
+4. Uppdatera state.
+5. Spara annonsobservationer till långtidshistoriken.
+6. Bygg marknadsunderlag.
+7. Beräkna marknadsvärde/fynd.
+8. Spara marknadsvärdesobservationer.
+9. Skicka nya fynd.
+10. Spara state även när inget mejl skickats.
 """
 
 from datetime import datetime
@@ -43,13 +40,11 @@ from scoring import (
     score_niva,
 )
 from notify import skicka_epost
-
-from scrapers import (
-    blocket,
-    wayke,
-    bytbil,
-    bilweb,
+from history import (
+    spara_annonsobservation,
+    spara_marknadsvardesobservation,
 )
+from scrapers import blocket, wayke, bytbil, bilweb
 
 
 KALLA_TILL_MODUL = {
@@ -59,109 +54,46 @@ KALLA_TILL_MODUL = {
     "bilweb": bilweb,
 }
 
-
 AKTIV_TID_START = 6
 AKTIV_TID_SLUT = 22
 TIDSZON = ZoneInfo("Europe/Stockholm")
 
-
-# =========================================================
-# FILTERGRÄNSER
-# =========================================================
-
 MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
-
-# Vi är inte intresserade av bilar med mindre än 1 000 mil.
 MIN_MILTAL_FOR_KANDIDAT = 1000
-
 DIAGNOSTIK_ANTAL = 20
 
 
 def _inom_aktiv_tid() -> bool:
-    """Avgör om det just nu är mellan 06:00-22:00 svensk tid."""
-
     nu = datetime.now(TIDSZON)
-
-    return (
-        AKTIV_TID_START
-        <= nu.hour
-        < AKTIV_TID_SLUT
-    )
+    return AKTIV_TID_START <= nu.hour < AKTIV_TID_SLUT
 
 
 def hamta_alla_annonser() -> list[dict]:
-    """Hämtar annonser från alla aktiva källor."""
-
     alla = []
 
     for kalla in AKTIVA_KALLOR:
-
         modul = KALLA_TILL_MODUL.get(kalla)
 
         if modul is None:
-            print(
-                f"Okänd källa i config: {kalla}"
-            )
+            print(f"Okänd källa i config: {kalla}")
             continue
 
         try:
             annonser = modul.hamta_annonser()
-
-            print(
-                f"[KÄLLA] {kalla}: "
-                f"{len(annonser)} annonser"
-            )
-
+            print(f"[KÄLLA] {kalla}: {len(annonser)} annonser")
             alla.extend(annonser)
-
         except Exception as e:
-            print(
-                f"FEL i källa '{kalla}': {e}"
-            )
+            print(f"FEL i källa '{kalla}': {e}")
 
     return alla
 
 
 def _annons_namn(bil: dict) -> str:
-    """Försöker skapa en användbar kort rubrik för loggen."""
-
     try:
         return bil_rubrik(bil)
     except Exception:
-        modell = bil.get(
-            "modell"
-        ) or "Okänd modell"
-
-        return str(modell)
-
-
-def _ar_bmw_330e(bil: dict) -> bool:
-    """
-    Identifierar BMW 330e xDrive Touring.
-
-    Diagnostiken begränsas till denna modell så att Actions-loggen
-    inte fylls med detaljer för alla andra bilmodeller.
-    """
-
-    text = " ".join(
-        str(
-            bil.get(
-                falt,
-                ""
-            )
-        )
-        for falt in (
-            "modell",
-            "variant",
-        )
-    ).lower()
-
-    return (
-        "330e" in text
-        and "xdrive" in text
-        and "touring" in text
-    )
+        return str(bil.get("modell") or "Okänd modell")
 
 
 def _logga_kandidat(
@@ -170,16 +102,8 @@ def _logga_kandidat(
     score: int,
     status: str,
 ) -> dict:
-    """Skapar en kompakt diagnostikpost."""
-
-    breakdown = berakna_fyndscore_breakdown(
-        bil,
-        vardering,
-    )
-
-    miltalsdiagnostik = berakna_miltalsdiagnostik(
-        bil
-    )
+    breakdown = berakna_fyndscore_breakdown(bil, vardering)
+    mildiag = berakna_miltalsdiagnostik(bil)
 
     return {
         "score": score,
@@ -188,369 +112,88 @@ def _logga_kandidat(
         "utrustningspoang": breakdown["utrustning"],
         "trygghetspoang": breakdown["trygghet"],
         "auktion_avdrag": breakdown["auktion_avdrag"],
-        "diff": vardering.get(
-            "diff",
-            0,
-        ),
-        "marknad": vardering.get(
-            "marknadsvarde",
-            0,
-        ),
-        "pris": bil.get(
-            "annonspris",
-            0,
-        ),
-        "miltal": bil.get(
-            "miltal",
-            0,
-        ),
-        "arsmodell": bil.get(
-            "arsmodell",
-            "?",
-        ),
+        "diff": vardering.get("diff", 0),
+        "marknad": vardering.get("marknadsvarde", 0),
+        "pris": bil.get("annonspris", 0),
+        "miltal": bil.get("miltal", 0),
+        "arsmodell": bil.get("arsmodell", "?"),
         "modell": _annons_namn(bil),
-        "utrustning": bil.get(
-            "utrustningsniva",
-            "",
-        ),
+        "utrustning": bil.get("utrustningsniva", ""),
         "status": status,
-        "url": (
-            bil.get("urls", [""])[0]
-            if bil.get("urls")
-            else ""
-        ),
-        "alder_ar": miltalsdiagnostik[
-            "alder_ar"
-        ],
-        "forvantat_mil": miltalsdiagnostik[
-            "forvantat_mil"
-        ],
-        "mil_avvikelse": miltalsdiagnostik[
-            "mil_avvikelse"
-        ],
-        "mil_justering": miltalsdiagnostik[
-            "mil_justering"
-        ],
-        "marknadsdiagnostik": vardering.get(
-            "marknadsdiagnostik"
-        ),
-        "diagnostik_330e": _ar_bmw_330e(
-            bil
-        ),
+        "url": (bil.get("urls") or [bil.get("url") or ""])[0],
+        "alder_ar": mildiag["alder_ar"],
+        "forvantat_mil": mildiag["forvantat_mil"],
+        "mil_avvikelse": mildiag["mil_avvikelse"],
+        "mil_justering": mildiag["mil_justering"],
+        "marknadsdiagnostik": vardering.get("marknadsdiagnostik"),
     }
 
 
-def _skriv_marknadsdiagnostik(
-    kandidat: dict,
-) -> None:
-    """
-    Skriver ut exakt vilka jämförelseannonser som ligger bakom
-    marknadsvärdet.
-
-    Påverkar inte själva värderingen.
-    """
-
-    diagnostik = kandidat.get(
-        "marknadsdiagnostik"
-    )
-
-    if not diagnostik:
-        return
-
-    print("")
-    print(
-        "-" * 80
-    )
-    print(
-        "[MARKNADSDIAGNOSTIK]"
-    )
-    print(
-        f"{kandidat['modell']} "
-        f"{kandidat['arsmodell']}"
-    )
-
-    print(
-        f"Annonspris: "
-        f"{kandidat['pris']:,} kr"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Miltal: "
-        f"{kandidat['miltal']:,} mil"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Marknadsvärde: "
-        f"{kandidat['marknad']:,} kr"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Diff: "
-        f"{kandidat['diff']:+,} kr"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Antal jämförelsebilar: "
-        f"{diagnostik.get('antal', 0)}"
-    )
-
-    median_justerat = diagnostik.get(
-        "median_justerat"
-    )
-
-    if median_justerat is not None:
-
-        print(
-            f"Median justerat pris: "
-            f"{median_justerat:,} kr"
-            .replace(",", " ")
-        )
-
-    print("")
-
-    for index, jamforelse in enumerate(
-        diagnostik.get(
-            "jamforelser",
-            []
-        ),
-        start=1,
-    ):
-
-        print(
-            f"  Jämförelse {index:02d}:"
-        )
-
-        print(
-            f"    Pris: "
-            f"{jamforelse['pris']:,} kr"
-            .replace(",", " ")
-        )
-
-        print(
-            f"    Miltal: "
-            f"{jamforelse['miltal']:,} mil"
-            .replace(",", " ")
-        )
-
-        print(
-            f"    Skillnad: "
-            f"{jamforelse['milskillnad']:+,} mil"
-            .replace(",", " ")
-        )
-
-        print(
-            f"    Miljustering: "
-            f"{jamforelse['miljustering']:+,} kr"
-            .replace(",", " ")
-        )
-
-        print(
-            f"    Justerat pris: "
-            f"{jamforelse['justerat_pris']:,} kr"
-            .replace(",", " ")
-        )
-
-        if jamforelse.get(
-            "annons_id"
-        ):
-
-            print(
-                f"    Annons-ID: "
-                f"{jamforelse['annons_id']}"
-            )
-
-    print(
-        "-" * 80
-    )
-
-
-def _skriv_diagnostik(
-    kandidater: list[dict],
-) -> None:
-    """
-    Skriver ut de bästa kandidaterna.
-
-    Dessa kan ha skickats, stoppats av score,
-    redan vara notifierade eller av annan anledning
-    inte blivit mejlade.
-    """
-
+def _skriv_diagnostik(kandidater: list[dict]) -> None:
     if not kandidater:
-        print("")
-        print("=== DIAGNOSTIK ===")
+        print("\n=== DIAGNOSTIK ===")
         print("Inga kandidater passerade valuation.")
         return
 
     kandidater = sorted(
         kandidater,
-        key=lambda x: (
-            x["score"],
-            x["diff"],
-        ),
+        key=lambda x: (x["score"], x["diff"]),
         reverse=True,
     )
 
-    print("")
-    print("=" * 80)
+    print("\n" + "=" * 80)
     print("=== DIAGNOSTIK: BÄSTA KANDIDATER ===")
     print("=" * 80)
 
-    for index, kandidat in enumerate(
-        kandidater[:DIAGNOSTIK_ANTAL],
-        start=1,
-    ):
-
+    for i, k in enumerate(kandidater[:DIAGNOSTIK_ANTAL], 1):
         print(
-            f"{index:02d}. "
-            f"{kandidat['score']:3d}/100 | "
-            f"{kandidat['arsmodell']} | "
-            f"{kandidat['miltal']:,} mil | "
-            f"{kandidat['pris']:,} kr | "
-            f"diff +{kandidat['diff']:,} | "
-            f"{kandidat['modell']} | "
-            f"{kandidat['utrustning']} | "
-            f"{kandidat['status']}"
-        )
-
-        print(
-            "    "
-            f"Pris: {kandidat['prispoang']}/60 | "
-            f"Miltal: {kandidat['miltalspoang']}/20 | "
-            f"Utrustning: {kandidat['utrustningspoang']}/5 | "
-            f"Trygghet: {kandidat['trygghetspoang']}/15"
-            + (
-                f" | Auktion: "
-                f"-{kandidat['auktion_avdrag']}"
-                if kandidat["auktion_avdrag"]
-                else ""
-            )
-        )
-
-        print(
-            "    "
-            f"Ålder: {kandidat['alder_ar']:.2f} år | "
-            f"Förväntat: {kandidat['forvantat_mil']:,} mil | "
-            f"Faktiskt: {kandidat['miltal']:,} mil | "
-            f"Avvikelse: {kandidat['mil_avvikelse']:+,} mil | "
-            f"Miljustering: {kandidat['mil_justering']:+,} kr"
+            f"{i:02d}. {k['score']:3d}/100 | "
+            f"{k['arsmodell']} | {k['miltal']:,} mil | "
+            f"{k['pris']:,} kr | diff +{k['diff']:,} | "
+            f"{k['modell']} | {k['utrustning']} | {k['status']}"
             .replace(",", " ")
         )
-
-        if kandidat.get(
-            "diagnostik_330e"
-        ):
-
-            _skriv_marknadsdiagnostik(
-                kandidat
-            )
-
-        if kandidat["url"]:
-            print(
-                f"    {kandidat['url']}"
-            )
+        print(
+            "    "
+            f"Pris: {k['prispoang']}/60 | "
+            f"Miltal: {k['miltalspoang']}/20 | "
+            f"Utrustning: {k['utrustningspoang']}/5 | "
+            f"Trygghet: {k['trygghetspoang']}/15"
+        )
 
     print("=" * 80)
-    print("")
 
 
 def main():
-
-    print("")
-    print("=== Bilfyndfilter startar ===")
-    print("")
-
-    # =====================================================
-    # AKTIV TID
-    # =====================================================
+    print("\n=== Bilfyndfilter startar ===\n")
 
     if not _inom_aktiv_tid():
-
         nu = datetime.now(TIDSZON)
-
         print(
-            f"Utanför aktiv tid "
-            f"({nu.strftime('%H:%M')} svensk tid, "
-            f"fönster är "
-            f"{AKTIV_TID_START:02d}:00-"
-            f"{AKTIV_TID_SLUT:02d}:00). "
-            "Avslutar utan att göra något."
+            f"Utanför aktiv tid ({nu.strftime('%H:%M')} svensk tid, "
+            f"fönster {AKTIV_TID_START:02d}:00-"
+            f"{AKTIV_TID_SLUT:02d}:00). Avslutar."
         )
-
         return
 
-    # =====================================================
-    # HÄMTA
-    # =====================================================
-
     raa_annonser = hamta_alla_annonser()
+    print(f"Totalt {len(raa_annonser)} annonser innan dedup")
 
-    print("")
-    print(
-        f"Totalt {len(raa_annonser)} "
-        "annonser innan dedup"
-    )
-
-    # =====================================================
-    # DEDUP
-    # =====================================================
-
-    bilar = deduplicera(
-        raa_annonser
-    )
-
-    print(
-        f"{len(bilar)} unika bilar efter dedup"
-    )
-
-    # =====================================================
-    # STATE / HISTORIK
-    # =====================================================
+    bilar = deduplicera(raa_annonser)
+    print(f"{len(bilar)} unika bilar efter dedup")
 
     state = ladda_state()
+    bilar = uppdatera_och_berika(bilar, state)
 
-    bilar = uppdatera_och_berika(
-        bilar,
-        state,
-    )
+    # Långtidshistorik: en observation per hittad annons och körning.
+    for bil in bilar:
+        try:
+            spara_annonsobservation(bil)
+        except Exception as e:
+            print(f"[HISTORIK] Kunde inte spara annonsobservation: {e}")
 
-    # =====================================================
-    # MARKNADSUNDERLAG
-    # =====================================================
-
-    marknadsunderlag = bygg_marknadsunderlag(
-        bilar
-    )
-
-    print(
-        f"{len(marknadsunderlag)} "
-        "marknadskategorier byggda"
-    )
-
-    for kategori, annonser in (
-        marknadsunderlag.items()
-    ):
-
-        if len(annonser) >= 3:
-
-            modell, variant, arsmodell = (
-                kategori
-            )
-
-            print(
-                f"[MARKNAD] "
-                f"{modell} | "
-                f"{variant} | "
-                f"{arsmodell}: "
-                f"{len(annonser)} jämförelsebilar"
-            )
-
-    # =====================================================
-    # STATISTIK
-    # =====================================================
+    marknadsunderlag = bygg_marknadsunderlag(bilar)
+    print(f"{len(marknadsunderlag)} marknadskategorier byggda")
 
     statistik = {
         "totalt": len(bilar),
@@ -565,342 +208,114 @@ def main():
 
     kandidater = []
 
-    # =====================================================
-    # BEDÖM ALLA BILAR
-    # =====================================================
-
     for bil in bilar:
-
-        # -------------------------------------------------
-        # Leasingfilter
-        # -------------------------------------------------
-
-        if _ar_leasingannons(
-            bil
-        ):
-
-            statistik[
-                "leasing_stoppade"
-            ] += 1
-
-            print(
-                "[FILTER] "
-                f"STOPP: leasingannons - "
-                f"{_annons_namn(bil)}"
-            )
-
+        if _ar_leasingannons(bil):
+            statistik["leasing_stoppade"] += 1
             continue
 
-        # -------------------------------------------------
-        # Miltalsfilter
-        # -------------------------------------------------
-
-        miltal = bil.get(
-            "miltal"
-        )
-
-        if (
-            not isinstance(
-                miltal,
-                (int, float)
-            )
-            or miltal < MIN_MILTAL_FOR_KANDIDAT
-        ):
-
-            statistik[
-                "miltal_stoppade"
-            ] += 1
-
-            print(
-                "[FILTER] "
-                f"STOPP: under "
-                f"{MIN_MILTAL_FOR_KANDIDAT:,} mil - "
-                f"{_annons_namn(bil)} "
-                f"({miltal if miltal is not None else 'okänt'} mil)"
-                .replace(",", " ")
-            )
-
+        miltal = bil.get("miltal")
+        if not isinstance(miltal, (int, float)) or miltal < MIN_MILTAL_FOR_KANDIDAT:
+            statistik["miltal_stoppade"] += 1
             continue
 
         try:
-            vardering = berakna_fynd(
-                bil,
-                marknadsunderlag,
-            )
-
+            vardering = berakna_fynd(bil, marknadsunderlag)
         except Exception as e:
-
-            print(
-                "[FEL valuation] "
-                f"{_annons_namn(bil)}: {e}"
-            )
-
+            print(f"[FEL valuation] {_annons_namn(bil)}: {e}")
             continue
 
-        # -------------------------------------------------
-        # Valuation
-        # -------------------------------------------------
+        # Spara även värderingar som inte blir fynd.
+        try:
+            spara_marknadsvardesobservation(bil, vardering)
+        except Exception as e:
+            print(f"[HISTORIK] Kunde inte spara värdeobservation: {e}")
 
-        if vardering.get(
-            "niva"
-        ) is None:
-
+        if vardering.get("niva") is None:
             continue
 
-        statistik[
-            "valuation_ok"
-        ] += 1
+        statistik["valuation_ok"] += 1
 
-        diff = vardering.get(
-            "diff",
-            0,
-        )
-
-        # -------------------------------------------------
-        # Prisfilter
-        # -------------------------------------------------
-
+        diff = vardering.get("diff", 0)
         if diff < MIN_DIFF_FOR_CANDIDATE:
-
             continue
 
-        statistik[
-            "under_diff"
-        ] += 1
-
-        # -------------------------------------------------
-        # Score
-        # -------------------------------------------------
+        statistik["under_diff"] += 1
 
         try:
-            score = berakna_fyndscore(
-                bil,
-                vardering,
-            )
-
+            score = berakna_fyndscore(bil, vardering)
         except Exception as e:
-
-            print(
-                "[FEL scoring] "
-                f"{_annons_namn(bil)}: {e}"
-            )
-
+            print(f"[FEL scoring] {_annons_namn(bil)}: {e}")
             continue
-
-        # -------------------------------------------------
-        # Kandidat
-        # -------------------------------------------------
 
         if score < MIN_SCORE_FOR_NOTIS:
-
             kandidater.append(
                 _logga_kandidat(
-                    bil,
-                    vardering,
-                    score,
-                    (
-                        "STOPP: score < "
-                        f"{MIN_SCORE_FOR_NOTIS}"
-                    ),
+                    bil, vardering, score,
+                    f"STOPP: score < {MIN_SCORE_FOR_NOTIS}",
                 )
             )
-
             continue
 
-        statistik[
-            "score_ok"
-        ] += 1
+        statistik["score_ok"] += 1
 
-        # -------------------------------------------------
-        # Redan notifierad
-        # -------------------------------------------------
-
-        if redan_notifierad(
-            bil,
-            state,
-        ):
-
-            statistik[
-                "redan_notifierade"
-            ] += 1
-
+        if redan_notifierad(bil, state):
+            statistik["redan_notifierade"] += 1
             kandidater.append(
                 _logga_kandidat(
-                    bil,
-                    vardering,
-                    score,
-                    "STOPP: redan notifierad",
+                    bil, vardering, score,
+                    "STOPP: väntar på minst 15 000 kr lägre prisnivå",
                 )
             )
-
             continue
-
-        # -------------------------------------------------
-        # Kandidat som faktiskt kan skickas
-        # -------------------------------------------------
 
         kandidater.append(
             _logga_kandidat(
-                bil,
-                vardering,
-                score,
-                "SKICKAS",
+                bil, vardering, score, "SKICKAS"
             )
         )
 
-        # -------------------------------------------------
-        # Mejlets nivå
-        # -------------------------------------------------
+        score_text = score_niva(score)
+        emoji, etikett = score_text.split(" ", 1)
+        text = formatera_notis(bil, vardering, score)
 
-        score_niva_text = score_niva(
-            score
-        )
-
-        emoji, niva_etikett = (
-            score_niva_text.split(
-                " ",
-                1,
-            )
-        )
-
-        # -------------------------------------------------
-        # Formatera
-        # -------------------------------------------------
-
-        text = formatera_notis(
-            bil,
-            vardering,
-            score,
-        )
-
-        diff_formaterad = (
-            f"{diff:,}"
-            .replace(",", " ")
-        )
-
+        diff_formaterad = f"{diff:,}".replace(",", " ")
         amne = (
-            f"{emoji} "
-            f"{niva_etikett}: "
-            f"{bil_rubrik(bil)} "
-            f"{bil.get('arsmodell')} - "
-            f"{diff_formaterad} kr under marknad"
+            f"{emoji} {etikett}: {bil_rubrik(bil)} "
+            f"{bil.get('arsmodell')} - {diff_formaterad} kr under marknad"
         )
 
-        # -------------------------------------------------
-        # Skicka
-        # -------------------------------------------------
-
-        skickat = skicka_epost(
-            amne,
-            text,
-        )
+        skickat = skicka_epost(amne, text)
 
         if skickat:
-
-            print(
-                f"Mejl skickat: {amne}"
-            )
-
-            markera_notifierad(
-                bil,
-                state,
-            )
-
-            spara_state(
-                state
-            )
-
-            statistik[
-                "mejl_skickade"
-            ] += 1
-
+            print(f"Mejl skickat: {amne}")
+            markera_notifierad(bil, state)
+            statistik["mejl_skickade"] += 1
         else:
-
             print(
-                "OBS: mejl INTE skickat, "
-                "försöker igen nästa körning: "
+                "OBS: mejl INTE skickat, försöker igen nästa körning: "
                 f"{amne}"
             )
 
-    # =====================================================
-    # DIAGNOSTIK
-    # =====================================================
+    # State sparas alltid. Därmed går även prisförändringar och migrationer
+    # tillbaka till GitHub Actions, inte bara körningar där ett mejl skickades.
+    spara_state(state)
 
-    _skriv_diagnostik(
-        kandidater
-    )
+    _skriv_diagnostik(kandidater)
 
-    # =====================================================
-    # SAMMANFATTNING
-    # =====================================================
-
-    print("")
-    print("=" * 70)
+    print("\n" + "=" * 70)
     print("=== SAMMANFATTNING ===")
     print("=" * 70)
-
-    print(
-        f"Totalt efter dedup: "
-        f"{statistik['totalt']}"
-    )
-
-    print(
-        f"Leasingannonser stoppade: "
-        f"{statistik['leasing_stoppade']}"
-    )
-
-    print(
-        f"Bilar under "
-        f"{MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
-        f"{statistik['miltal_stoppade']}"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Valuation OK: "
-        f"{statistik['valuation_ok']}"
-    )
-
-    print(
-        f"Över prisdiff-gränsen "
-        f"({MIN_DIFF_FOR_CANDIDATE:,} kr): "
-        f"{statistik['under_diff']}"
-        .replace(",", " ")
-    )
-
-    print(
-        f"Score >= "
-        f"{MIN_SCORE_FOR_NOTIS}: "
-        f"{statistik['score_ok']}"
-    )
-
-    print(
-        f"Redan notifierade: "
-        f"{statistik['redan_notifierade']}"
-    )
-
-    print(
-        f"Mejl skickade: "
-        f"{statistik['mejl_skickade']}"
-    )
-
+    print(f"Totalt efter dedup: {statistik['totalt']}")
+    print(f"Leasingannonser stoppade: {statistik['leasing_stoppade']}")
+    print(f"Bilar under {MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
+          f"{statistik['miltal_stoppade']}".replace(",", " "))
+    print(f"Valuation OK: {statistik['valuation_ok']}")
+    print(f"Över prisdiff-gränsen ({MIN_DIFF_FOR_CANDIDATE:,} kr): "
+          f"{statistik['under_diff']}".replace(",", " "))
+    print(f"Score >= {MIN_SCORE_FOR_NOTIS}: {statistik['score_ok']}")
+    print(f"Redan notifierade: {statistik['redan_notifierade']}")
+    print(f"Mejl skickade: {statistik['mejl_skickade']}")
     print("=" * 70)
-
-    if statistik[
-        "mejl_skickade"
-    ] == 0:
-
-        print(
-            "Inga nya fynd denna körning."
-        )
-
-    else:
-
-        print(
-            f"Totalt "
-            f"{statistik['mejl_skickade']} "
-            "nya fynd mejlade denna körning."
-        )
 
 
 if __name__ == "__main__":
