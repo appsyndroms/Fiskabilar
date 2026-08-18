@@ -8,6 +8,7 @@ Justera fritt utan att röra övrig kod.
 ARSMODELL_MIN = 2022
 ARSMODELL_MAX = 2024
 
+MIN_MIL = 1000
 MAX_MIL = 12000
 VAXELLADA = "Automat"
 UTESLUT_SKADAD = True
