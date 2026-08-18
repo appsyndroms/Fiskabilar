@@ -72,6 +72,9 @@ TIDSZON = ZoneInfo("Europe/Stockholm")
 MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 
+# Vi är inte intresserade av bilar med mindre än 1 000 mil.
+MIN_MILTAL_FOR_KANDIDAT = 1000
+
 DIAGNOSTIK_ANTAL = 20
 
 
@@ -552,6 +555,7 @@ def main():
     statistik = {
         "totalt": len(bilar),
         "leasing_stoppade": 0,
+        "miltal_stoppade": 0,
         "valuation_ok": 0,
         "under_diff": 0,
         "score_ok": 0,
@@ -583,6 +587,37 @@ def main():
                 "[FILTER] "
                 f"STOPP: leasingannons - "
                 f"{_annons_namn(bil)}"
+            )
+
+            continue
+
+        # -------------------------------------------------
+        # Miltalsfilter
+        # -------------------------------------------------
+
+        miltal = bil.get(
+            "miltal"
+        )
+
+        if (
+            not isinstance(
+                miltal,
+                (int, float)
+            )
+            or miltal < MIN_MILTAL_FOR_KANDIDAT
+        ):
+
+            statistik[
+                "miltal_stoppade"
+            ] += 1
+
+            print(
+                "[FILTER] "
+                f"STOPP: under "
+                f"{MIN_MILTAL_FOR_KANDIDAT:,} mil - "
+                f"{_annons_namn(bil)} "
+                f"({miltal if miltal is not None else 'okänt'} mil)"
+                .replace(",", " ")
             )
 
             continue
@@ -812,6 +847,13 @@ def main():
     print(
         f"Leasingannonser stoppade: "
         f"{statistik['leasing_stoppade']}"
+    )
+
+    print(
+        f"Bilar under "
+        f"{MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
+        f"{statistik['miltal_stoppade']}"
+        .replace(",", " ")
     )
 
     print(
