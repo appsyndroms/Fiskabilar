@@ -151,7 +151,7 @@
     "forsta_pris": 429500,
     "senaste_pris": 429500,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:v60:T6 AWD:2024:7218": {
     "forsta_sedd": "2026-08-14",
@@ -207,7 +207,7 @@
     "forsta_pris": 359900,
     "senaste_pris": 359900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:v90:T6 AWD:2022:8346": {
     "forsta_sedd": "2026-08-14",
@@ -431,7 +431,7 @@
     "forsta_pris": 319000,
     "senaste_pris": 319000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:7176": {
     "forsta_sedd": "2026-08-14",
@@ -459,7 +459,7 @@
     "forsta_pris": 349900,
     "senaste_pris": 349900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2022:10500": {
     "forsta_sedd": "2026-08-14",
@@ -501,7 +501,7 @@
     "forsta_pris": 339800,
     "senaste_pris": 339800,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:530e-xdrive-touring:530e xDrive Touring:2023:6680": {
     "forsta_sedd": "2026-08-14",
@@ -613,7 +613,7 @@
     "forsta_pris": 324000,
     "senaste_pris": 324000,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:v60:T6 AWD:2023:9925": {
     "forsta_sedd": "2026-08-15",
@@ -1047,7 +1047,7 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "notifierad": true
   },
   "kal:v60:T6 AWD:2022:8374": {
     "forsta_sedd": "2026-08-16",
@@ -1286,5 +1286,264 @@
     "senaste_pris": 469800,
     "senast_sedd": "2026-08-18",
     "notifierad": false
+  },
+  "kal:v60:T8 AWD:2022:5439": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 419000,
+    "senaste_pris": 419000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:4100": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 449000,
+    "senaste_pris": 449000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:9669": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 319800,
+    "senaste_pris": 319800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 439000,
+    "senaste_pris": 439000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:7350": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 449000,
+    "senaste_pris": 449000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:5812": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 438990,
+    "senaste_pris": 438990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:11759": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 307900,
+    "senaste_pris": 307900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:3191": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 447990,
+    "senaste_pris": 447990,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:10170": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 389000,
+    "senaste_pris": 389000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:6085": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 359900,
+    "senaste_pris": 5425,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 424800,
+    "senaste_pris": 424800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:7383": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 339800,
+    "senaste_pris": 339800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:6105": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:3800": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 445000,
+    "senaste_pris": 445000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:5770": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:1740": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:2140": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 499800,
+    "senaste_pris": 499800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:502": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 489000,
+    "senaste_pris": 489000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 528600,
+    "senaste_pris": 528600,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:2300": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:484": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:5350": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 509500,
+    "senaste_pris": 509500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:0": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 629200,
+    "senaste_pris": 629200,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:0": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 597500,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 548700,
+    "senaste_pris": 548700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:1357": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 598700,
+    "senaste_pris": 598700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:1010": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 548700,
+    "senaste_pris": 548700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:1000": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 658900,
+    "senaste_pris": 658900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:720": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 628700,
+    "senaste_pris": 628700,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:500": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 639900,
+    "senaste_pris": 639900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:2": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 589000,
+    "senaste_pris": 589000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:1200": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 549800,
+    "senaste_pris": 549800,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2026:799": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 569000,
+    "senaste_pris": 569000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:8860": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:550": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 659000,
+    "senaste_pris": 659000,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false
+  },
+  "kal:330e-xdrive-touring:330e xDrive Touring:2025:2": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 4495,
+    "senaste_pris": 4495,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true
   }
 }
