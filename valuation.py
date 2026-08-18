@@ -8,17 +8,18 @@ Grundtanke:
 1. Hitta jämförbara bilar med samma modell, variant och årsmodell.
 2. Ta bort leasing-/månadsprisannonser från marknadsunderlaget.
 3. Ta bort orimliga priser.
-4. Ta bort aktuell bil från sina egna jämförelser.
-5. Justera jämförelsepris efter skillnad i miltal.
-6. Använd medianen av de justerade jämförelsepriserna.
-7. Justera för utrustningsnivå.
-8. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
-9. Falla tillbaka till ett manuellt baspris om tillräckligt många
-   jämförelsebilar saknas.
+4. Ta bort bilar under 1 000 mil från marknadsunderlaget.
+5. Ta bort aktuell bil från sina egna jämförelser.
+6. Justera jämförelsepris efter skillnad i miltal.
+7. Använd medianen av de justerade jämförelsepriserna.
+8. Justera för utrustningsnivå.
+9. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
+10. Falla tillbaka till ett manuellt baspris om tillräckligt många
+    jämförelsebilar saknas.
 
 VIKTIGT:
 Marknadsunderlaget ska endast innehålla faktiska kontantpriser för
-bilar som faktiskt säljs.
+bilar som faktiskt säljs och bilar med minst 1 000 mil.
 
 Leasingannonser, månadspriser och liknande får inte blandas ihop
 med försäljningspriser.
@@ -99,6 +100,10 @@ MIN_JAMFORELSEBILAR = 3
 MAX_JAMFORELSEBILAR = 15
 
 KR_PER_MIL_AVVIKELSE = 2.0
+
+# Bilar under denna gräns ska inte användas som
+# fyndkandidater eller som jämförelsebilar i marknadsvärderingen.
+MIN_MILTAL = 1000
 
 
 # ---------------------------------------------------------
@@ -309,13 +314,15 @@ def bygg_marknadsunderlag(
 
     Varje grupp innehåller pris, miltal och en identifierare.
 
-    Leasingannonser och orimliga priser tas bort.
+    Leasingannonser, orimliga priser och bilar under 1 000 mil
+    tas bort.
     """
 
     underlag = {}
 
     borttagna_leasing = 0
     borttagna_pris = 0
+    borttagna_miltal = 0
     godkanda = 0
 
     for bil in bilar:
@@ -365,6 +372,12 @@ def bygg_marknadsunderlag(
         ):
 
             borttagna_pris += 1
+
+            continue
+
+        if miltal < MIN_MILTAL:
+
+            borttagna_miltal += 1
 
             continue
 
@@ -425,6 +438,13 @@ def bygg_marknadsunderlag(
         "[MARKNAD] "
         f"{borttagna_pris} annonser med "
         "orimligt pris/miltal borttagna"
+    )
+
+    print(
+        "[MARKNAD] "
+        f"{borttagna_miltal} annonser under "
+        f"{MIN_MILTAL:,} mil borttagna från marknadsunderlaget"
+        .replace(",", " ")
     )
 
     return underlag
@@ -488,6 +508,9 @@ def _hamta_jamforelsebilar(
     Jämförelsebilen själv tas bort.
 
     De närmaste bilarna i miltal används först.
+
+    Marknadsunderlaget innehåller redan endast bilar med
+    minst 1 000 mil.
     """
 
     if not marknadsunderlag:
@@ -644,7 +667,7 @@ def _bygg_marknadsdiagnostik(
             "malpris": bil.get(
                 "annonspris"
             ),
-            "milmalspris": None,
+            "miltal": None,
             "median_justerat": None,
             "jamforelser": [],
         }
