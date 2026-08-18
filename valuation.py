@@ -113,10 +113,10 @@ MAX_MILTALSSKILLNAD = 3000
 # och jämförelsebil.
 #
 # Exempel:
-# 1 000 mil skillnad = 20 000 kr
-# 2 000 mil skillnad = 40 000 kr
-# 3 000 mil skillnad = 60 000 kr
-KR_PER_MIL_AVVIKELSE = 20.0
+# 1 000 mil skillnad = 12 000 kr
+# 2 000 mil skillnad = 24 000 kr
+# 3 000 mil skillnad = 36 000 kr
+KR_PER_MIL_AVVIKELSE = 12.0
 
 # Bilar under 1 000 mil används inte som marknadsunderlag.
 MIN_MILTAL = 1000
@@ -754,7 +754,7 @@ STOR_BATTERI_VARDE = 12000
 
 
 # Maximal total utrustningsjustering.
-
+#
 # Detta är viktigt eftersom en kombination av många
 # utrustningsposter annars kan flytta ett jämförelsepris
 # orimligt långt från dess faktiska marknadspris.
@@ -1505,6 +1505,16 @@ def berakna_fynd(
         jamforelser
     )
 
+    # -----------------------------------------------------
+    # EMPIRISKT UNDERLAG
+    #
+    # Ett fynd får endast klassas som FYND om det finns
+    # minst tre faktiska jämförelsebilar.
+    #
+    # Detta förhindrar att ett manuellt BASPRIS ensamt
+    # kan skapa ett fynd.
+    # -----------------------------------------------------
+
     empiriskt_underlag = (
         antal_jamforelser
         >= MIN_JAMFORELSEBILAR
@@ -1528,15 +1538,17 @@ def berakna_fynd(
     # =====================================================
     #
     # Vanligt FYND:
-    # minst 20 000 kr under marknadsvärdet.
+    # minst 20 000 kr under marknadsvärdet,
+    # minst 5 % under marknadsvärdet,
+    # OCH minst tre faktiska jämförelsebilar.
     #
     # EXTREMT_FYND:
     # minst 35 000 kr och dessutom minst 8 %
     # under marknadsvärdet samt minst GODKÄNT empiriskt
     # underlag.
     #
-    # Detta gör att ett extremt fynd inte kan uppstå
-    # enbart på grund av ett mycket högt manuellt baspris.
+    # Detta gör att varken FYND eller EXTREMT_FYND
+    # kan uppstå enbart på grund av ett manuellt baspris.
     # =====================================================
 
     if (
@@ -1553,7 +1565,8 @@ def berakna_fynd(
         niva = "EXTREMT_FYND"
 
     elif (
-        diff >= 20000
+        empiriskt_underlag
+        and diff >= 20000
         and fyndprocent >= 5.0
     ):
 
