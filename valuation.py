@@ -97,14 +97,23 @@ BASPRIS = {
 MIN_JAMFORELSEBILAR = 3
 MAX_JAMFORELSEBILAR = 15
 
-KR_PER_MIL_AVVIKELSE = 2.0
+# Prisjustering per mils skillnad mellan aktuell bil
+# och jämförelsebil.
+#
+# 20 kr/mil innebär exempelvis:
+# 1 000 mil skillnad = 20 000 kr
+# 2 000 mil skillnad = 40 000 kr
+# 3 000 mil skillnad = 60 000 kr
+#
+# Detta är betydligt mer rimligt än tidigare 2 kr/mil,
+# som nästan gjorde miltalet betydelselöst.
+KR_PER_MIL_AVVIKELSE = 20.0
 
 # Jämförelsebilar måste ligga inom detta miltal
-# från den aktuella bilen. Detta hindrar exempelvis
-# en bil på 7 000 mil från att värderas huvudsakligen
-# mot bilar på 3 000 mil eller 12 000 mil.
+# från den aktuella bilen.
 MAX_MILTALSSKILLNAD = 3000
 
+# Bilar under 1 000 mil används inte som marknadsunderlag.
 MIN_MILTAL = 1000
 
 MIN_KONTANTPRIS = 100000
@@ -146,6 +155,59 @@ def _normalisera_text(text: str) -> str:
         .replace("_", " ")
         .replace("-", " ")
     )
+
+
+def _ar_sant(value) -> bool:
+    """
+    Tolka booleska värden robust.
+
+    Viktigt:
+    bool("false") == True i Python.
+
+    Annonsdata kan däremot innehålla exempelvis:
+    "false", "0", "no", "nej", etc.
+    Dessa ska behandlas som False.
+    """
+
+    if isinstance(value, bool):
+        return value
+
+    if value is None:
+        return False
+
+    if isinstance(value, (int, float)):
+        return value != 0
+
+    if isinstance(value, str):
+        normaliserat = (
+            value
+            .strip()
+            .lower()
+        )
+
+        if normaliserat in (
+            "",
+            "false",
+            "0",
+            "no",
+            "nej",
+            "n",
+            "none",
+            "null",
+        ):
+            return False
+
+        if normaliserat in (
+            "true",
+            "1",
+            "yes",
+            "ja",
+            "j",
+            "y",
+        ):
+            return True
+
+    return bool(value)
 
 
 def _annons_text(bil: dict) -> str:
@@ -310,16 +372,16 @@ def bygg_marknadsunderlag(
                 "utrustningsniva": bil.get(
                     "utrustningsniva"
                 ),
-                "dragkrok": bool(
+                "dragkrok": _ar_sant(
                     bil.get("dragkrok")
                 ),
-                "varmare": bool(
+                "varmare": _ar_sant(
                     bil.get("varmare")
                 ),
-                "volvo_selekt": bool(
+                "volvo_selekt": _ar_sant(
                     bil.get("volvo_selekt")
                 ),
-                "stor_batteri": bool(
+                "stor_batteri": _ar_sant(
                     bil.get("stor_batteri")
                 ),
             }
@@ -417,7 +479,6 @@ def _hamta_jamforelsebilar(
     target_mil = bil.get("miltal")
 
     # -----------------------------------------------------
-    # NYTT:
     # Begränsa jämförelsebilar till ett rimligt
     # miltalsintervall runt aktuell bil.
     #
@@ -558,16 +619,24 @@ def _hamta_tillvalsjustering(
 
     justering = 0
 
-    if bil.get("dragkrok"):
+    if _ar_sant(
+        bil.get("dragkrok")
+    ):
         justering += DRAGKROK_VARDE
 
-    if bil.get("varmare"):
+    if _ar_sant(
+        bil.get("varmare")
+    ):
         justering += VARMARE_VARDE
 
-    if bil.get("volvo_selekt"):
+    if _ar_sant(
+        bil.get("volvo_selekt")
+    ):
         justering += SELEKT_VARDE
 
-    if bil.get("stor_batteri"):
+    if _ar_sant(
+        bil.get("stor_batteri")
+    ):
         justering += STOR_BATTERI_VARDE
 
     return justering
