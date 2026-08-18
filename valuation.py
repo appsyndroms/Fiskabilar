@@ -6,15 +6,22 @@ jämförelseunderlag.
 
 Grundtanke:
 1. Hitta jämförbara bilar med samma modell, variant och årsmodell.
-2. Justera jämförelsepris efter skillnad i miltal.
-3. Använd medianen av de justerade jämförelsepriserna.
-4. Justera för utrustningsnivå.
-5. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
-6. Falla tillbaka till ett manuellt baspris om tillräckligt många
+2. Ta bort leasing-/månadsprisannonser från marknadsunderlaget.
+3. Ta bort orimliga priser.
+4. Ta bort aktuell bil från sina egna jämförelser.
+5. Justera jämförelsepris efter skillnad i miltal.
+6. Använd medianen av de justerade jämförelsepriserna.
+7. Justera för utrustningsnivå.
+8. Justera för dragkrok, värmare, Volvo Selekt och batteristorlek.
+9. Falla tillbaka till ett manuellt baspris om tillräckligt många
    jämförelsebilar saknas.
 
 VIKTIGT:
-Utrustningsnivå matchas med delsträngar i stället för exakt text.
+Marknadsunderlaget ska endast innehålla faktiska kontantpriser för
+bilar som faktiskt säljs.
+
+Leasingannonser, månadspriser och liknande får inte blandas ihop
+med försäljningspriser.
 
 Marknadsmodellen är avsiktligt enkel och transparent. Den ska kunna
 förbättras när vi får större historiskt underlag.
@@ -94,6 +101,168 @@ MAX_JAMFORELSEBILAR = 15
 KR_PER_MIL_AVVIKELSE = 2.0
 
 
+# ---------------------------------------------------------
+# Rimlighetsgränser
+# ---------------------------------------------------------
+
+# Ett vanligt kontantpris för de bevakade bilarna ska inte
+# kunna vara några tusen kronor.
+MIN_KONTANTPRIS = 100000
+
+# Skydd mot uppenbara felaktiga priser.
+MAX_KONTANTPRIS = 2000000
+
+
+# =========================================================
+# LEASING / MÅNADSPRIS
+# =========================================================
+
+LEASING_NYCKELORD = (
+    "leasing",
+    "privatleasing",
+    "företagsleasing",
+    "foretagsleasing",
+    "leasingpris",
+    "leasingkostnad",
+    "leasingavgift",
+    "månadspris",
+    "manadspris",
+    "månadsavgift",
+    "manadsavgift",
+    "kr/mån",
+    "kr / mån",
+    "kr/månaden",
+    "kr per månad",
+    "per månad",
+    "per manad",
+    "/månad",
+    "/manad",
+)
+
+
+def _normalisera_text(
+    text: str,
+) -> str:
+    """
+    Normaliserar annonstext för robustare matchning.
+    """
+
+    return (
+        str(text or "")
+        .strip()
+        .lower()
+        .replace("_", " ")
+        .replace("-", " ")
+    )
+
+
+def _annons_text(
+    bil: dict,
+) -> str:
+    """
+    Samlar textfält som kan avslöja att annonsen är leasing
+    eller månadspris.
+
+    Vi använder flera fält eftersom olika scrapers kan placera
+    annonstexten på olika ställen.
+    """
+
+    delar = []
+
+    for falt in (
+        "utrustningsniva",
+        "modell",
+        "variant",
+        "pris_text",
+        "annonsrubrik",
+        "rubrik",
+        "beskrivning",
+        "fritext",
+        "leasing",
+        "finansiering",
+    ):
+
+        value = bil.get(
+            falt
+        )
+
+        if value:
+            delar.append(
+                str(value)
+            )
+
+    url = bil.get(
+        "url"
+    )
+
+    if url:
+        delar.append(
+            str(url)
+        )
+
+    urls = bil.get(
+        "urls"
+    )
+
+    if urls:
+        delar.extend(
+            str(x)
+            for x in urls
+            if x
+        )
+
+    return _normalisera_text(
+        " ".join(delar)
+    )
+
+
+def _ar_leasingannons(
+    bil: dict,
+) -> bool:
+    """
+    Returnerar True om annonsen sannolikt är leasing/månadspris.
+
+    Leasingannonser ska inte användas som jämförelseannonser.
+    """
+
+    text = _annons_text(
+        bil
+    )
+
+    return any(
+        nyckel in text
+        for nyckel in LEASING_NYCKELORD
+    )
+
+
+def _ar_rimligt_kontantpris(
+    pris: int | float,
+) -> bool:
+    """
+    Skydd mot uppenbart felaktiga priser.
+
+    Detta är inte en generell marknadsvärdering utan ett
+    skydd mot att exempelvis 4 495 kr/mån råkar tolkas som
+    bilens försäljningspris.
+    """
+
+    if not isinstance(
+        pris,
+        (int, float)
+    ):
+        return False
+
+    return (
+        MIN_KONTANTPRIS
+        <= pris
+        <= MAX_KONTANTPRIS
+    )
+
+
+# =========================================================
+# MARKNADSKATEGORI
+# =========================================================
+
 def _marknadskategori(
     bil: dict,
 ) -> tuple:
@@ -121,6 +290,10 @@ def _marknadskategori(
     )
 
 
+# =========================================================
+# MARKNADSUNDERLAG
+# =========================================================
+
 def bygg_marknadsunderlag(
     bilar: list[dict],
 ) -> dict:
@@ -134,32 +307,54 @@ def bygg_marknadsunderlag(
         variant
         årsmodell
 
-    Varje grupp innehåller pris och miltal för de faktiska
-    annonserna.
+    Varje grupp innehåller pris, miltal och en identifierare.
 
-    Endast annonser med giltigt pris och miltal används.
+    Leasingannonser och orimliga priser tas bort.
     """
 
     underlag = {}
 
+    borttagna_leasing = 0
+    borttagna_pris = 0
+    godkanda = 0
+
     for bil in bilar:
+
+        # -------------------------------------------------
+        # Leasing
+        # -------------------------------------------------
+
+        if _ar_leasingannons(
+            bil
+        ):
+
+            borttagna_leasing += 1
+
+            continue
+
+        # -------------------------------------------------
+        # Pris
+        # -------------------------------------------------
 
         pris = bil.get(
             "annonspris"
         )
 
+        if not _ar_rimligt_kontantpris(
+            pris
+        ):
+
+            borttagna_pris += 1
+
+            continue
+
+        # -------------------------------------------------
+        # Miltal
+        # -------------------------------------------------
+
         miltal = bil.get(
             "miltal"
         )
-
-        if (
-            not isinstance(
-                pris,
-                (int, float)
-            )
-            or pris <= 0
-        ):
-            continue
 
         if (
             not isinstance(
@@ -168,10 +363,37 @@ def bygg_marknadsunderlag(
             )
             or miltal < 0
         ):
+
+            borttagna_pris += 1
+
             continue
+
+        # -------------------------------------------------
+        # Kategori
+        # -------------------------------------------------
 
         kategori = _marknadskategori(
             bil
+        )
+
+        annons_id = (
+            bil.get(
+                "annons_id"
+            )
+            or bil.get(
+                "id"
+            )
+            or bil.get(
+                "url"
+            )
+            or (
+                bil.get(
+                    "urls",
+                    [None]
+                )[0]
+                if bil.get("urls")
+                else None
+            )
         )
 
         underlag.setdefault(
@@ -181,10 +403,73 @@ def bygg_marknadsunderlag(
             {
                 "pris": float(pris),
                 "miltal": float(miltal),
+                "annons_id": annons_id,
             }
         )
 
+        godkanda += 1
+
+    print(
+        "[MARKNAD] "
+        f"{godkanda} annonser används som "
+        "kontantprisunderlag"
+    )
+
+    print(
+        "[MARKNAD] "
+        f"{borttagna_leasing} leasing-/månadsprisannonser "
+        "borttagna"
+    )
+
+    print(
+        "[MARKNAD] "
+        f"{borttagna_pris} annonser med "
+        "orimligt pris/miltal borttagna"
+    )
+
     return underlag
+
+
+# =========================================================
+# JÄMFÖRELSEBILAR
+# =========================================================
+
+def _hamta_annons_id(
+    bil: dict,
+):
+    """
+    Hämtar stabil identifierare för aktuell annons.
+    """
+
+    annons_id = bil.get(
+        "annons_id"
+    )
+
+    if annons_id:
+        return annons_id
+
+    annons_id = bil.get(
+        "id"
+    )
+
+    if annons_id:
+        return annons_id
+
+    url = bil.get(
+        "url"
+    )
+
+    if url:
+        return url
+
+    urls = bil.get(
+        "urls"
+    )
+
+    if urls:
+        return urls[0]
+
+    return None
 
 
 def _hamta_jamforelsebilar(
@@ -194,11 +479,15 @@ def _hamta_jamforelsebilar(
     """
     Hämtar jämförelsebilar för aktuell bil.
 
-    I första hand används exakt samma:
-        modell + variant + årsmodell
+    Primärt:
 
-    Om det finns fler än MAX_JAMFORELSEBILAR används de närmaste
-    i miltal.
+        modell
+        variant
+        årsmodell
+
+    Jämförelsebilen själv tas bort.
+
+    De närmaste bilarna i miltal används först.
     """
 
     if not marknadsunderlag:
@@ -217,6 +506,20 @@ def _hamta_jamforelsebilar(
 
     if not jamforelser:
         return []
+
+    aktuell_id = _hamta_annons_id(
+        bil
+    )
+
+    if aktuell_id:
+
+        jamforelser = [
+            x
+            for x in jamforelser
+            if x.get(
+                "annons_id"
+            ) != aktuell_id
+        ]
 
     target_mil = bil.get(
         "miltal"
@@ -239,6 +542,10 @@ def _hamta_jamforelsebilar(
     ]
 
 
+# =========================================================
+# MARKNADSPRIS
+# =========================================================
+
 def _berakna_marknadspris_fran_jamforelser(
     bil: dict,
     jamforelser: list[dict],
@@ -246,16 +553,16 @@ def _berakna_marknadspris_fran_jamforelser(
     """
     Beräknar marknadsvärde från faktiska jämförelseannonser.
 
-    Varje jämförelsepris justeras med KR_PER_MIL_AVVIKELSE för
-    skillnaden i miltal mellan jämförelsebilen och mål-bilen.
+    Varje jämförelsepris justeras för skillnad i miltal.
 
-    Därefter används medianen, vilket gör modellen mindre känslig
-    för enstaka extremt dyra eller billiga annonser.
+    Median används för att minska påverkan från enstaka
+    extrema annonser.
     """
 
     if len(
         jamforelser
     ) < MIN_JAMFORELSEBILAR:
+
         return None
 
     target_mil = bil.get(
@@ -266,6 +573,7 @@ def _berakna_marknadspris_fran_jamforelser(
         target_mil,
         (int, float)
     ):
+
         return None
 
     justerade_priser = []
@@ -280,11 +588,6 @@ def _berakna_marknadspris_fran_jamforelser(
             "miltal"
         ]
 
-        # Om jämförelsebilen har fler mil än mål-bilen ska dess
-        # pris justeras uppåt.
-        #
-        # Om jämförelsebilen har färre mil ska dess pris justeras
-        # nedåt.
         miljustering = (
             miltal
             - target_mil
@@ -298,6 +601,9 @@ def _berakna_marknadspris_fran_jamforelser(
         justerade_priser.append(
             justerat_pris
         )
+
+    if not justerade_priser:
+        return None
 
     return int(
         round(
@@ -313,10 +619,6 @@ def _berakna_marknadspris_fran_jamforelser(
 # MILTAL - FALLBACK
 # =========================================================
 
-# Tidigare modell använde 1 500 mil/år som normal körning.
-#
-# Vi använder därför en högre normalnivå och en mildare
-# värdepåverkan per avvikande mil.
 FORVANTAT_MIL_PER_AR = 1800
 
 
@@ -433,22 +735,6 @@ def _ar_sedan_arsmodell(
     )
 
 
-def _normalisera_text(
-    text: str,
-) -> str:
-    """
-    Normaliserar annonstext för robustare matchning.
-    """
-
-    return (
-        (text or "")
-        .strip()
-        .lower()
-        .replace("_", " ")
-        .replace("-", " ")
-    )
-
-
 def _hamta_utrustningsjustering(
     bil: dict,
 ) -> int:
@@ -457,7 +743,9 @@ def _hamta_utrustningsjustering(
     """
 
     utrustning = _normalisera_text(
-        bil.get("utrustningsniva")
+        bil.get(
+            "utrustningsniva"
+        )
         or ""
     )
 
@@ -480,6 +768,7 @@ def _hamta_utrustningsjustering(
                 normaliserad_nyckel
                 in utrustning
             ):
+
                 return justering
 
     return 0
@@ -499,6 +788,7 @@ def berakna_miltalsdiagnostik(
     )
 
     if not arsmodell:
+
         return {
             "arsmodell": None,
             "alder_ar": 0,
@@ -634,10 +924,6 @@ def berakna_marknadsvarde(
     Annars används den manuella fallback-modellen.
     """
 
-    # -----------------------------------------------------
-    # EMPIRISKT MARKNADSVÄRDE
-    # -----------------------------------------------------
-
     jamforelser = (
         _hamta_jamforelsebilar(
             bil,
@@ -652,11 +938,7 @@ def berakna_marknadsvarde(
         )
     )
 
-    anvander_empiriskt_underlag = (
-        marknadspris is not None
-    )
-
-    if anvander_empiriskt_underlag:
+    if marknadspris is not None:
 
         baspris = marknadspris
 
@@ -670,7 +952,7 @@ def berakna_marknadsvarde(
             return 0
 
         # -------------------------------------------------
-        # Miltal - endast fallback-modellen
+        # Miltal - fallback
         # -------------------------------------------------
 
         arsmodell = bil.get(
@@ -719,16 +1001,24 @@ def berakna_marknadsvarde(
 
     tillval = 0
 
-    if bil.get("dragkrok"):
+    if bil.get(
+        "dragkrok"
+    ):
         tillval += DRAGKROK_VARDE
 
-    if bil.get("varmare"):
+    if bil.get(
+        "varmare"
+    ):
         tillval += VARMARE_VARDE
 
-    if bil.get("volvo_selekt"):
+    if bil.get(
+        "volvo_selekt"
+    ):
         tillval += SELEKT_VARDE
 
-    if bil.get("stor_batteri"):
+    if bil.get(
+        "stor_batteri"
+    ):
         tillval += STOR_BATTERI_VARDE
 
     # -----------------------------------------------------
