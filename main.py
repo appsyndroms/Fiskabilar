@@ -33,6 +33,7 @@ from valuation import (
     bygg_marknadsunderlag,
     berakna_fynd,
     berakna_miltalsdiagnostik,
+    _ar_leasingannons,
 )
 from scoring import (
     berakna_fyndscore,
@@ -379,6 +380,7 @@ def main():
 
     statistik = {
         "totalt": len(bilar),
+        "leasing_stoppade": 0,
         "valuation_ok": 0,
         "under_diff": 0,
         "score_ok": 0,
@@ -393,6 +395,26 @@ def main():
     # =====================================================
 
     for bil in bilar:
+
+        # -------------------------------------------------
+        # Leasingfilter
+        # -------------------------------------------------
+
+        if _ar_leasingannons(
+            bil
+        ):
+
+            statistik[
+                "leasing_stoppade"
+            ] += 1
+
+            print(
+                "[FILTER] "
+                f"STOPP: leasingannons - "
+                f"{_annons_namn(bil)}"
+            )
+
+            continue
 
         try:
             vardering = berakna_fynd(
@@ -627,6 +649,11 @@ def main():
     print(
         f"Totalt efter dedup: "
         f"{statistik['totalt']}"
+    )
+
+    print(
+        f"Leasingannonser stoppade: "
+        f"{statistik['leasing_stoppade']}"
     )
 
     print(
