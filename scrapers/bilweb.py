@@ -1,71 +1,23 @@
 """
-Scraper för Bilweb - VERIFIERAD mot verklig sidstruktur 2026-08-09,
-utökad till V60+V90 2026-08-12, bugfixad 2026-08-12, generaliserad
-till flera märken (inkl. BMW 530e xDrive Touring) 2026-08-13,
-omskriven till årsloop 2026-08-15, omskriven till detaljsides-
-hämtning 2026-08-15 (se motivering nedan).
+Scraper för Bilweb.
 
-Bekräftat: Bilweb fungerar UTAN JavaScript, så vanlig requests.get()
-räcker - både för sökresultatsidan och för enskilda annonssidor.
+Bilweb fungerar utan JavaScript för de delar vi behöver läsa ut.
+Sökresultatsidan används endast för att hitta kandidat-URL:er.
+Pris, miltal och övriga detaljuppgifter hämtas från respektive
+annons egen detaljsida.
 
-VIKTIGT ÄNDRING 2026-08-15 (årsloop): tidigare användes en enda
-sökning på bilweb.se/sok/{marke}/{modell}/kombi, som bara visar
-FÖRSTA SIDAN sorterad på senast publicerad annons - INTE på
-årsmodell. Bilweb har - precis som Wayke - en årsspecifik sökväg, så
-vi loopar nu över ARSMODELL_MIN..ARSMODELL_MAX.
+Registreringsnummer hämtas från samma detaljsida som pris/miltal.
 
-STÖRRE OMSKRIVNING 2026-08-15 (VIKTIGAST): två tidigare försök att
-läsa ut pris/mil direkt ur SÖKRESULTATSIDAN (dels teckenpositioner i
-rå HTML, dels DOM-uppåtvandring till närmaste förälder) visade sig
-båda kunna ge FEL värden - verifierat konkret mot en riktig annons
-(429 900 kr / 5 434 mil enligt annonsens egen sida, men 354 900 kr /
-5 692 mil extraherat från sökresultatlistan). Orsaken är att samma
-annons ofta länkas flera gånger på sökresultatsidan (kompakt rutnät +
-expanderad lista), och den kompakta representationen ibland saknar
-egen pris/mil-text helt - då "ärver" extraktionen av misstag en
-GRANNANNONS siffror istället, oavsett hur avgränsningslogiken byggs.
+VIKTIGT:
+Registreringsnummer används som starkaste identifierare av fysisk bil,
+men endast när Bilwebs sida uttryckligen anger ett registreringsnummer.
 
-Lösningen är att helt sluta gissa på sökresultatsidans struktur och
-istället hämta varje kandidat-annons EGEN detaljsida (verifierad
-otvetydig: "Pris 429 900 kr" och "Mil 5 434" förekommer där bara en
-gång var, ingen risk för sammanblandning). Sökresultatsidan används
-nu bara för att hitta KANDIDAT-URL:er (baserat på variant i sluggen),
-inte för att läsa ut pris/mil.
+Ingen generell sökning efter sex-/sjuteckenssträngar görs, eftersom
+exempelvis BMW530 annars kan feltolkas som ett registreringsnummer.
 
-Konsekvens: fler HTTP-anrop (ett per kandidat, utöver själva
-sökningen) => längre körtid. Bedömd rimlig avvägning eftersom
-felaktiga pris/mil-siffror direkt påverkar ett köpbeslut.
-
-ÄNDRING 2026-08-18:
-En detaljsida hämtas nu maximalt EN gång per URL under en körning.
-Om samma annons dyker upp igen via en annan sökning/årsloop/variant
-används det tidigare resultatet från cachen istället för ett nytt
-HTTP-anrop.
-
-Detta gäller även annonser som redan har avfärdats efter kontroll av
-detaljsidan. Vi behöver alltså inte hämta samma URL igen bara för att
-konstatera samma sak en gång till.
-
-ÄNDRING 2026-08-18:
-Registreringsnummer extraheras från samma detaljsida som redan hämtas
-för pris/miltal. Ingen extra HTTP-förfrågan görs.
-
-Registreringsnumret används som stark identifierare av fysisk bil i
-dedupliceringen och långtidshistoriken när det finns tillgängligt.
-
-Om Bilweb inte visar registreringsnummer lämnas fältet None och
-befintlig dedupliceringslogik används som fallback.
-
-ÄNDRING 2026-08-18:
-Registreringsnummer får ENDAST identifieras när Bilwebs detaljsida
-innehåller en uttrycklig etikett för registreringsnummer och ett
-registreringsnummer direkt efter etiketten.
-
-Den tidigare försiktiga fallback-sökningen i hela sidans text är
-borttagen. Det förhindrar att andra sex- eller sjuteckenssträngar,
-exempelvis BMW530 eller BMW330, feltolkas som registreringsnummer.
+Detaljsidor cachas under varje körning så att samma URL aldrig hämtas
+mer än en gång.
 """
-
 
 import re
 import time
@@ -86,6 +38,8 @@ SOK_DELAY_SEKUNDER = 3.0
 DETALJ_DELAY_SEKUNDER = 1.5
 
 SOK_URL_MALL = "https://bilweb.se/sok/{marke}/{modell}/{ar}"
+
+BILWEB_BASE_URL = "https://bilweb.se"
 
 HEADERS = {
     "User-Agent": (
@@ -117,36 +71,52 @@ AUKTION_REGEX = re.compile(
 )
 
 
-# Registreringsnummer:
+# ---------------------------------------------------------------------------
+# Registreringsnummer
+# ---------------------------------------------------------------------------
 #
-# Svenska registreringsnummer är normalt:
+# Svenska registreringsnummer:
+#
 #   ABC123
 #   ABC 123
+#   ABC-123
 #   ABC12A
 #   ABC 12A
 #
-# Vi använder detta ENDAST efter att vi först har hittat en relevant
-# etikett på detaljsidan.
+# Regexen används INTE på hela sidan.
+# Den används endast efter en uttrycklig regnr-etikett.
+# ---------------------------------------------------------------------------
+
 REGNR_REGEX = re.compile(
-    r"\b([A-ZÅÄÖ]{3})[\s-]?(\d{2,3}|"
-    r"\d{2}[A-Z])\b",
+    r"\b"
+    r"([A-ZÅÄÖ]{3})"
+    r"[\s-]?"
+    r"("
+    r"\d{3}"
+    r"|"
+    r"\d{2}[A-Z]"
+    r")"
+    r"\b",
     re.IGNORECASE,
 )
+
 
 REGNR_ETIKETT_REGEX = re.compile(
-    r"(?:"
-    r"Registreringsnummer"
-    r"|Registreringsnr"
-    r"|Registreringsnummer:"
-    r"|Reg\.?\s*nr"
-    r"|Regnr"
-    r"|Regnr:"
-    r")",
+    r"\b(?:"
+    r"registreringsnummer"
+    r"|registreringsnr"
+    r"|reg\.?\s*nr"
+    r"|regnr"
+    r")\b"
+    r"\s*:?",
     re.IGNORECASE,
 )
 
 
-def _bygg_href_regex(marke_slug: str) -> re.Pattern:
+def _bygg_href_regex(
+    marke_slug: str,
+) -> re.Pattern:
+
     return re.compile(
         rf"{re.escape(marke_slug)}-"
         rf"(?P<slug>[a-z0-9-]+?)-"
@@ -156,14 +126,26 @@ def _bygg_href_regex(marke_slug: str) -> re.Pattern:
     )
 
 
-def _rensa_tal(text: str) -> int:
-    siffror = re.sub(r"\D", "", text)
+def _rensa_tal(
+    text: str,
+) -> int:
+
+    siffror = re.sub(
+        r"\D",
+        "",
+        text,
+    )
+
     return int(siffror) if siffror else 0
 
 
-def _normalisera_regnr(regnr: str | None) -> str | None:
+def _normalisera_regnr(
+    regnr: str | None,
+) -> str | None:
     """
-    Normaliserar registreringsnummer så att exempelvis:
+    Normaliserar registreringsnummer.
+
+    Exempel:
 
         ABC 123
         ABC-123
@@ -172,8 +154,6 @@ def _normalisera_regnr(regnr: str | None) -> str | None:
     blir:
 
         ABC123
-
-    Detta gör dedupliceringen mellan källor mer robust.
     """
 
     if not regnr:
@@ -185,33 +165,45 @@ def _normalisera_regnr(regnr: str | None) -> str | None:
         regnr,
     ).upper()
 
-    if len(normaliserat) < 6 or len(normaliserat) > 7:
+    if len(normaliserat) not in (6, 7):
         return None
 
     return normaliserat
 
 
-def _extrahera_regnr(text: str) -> str | None:
+def _extrahera_regnr(
+    text: str,
+) -> str | None:
     """
-    Försöker hitta registreringsnummer på detaljsidan.
+    Extraherar registreringsnummer från detaljsidans text.
 
-    Viktigt:
-    Funktionen arbetar ENDAST på text som redan hämtats från
-    detaljsidan. Den gör alltså inget extra HTTP-anrop.
+    Viktig säkerhetsprincip:
 
-    Registreringsnummer accepteras ENDAST om det finns en uttrycklig
-    registreringsnummer-etikett och ett giltigt registreringsnummer
-    direkt efter etiketten.
+    Vi letar INTE efter registreringsnummer generellt i hela sidan.
 
-    Ingen fallback-sökning görs i hela sidans text.
+    Först måste sidan innehålla en uttrycklig etikett som exempelvis:
+
+        Registreringsnummer
+        Registreringsnr
+        Reg nr
+        Reg.nr
+        Regnr
+
+    Därefter får ett registreringsnummer endast förekomma direkt efter
+    etiketten, bortsett från whitespace och kolon.
+
+    Detta förhindrar att exempelvis:
+
+        BMW530
+        BMW330
+        V60T6
+
+    feltolkas som registreringsnummer.
     """
 
-    # ------------------------------------------------------------
-    # Endast stark signal:
-    # registreringsnummer direkt efter relevant etikett.
-    # ------------------------------------------------------------
-
-    etikett_match = REGNR_ETIKETT_REGEX.search(text)
+    etikett_match = REGNR_ETIKETT_REGEX.search(
+        text
+    )
 
     if not etikett_match:
         return None
@@ -220,12 +212,27 @@ def _extrahera_regnr(text: str) -> str | None:
         etikett_match.end():
     ]
 
-    # Begränsa sökningen till ett kort område efter etiketten.
-    # Det minskar risken för att träffa text längre ner på sidan.
-    efter = efter[:200]
+    # Vi tillåter endast whitespace, kolon eller bindestreck
+    # mellan etiketten och själva registreringsnumret.
+    #
+    # Om det kommer en massa annan text först ska vi inte försöka
+    # gissa.
+    direkt_prefix = re.match(
+        r"^[\s:;\-]*",
+        efter,
+    )
 
-    match = REGNR_REGEX.search(
-        efter
+    if not direkt_prefix:
+        return None
+
+    start = direkt_prefix.end()
+
+    kandidattext = efter[
+        start:start + 20
+    ]
+
+    match = REGNR_REGEX.match(
+        kandidattext
     )
 
     if not match:
@@ -241,26 +248,129 @@ def _extrahera_regnr(text: str) -> str | None:
     )
 
 
-def _hamta_kandidat_urler(
-    bilkonfig: dict,
-    ar: int
-) -> list[dict]:
+def _extrahera_regnr_dom(
+    soup: BeautifulSoup,
+) -> str | None:
     """
-    Hämtar sökresultatsidan för en modell/årsmodell och plockar ut
-    KANDIDAT-URL:er vars slug matchar önskad variant.
+    Försöker hitta registreringsnummer genom DOM-strukturen.
+
+    Detta är ännu säkrare än att söka i hela sidans sammanslagna text.
+
+    Vi letar efter ett element vars synliga text innehåller en
+    registreringsnummer-etikett och undersöker sedan samma element,
+    nästa syskon eller närmaste relevanta container.
+
+    Om DOM-strukturen inte ger en entydig träff returneras None och
+    den strikta textbaserade metoden får försöka.
     """
 
-    marke_slug = bilkonfig["marke_slug"]
+    etikett_element = None
+
+    for element in soup.find_all(
+        string=REGNR_ETIKETT_REGEX
+    ):
+        text = str(element).strip()
+
+        if REGNR_ETIKETT_REGEX.search(
+            text
+        ):
+            etikett_element = element
+            break
+
+    if etikett_element is None:
+        return None
+
+    # ------------------------------------------------------------
+    # 1. Samma textnod
+    # ------------------------------------------------------------
+
+    kandidat = _extrahera_regnr(
+        str(etikett_element)
+    )
+
+    if kandidat:
+        return kandidat
+
+    # ------------------------------------------------------------
+    # 2. Föräldraelement
+    # ------------------------------------------------------------
+
+    parent = getattr(
+        etikett_element,
+        "parent",
+        None,
+    )
+
+    if parent:
+        parent_text = parent.get_text(
+            " ",
+            strip=True,
+        )
+
+        kandidat = _extrahera_regnr(
+            parent_text
+        )
+
+        if kandidat:
+            return kandidat
+
+    # ------------------------------------------------------------
+    # 3. Nästa syskon
+    # ------------------------------------------------------------
+
+    if parent:
+        sibling = parent.find_next_sibling()
+
+        if sibling:
+            sibling_text = sibling.get_text(
+                " ",
+                strip=True,
+            )
+
+            match = REGNR_REGEX.search(
+                sibling_text
+            )
+
+            if match:
+                kandidat = (
+                    f"{match.group(1)}"
+                    f"{match.group(2)}"
+                )
+
+                kandidat = _normalisera_regnr(
+                    kandidat
+                )
+
+                if kandidat:
+                    return kandidat
+
+    return None
+
+
+def _hamta_kandidat_urler(
+    bilkonfig: dict,
+    ar: int,
+) -> list[dict]:
+    """
+    Hämtar Bilwebs sökresultatsida för modell/årsmodell.
+
+    Sidan används endast för att hitta kandidat-URL:er.
+    Pris och miltal läses aldrig från sökresultatet.
+    """
+
+    marke_slug = bilkonfig[
+        "marke_slug"
+    ]
 
     modell_slug = bilkonfig.get(
         "bilweb_modell_slug",
-        bilkonfig["modell_slug"]
+        bilkonfig["modell_slug"],
     )
 
     sok_url = SOK_URL_MALL.format(
         marke=marke_slug,
         modell=modell_slug,
-        ar=ar
+        ar=ar,
     )
 
     href_regex = _bygg_href_regex(
@@ -271,17 +381,20 @@ def _hamta_kandidat_urler(
         resp = requests.get(
             sok_url,
             headers=HEADERS,
-            timeout=15
+            timeout=15,
         )
+
         resp.raise_for_status()
 
     except Exception as e:
+
         print(
             f"[bilweb] FEL vid hämtning av söksida för "
             f"{bilkonfig['marke_visning']} "
             f"{bilkonfig['modell_visning']} "
             f"årsmodell {ar}: {e}"
         )
+
         return []
 
     time.sleep(
@@ -290,7 +403,7 @@ def _hamta_kandidat_urler(
 
     soup = BeautifulSoup(
         resp.text,
-        "html.parser"
+        "html.parser",
     )
 
     sedda_id = set()
@@ -299,7 +412,7 @@ def _hamta_kandidat_urler(
 
     for a in soup.find_all(
         "a",
-        href=True
+        href=True,
     ):
 
         m = href_regex.search(
@@ -327,7 +440,7 @@ def _hamta_kandidat_urler(
 
         variant = identifiera_variant(
             bilkonfig,
-            slug_text
+            slug_text,
         )
 
         if variant is None:
@@ -342,20 +455,22 @@ def _hamta_kandidat_urler(
         href = a["href"]
 
         full_url = (
-            f"https://bilweb.se{href}"
+            f"{BILWEB_BASE_URL}{href}"
             if href.startswith("/")
             else href
         )
 
-        kandidater.append({
-            "url": full_url,
-            "annons_id": annons_id,
-            "slug_text": slug_text,
-            "variant": variant,
-            "arsmodell": int(
-                m.group("ar")
-            ),
-        })
+        kandidater.append(
+            {
+                "url": full_url,
+                "annons_id": annons_id,
+                "slug_text": slug_text,
+                "variant": variant,
+                "arsmodell": int(
+                    m.group("ar")
+                ),
+            }
+        )
 
     print(
         f"[bilweb] "
@@ -367,6 +482,7 @@ def _hamta_kandidat_urler(
     )
 
     if avvisade_slugs:
+
         print(
             f"[bilweb]   Exempel på slugs som INTE "
             f"matchade någon variant: "
@@ -377,11 +493,18 @@ def _hamta_kandidat_urler(
 
 
 def _hamta_pris_mil_fran_detaljsida(
-    url: str
-) -> tuple[int, int, int | None, bool, str | None] | None:
-
+    url: str,
+) -> tuple[
+    int,
+    int,
+    int | None,
+    bool,
+    str | None,
+] | None:
     """
-    Hämtar en enskild annons egen sida och läser ut:
+    Hämtar en annons egen detaljsida.
+
+    Returnerar:
 
         pris
         mil
@@ -389,40 +512,36 @@ def _hamta_pris_mil_fran_detaljsida(
         auktion
         registreringsnummer
 
-    Returnerar:
-
-        (pris, mil, antal_agare, ar_auktion, regnr)
-
-    eller None om något gick fel.
-
-    Registreringsnumret hämtas från SAMMA HTTP-svar som pris/miltal.
-    Inget extra anrop görs.
+    Registreringsnumret hämtas från samma HTTP-svar.
     """
 
     try:
+
         resp = requests.get(
             url,
             headers=HEADERS,
-            timeout=15
+            timeout=15,
         )
 
         resp.raise_for_status()
 
     except Exception as e:
+
         print(
             f"[bilweb]   FEL vid hämtning av "
             f"detaljsida {url}: {e}"
         )
+
         return None
 
     soup = BeautifulSoup(
         resp.text,
-        "html.parser"
+        "html.parser",
     )
 
     text = soup.get_text(
         separator="\n",
-        strip=True
+        strip=True,
     )
 
     # ------------------------------------------------------------
@@ -432,7 +551,7 @@ def _hamta_pris_mil_fran_detaljsida(
     pris_match = re.search(
         r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
         text,
-        re.IGNORECASE
+        re.IGNORECASE,
     )
 
     # ------------------------------------------------------------
@@ -442,24 +561,31 @@ def _hamta_pris_mil_fran_detaljsida(
     mil_match = re.search(
         r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
         text,
-        re.IGNORECASE
+        re.IGNORECASE,
     )
 
     if not pris_match:
+
         pris_match = PRIS_DETALJ_REGEX.search(
-            text.replace("\n", " ")
+            text.replace(
+                "\n",
+                " ",
+            )
         )
 
     if not mil_match:
+
         mil_match = MIL_DETALJ_REGEX.search(
             text
         )
 
     if not pris_match or not mil_match:
+
         print(
             f"[bilweb]   Kunde inte tolka "
             f"pris/mil på detaljsidan: {url}"
         )
+
         return None
 
     # ------------------------------------------------------------
@@ -467,11 +593,16 @@ def _hamta_pris_mil_fran_detaljsida(
     # ------------------------------------------------------------
 
     agare_match = AGARE_DETALJ_REGEX.search(
-        text.replace("\n", " ")
+        text.replace(
+            "\n",
+            " ",
+        )
     )
 
     antal_agare = (
-        int(agare_match.group(1))
+        int(
+            agare_match.group(1)
+        )
         if agare_match
         else None
     )
@@ -481,30 +612,41 @@ def _hamta_pris_mil_fran_detaljsida(
     # ------------------------------------------------------------
 
     ar_auktion = (
-        AUKTION_REGEX.search(text)
+        AUKTION_REGEX.search(
+            text
+        )
         is not None
     )
 
     # ------------------------------------------------------------
     # Registreringsnummer
+    # ------------------------------------------------------------
     #
-    # OBS:
-    # Detta använder samma "text" som redan hämtats.
-    # Ingen ny requests.get().
+    # Först försöker vi använda DOM-strukturen.
+    # Därefter den strikta textmetoden.
     #
-    # Endast explicit etikett accepteras.
+    # Båda metoderna kräver uttrycklig regnr-etikett.
     # ------------------------------------------------------------
 
-    regnr = _extrahera_regnr(
-        text
+    regnr = _extrahera_regnr_dom(
+        soup
     )
 
+    if not regnr:
+
+        regnr = _extrahera_regnr(
+            text
+        )
+
     if regnr:
+
         print(
             f"[bilweb]   REGNR hittat: "
             f"{regnr}"
         )
+
     else:
+
         print(
             f"[bilweb]   REGNR saknas: "
             f"{url}"
@@ -530,34 +672,41 @@ def hamta_annonser() -> list[dict]:
     )
 
     bilar = []
+
     rak_grundkrav_totalt = 0
 
     regnr_detaljsidor = 0
     regnr_hittade = 0
 
-    # Cache för detaljsidor under denna körning.
+    # ------------------------------------------------------------
+    # Detaljsidecache
+    #
+    # En URL hämtas maximalt en gång under hela körningen.
+    # Även misslyckade/avvisade resultat cachas.
+    # ------------------------------------------------------------
+
     detaljsida_cache = {}
 
     for bilkonfig in BILAR:
 
         arsmodell_min = bilkonfig.get(
             "arsmodell_min",
-            ARSMODELL_MIN
+            ARSMODELL_MIN,
         )
 
         arsmodell_max = bilkonfig.get(
             "arsmodell_max",
-            ARSMODELL_MAX
+            ARSMODELL_MAX,
         )
 
         for ar in range(
             arsmodell_min,
-            arsmodell_max + 1
+            arsmodell_max + 1,
         ):
 
             kandidater = _hamta_kandidat_urler(
                 bilkonfig,
-                ar
+                ar,
             )
 
             rak_grundkrav = 0
@@ -567,13 +716,14 @@ def hamta_annonser() -> list[dict]:
                 url = kandidat["url"]
 
                 # ------------------------------------------------
-                # Cache:
-                # samma detaljsida hämtas maximalt en gång.
+                # Cache
                 # ------------------------------------------------
 
                 if url in detaljsida_cache:
 
-                    resultat = detaljsida_cache[url]
+                    resultat = detaljsida_cache[
+                        url
+                    ]
 
                     print(
                         f"[bilweb]   CACHE: "
@@ -589,7 +739,9 @@ def hamta_annonser() -> list[dict]:
                         )
                     )
 
-                    detaljsida_cache[url] = resultat
+                    detaljsida_cache[
+                        url
+                    ] = resultat
 
                     time.sleep(
                         DETALJ_DELAY_SEKUNDER
@@ -614,6 +766,9 @@ def hamta_annonser() -> list[dict]:
                 bil = {
                     "kalla": "bilweb",
                     "url": url,
+
+                    "annons_id":
+                        kandidat["annons_id"],
 
                     "regnr": regnr,
 
@@ -686,7 +841,7 @@ def hamta_annonser() -> list[dict]:
 
                 bil = berika_fran_fritext(
                     bil,
-                    bil["utrustningsniva"]
+                    bil["utrustningsniva"],
                 )
 
                 fel = grundkrav_fel(
@@ -714,6 +869,7 @@ def hamta_annonser() -> list[dict]:
                     )
 
             if kandidater:
+
                 print(
                     f"[bilweb]   -> "
                     f"{rak_grundkrav} av "
@@ -740,6 +896,7 @@ def hamta_annonser() -> list[dict]:
     )
 
     if regnr_detaljsidor:
+
         procent = (
             regnr_hittade
             / regnr_detaljsidor
@@ -750,7 +907,9 @@ def hamta_annonser() -> list[dict]:
             "[bilweb] REGNR-TÄCKNING: "
             f"{procent:.1f}%"
         )
+
     else:
+
         print(
             "[bilweb] REGNR-TÄCKNING: "
             "0.0%"
