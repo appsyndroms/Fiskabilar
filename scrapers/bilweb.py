@@ -35,6 +35,16 @@ inte för att läsa ut pris/mil.
 Konsekvens: fler HTTP-anrop (ett per kandidat, utöver själva
 sökningen) => längre körtid. Bedömd rimlig avvägning eftersom
 felaktiga pris/mil-siffror direkt påverkar ett köpbeslut.
+
+ÄNDRING 2026-08-18:
+En detaljsida hämtas nu maximalt EN gång per URL under en körning.
+Om samma annons dyker upp igen via en annan sökning/årsloop/variant
+används det tidigare resultatet från cachen istället för ett nytt
+HTTP-anrop.
+
+Detta gäller även annonser som redan har avfärdats efter kontroll av
+detaljsidan. Vi behöver alltså inte hämta samma URL igen bara för att
+konstatera samma sak en gång till.
 """
 
 import re
@@ -350,6 +360,22 @@ def hamta_annonser() -> list[dict]:
     bilar = []
     rak_grundkrav_totalt = 0
 
+    # Cache för detaljsidor under denna körning.
+    #
+    # Nyckel:
+    #     annonsens URL
+    #
+    # Värde:
+    #     resultatet från _hamta_pris_mil_fran_detaljsida()
+    #
+    # None cachelagras också. Det betyder att om en detaljsida
+    # redan har försökt hämtas men inte gick att tolka, försöker vi
+    # inte hämta exakt samma URL igen senare under samma körning.
+    #
+    # Framför allt innebär detta att en annons som redan har
+    # kontrollerats och sedan avfärdats inte behöver laddas om.
+    detaljsida_cache = {}
+
     for bilkonfig in BILAR:
 
         # Varje bilmodell kan ha ett eget årsintervall.
@@ -378,15 +404,36 @@ def hamta_annonser() -> list[dict]:
 
             for kandidat in kandidater:
 
-                resultat = (
-                    _hamta_pris_mil_fran_detaljsida(
-                        kandidat["url"]
-                    )
-                )
+                url = kandidat["url"]
 
-                time.sleep(
-                    DETALJ_DELAY_SEKUNDER
-                )
+                # Om samma URL redan har kontrollerats under denna
+                # körning används det tidigare resultatet.
+                #
+                # Detta gäller även om bilen tidigare avfärdades
+                # på grund av grundkraven.
+                if url in detaljsida_cache:
+
+                    resultat = detaljsida_cache[url]
+
+                    print(
+                        f"[bilweb]   CACHE: "
+                        f"detaljsida redan kontrollerad "
+                        f"- hoppar över hämtning: {url}"
+                    )
+
+                else:
+
+                    resultat = (
+                        _hamta_pris_mil_fran_detaljsida(
+                            url
+                        )
+                    )
+
+                    detaljsida_cache[url] = resultat
+
+                    time.sleep(
+                        DETALJ_DELAY_SEKUNDER
+                    )
 
                 if resultat is None:
                     continue
@@ -400,7 +447,7 @@ def hamta_annonser() -> list[dict]:
 
                 bil = {
                     "kalla": "bilweb",
-                    "url": kandidat["url"],
+                    "url": url,
                     "regnr": None,
 
                     "marke_slug":
