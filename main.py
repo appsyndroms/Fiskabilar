@@ -6,12 +6,13 @@ Flöde:
 2. Hämta annonser.
 3. Deduplicera.
 4. Uppdatera state.
-5. Spara annonsobservationer till långtidshistoriken.
-6. Bygg marknadsunderlag.
-7. Beräkna marknadsvärde/fynd.
-8. Spara marknadsvärdesobservationer.
-9. Skicka nya fynd.
-10. Spara state även när inget mejl skickats.
+5. Läs och berika med långtidshistorik.
+6. Spara annonsobservationer till långtidshistoriken.
+7. Bygg marknadsunderlag.
+8. Beräkna marknadsvärde/fynd.
+9. Spara marknadsvärdesobservationer.
+10. Skicka nya fynd.
+11. Spara state även när inget mejl skickats.
 """
 
 from datetime import datetime
@@ -43,6 +44,8 @@ from notify import skicka_epost
 from history import (
     spara_annonsobservation,
     spara_marknadsvardesobservation,
+    bygg_historikindex,
+    berika_med_historik,
 )
 from scrapers import blocket, wayke, bytbil, bilweb
 
@@ -126,7 +129,58 @@ def _logga_kandidat(
         "mil_avvikelse": mildiag["mil_avvikelse"],
         "mil_justering": mildiag["mil_justering"],
         "marknadsdiagnostik": vardering.get("marknadsdiagnostik"),
+        "historik_observationer": bil.get("historik_observationer", 0),
+        "historik_dagar": bil.get("historik_dagar", 0),
+        "historik_forsta_pris": bil.get("historik_forsta_pris"),
+        "historik_senaste_pris": bil.get("historik_senaste_pris"),
+        "historik_prisfall": bil.get("historik_prisfall", 0),
+        "historik_prisforandring": bil.get(
+            "historik_prisforandring",
+            0,
+        ),
+        "historik_marknadsvarde": bil.get(
+            "historik_marknadsvarde"
+        ),
     }
+
+
+def _formatera_historikdiagnostik(k: dict) -> str | None:
+    observationer = k.get("historik_observationer", 0)
+
+    if not observationer:
+        return None
+
+    delar = [
+        f"Historik: {observationer} obs",
+        f"{k.get('historik_dagar', 0)} dagar",
+    ]
+
+    forsta_pris = k.get("historik_forsta_pris")
+    senaste_pris = k.get("historik_senaste_pris")
+    prisfall = k.get("historik_prisfall", 0)
+
+    if isinstance(forsta_pris, (int, float)):
+        delar.append(
+            f"första pris {forsta_pris:,.0f} kr".replace(",", " ")
+        )
+
+    if isinstance(senaste_pris, (int, float)):
+        delar.append(
+            f"senaste {senaste_pris:,.0f} kr".replace(",", " ")
+        )
+
+    if prisfall:
+        delar.append(
+            f"prisfall {prisfall:,.0f} kr".replace(",", " ")
+        )
+
+    marknad = k.get("historik_marknadsvarde")
+    if isinstance(marknad, (int, float)):
+        delar.append(
+            f"historiskt MV {marknad:,.0f} kr".replace(",", " ")
+        )
+
+    return " | ".join(delar)
 
 
 def _skriv_diagnostik(kandidater: list[dict]) -> None:
@@ -161,6 +215,10 @@ def _skriv_diagnostik(kandidater: list[dict]) -> None:
             f"Trygghet: {k['trygghetspoang']}/15"
         )
 
+        historiktext = _formatera_historikdiagnostik(k)
+        if historiktext:
+            print(f"    {historiktext}")
+
     print("=" * 80)
 
 
@@ -185,12 +243,31 @@ def main():
     state = ladda_state()
     bilar = uppdatera_och_berika(bilar, state)
 
+    # Läs långtidshistoriken innan dagens observationer sparas.
+    # Därmed beskriver historikfälten endast tidigare körningar.
+    historikindex = bygg_historikindex()
+
+    for bil in bilar:
+        try:
+            berika_med_historik(
+                bil,
+                historikindex,
+            )
+        except Exception as e:
+            print(
+                "[HISTORIK] Kunde inte läsa historik för annons: "
+                f"{e}"
+            )
+
     # Långtidshistorik: en observation per hittad annons och körning.
     for bil in bilar:
         try:
             spara_annonsobservation(bil)
         except Exception as e:
-            print(f"[HISTORIK] Kunde inte spara annonsobservation: {e}")
+            print(
+                "[HISTORIK] Kunde inte spara annonsobservation: "
+                f"{e}"
+            )
 
     marknadsunderlag = bygg_marknadsunderlag(bilar)
     print(f"{len(marknadsunderlag)} marknadskategorier byggda")
@@ -224,11 +301,13 @@ def main():
             print(f"[FEL valuation] {_annons_namn(bil)}: {e}")
             continue
 
-        # Spara även värderingar som inte blir fynd.
         try:
             spara_marknadsvardesobservation(bil, vardering)
         except Exception as e:
-            print(f"[HISTORIK] Kunde inte spara värdeobservation: {e}")
+            print(
+                "[HISTORIK] Kunde inte spara värdeobservation: "
+                f"{e}"
+            )
 
         if vardering.get("niva") is None:
             continue
@@ -250,7 +329,9 @@ def main():
         if score < MIN_SCORE_FOR_NOTIS:
             kandidater.append(
                 _logga_kandidat(
-                    bil, vardering, score,
+                    bil,
+                    vardering,
+                    score,
                     f"STOPP: score < {MIN_SCORE_FOR_NOTIS}",
                 )
             )
@@ -262,7 +343,9 @@ def main():
             statistik["redan_notifierade"] += 1
             kandidater.append(
                 _logga_kandidat(
-                    bil, vardering, score,
+                    bil,
+                    vardering,
+                    score,
                     "STOPP: väntar på minst 15 000 kr lägre prisnivå",
                 )
             )
@@ -270,7 +353,10 @@ def main():
 
         kandidater.append(
             _logga_kandidat(
-                bil, vardering, score, "SKICKAS"
+                bil,
+                vardering,
+                score,
+                "SKICKAS",
             )
         )
 
@@ -296,8 +382,6 @@ def main():
                 f"{amne}"
             )
 
-    # State sparas alltid. Därmed går även prisförändringar och migrationer
-    # tillbaka till GitHub Actions, inte bara körningar där ett mejl skickades.
     spara_state(state)
 
     _skriv_diagnostik(kandidater)
@@ -307,11 +391,15 @@ def main():
     print("=" * 70)
     print(f"Totalt efter dedup: {statistik['totalt']}")
     print(f"Leasingannonser stoppade: {statistik['leasing_stoppade']}")
-    print(f"Bilar under {MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
-          f"{statistik['miltal_stoppade']}".replace(",", " "))
+    print(
+        f"Bilar under {MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
+        f"{statistik['miltal_stoppade']}"
+    )
     print(f"Valuation OK: {statistik['valuation_ok']}")
-    print(f"Över prisdiff-gränsen ({MIN_DIFF_FOR_CANDIDATE:,} kr): "
-          f"{statistik['under_diff']}".replace(",", " "))
+    print(
+        f"Över prisdiff-gränsen ({MIN_DIFF_FOR_CANDIDATE:,} kr): "
+        f"{statistik['under_diff']}"
+    )
     print(f"Score >= {MIN_SCORE_FOR_NOTIS}: {statistik['score_ok']}")
     print(f"Redan notifierade: {statistik['redan_notifierade']}")
     print(f"Mejl skickade: {statistik['mejl_skickade']}")
