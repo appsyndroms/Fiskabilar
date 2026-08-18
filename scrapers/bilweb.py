@@ -43,7 +43,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import BILAR, ARSMODELL_MIN, ARSMODELL_MAX
-from scrapers import matchar_grundkrav, berika_fran_fritext, identifiera_variant
+from scrapers import (
+    matchar_grundkrav,
+    grundkrav_fel,
+    berika_fran_fritext,
+    identifiera_variant,
+)
 
 SOK_DELAY_SEKUNDER = 3.0
 DETALJ_DELAY_SEKUNDER = 1.5
@@ -435,14 +440,26 @@ def hamta_annonser() -> list[dict]:
                     bil["utrustningsniva"]
                 )
 
-                if matchar_grundkrav(
+                fel = grundkrav_fel(
                     bil
-                ):
+                )
+
+                if not fel:
                     rak_grundkrav += 1
                     rak_grundkrav_totalt += 1
 
                     bilar.append(
                         bil
+                    )
+
+                else:
+                    print(
+                        f"[bilweb]   BORTVALD: "
+                        f"{bil['modell']} "
+                        f"{bil['arsmodell']} "
+                        f"{bil['miltal']} mil "
+                        f"{bil['annonspris']} kr "
+                        f"-> {', '.join(fel)}"
                     )
 
             if kandidater:
