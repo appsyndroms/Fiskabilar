@@ -3,8 +3,6 @@
 from config import BILAR
 
 
-# Snabbuppslag: (marke_slug, modell_slug) ->
-# (marke_visning, modell_visning)
 _VISNINGSNAMN = {
     (b["marke_slug"], b["modell_slug"]): (
         b["marke_visning"],
@@ -70,50 +68,59 @@ def berakna_fyndscore_breakdown(
 
     prispoang = 0
 
-    if diff >= 50000:
+    if diff >= 60000:
         prispoang = 60
 
+    elif diff >= 55000:
+        prispoang = 56
+
+    elif diff >= 50000:
+        prispoang = 52
+
     elif diff >= 45000:
-        prispoang = 55
+        prispoang = 48
 
     elif diff >= 40000:
-        prispoang = 50
+        prispoang = 44
 
     elif diff >= 35000:
-        prispoang = 45
-
-    elif diff >= 30000:
         prispoang = 40
 
+    elif diff >= 30000:
+        prispoang = 36
+
     elif diff >= 27500:
-        prispoang = 37
+        prispoang = 33
 
     elif diff >= 25000:
-        prispoang = 34
+        prispoang = 30
 
     elif diff >= 22500:
-        prispoang = 31
+        prispoang = 27
 
     elif diff >= 20000:
-        prispoang = 28
+        prispoang = 24
 
     elif diff >= 17500:
-        prispoang = 25
+        prispoang = 21
 
     elif diff >= 15000:
-        prispoang = 22
-
-    elif diff >= 12500:
         prispoang = 18
 
+    elif diff >= 12500:
+        prispoang = 15
+
     elif diff >= 10000:
-        prispoang = 14
+        prispoang = 12
 
     elif diff >= 7500:
-        prispoang = 10
+        prispoang = 9
 
     elif diff >= 5000:
         prispoang = 6
+
+    elif diff >= 2500:
+        prispoang = 3
 
     # =========================================================
     # 2. MILTAL - MAX 20 POÄNG
@@ -139,15 +146,21 @@ def berakna_fyndscore_breakdown(
         miltalspoang = 15
 
     elif miltal < 9000:
-        miltalspoang = 12
+        miltalspoang = 13
 
     elif miltal < 10000:
-        miltalspoang = 9
+        miltalspoang = 11
 
     elif miltal < 11000:
-        miltalspoang = 6
+        miltalspoang = 9
 
     elif miltal < 12000:
+        miltalspoang = 7
+
+    elif miltal < 13000:
+        miltalspoang = 5
+
+    elif miltal < 14000:
         miltalspoang = 3
 
     # =========================================================
@@ -174,11 +187,6 @@ def berakna_fyndscore_breakdown(
 
     elif "core" in utrustningsniva:
         utrustningspoang = 1
-
-    # Viktiga tillval.
-    #
-    # Dessa ingår i utrustningsdelen och får därför inte göra
-    # att utrustning totalt överstiger 5 poäng.
 
     tillvalspoang = 0
 
@@ -215,11 +223,9 @@ def berakna_fyndscore_breakdown(
     elif antal_agare == 2:
         trygghetspoang += 2
 
-    # Ej hyrbil/tjänstebil är positivt.
     if not bil.get("hyrbil"):
         trygghetspoang += 3
 
-    # Svensksåld/ej import är positivt.
     if not bil.get("import"):
         trygghetspoang += 3
 
