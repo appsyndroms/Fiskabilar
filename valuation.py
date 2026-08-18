@@ -815,15 +815,6 @@ def _hamta_jamforelsebilar(
 
     jamforelser = filtrerade
 
-    if exkluderade:
-
-        print(
-            "[MARKNAD] "
-            f"Aktuell annons exkluderad från "
-            f"jämförelseunderlag: "
-            f"{len(exkluderade)} st"
-        )
-
     target_mil = bil.get(
         "miltal"
     )
