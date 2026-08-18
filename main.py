@@ -132,6 +132,34 @@ def _annons_namn(bil: dict) -> str:
         return str(modell)
 
 
+def _ar_bmw_330e(bil: dict) -> bool:
+    """
+    Identifierar BMW 330e xDrive Touring.
+
+    Diagnostiken begränsas till denna modell så att Actions-loggen
+    inte fylls med detaljer för alla andra bilmodeller.
+    """
+
+    text = " ".join(
+        str(
+            bil.get(
+                falt,
+                ""
+            )
+        )
+        for falt in (
+            "modell",
+            "variant",
+        )
+    ).lower()
+
+    return (
+        "330e" in text
+        and "xdrive" in text
+        and "touring" in text
+    )
+
+
 def _logga_kandidat(
     bil: dict,
     vardering: dict,
@@ -199,7 +227,141 @@ def _logga_kandidat(
         "mil_justering": miltalsdiagnostik[
             "mil_justering"
         ],
+        "marknadsdiagnostik": vardering.get(
+            "marknadsdiagnostik"
+        ),
+        "diagnostik_330e": _ar_bmw_330e(
+            bil
+        ),
     }
+
+
+def _skriv_marknadsdiagnostik(
+    kandidat: dict,
+) -> None:
+    """
+    Skriver ut exakt vilka jämförelseannonser som ligger bakom
+    marknadsvärdet.
+
+    Påverkar inte själva värderingen.
+    """
+
+    diagnostik = kandidat.get(
+        "marknadsdiagnostik"
+    )
+
+    if not diagnostik:
+        return
+
+    print("")
+    print(
+        "-" * 80
+    )
+    print(
+        "[MARKNADSDIAGNOSTIK]"
+    )
+    print(
+        f"{kandidat['modell']} "
+        f"{kandidat['arsmodell']}"
+    )
+
+    print(
+        f"Annonspris: "
+        f"{kandidat['pris']:,} kr"
+        .replace(",", " ")
+    )
+
+    print(
+        f"Miltal: "
+        f"{kandidat['miltal']:,} mil"
+        .replace(",", " ")
+    )
+
+    print(
+        f"Marknadsvärde: "
+        f"{kandidat['marknad']:,} kr"
+        .replace(",", " ")
+    )
+
+    print(
+        f"Diff: "
+        f"{kandidat['diff']:+,} kr"
+        .replace(",", " ")
+    )
+
+    print(
+        f"Antal jämförelsebilar: "
+        f"{diagnostik.get('antal', 0)}"
+    )
+
+    median_justerat = diagnostik.get(
+        "median_justerat"
+    )
+
+    if median_justerat is not None:
+
+        print(
+            f"Median justerat pris: "
+            f"{median_justerat:,} kr"
+            .replace(",", " ")
+        )
+
+    print("")
+
+    for index, jamforelse in enumerate(
+        diagnostik.get(
+            "jamforelser",
+            []
+        ),
+        start=1,
+    ):
+
+        print(
+            f"  Jämförelse {index:02d}:"
+        )
+
+        print(
+            f"    Pris: "
+            f"{jamforelse['pris']:,} kr"
+            .replace(",", " ")
+        )
+
+        print(
+            f"    Miltal: "
+            f"{jamforelse['miltal']:,} mil"
+            .replace(",", " ")
+        )
+
+        print(
+            f"    Skillnad: "
+            f"{jamforelse['milskillnad']:+,} mil"
+            .replace(",", " ")
+        )
+
+        print(
+            f"    Miljustering: "
+            f"{jamforelse['miljustering']:+,} kr"
+            .replace(",", " ")
+        )
+
+        print(
+            f"    Justerat pris: "
+            f"{jamforelse['justerat_pris']:,} kr"
+            .replace(",", " ")
+        )
+
+        if jamforelse.get(
+            "annons_id"
+        ):
+
+            print(
+                f"    Annons-ID: "
+                f"{jamforelse['annons_id']}"
+            )
+
+    print(
+        "-" * 80
+    )
 
 
 def _skriv_diagnostik(
@@ -273,6 +435,14 @@ def _skriv_diagnostik(
             f"Miljustering: {kandidat['mil_justering']:+,} kr"
             .replace(",", " ")
         )
+
+        if kandidat.get(
+            "diagnostik_330e"
+        ):
+
+            _skriv_marknadsdiagnostik(
+                kandidat
+            )
 
         if kandidat["url"]:
             print(
