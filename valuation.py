@@ -6,15 +6,16 @@ jämförelseunderlag.
 
 Grundtanke:
 1. Hitta jämförbara bilar med samma modell, variant och årsmodell.
-2. Ta bort leasing-/månadsprisannonser från marknadsunderlaget.
-3. Ta bort orimliga priser.
+2. Ta bort annonser där priset faktiskt är ett leasing-/månadspris.
+3. Ta bort orimliga kontantpriser.
 4. Ta bort bilar under 1 000 mil från marknadsunderlaget.
 5. Ta bort aktuell bil från sina egna jämförelser.
 6. Justera jämförelsepris efter skillnad i miltal.
 7. Normalisera jämförelsebilarnas utrustning mot aktuell bil.
-8. Använd medianen av de justerade jämförelsepriserna.
-9. Falla tillbaka till ett manuellt baspris om tillräckligt många
-   jämförelsebilar saknas.
+8. Begränsa orimligt stora utrustningsjusteringar.
+9. Använd medianen av de justerade jämförelsepriserna.
+10. Falla tillbaka till ett manuellt baspris om tillräckligt många
+    jämförelsebilar saknas.
 
 VIKTIGT:
 Marknadsunderlaget ska endast innehålla faktiska kontantpriser för
@@ -22,6 +23,9 @@ bilar som faktiskt säljs och bilar med minst 1 000 mil.
 
 Leasingannonser, månadspriser och liknande får inte blandas ihop
 med försäljningspriser.
+
+Att en bil tidigare varit leasingbil innebär däremot INTE att
+annonsen ska filtreras bort.
 
 Marknadsmodellen är avsiktligt enkel och transparent. Den ska kunna
 förbättras när vi får större historiskt underlag.
@@ -97,21 +101,22 @@ BASPRIS = {
 MIN_JAMFORELSEBILAR = 3
 MAX_JAMFORELSEBILAR = 15
 
+# Först försöker modellen hitta jämförelsebilar inom
+# detta miltalsintervall.
+#
+# Om färre än MIN_JAMFORELSEBILAR hittas utökas intervallet
+# till MAX_MILTALSSKILLNAD.
+PRIMAR_MAX_MILTALSSKILLNAD = 1500
+MAX_MILTALSSKILLNAD = 3000
+
 # Prisjustering per mils skillnad mellan aktuell bil
 # och jämförelsebil.
 #
-# 20 kr/mil innebär exempelvis:
+# Exempel:
 # 1 000 mil skillnad = 20 000 kr
 # 2 000 mil skillnad = 40 000 kr
 # 3 000 mil skillnad = 60 000 kr
-#
-# Detta är betydligt mer rimligt än tidigare 2 kr/mil,
-# som nästan gjorde miltalet betydelselöst.
 KR_PER_MIL_AVVIKELSE = 20.0
-
-# Jämförelsebilar måste ligga inom detta miltal
-# från den aktuella bilen.
-MAX_MILTALSSKILLNAD = 3000
 
 # Bilar under 1 000 mil används inte som marknadsunderlag.
 MIN_MILTAL = 1000
@@ -124,14 +129,27 @@ MAX_KONTANTPRIS = 2000000
 # LEASING / MÅNADSPRIS
 # =========================================================
 
+# Viktigt:
+#
+# Vi letar inte längre efter ordet "leasing" var som helst
+# i annonsen.
+#
+# "Tidigare leasingbil" ska exempelvis INTE filtreras bort.
+#
+# Däremot ska en annons som faktiskt anger leasingpris,
+# månadspris eller leasingkostnad filtreras bort.
+
 LEASING_NYCKELORD = (
-    "leasing",
     "privatleasing",
     "företagsleasing",
     "foretagsleasing",
     "leasingpris",
     "leasingkostnad",
     "leasingavgift",
+    "leasing erbjudande",
+    "leasing erbjuds",
+    "leasing från",
+    "leasing fr.",
     "månadspris",
     "manadspris",
     "månadsavgift",
@@ -144,6 +162,20 @@ LEASING_NYCKELORD = (
     "per manad",
     "/månad",
     "/manad",
+)
+
+
+# Formuleringar som normalt innebär att leasing endast
+# beskriver bilens historik och därför INTE ska filtrera bort
+# annonsen.
+TIDIGARE_LEASING_NYCKELORD = (
+    "tidigare leasingbil",
+    "tidigare leasing",
+    "fd leasingbil",
+    "f d leasingbil",
+    "före detta leasingbil",
+    "fore detta leasingbil",
+    "leasinghistorik",
 )
 
 
@@ -179,6 +211,7 @@ def _ar_sant(value) -> bool:
         return value != 0
 
     if isinstance(value, str):
+
         normaliserat = (
             value
             .strip()
@@ -211,6 +244,7 @@ def _ar_sant(value) -> bool:
 
 
 def _annons_text(bil: dict) -> str:
+
     delar = []
 
     for falt in (
@@ -225,15 +259,20 @@ def _annons_text(bil: dict) -> str:
         "leasing",
         "finansiering",
     ):
+
         value = bil.get(falt)
 
         if value:
-            delar.append(str(value))
+            delar.append(
+                str(value)
+            )
 
     url = bil.get("url")
 
     if url:
-        delar.append(str(url))
+        delar.append(
+            str(url)
+        )
 
     urls = bil.get("urls")
 
@@ -249,8 +288,29 @@ def _annons_text(bil: dict) -> str:
     )
 
 
-def _ar_leasingannons(bil: dict) -> bool:
+def _ar_leasingannons(
+    bil: dict,
+) -> bool:
+    """
+    Avgör om annonsen faktiskt verkar vara en leasingannons.
+
+    "Tidigare leasingbil" ska inte räknas som leasingannons.
+    """
+
     text = _annons_text(bil)
+
+    if not text:
+        return False
+
+    # Om texten uttryckligen beskriver bilen som tidigare
+    # leasingbil är det historik och inte ett leasingpris.
+    for nyckel in TIDIGARE_LEASING_NYCKELORD:
+
+        if nyckel in text:
+            text = text.replace(
+                nyckel,
+                "",
+            )
 
     return any(
         nyckel in text
@@ -264,7 +324,7 @@ def _ar_rimligt_kontantpris(
 
     if not isinstance(
         pris,
-        (int, float)
+        (int, float),
     ):
         return False
 
@@ -273,6 +333,63 @@ def _ar_rimligt_kontantpris(
         <= pris
         <= MAX_KONTANTPRIS
     )
+
+
+# =========================================================
+# ANNONS-ID
+# =========================================================
+
+def _hamta_annons_id(
+    bil: dict,
+):
+    """
+    Skapa ett så stabilt annons-ID som möjligt.
+
+    Prioritet:
+    1. annons_id
+    2. id
+    3. url
+    4. första URL
+    """
+
+    annons_id = bil.get(
+        "annons_id"
+    )
+
+    if annons_id:
+        return str(
+            annons_id
+        ).strip()
+
+    annons_id = bil.get(
+        "id"
+    )
+
+    if annons_id:
+        return str(
+            annons_id
+        ).strip()
+
+    url = bil.get(
+        "url"
+    )
+
+    if url:
+        return str(
+            url
+        ).strip()
+
+    urls = bil.get(
+        "urls"
+    )
+
+    if urls:
+
+        return str(
+            urls[0]
+        ).strip()
+
+    return None
 
 
 # =========================================================
@@ -287,13 +404,17 @@ def _marknadskategori(
         str(
             bil.get(
                 "modell",
-                ""
+                "",
             )
         ).lower(),
 
-        bil.get("variant"),
+        bil.get(
+            "variant"
+        ),
 
-        bil.get("arsmodell"),
+        bil.get(
+            "arsmodell"
+        ),
     )
 
 
@@ -314,24 +435,32 @@ def bygg_marknadsunderlag(
 
     for bil in bilar:
 
-        if _ar_leasingannons(bil):
+        if _ar_leasingannons(
+            bil
+        ):
 
             borttagna_leasing += 1
             continue
 
-        pris = bil.get("annonspris")
+        pris = bil.get(
+            "annonspris"
+        )
 
-        if not _ar_rimligt_kontantpris(pris):
+        if not _ar_rimligt_kontantpris(
+            pris
+        ):
 
             borttagna_pris += 1
             continue
 
-        miltal = bil.get("miltal")
+        miltal = bil.get(
+            "miltal"
+        )
 
         if (
             not isinstance(
                 miltal,
-                (int, float)
+                (int, float),
             )
             or miltal < 0
         ):
@@ -344,26 +473,27 @@ def bygg_marknadsunderlag(
             borttagna_miltal += 1
             continue
 
-        kategori = _marknadskategori(bil)
+        kategori = _marknadskategori(
+            bil
+        )
 
-        annons_id = (
-            bil.get("annons_id")
-            or bil.get("id")
-            or bil.get("url")
-            or (
-                bil.get("urls", [None])[0]
-                if bil.get("urls")
-                else None
-            )
+        annons_id = _hamta_annons_id(
+            bil
         )
 
         underlag.setdefault(
             kategori,
-            []
+            [],
         ).append(
             {
-                "pris": float(pris),
-                "miltal": float(miltal),
+                "pris": float(
+                    pris
+                ),
+
+                "miltal": float(
+                    miltal
+                ),
+
                 "annons_id": annons_id,
 
                 # Behåll information om utrustning
@@ -372,17 +502,29 @@ def bygg_marknadsunderlag(
                 "utrustningsniva": bil.get(
                     "utrustningsniva"
                 ),
+
                 "dragkrok": _ar_sant(
-                    bil.get("dragkrok")
+                    bil.get(
+                        "dragkrok"
+                    )
                 ),
+
                 "varmare": _ar_sant(
-                    bil.get("varmare")
+                    bil.get(
+                        "varmare"
+                    )
                 ),
+
                 "volvo_selekt": _ar_sant(
-                    bil.get("volvo_selekt")
+                    bil.get(
+                        "volvo_selekt"
+                    )
                 ),
+
                 "stor_batteri": _ar_sant(
-                    bil.get("stor_batteri")
+                    bil.get(
+                        "stor_batteri"
+                    )
                 ),
             }
         )
@@ -410,8 +552,12 @@ def bygg_marknadsunderlag(
     print(
         "[MARKNAD] "
         f"{borttagna_miltal} annonser under "
-        f"{MIN_MILTAL:,} mil borttagna från marknadsunderlaget"
-        .replace(",", " ")
+        f"{MIN_MILTAL:,} mil borttagna från "
+        "marknadsunderlaget"
+        .replace(
+            ",",
+            " ",
+        )
     )
 
     return underlag
@@ -421,31 +567,6 @@ def bygg_marknadsunderlag(
 # JÄMFÖRELSEBILAR
 # =========================================================
 
-def _hamta_annons_id(bil: dict):
-
-    annons_id = bil.get("annons_id")
-
-    if annons_id:
-        return annons_id
-
-    annons_id = bil.get("id")
-
-    if annons_id:
-        return annons_id
-
-    url = bil.get("url")
-
-    if url:
-        return url
-
-    urls = bil.get("urls")
-
-    if urls:
-        return urls[0]
-
-    return None
-
-
 def _hamta_jamforelsebilar(
     bil: dict,
     marknadsunderlag: dict | None,
@@ -454,60 +575,97 @@ def _hamta_jamforelsebilar(
     if not marknadsunderlag:
         return []
 
-    kategori = _marknadskategori(bil)
+    kategori = _marknadskategori(
+        bil
+    )
 
     jamforelser = list(
         marknadsunderlag.get(
             kategori,
-            []
+            [],
         )
     )
 
     if not jamforelser:
         return []
 
-    aktuell_id = _hamta_annons_id(bil)
+    aktuell_id = _hamta_annons_id(
+        bil
+    )
 
     if aktuell_id:
 
         jamforelser = [
             x
             for x in jamforelser
-            if x.get("annons_id") != aktuell_id
-        ]
-
-    target_mil = bil.get("miltal")
-
-    # -----------------------------------------------------
-    # Begränsa jämförelsebilar till ett rimligt
-    # miltalsintervall runt aktuell bil.
-    #
-    # Exempel:
-    # En bil på 7 383 mil jämförs endast med bilar
-    # mellan 4 383 och 10 383 mil.
-    # -----------------------------------------------------
-
-    if isinstance(
-        target_mil,
-        (int, float)
-    ):
-
-        jamforelser = [
-            x
-            for x in jamforelser
-            if abs(
-                x["miltal"] - target_mil
-            ) <= MAX_MILTALSSKILLNAD
-        ]
-
-        jamforelser.sort(
-            key=lambda x: abs(
-                x["miltal"]
-                - target_mil
+            if (
+                x.get("annons_id")
+                != aktuell_id
             )
-        )
+        ]
 
-    return jamforelser[
+    target_mil = bil.get(
+        "miltal"
+    )
+
+    if not isinstance(
+        target_mil,
+        (int, float),
+    ):
+        return []
+
+    # -----------------------------------------------------
+    # STEG 1
+    #
+    # Försök först hitta minst tre bilar inom ±1 500 mil.
+    # Detta ger normalt betydligt bättre jämförelser.
+    # -----------------------------------------------------
+
+    primara = [
+        x
+        for x in jamforelser
+        if abs(
+            x["miltal"]
+            - target_mil
+        ) <= PRIMAR_MAX_MILTALSSKILLNAD
+    ]
+
+    primara.sort(
+        key=lambda x: abs(
+            x["miltal"]
+            - target_mil
+        )
+    )
+
+    if len(primara) >= MIN_JAMFORELSEBILAR:
+
+        return primara[
+            :MAX_JAMFORELSEBILAR
+        ]
+
+    # -----------------------------------------------------
+    # STEG 2
+    #
+    # Om marknaden är tunn utökas intervallet till ±3 000 mil.
+    # -----------------------------------------------------
+
+    utokade = [
+        x
+        for x in jamforelser
+        if abs(
+            x["miltal"]
+            - target_mil
+        ) <= MAX_MILTALSSKILLNAD
+    ]
+
+    utokade.sort(
+        key=lambda x: abs(
+            x["miltal"]
+            - target_mil
+        )
+    )
+
+    return utokade[
         :MAX_JAMFORELSEBILAR
     ]
 
@@ -520,29 +678,34 @@ UTRUSTNINGSNIVA_JUSTERING = [
     (
         (
             "polestar engineered",
-            "polestar-engineered",
+            "polestar engineered",
         ),
         30000,
     ),
 
     (
-        ("inscription expression",),
+        (
+            "inscription expression",
+        ),
         25000,
     ),
 
     (
-        ("inscription",),
+        (
+            "inscription",
+        ),
         20000,
     ),
 
     (
-        ("ultimate",),
+        (
+            "ultimate",
+        ),
         15000,
     ),
 
     (
         (
-            "r-design",
             "r design",
             "rdesign",
         ),
@@ -551,7 +714,6 @@ UTRUSTNINGSNIVA_JUSTERING = [
 
     (
         (
-            "plus, dark",
             "plus dark",
             "plus dark edition",
         ),
@@ -559,17 +721,23 @@ UTRUSTNINGSNIVA_JUSTERING = [
     ),
 
     (
-        ("plus",),
+        (
+            "plus",
+        ),
         0,
     ),
 
     (
-        ("momentum",),
+        (
+            "momentum",
+        ),
         0,
     ),
 
     (
-        ("core",),
+        (
+            "core",
+        ),
         -15000,
     ),
 ]
@@ -585,29 +753,60 @@ SELEKT_VARDE = 6000
 STOR_BATTERI_VARDE = 12000
 
 
+# Maximal total utrustningsjustering.
+
+# Detta är viktigt eftersom en kombination av många
+# utrustningsposter annars kan flytta ett jämförelsepris
+# orimligt långt från dess faktiska marknadspris.
+MAX_TOTAL_UTRUSTNINGSJUSTERING = 40000
+
+
+def _begransa_utrustningsjustering(
+    justering: int | float,
+) -> int:
+
+    return int(
+        max(
+            -MAX_TOTAL_UTRUSTNINGSJUSTERING,
+            min(
+                MAX_TOTAL_UTRUSTNINGSJUSTERING,
+                justering,
+            ),
+        )
+    )
+
+
 def _hamta_utrustningsjustering(
     bil: dict,
 ) -> int:
 
     utrustning = _normalisera_text(
-        bil.get("utrustningsniva")
+        bil.get(
+            "utrustningsniva"
+        )
         or ""
     )
 
     if not utrustning:
         return 0
 
-    for nyckelord, justering in (
-        UTRUSTNINGSNIVA_JUSTERING
-    ):
+    for (
+        nyckelord,
+        justering,
+    ) in UTRUSTNINGSNIVA_JUSTERING:
 
         for nyckel in nyckelord:
 
             normaliserad_nyckel = (
-                _normalisera_text(nyckel)
+                _normalisera_text(
+                    nyckel
+                )
             )
 
-            if normaliserad_nyckel in utrustning:
+            if (
+                normaliserad_nyckel
+                in utrustning
+            ):
                 return justering
 
     return 0
@@ -620,22 +819,30 @@ def _hamta_tillvalsjustering(
     justering = 0
 
     if _ar_sant(
-        bil.get("dragkrok")
+        bil.get(
+            "dragkrok"
+        )
     ):
         justering += DRAGKROK_VARDE
 
     if _ar_sant(
-        bil.get("varmare")
+        bil.get(
+            "varmare"
+        )
     ):
         justering += VARMARE_VARDE
 
     if _ar_sant(
-        bil.get("volvo_selekt")
+        bil.get(
+            "volvo_selekt"
+        )
     ):
         justering += SELEKT_VARDE
 
     if _ar_sant(
-        bil.get("stor_batteri")
+        bil.get(
+            "stor_batteri"
+        )
     ):
         justering += STOR_BATTERI_VARDE
 
@@ -646,9 +853,17 @@ def _hamta_total_utrustningsjustering(
     bil: dict,
 ) -> int:
 
-    return (
-        _hamta_utrustningsjustering(bil)
-        + _hamta_tillvalsjustering(bil)
+    total = (
+        _hamta_utrustningsjustering(
+            bil
+        )
+        + _hamta_tillvalsjustering(
+            bil
+        )
+    )
+
+    return _begransa_utrustningsjustering(
+        total
     )
 
 
@@ -661,14 +876,19 @@ def _berakna_marknadspris_fran_jamforelser(
     jamforelser: list[dict],
 ) -> int | None:
 
-    if len(jamforelser) < MIN_JAMFORELSEBILAR:
+    if len(
+        jamforelser
+    ) < MIN_JAMFORELSEBILAR:
+
         return None
 
-    target_mil = bil.get("miltal")
+    target_mil = bil.get(
+        "miltal"
+    )
 
     if not isinstance(
         target_mil,
-        (int, float)
+        (int, float),
     ):
         return None
 
@@ -682,26 +902,30 @@ def _berakna_marknadspris_fran_jamforelser(
 
     for jamforelse in jamforelser:
 
-        pris = jamforelse["pris"]
-        miltal = jamforelse["miltal"]
+        pris = jamforelse[
+            "pris"
+        ]
+
+        miltal = jamforelse[
+            "miltal"
+        ]
 
         # -------------------------------------------------
-        # Miltalsjustering
+        # MILTALSJUSTERING
         # -------------------------------------------------
 
         miljustering = (
-            miltal - target_mil
+            miltal
+            - target_mil
         ) * KR_PER_MIL_AVVIKELSE
 
         pris_efter_miltal = (
-            pris + miljustering
+            pris
+            + miljustering
         )
 
         # -------------------------------------------------
-        # Utrustningsnormalisering
-        #
-        # Vi räknar om jämförelsebilen till samma
-        # utrustningsnivå som den aktuella bilen.
+        # UTRUSTNINGSNORMALISERING
         # -------------------------------------------------
 
         jamforelse_utrustning = (
@@ -713,6 +937,12 @@ def _berakna_marknadspris_fran_jamforelser(
         utrustningsjustering = (
             target_utrustning
             - jamforelse_utrustning
+        )
+
+        utrustningsjustering = (
+            _begransa_utrustningsjustering(
+                utrustningsjustering
+            )
         )
 
         justerat_pris = (
@@ -729,9 +959,32 @@ def _berakna_marknadspris_fran_jamforelser(
 
     return int(
         round(
-            median(justerade_priser) / 1000
-        ) * 1000
+            median(
+                justerade_priser
+            ) / 1000
+        )
+        * 1000
     )
+
+
+# =========================================================
+# MARKNADSDIAGNOSTIK
+# =========================================================
+
+def _bestam_underlagsstyrka(
+    antal: int,
+) -> str:
+
+    if antal >= 8:
+        return "STARKT"
+
+    if antal >= 5:
+        return "GODKÄNT"
+
+    if antal >= 3:
+        return "SVAGT"
+
+    return "OTILLRÄCKLIGT"
 
 
 def _bygg_marknadsdiagnostik(
@@ -739,20 +992,38 @@ def _bygg_marknadsdiagnostik(
     jamforelser: list[dict],
 ) -> dict:
 
-    target_mil = bil.get("miltal")
+    target_mil = bil.get(
+        "miltal"
+    )
 
-    detaljer = []
+    underlagsstyrka = (
+        _bestam_underlagsstyrka(
+            len(jamforelser)
+        )
+    )
 
     if not isinstance(
         target_mil,
-        (int, float)
+        (int, float),
     ):
 
         return {
-            "antal": len(jamforelser),
-            "malpris": bil.get("annonspris"),
+            "antal": len(
+                jamforelser
+            ),
+
+            "underlagsstyrka": (
+                underlagsstyrka
+            ),
+
+            "malpris": bil.get(
+                "annonspris"
+            ),
+
             "miltal": None,
+
             "median_justerat": None,
+
             "jamforelser": [],
         }
 
@@ -762,13 +1033,21 @@ def _bygg_marknadsdiagnostik(
         )
     )
 
+    detaljer = []
+
     for jamforelse in jamforelser:
 
-        pris = jamforelse["pris"]
-        miltal = jamforelse["miltal"]
+        pris = jamforelse[
+            "pris"
+        ]
+
+        miltal = jamforelse[
+            "miltal"
+        ]
 
         milskillnad = (
-            miltal - target_mil
+            miltal
+            - target_mil
         )
 
         miljustering = (
@@ -785,6 +1064,12 @@ def _bygg_marknadsdiagnostik(
         utrustningsjustering = (
             target_utrustning
             - jamforelse_utrustning
+        )
+
+        utrustningsjustering = (
+            _begransa_utrustningsjustering(
+                utrustningsjustering
+            )
         )
 
         justerat_pris = (
@@ -842,29 +1127,43 @@ def _bygg_marknadsdiagnostik(
         )
 
     justerade = [
-        x["justerat_pris"]
+        x[
+            "justerat_pris"
+        ]
         for x in detaljer
     ]
 
     median_justerat = (
-        median(justerade)
+        median(
+            justerade
+        )
         if justerade
         else None
     )
 
     return {
-        "antal": len(detaljer),
+        "antal": len(
+            detaljer
+        ),
+
+        "underlagsstyrka": (
+            underlagsstyrka
+        ),
 
         "malpris": bil.get(
             "annonspris"
         ),
 
         "miltal": int(
-            round(target_mil)
+            round(
+                target_mil
+            )
         ),
 
         "malbil_utrustning": int(
-            round(target_utrustning)
+            round(
+                target_utrustning
+            )
         ),
 
         "median_justerat": (
@@ -896,15 +1195,20 @@ def _ar_sedan_arsmodell(
     arsmodell: int,
 ) -> float:
 
+    if not arsmodell:
+        return 0.0
+
     idag = date.today()
 
     return max(
         0.0,
         (
-            idag.year - arsmodell
+            idag.year
+            - arsmodell
         )
         + (
-            idag.month - 6
+            idag.month
+            - 6
         ) / 12,
     )
 
@@ -913,7 +1217,9 @@ def berakna_miltalsdiagnostik(
     bil: dict,
 ) -> dict:
 
-    arsmodell = bil.get("arsmodell")
+    arsmodell = bil.get(
+        "arsmodell"
+    )
 
     if not arsmodell:
 
@@ -965,7 +1271,9 @@ def berakna_miltalsdiagnostik(
             forvantat_mil
         ),
 
-        "faktiskt_miltal": faktiskt_miltal,
+        "faktiskt_miltal": (
+            faktiskt_miltal
+        ),
 
         "mil_avvikelse": round(
             mil_avvikelse
@@ -986,12 +1294,19 @@ def _hamta_baspris(
 ) -> int | None:
 
     modell = (
-        bil.get("modell")
+        bil.get(
+            "modell"
+        )
         or "v60"
     ).lower()
 
-    variant = bil.get("variant")
-    arsmodell = bil.get("arsmodell")
+    variant = bil.get(
+        "variant"
+    )
+
+    arsmodell = bil.get(
+        "arsmodell"
+    )
 
     baspris = BASPRIS.get(
         (
@@ -1021,7 +1336,9 @@ def _hamta_baspris(
         return None
 
     return int(
-        median(kandidater)
+        median(
+            kandidater
+        )
     )
 
 
@@ -1054,9 +1371,11 @@ def berakna_marknadsvarde(
 
     if marknadspris is not None:
 
-        # Utrustningen är redan normaliserad i
-        # jämförelsepriset.
-        marknadsvarde = marknadspris
+        # Utrustningen är redan normaliserad
+        # i jämförelsepriset.
+        marknadsvarde = (
+            marknadspris
+        )
 
     # =====================================================
     # FALLBACK
@@ -1113,7 +1432,8 @@ def berakna_marknadsvarde(
 
     return (
         round(
-            marknadsvarde / 1000
+            marknadsvarde
+            / 1000
         )
         * 1000
     )
@@ -1145,6 +1465,35 @@ def berakna_fynd(
         - annonspris
     )
 
+    # -----------------------------------------------------
+    # FYNDPROCENT
+    #
+    # Exempel:
+    # marknadsvärde 350 000
+    # annonspris    315 000
+    # diff           35 000
+    #
+    # fyndprocent = 10 %
+    # -----------------------------------------------------
+
+    if (
+        isinstance(
+            marknadsvarde,
+            (int, float),
+        )
+        and marknadsvarde > 0
+    ):
+
+        fyndprocent = (
+            diff
+            / marknadsvarde
+            * 100
+        )
+
+    else:
+
+        fyndprocent = 0.0
+
     jamforelser = (
         _hamta_jamforelsebilar(
             bil,
@@ -1152,9 +1501,19 @@ def berakna_fynd(
         )
     )
 
+    antal_jamforelser = len(
+        jamforelser
+    )
+
     empiriskt_underlag = (
-        len(jamforelser)
+        antal_jamforelser
         >= MIN_JAMFORELSEBILAR
+    )
+
+    underlagsstyrka = (
+        _bestam_underlagsstyrka(
+            antal_jamforelser
+        )
     )
 
     marknadsdiagnostik = (
@@ -1164,22 +1523,66 @@ def berakna_fynd(
         )
     )
 
-    if diff >= 35000:
+    # =====================================================
+    # FYNDKLASSNING
+    # =====================================================
+    #
+    # Vanligt FYND:
+    # minst 20 000 kr under marknadsvärdet.
+    #
+    # EXTREMT_FYND:
+    # minst 35 000 kr och dessutom minst 8 %
+    # under marknadsvärdet samt minst GODKÄNT empiriskt
+    # underlag.
+    #
+    # Detta gör att ett extremt fynd inte kan uppstå
+    # enbart på grund av ett mycket högt manuellt baspris.
+    # =====================================================
+
+    if (
+        empiriskt_underlag
+        and diff >= 35000
+        and fyndprocent >= 8.0
+        and underlagsstyrka
+        in (
+            "GODKÄNT",
+            "STARKT",
+        )
+    ):
+
         niva = "EXTREMT_FYND"
 
-    elif diff >= 20000:
+    elif (
+        diff >= 20000
+        and fyndprocent >= 5.0
+    ):
+
         niva = "FYND"
 
     else:
+
         niva = None
 
     return {
-        "marknadsvarde": marknadsvarde,
+        "marknadsvarde": (
+            marknadsvarde
+        ),
+
         "diff": diff,
+
+        "fyndprocent": round(
+            fyndprocent,
+            1,
+        ),
+
         "niva": niva,
 
-        "jamforelseantal": len(
-            jamforelser
+        "jamforelseantal": (
+            antal_jamforelser
+        ),
+
+        "underlagsstyrka": (
+            underlagsstyrka
         ),
 
         "empiriskt_underlag": (
