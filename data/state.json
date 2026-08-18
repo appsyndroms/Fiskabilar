@@ -2069,8 +2069,9 @@
     "forsta_pris": 399900,
     "senaste_pris": 399900,
     "senast_sedd": "2026-08-18",
-    "notifierad": false,
-    "migrerad_fran": "kal:v60:T6 AWD:2024:5943"
+    "notifierad": true,
+    "migrerad_fran": "kal:v60:T6 AWD:2024:5943",
+    "notifierad_pris": 399900
   },
   "url:https://www.wayke.se/objekt/8e77887e-44ee-4a1c-99d1-4136ef83c44f": {
     "forsta_sedd": "2026-08-14",
@@ -3930,5 +3931,22 @@
     "senaste_pris": 329000,
     "senast_sedd": "2026-08-18",
     "notifierad": false
+  },
+  "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-recharge-core-edt-backkamera-google-varmare-2024-kombi-12810491": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-18",
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5300"
+  },
+  "url:https://www.wayke.se/objekt/e95184e9-4898-4ed2-848c-c390d0a7c963": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 528600,
+    "senaste_pris": 528600,
+    "senast_sedd": "2026-08-18",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445"
   }
 }
