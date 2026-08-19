@@ -2,51 +2,40 @@
 Scraper för Wayke.
 
 Wayke är server-renderad (fungerar utan JavaScript), så vanlig
-requests.get() räcker. Vi bygger INTE på CSS-klasser här utan på de
-stabila textetiketterna ("Plats:", "Återförsäljare:", "Fuel Type:",
-"Mätarställning:", "Model Year:", "Gearbox Type:", "Kontantpris") som
-verifierats för annonskorten.
-
-URL-mönster:
-    https://www.wayke.se/sok/{marke_slug}/{modell_slug}/{arsmodell}
-
-Exempel:
-    https://www.wayke.se/sok/volvo/v60/2023
-    https://www.wayke.se/sok/volvo/v90/2023
-    https://www.wayke.se/sok/bmw/530e-xdrive-touring/2023
-
-Enskilda annonser ligger på:
-    https://www.wayke.se/objekt/{uuid}
-
-Sök-sidan kan innehålla samma annonslänk flera gånger i HTML:n.
-Därför dedupliceras objektlänkar globalt, men deras ursprungliga
-ordning bevaras.
+requests.get() räcker.
 
 VIKTIGT:
-Antalet objektlänkar och antalet tolkade annonsblock behöver inte vara
-samma. Waykes HTML kan innehålla objektlänkar som inte representerar
-ett annonsblock som vår regex kan tolka.
+Annonsens URL och dess innehåll extraheras från samma HTML-kort.
+Vi förlitar oss alltså inte längre på att:
 
-Därför kopplas URL:er endast till annonser när matchningen är säker.
-Vid mismatch lämnas URL-fältet None i stället för att riskera att
-en bil får fel annonslänk.
+    [14 objektlänkar] == [14 annonsblock]
 
-Vid mismatch skrivs diagnostik ut med:
-- antal unika objektlänkar
-- antal tolkade annonsblock
-- differensen
-- samtliga objektlänkar
-- samtliga tolkade annonsblock
+ska gälla.
 
-Detta gör det möjligt att felsöka Waykes HTML utan att skapa felaktiga
-länkningar.
+Wayke kan innehålla extra /objekt/-länkar i HTML:n som inte motsvarar
+ett tolkningsbart annonskort. Sådana länkar ignoreras.
+
+För varje annonskort försöker vi hitta:
+- objekt-URL
+- plats
+- återförsäljare
+- titel
+- bränsle
+- miltal
+- årsmodell
+- växellåda
+- kontantpris
+
+URL kopplas därför direkt till den annons som innehåller länken.
+
+Om ett annonskort inte kan tolkas skrivs det ut som diagnostik,
+men övriga annonser påverkas inte.
 
 Sålda bilar filtreras bort explicit eftersom "Sålt"/"Såld" kan förekomma
-i dealer-fältet där "I lager" annars förväntades.
+i dealer-fältet.
 
 Paginering via ?page=2 har tidigare inte ändrat resultatet vid test.
-Om en sökning har fler resultat än en sida visar kan Wayke eventuellt
-ladda fler via JavaScript ("Visa fler"). Playwright/Selenium kan då
+Om Wayke laddar ytterligare annonser via JavaScript kan Playwright/Selenium
 behövas.
 """
 
@@ -85,10 +74,6 @@ def _bygg_annons_regex(wayke_anchor: str) -> re.Pattern:
     """
     Bygger annonsregexen dynamiskt per bilkonfiguration.
 
-    Ankartexten, exempelvis "Volvo V60" eller
-    "BMW 530e xDrive Touring", används för att hitta var
-    varje annonsblock börjar.
-
     Regexen bygger på de stabila textetiketter som verifierats
     på Waykes söksidor.
     """
@@ -106,35 +91,9 @@ def _bygg_annons_regex(wayke_anchor: str) -> re.Pattern:
     )
 
 
-# Fångar länkar till enskilda annonser.
-#
-# En och samma annons kan förekomma flera gånger i HTML:n.
-# Därför dedupliceras resultatet i _extrahera_lankar().
 OBJEKT_LANK_REGEX = re.compile(
-    r'href="(/objekt/[0-9a-fA-F-]+)"'
+    r"/objekt/[0-9a-fA-F-]+"
 )
-
-
-def _extrahera_lankar(html: str) -> list[str]:
-    """
-    Plockar ut unika /objekt/-länkar i dokumentordning.
-
-    Alla dubletter tas bort globalt, inte bara direkt efter varandra.
-    """
-
-    hittade_lankar = OBJEKT_LANK_REGEX.findall(html)
-
-    unika_i_ordning: list[str] = []
-    sedda: set[str] = set()
-
-    for lank in hittade_lankar:
-        if lank in sedda:
-            continue
-
-        sedda.add(lank)
-        unika_i_ordning.append(lank)
-
-    return unika_i_ordning
 
 
 def _normalisera_diagnostiktext(text: str) -> str:
@@ -148,33 +107,227 @@ def _normalisera_diagnostiktext(text: str) -> str:
     )
 
 
+def _hitta_objekt_url(element) -> str | None:
+    """
+    Letar efter objekt-URL i ett HTML-element.
+
+    Söker först på elementet och därefter bland dess länkar.
+    """
+
+    if element.name == "a":
+        href = element.get("href")
+
+        if href:
+            match = OBJEKT_LANK_REGEX.search(
+                href
+            )
+
+            if match:
+                return WAYKE_BAS + match.group(0)
+
+    for anchor in element.find_all(
+        "a",
+        href=True,
+    ):
+        href = anchor.get("href")
+
+        match = OBJEKT_LANK_REGEX.search(
+            href or ""
+        )
+
+        if match:
+            return WAYKE_BAS + match.group(0)
+
+    return None
+
+
+def _hitta_annonskort(
+    anchor,
+):
+    """
+    Letar upp det närmaste HTML-element som representerar ett
+    komplett Wayke-annonskort.
+
+    Vi går uppåt i DOM-trädet och letar efter ett element vars text
+    innehåller de stabila fälten som behövs för att tolka annonsen.
+
+    Detta gör att URL och annonsdata kommer från samma DOM-segment.
+    """
+
+    element = anchor
+
+    for _ in range(10):
+        if element is None:
+            break
+
+        text = element.get_text(
+            separator=""
+        )
+
+        if (
+            "Plats:" in text
+            and "Återförsäljare:" in text
+            and "Mätarställning:" in text
+            and "Model Year:" in text
+            and "Kontantpris" in text
+        ):
+            return element
+
+        element = element.parent
+
+    return None
+
+
+def _extrahera_annonskort(
+    html: str,
+    annons_regex: re.Pattern,
+) -> list[dict]:
+    """
+    Extraherar annonser direkt från Waykes HTML-kort.
+
+    Fördelen jämfört med den tidigare metoden är att vi inte längre
+    behöver para ihop:
+
+        objektlänkar[0] -> annons[0]
+        objektlänkar[1] -> annons[1]
+
+    URL:n följer i stället med det DOM-element där annonsen faktiskt
+    finns.
+
+    Returnerar poster med:
+
+        {
+            "url": ...,
+            "match": re.Match,
+        }
+
+    Dubbletter av samma objekt-ID tas bort.
+    """
+
+    soup = BeautifulSoup(
+        html,
+        "html.parser",
+    )
+
+    resultat: list[dict] = []
+    sedda_urler: set[str] = set()
+
+    # Alla länkar till enskilda objekt.
+    anchors = soup.find_all(
+        "a",
+        href=OBJEKT_LANK_REGEX,
+    )
+
+    for anchor in anchors:
+        url = _hitta_objekt_url(
+            anchor
+        )
+
+        if not url:
+            continue
+
+        if url in sedda_urler:
+            continue
+
+        kort = _hitta_annonskort(
+            anchor
+        )
+
+        if kort is None:
+            continue
+
+        text = kort.get_text(
+            separator=""
+        )
+
+        match = annons_regex.search(
+            text
+        )
+
+        if not match:
+            continue
+
+        sedda_urler.add(url)
+
+        resultat.append(
+            {
+                "url": url,
+                "match": match,
+            }
+        )
+
+    return resultat
+
+
+def _extrahera_lankar(
+    html: str,
+) -> list[str]:
+    """
+    Returnerar alla unika objektlänkar.
+
+    Funktionen används endast för diagnostik.
+    URL-länkningen av annonser sker numera via
+    _extrahera_annonskort().
+    """
+
+    hittade_lankar = OBJEKT_LANK_REGEX.findall(
+        html
+    )
+
+    unika_i_ordning: list[str] = []
+    sedda: set[str] = set()
+
+    for lank in hittade_lankar:
+        full_url = WAYKE_BAS + lank
+
+        if full_url in sedda:
+            continue
+
+        sedda.add(full_url)
+        unika_i_ordning.append(
+            full_url
+        )
+
+    return unika_i_ordning
+
+
 def _logga_lankdiagnostik(
-    lankar: list[str],
-    traffar: list[re.Match],
+    alla_lankar: list[str],
+    annonser: list[dict],
     bilkonfig: dict,
     arsmodell: int,
 ) -> None:
     """
-    Skriver diagnostik när antalet Wayke-länkar och annonsblock
-    inte överensstämmer.
+    Diagnostik för Waykes URL-/annonsmatchning.
 
-    Viktigt:
-    Vi försöker inte gissa vilken URL som hör till vilken annons.
+    Den gamla logiken betraktade varje skillnad i antal som ett
+    totalt mismatch.
 
-    Ett mismatch-fall kan exempelvis vara:
+    Den nya logiken visar i stället:
 
-        14 objektlänkar
-        13 annonsblock
+        alla objektlänkar
+        faktiskt tolkade annonser
 
-    Det betyder inte automatiskt att en av de 13 annonserna är fel.
-    Det kan vara en extra objektlänk i Waykes HTML som vår annonsregex
-    inte tolkar.
+    eftersom dessa nu extraheras från samma HTML-struktur.
     """
 
-    differens = len(lankar) - len(traffar)
+    tolkade_urler = {
+        annons["url"]
+        for annons in annonser
+        if annons.get("url")
+    }
+
+    otolkade_lankar = [
+        lank
+        for lank in alla_lankar
+        if lank not in tolkade_urler
+    ]
+
+    if not otolkade_lankar:
+        return
 
     warning(
-        "[wayke] URL-diagnostik vid mismatch:"
+        "[wayke] URL-diagnostik:"
     )
 
     warning(
@@ -186,54 +339,55 @@ def _logga_lankdiagnostik(
 
     warning(
         f"[wayke]   Unika objektlänkar: "
-        f"{len(lankar)}"
+        f"{len(alla_lankar)}"
     )
 
     warning(
-        f"[wayke]   Tolkade annonsblock: "
-        f"{len(traffar)}"
+        f"[wayke]   Tolkade annonskort: "
+        f"{len(annonser)}"
     )
 
-    if differens > 0:
-        warning(
-            f"[wayke]   Skillnad: "
-            f"{differens} fler objektlänk(ar) "
-            "än tolkade annonsblock"
-        )
-
-    elif differens < 0:
-        warning(
-            f"[wayke]   Skillnad: "
-            f"{abs(differens)} fler tolkade annonsblock "
-            "än objektlänkar"
-        )
-
-    else:
-        warning(
-            "[wayke]   Skillnad: 0"
-        )
+    warning(
+        f"[wayke]   Objektlänkar utan "
+        f"tolkningsbart annonskort: "
+        f"{len(otolkade_lankar)}"
+    )
 
     warning(
-        "[wayke]   Objektlänkar:"
+        "[wayke]   Ej tolkade länkar:"
     )
 
     for index, lank in enumerate(
-        lankar,
+        otolkade_lankar,
         start=1,
     ):
         warning(
             f"[wayke]     {index:02d}. "
-            f"{WAYKE_BAS}{lank}"
+            f"{lank}"
         )
 
+
+def _logga_annonsdiagnostik(
+    annonser: list[dict],
+    bilkonfig: dict,
+    arsmodell: int,
+) -> None:
+    """
+    Kort diagnostik över de annonser som faktiskt tolkades.
+
+    Används bara när URL-diagnostik behövs.
+    """
+
     warning(
-        "[wayke]   Tolkade annonsblock:"
+        "[wayke]   Tolkade annonskort:"
     )
 
-    for index, match in enumerate(
-        traffar,
+    for index, annons in enumerate(
+        annonser,
         start=1,
     ):
+        match = annons["match"]
+
         titel = _normalisera_diagnostiktext(
             match.group("titel")
         )
@@ -266,21 +420,14 @@ def _logga_lankdiagnostik(
             f"{mil} mil | "
             f"{pris} kr | "
             f"{plats[:60]} | "
-            f"{dealer[:60]}"
+            f"{dealer[:60]} | "
+            f"{annons['url']}"
         )
 
-    warning(
-        "[wayke]   URL-länkning: "
-        "SKIPPAD för denna sökning eftersom "
-        "antalet länkar och annonsblock inte matchar."
-    )
 
-    warning(
-        "[wayke]   Inga URL:er kopplas på chans."
-    )
-
-
-def _rensa_tal(text: str) -> int:
+def _rensa_tal(
+    text: str,
+) -> int:
     """Tar bort allt utom siffror och returnerar heltal."""
 
     siffror = re.sub(
@@ -289,7 +436,9 @@ def _rensa_tal(text: str) -> int:
         text,
     )
 
-    return int(siffror) if siffror else 0
+    return int(
+        siffror
+    ) if siffror else 0
 
 
 def _tolka_titel(
@@ -304,22 +453,12 @@ def _tolka_titel(
     Sålda bilar filtreras bort innan annonsen skapas.
     """
 
-    # Sålda bilar kan förekomma i dealer-fältet som exempelvis:
-    # "...SåldVolvo V60..."
-    #
-    # "Sålt" och "Såld" hanteras båda.
-
     if re.search(
         r"sål[dt]",
         dealer,
         re.IGNORECASE,
     ):
         return None
-
-    # Kontrollera variant mot ankare + titel tillsammans.
-    #
-    # För Volvo innehåller titeln ofta variantinformationen.
-    # För BMW kan hela varianten redan finnas i wayke_anchor.
 
     variant = identifiera_variant(
         bilkonfig,
@@ -332,9 +471,15 @@ def _tolka_titel(
     return {
         "kalla": "wayke",
         "regnr": None,
-        "marke_slug": bilkonfig["marke_slug"],
-        "modell_slug": bilkonfig["modell_slug"],
-        "modell": bilkonfig["modell_slug"],
+        "marke_slug": bilkonfig[
+            "marke_slug"
+        ],
+        "modell_slug": bilkonfig[
+            "modell_slug"
+        ],
+        "modell": bilkonfig[
+            "modell_slug"
+        ],
         "variant": variant,
         "utrustningsniva": (
             titel.strip()[:60]
@@ -380,11 +525,10 @@ def hamta_annonser() -> list[dict]:
 
     for bilkonfig in BILAR:
         annons_regex = _bygg_annons_regex(
-            bilkonfig["wayke_anchor"]
+            bilkonfig[
+                "wayke_anchor"
+            ]
         )
-
-        # Varje bilmodell kan ha ett eget årsintervall.
-        # Om det inte anges används de globala standardvärdena.
 
         arsmodell_min = bilkonfig.get(
             "arsmodell_min",
@@ -402,8 +546,12 @@ def hamta_annonser() -> list[dict]:
         ):
             try:
                 html = _hamta_sida(
-                    bilkonfig["marke_slug"],
-                    bilkonfig["modell_slug"],
+                    bilkonfig[
+                        "marke_slug"
+                    ],
+                    bilkonfig[
+                        "modell_slug"
+                    ],
                     ar,
                 )
 
@@ -416,73 +564,48 @@ def hamta_annonser() -> list[dict]:
                 )
                 continue
 
-            text = BeautifulSoup(
+            # --------------------------------------------------------
+            # NY URL-HANTERING
+            #
+            # URL och annonsdata hämtas från samma DOM-kort.
+            #
+            # Det betyder att en extra Wayke-länk inte längre gör att
+            # alla andra URL:er måste kastas bort.
+            # --------------------------------------------------------
+
+            annonskort = _extrahera_annonskort(
                 html,
-                "html.parser",
-            ).get_text(
-                separator=""
+                annons_regex,
             )
 
-            traffar = list(
-                annons_regex.finditer(text)
-            )
-
-            lankar = _extrahera_lankar(
+            alla_lankar = _extrahera_lankar(
                 html
             )
 
-            # --------------------------------------------------------
-            # URL-MATCHNING
-            #
-            # Vi kopplar URL:er endast när antalet länkar och
-            # tolkade annonsblock är identiskt.
-            #
-            # Det är medvetet konservativt.
-            #
-            # Om Wayke exempelvis ger:
-            #
-            #   14 objektlänkar
-            #   13 annonsblock
-            #
-            # får vi INTE anta att:
-            #
-            #   länk 1 -> annons 1
-            #   länk 2 -> annons 2
-            #   ...
-            #
-            # eftersom en enda extra länk kan ligga var som helst.
-            #
-            # Felaktig URL är betydligt värre än saknad URL.
-            # --------------------------------------------------------
-
-            if len(lankar) != len(traffar):
+            if len(alla_lankar) != len(
+                annonskort
+            ):
                 _logga_lankdiagnostik(
-                    lankar,
-                    traffar,
+                    alla_lankar,
+                    annonskort,
                     bilkonfig,
                     ar,
                 )
 
-                lankar_for_annonser = [
-                    None
-                    for _ in traffar
-                ]
+            for annons in annonskort:
+                match = annons["match"]
 
-            else:
-                lankar_for_annonser = [
-                    WAYKE_BAS + lank
-                    for lank in lankar
-                ]
-
-            for match, lank in zip(
-                traffar,
-                lankar_for_annonser,
-            ):
                 bil = _tolka_titel(
                     bilkonfig,
-                    match.group("titel"),
-                    match.group("plats"),
-                    match.group("dealer"),
+                    match.group(
+                        "titel"
+                    ),
+                    match.group(
+                        "plats"
+                    ),
+                    match.group(
+                        "dealer"
+                    ),
                 )
 
                 if bil is None:
@@ -491,13 +614,19 @@ def hamta_annonser() -> list[dict]:
                 bil.update(
                     {
                         "annonspris": _rensa_tal(
-                            match.group("pris")
+                            match.group(
+                                "pris"
+                            )
                         ),
                         "arsmodell": int(
-                            match.group("ar")
+                            match.group(
+                                "ar"
+                            )
                         ),
                         "miltal": _rensa_tal(
-                            match.group("mil")
+                            match.group(
+                                "mil"
+                            )
                         ),
                         "vaxellada": (
                             "Automat"
@@ -521,7 +650,9 @@ def hamta_annonser() -> list[dict]:
                         "varmare": None,
                         "volvo_selekt": None,
                         "stor_batteri": None,
-                        "url": lank,
+                        "url": annons[
+                            "url"
+                        ],
                     }
                 )
 
@@ -536,7 +667,9 @@ def hamta_annonser() -> list[dict]:
                 if matchar_grundkrav(
                     bil
                 ):
-                    bilar.append(bil)
+                    bilar.append(
+                        bil
+                    )
 
             time.sleep(
                 DELAY_SEKUNDER
