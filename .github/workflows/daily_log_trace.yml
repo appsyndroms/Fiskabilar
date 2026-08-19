@@ -1,4 +1,4 @@
-name: Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
+name: TRACE - Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
 
 on:
   workflow_dispatch: {}
