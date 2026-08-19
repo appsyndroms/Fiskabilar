@@ -14,15 +14,25 @@ Matchningen sker i flera nivåer:
 3. Stark kombination av bilens egenskaper
 4. Poängbaserad fuzzy matching
 
-Detta är mer robust än att kräva att modell, variant, miltal
-och pris måste ligga inom fasta marginaler.
-
 Fingerprinten är avsiktligt konservativ:
-det är bättre att missa en osäker dubblett än att slå ihop
-två olika bilar.
 
-Alla numeriska och textbaserade signaler normaliseras innan
-matchning.
+    Det är bättre att missa en osäker dubblett än att slå ihop
+    två olika bilar.
+
+Viktiga principer:
+
+- Regnr och VIN är starkaste identifierarna.
+- Modell måste matcha vid fingerprint-matchning.
+- Olika årsmodell är en konflikt när båda källorna anger årsmodell.
+- Saknad årsmodell är däremot inte en konflikt.
+- Pris är en svag signal.
+- Miltal är en starkare signal.
+- Första registrering är en stark identifierande signal.
+- Utrustning används endast när båda källorna faktiskt anger information.
+- Dubblettgrupper använder en stabil representant för att undvika
+  transitiv "chain matching".
+
+Alla numeriska och textbaserade signaler normaliseras innan matchning.
 """
 
 from __future__ import annotations
@@ -42,10 +52,10 @@ PRIS_MARGINAL = 5000
 # Minsta poäng för automatisk dubblett.
 MATCHNINGSGRANS = 82
 
-# Om regnr eller VIN matchar behöver vi normalt inte använda poängmodellen.
+# Säker identifierare.
 SIKER_MATCHNING = 100
 
-# Pris och miltal används som signaler men får inte ensamma skapa matchning.
+# När variant saknas på ena sidan krävs flera oberoende starka signaler.
 MINSTA_STARKA_SIGNALER = 3
 
 
@@ -82,7 +92,10 @@ def _normalisera_text(value) -> str:
         if not unicodedata.combining(c)
     )
 
-    text = text.replace("&", " och ")
+    text = text.replace(
+        "&",
+        " och ",
+    )
 
     # Vanliga separators behandlas som mellanslag.
     text = re.sub(
@@ -144,25 +157,24 @@ def _normalisera_variant(value) -> str:
         xDrive
         X-Drive
         x drive
-
     """
 
     text = _normalisera_text(value)
 
-    # Vanliga skrivvarianter.
     ersattningar = {
         "x drive": "xdrive",
-        "awd": "awd",
         "4 motion": "4motion",
         "4motion": "4motion",
-        "quattro": "quattro",
-        "recharge": "recharge",
         "plug in": "plugin",
+        "plug-in": "plugin",
         "phev": "plugin",
     }
 
     for gammal, ny in ersattningar.items():
-        text = text.replace(gammal, ny)
+        text = text.replace(
+            gammal,
+            ny,
+        )
 
     return re.sub(
         r"\s+",
@@ -183,7 +195,10 @@ def _numeriskt(value):
     Returnerar None om värdet saknas eller inte är numeriskt.
     """
 
-    if value in (None, ""):
+    if value in (
+        None,
+        "",
+    ):
         return None
 
     if isinstance(value, bool):
@@ -199,7 +214,6 @@ def _numeriskt(value):
                 ".",
             )
 
-            # Ta bort allt utom siffror, minus och decimalpunkt.
             text = re.sub(
                 r"[^0-9.\-]",
                 "",
@@ -213,7 +227,10 @@ def _numeriskt(value):
 
         return float(value)
 
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError,
+    ):
         return None
 
 
@@ -225,7 +242,9 @@ def _heltal(value):
     if numeriskt is None:
         return None
 
-    return int(round(numeriskt))
+    return int(
+        round(numeriskt)
+    )
 
 
 def _textlikhet(a, b) -> float:
@@ -268,7 +287,10 @@ def _variantlikhet(a, b) -> float:
     ).ratio()
 
 
-def _bool_finns(bil: dict, falt: str) -> bool:
+def _bool_finns(
+    bil: dict,
+    falt: str,
+) -> bool:
     """
     Returnerar True endast om fältet uttryckligen innehåller information.
 
@@ -287,7 +309,10 @@ def _bool_finns(bil: dict, falt: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _regnr_matchar(a: dict, b: dict) -> bool:
+def _regnr_matchar(
+    a: dict,
+    b: dict,
+) -> bool:
     """Kontrollerar registreringsnummer."""
 
     regnr_a = _normalisera_regnr(
@@ -304,8 +329,12 @@ def _regnr_matchar(a: dict, b: dict) -> bool:
     return regnr_a == regnr_b
 
 
-def _vin_matchar(a: dict, b: dict) -> bool:
-    """Kontrollerar VIN/chassinummer."""
+def _hamta_vin(bil: dict) -> set[str]:
+    """
+    Hämtar alla VIN/chassinummer som finns i en annons.
+
+    Olika scrapers/källor kan använda olika fältnamn.
+    """
 
     vin_falt = (
         "vin",
@@ -314,19 +343,38 @@ def _vin_matchar(a: dict, b: dict) -> bool:
         "vin_nummer",
     )
 
+    resultat = set()
+
     for falt in vin_falt:
-        vin_a = _normalisera_vin(
-            a.get(falt)
+        vin = _normalisera_vin(
+            bil.get(falt)
         )
 
-        vin_b = _normalisera_vin(
-            b.get(falt)
-        )
+        if vin:
+            resultat.add(vin)
 
-        if vin_a and vin_b:
-            return vin_a == vin_b
+    return resultat
 
-    return False
+
+def _vin_matchar(
+    a: dict,
+    b: dict,
+) -> bool:
+    """
+    Kontrollerar VIN/chassinummer.
+
+    Alla kända VIN-fält på respektive annons jämförs mot varandra.
+    """
+
+    vin_a = _hamta_vin(a)
+    vin_b = _hamta_vin(b)
+
+    if not vin_a or not vin_b:
+        return False
+
+    return bool(
+        vin_a.intersection(vin_b)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -334,7 +382,10 @@ def _vin_matchar(a: dict, b: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _modell_matchar(a: dict, b: dict) -> bool:
+def _modell_matchar(
+    a: dict,
+    b: dict,
+) -> bool:
     """
     Modell måste i praktiken matcha.
 
@@ -363,21 +414,91 @@ def _modell_matchar(a: dict, b: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _arsmodell_matchar(a: dict, b: dict) -> bool:
-    """Kontrollerar årsmodell."""
+def _arsmodell(
+    bil: dict,
+):
+    """Returnerar årsmodell som int eller None."""
 
-    arsmodell_a = _heltal(
-        a.get("arsmodell")
+    return _heltal(
+        bil.get("arsmodell")
     )
 
-    arsmodell_b = _heltal(
-        b.get("arsmodell")
-    )
 
-    if arsmodell_a is None or arsmodell_b is None:
+def _arsmodell_matchar(
+    a: dict,
+    b: dict,
+) -> bool:
+    """
+    Kontrollerar årsmodell.
+
+    Returnerar False om någon årsmodell saknas.
+    Använd _arsmodell_konfliktar() när det ska avgöras om
+    skillnaden faktiskt är en blockerande konflikt.
+    """
+
+    arsmodell_a = _arsmodell(a)
+    arsmodell_b = _arsmodell(b)
+
+    if (
+        arsmodell_a is None
+        or arsmodell_b is None
+    ):
         return False
 
     return arsmodell_a == arsmodell_b
+
+
+def _arsmodell_konfliktar(
+    a: dict,
+    b: dict,
+) -> bool:
+    """
+    Returnerar True endast när båda källorna anger årsmodell
+    och de faktiskt skiljer sig.
+
+    Saknad information är inte en konflikt.
+    """
+
+    arsmodell_a = _arsmodell(a)
+    arsmodell_b = _arsmodell(b)
+
+    if (
+        arsmodell_a is None
+        or arsmodell_b is None
+    ):
+        return False
+
+    return arsmodell_a != arsmodell_b
+
+
+# ---------------------------------------------------------------------------
+# Första registrering
+# ---------------------------------------------------------------------------
+
+
+def _forsta_registrering_matchar(
+    a: dict,
+    b: dict,
+) -> bool:
+    """
+    Jämför första registreringsdatum.
+
+    Textnormalisering används eftersom olika källor kan skriva
+    datum på olika sätt.
+    """
+
+    datum_a = _normalisera_text(
+        a.get("forsta_registrering")
+    )
+
+    datum_b = _normalisera_text(
+        b.get("forsta_registrering")
+    )
+
+    if not datum_a or not datum_b:
+        return False
+
+    return datum_a == datum_b
 
 
 # ---------------------------------------------------------------------------
@@ -385,7 +506,10 @@ def _arsmodell_matchar(a: dict, b: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _miltal_likhet(a: dict, b: dict) -> float:
+def _miltal_likhet(
+    a: dict,
+    b: dict,
+) -> float:
     """
     Ger 0–1 baserat på hur nära miltalen ligger.
 
@@ -402,7 +526,10 @@ def _miltal_likhet(a: dict, b: dict) -> float:
         b.get("miltal")
     )
 
-    if mil_a is None or mil_b is None:
+    if (
+        mil_a is None
+        or mil_b is None
+    ):
         return 0.0
 
     skillnad = abs(
@@ -416,8 +543,12 @@ def _miltal_likhet(a: dict, b: dict) -> float:
         return 0.0
 
     return 1.0 - (
-        (skillnad - 100)
-        / (MIL_MARGINAL - 100)
+        (
+            skillnad - 100
+        )
+        / (
+            MIL_MARGINAL - 100
+        )
     ) * 0.5
 
 
@@ -426,7 +557,10 @@ def _miltal_likhet(a: dict, b: dict) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _pris_likhet(a: dict, b: dict) -> float:
+def _pris_likhet(
+    a: dict,
+    b: dict,
+) -> float:
     """
     Ger 0–1 baserat på prisskillnad.
 
@@ -442,7 +576,10 @@ def _pris_likhet(a: dict, b: dict) -> float:
         b.get("annonspris")
     )
 
-    if pris_a is None or pris_b is None:
+    if (
+        pris_a is None
+        or pris_b is None
+    ):
         return 0.0
 
     skillnad = abs(
@@ -456,8 +593,12 @@ def _pris_likhet(a: dict, b: dict) -> float:
         return 0.0
 
     return 1.0 - (
-        (skillnad - 1000)
-        / (PRIS_MARGINAL - 1000)
+        (
+            skillnad - 1000
+        )
+        / (
+            PRIS_MARGINAL - 1000
+        )
     ) * 0.5
 
 
@@ -518,14 +659,23 @@ def _utrustningssignal(
         va = a.get(falt_namn)
         vb = b.get(falt_namn)
 
-        if isinstance(va, str) or isinstance(vb, str):
-            if _normalisera_text(va) == _normalisera_text(vb):
+        if (
+            isinstance(va, str)
+            or isinstance(vb, str)
+        ):
+            if (
+                _normalisera_text(va)
+                == _normalisera_text(vb)
+            ):
                 matchningar += 1
 
         elif va == vb:
             matchningar += 1
 
-    return matchningar, kanda
+    return (
+        matchningar,
+        kanda,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -540,52 +690,91 @@ def _matchningsscore(
     """
     Beräknar ett fingerprint-score 0–100.
 
-    Viktning:
+    Poäng:
 
         Modell                 blockerande krav
-        Årsmodell              20
+        Årsmodell              15
         Variant                20
         Miltal                 20
-        Pris                   10
-        Utrustning             15
+        Första registrering    15
+        Pris                   5
+        Utrustning             10
         Övriga signaler        15
 
+    Totalt: 100 poäng.
+
     Regnr och VIN hanteras separat som säkra identifierare.
+
+    Viktigt:
+
+    Saknad information ger normalt 0 poäng men är inte automatiskt
+    en konflikt.
+
+    En faktisk konflikt, exempelvis olika årsmodell när båda
+    källorna anger årsmodell, blockerar däremot matchningen.
     """
 
+    # -------------------------------------------------------
     # Modell är blockerande.
+    # -------------------------------------------------------
+
     if not _modell_matchar(a, b):
         return 0, {
             "orsak": "olika_modell",
         }
 
-    score = 0
-    detaljer = {
-        "modell": True,
-        "arsmodell": False,
-        "variantlikhet": 0.0,
-        "miltallikhet": 0.0,
-        "prislikhet": 0.0,
-        "utrustningsmatchningar": 0,
-        "utrustningskanda": 0,
-    }
-
     # -------------------------------------------------------
-    # Årsmodell: 20 poäng
+    # Årsmodell är blockerande endast när båda är kända
+    # och faktiskt skiljer sig.
     # -------------------------------------------------------
 
-    if _arsmodell_matchar(a, b):
-        score += 20
-        detaljer["arsmodell"] = True
-    else:
-        # Olika årsmodell är en mycket stark konflikt.
+    if _arsmodell_konfliktar(a, b):
         return 0, {
             "orsak": "olika_arsmodell",
         }
 
+    score = 0
+
+    detaljer = {
+        "modell": True,
+        "arsmodell": False,
+        "arsmodell_kand_a": _arsmodell(a) is not None,
+        "arsmodell_kand_b": _arsmodell(b) is not None,
+        "variantlikhet": 0.0,
+        "miltallikhet": 0.0,
+        "forsta_registrering": False,
+        "prislikhet": 0.0,
+        "utrustningsmatchningar": 0,
+        "utrustningskanda": 0,
+        "extra_score": 0,
+        "extra_max": 0,
+    }
+
+    # -------------------------------------------------------
+    # Årsmodell: 15 poäng
+    # -------------------------------------------------------
+
+    if _arsmodell_matchar(a, b):
+        score += 15
+        detaljer["arsmodell"] = True
+
+    # Om årsmodell saknas på ena sidan får vi inga poäng,
+    # men det är inte en konflikt.
+    #
+    # Detta är viktigt eftersom olika annonssajter ofta
+    # presenterar årsmodell på olika sätt.
+
     # -------------------------------------------------------
     # Variant: 20 poäng
     # -------------------------------------------------------
+
+    variant_a = _normalisera_variant(
+        a.get("variant")
+    )
+
+    variant_b = _normalisera_variant(
+        b.get("variant")
+    )
 
     variantlikhet = _variantlikhet(
         a.get("variant"),
@@ -594,14 +783,16 @@ def _matchningsscore(
 
     detaljer["variantlikhet"] = variantlikhet
 
-    if variantlikhet >= 0.90:
-        score += 20
+    if variant_a and variant_b:
 
-    elif variantlikhet >= 0.75:
-        score += 16
+        if variantlikhet >= 0.90:
+            score += 20
 
-    elif variantlikhet >= 0.60:
-        score += 10
+        elif variantlikhet >= 0.75:
+            score += 16
+
+        elif variantlikhet >= 0.60:
+            score += 10
 
     # -------------------------------------------------------
     # Miltal: 20 poäng
@@ -619,7 +810,20 @@ def _matchningsscore(
     )
 
     # -------------------------------------------------------
-    # Pris: 10 poäng
+    # Första registrering: 15 poäng
+    # -------------------------------------------------------
+
+    if _forsta_registrering_matchar(
+        a,
+        b,
+    ):
+        score += 15
+        detaljer[
+            "forsta_registrering"
+        ] = True
+
+    # -------------------------------------------------------
+    # Pris: 5 poäng
     # -------------------------------------------------------
 
     prislikhet = _pris_likhet(
@@ -630,11 +834,11 @@ def _matchningsscore(
     detaljer["prislikhet"] = prislikhet
 
     score += round(
-        prislikhet * 10
+        prislikhet * 5
     )
 
     # -------------------------------------------------------
-    # Utrustning: 15 poäng
+    # Utrustning: 10 poäng
     # -------------------------------------------------------
 
     matchningar, kanda = _utrustningssignal(
@@ -654,7 +858,7 @@ def _matchningsscore(
         utrustningspoang = (
             matchningar
             / kanda
-        ) * 15
+        ) * 10
 
         score += round(
             utrustningspoang
@@ -667,35 +871,22 @@ def _matchningsscore(
     extra_score = 0
     extra_max = 0
 
-    # Första registrering är ofta mycket stark.
-    if (
-        a.get("forsta_registrering")
-        and b.get("forsta_registrering")
-    ):
-        extra_max += 5
-
-        if (
-            _normalisera_text(
-                a.get("forsta_registrering")
-            )
-            == _normalisera_text(
-                b.get("forsta_registrering")
-            )
-        ):
-            extra_score += 5
-
-    # Antal ägare kan vara användbart.
+    # Antal ägare.
     if (
         a.get("antal_agare") is not None
         and b.get("antal_agare") is not None
     ):
-        extra_max += 3
+        extra_max += 4
 
         if (
-            _heltal(a.get("antal_agare"))
-            == _heltal(b.get("antal_agare"))
+            _heltal(
+                a.get("antal_agare")
+            )
+            == _heltal(
+                b.get("antal_agare")
+            )
         ):
-            extra_score += 3
+            extra_score += 4
 
     # Dragkrok.
     if (
@@ -728,24 +919,77 @@ def _matchningsscore(
         a.get("stor_batteri") is not None
         and b.get("stor_batteri") is not None
     ):
-        extra_max += 2
+        extra_max += 3
 
         if (
             bool(a.get("stor_batteri"))
             == bool(b.get("stor_batteri"))
         ):
+            extra_score += 3
+
+    # Volvo Selekt.
+    if (
+        a.get("volvo_selekt") is not None
+        and b.get("volvo_selekt") is not None
+    ):
+        extra_max += 1
+
+        if (
+            bool(a.get("volvo_selekt"))
+            == bool(b.get("volvo_selekt"))
+        ):
+            extra_score += 1
+
+    # Import.
+    if (
+        a.get("import") is not None
+        and b.get("import") is not None
+    ):
+        extra_max += 2
+
+        if (
+            bool(a.get("import"))
+            == bool(b.get("import"))
+        ):
             extra_score += 2
 
     if extra_max:
         score += round(
-            (extra_score / extra_max)
-            * 15
+            (
+                extra_score
+                / extra_max
+            ) * 15
         )
+
+    detaljer["extra_score"] = extra_score
+    detaljer["extra_max"] = extra_max
 
     return min(
         100,
         score,
     ), detaljer
+
+
+# ---------------------------------------------------------------------------
+# Matchningstyp
+# ---------------------------------------------------------------------------
+
+
+def _matchningstyp(
+    a: dict,
+    b: dict,
+) -> str:
+    """
+    Returnerar vilken typ av identifiering som användes.
+    """
+
+    if _regnr_matchar(a, b):
+        return "regnr"
+
+    if _vin_matchar(a, b):
+        return "vin"
+
+    return "fingerprint"
 
 
 # ---------------------------------------------------------------------------
@@ -765,6 +1009,16 @@ def _matchar(
         1. Regnr
         2. VIN
         3. Fingerprint-score
+
+    Fingerprint-matchningen är konservativ.
+
+    Viktigt:
+
+    Om två annonser har olika årsmodell och båda anger årsmodell
+    betraktas de inte som samma bil via fingerprint.
+
+    Om endast en källa anger årsmodell är detta däremot inte
+    automatiskt ett hinder.
     """
 
     # -------------------------------------------------------
@@ -789,23 +1043,15 @@ def _matchar(
         return False
 
     # -------------------------------------------------------
-    # Årsmodell måste matcha om båda källorna anger den.
+    # Olika kända årsmodeller är en hård konflikt.
     # -------------------------------------------------------
 
-    arsmodell_a = _heltal(
-        a.get("arsmodell")
-    )
-
-    arsmodell_b = _heltal(
-        b.get("arsmodell")
-    )
-
-    if (
-        arsmodell_a is not None
-        and arsmodell_b is not None
-        and arsmodell_a != arsmodell_b
-    ):
+    if _arsmodell_konfliktar(a, b):
         return False
+
+    # -------------------------------------------------------
+    # Fingerprint.
+    # -------------------------------------------------------
 
     score, detaljer = _matchningsscore(
         a,
@@ -813,10 +1059,7 @@ def _matchar(
     )
 
     # -------------------------------------------------------
-    # Skydd mot för svag matchning.
-    #
-    # Om variant saknas på ena sidan får inte enbart modell +
-    # årsmodell + ungefärligt pris/miltal räcka.
+    # Skydd mot för svag matchning när variant saknas.
     # -------------------------------------------------------
 
     variant_a = _normalisera_variant(
@@ -828,17 +1071,41 @@ def _matchar(
     )
 
     if not variant_a or not variant_b:
+
         starka_signaler = 0
 
+        # Samma kända årsmodell.
         if _arsmodell_matchar(a, b):
             starka_signaler += 1
 
-        if detaljer.get("miltallikhet", 0) >= 0.75:
+        # Mycket likt miltal.
+        if (
+            detaljer.get(
+                "miltallikhet",
+                0,
+            )
+            >= 0.75
+        ):
             starka_signaler += 1
 
-        if detaljer.get("prislikhet", 0) >= 0.75:
+        # Mycket likt pris.
+        if (
+            detaljer.get(
+                "prislikhet",
+                0,
+            )
+            >= 0.75
+        ):
             starka_signaler += 1
 
+        # Samma första registrering.
+        if detaljer.get(
+            "forsta_registrering",
+            False,
+        ):
+            starka_signaler += 2
+
+        # Minst två matchande utrustningsfält.
         if (
             detaljer.get(
                 "utrustningsmatchningar",
@@ -848,7 +1115,10 @@ def _matchar(
         ):
             starka_signaler += 1
 
-        if starka_signaler < MINSTA_STARKA_SIGNALER:
+        if (
+            starka_signaler
+            < MINSTA_STARKA_SIGNALER
+        ):
             return False
 
     # -------------------------------------------------------
@@ -870,46 +1140,69 @@ def fingerprint_score(
     """
     Returnerar detaljerad diagnostik.
 
-    Användbar vid felsökning och i GitHub Actions.
-
     Exempel:
 
         {
             "matchar": True,
             "score": 94,
+            "confidence": 94,
             "orsak": "fingerprint",
+            "matchningstyp": "fingerprint",
             "detaljer": {...}
         }
     """
+
+    # -------------------------------------------------------
+    # Regnr
+    # -------------------------------------------------------
 
     if _regnr_matchar(a, b):
         return {
             "matchar": True,
             "score": SIKER_MATCHNING,
+            "confidence": SIKER_MATCHNING,
             "orsak": "regnr",
+            "matchningstyp": "regnr",
             "detaljer": {},
         }
+
+    # -------------------------------------------------------
+    # VIN
+    # -------------------------------------------------------
 
     if _vin_matchar(a, b):
         return {
             "matchar": True,
             "score": SIKER_MATCHNING,
+            "confidence": SIKER_MATCHNING,
             "orsak": "vin",
+            "matchningstyp": "vin",
             "detaljer": {},
         }
+
+    # -------------------------------------------------------
+    # Fingerprint
+    # -------------------------------------------------------
 
     score, detaljer = _matchningsscore(
         a,
         b,
     )
 
+    matchar = _matchar(
+        a,
+        b,
+    )
+
     return {
-        "matchar": _matchar(a, b),
+        "matchar": matchar,
         "score": score,
+        "confidence": score,
         "orsak": detaljer.get(
             "orsak",
             "fingerprint",
         ),
+        "matchningstyp": "fingerprint",
         "detaljer": detaljer,
     }
 
@@ -933,6 +1226,8 @@ def _fullstandighetspoang(
         "regnr",
         "vin",
         "chassinummer",
+        "chassinr",
+        "vin_nummer",
         "utrustningsniva",
         "dragkrok",
         "varmare",
@@ -966,6 +1261,38 @@ def _fullstandighetspoang(
 
 
 # ---------------------------------------------------------------------------
+# Grupprepresentant
+# ---------------------------------------------------------------------------
+
+
+def _grupprepresentant(
+    grupp: list[dict],
+) -> dict:
+    """
+    Väljer en stabil representant för en dubblettgrupp.
+
+    Representanten ändras inte när nya annonser läggs till under
+    själva matchningspasset.
+
+    Detta är viktigt för att undvika transitiv chain matching:
+
+        A matchar B
+        B matchar C
+
+    ska inte automatiskt innebära:
+
+        A + B + C
+
+    om C inte också matchar gruppens representant.
+    """
+
+    return max(
+        grupp,
+        key=_fullstandighetspoang,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Dubblettgruppering
 # ---------------------------------------------------------------------------
 
@@ -981,53 +1308,74 @@ def deduplicera(
         - den mest kompletta annonsen används som bas
         - alla källor sparas
         - alla URL:er sparas
-        - fingerprint-score sparas för diagnostik
+        - fingerprint-score sparas
+        - matchningstyp sparas
 
     Viktigt:
 
-    Matchningen görs mot gruppens mest representativa bil.
-    Detta gör att en bil som finns på tre olika sajter kan samlas
-    även om varje källa saknar lite olika information.
+    En ny annons jämförs mot gruppens representant och inte
+    godtyckligt mot varje tidigare annons.
+
+    Detta förhindrar transitiv chain matching.
     """
 
     grupper: list[list[dict]] = []
 
     for bil in bilar:
+
         placerad = False
 
         for grupp in grupper:
 
-            # Testa mot samtliga annonser i gruppen.
-            # Detta är säkrare än att endast jämföra mot grupp[0],
-            # eftersom olika källor kan ha olika komplett information.
-            matchad = False
-            basta_score = 0
+            representant = _grupprepresentant(
+                grupp
+            )
 
-            for kandidat in grupp:
+            diagnostik = fingerprint_score(
+                representant,
+                bil,
+            )
 
-                diagnostik = fingerprint_score(
-                    kandidat,
-                    bil,
-                )
+            if not diagnostik["matchar"]:
+                continue
 
-                if diagnostik["matchar"]:
-                    matchad = True
-                    basta_score = max(
-                        basta_score,
-                        diagnostik["score"],
-                    )
+            # ---------------------------------------------------
+            # Matchningen är tillräckligt stark.
+            # ---------------------------------------------------
 
-            if matchad:
-                grupp.append(bil)
+            bil["_fingerprint_score"] = (
+                diagnostik["score"]
+            )
 
-                # Spara bästa matchning som diagnostik.
-                bil["_fingerprint_score"] = basta_score
+            bil["_matchningstyp"] = (
+                diagnostik["matchningstyp"]
+            )
 
-                placerad = True
-                break
+            bil["_matchningsorsak"] = (
+                diagnostik["orsak"]
+            )
+
+            grupp.append(
+                bil
+            )
+
+            placerad = True
+            break
 
         if not placerad:
-            bil["_fingerprint_score"] = 100
+
+            bil["_fingerprint_score"] = (
+                SIKER_MATCHNING
+            )
+
+            bil["_matchningstyp"] = (
+                "unik"
+            )
+
+            bil["_matchningsorsak"] = (
+                "ingen_dubblett"
+            )
+
             grupper.append(
                 [bil]
             )
@@ -1040,7 +1388,10 @@ def deduplicera(
 
     for grupp in grupper:
 
+        # -------------------------------------------------------
         # Mest kompletta annonsen blir basannons.
+        # -------------------------------------------------------
+
         basbil = max(
             grupp,
             key=_fullstandighetspoang,
@@ -1068,17 +1419,25 @@ def deduplicera(
 
         for b in grupp:
 
-            for url in (
+            kandidat_urls = (
                 b.get("urls")
                 or [b.get("url")]
-            ):
-                if url and url not in urls:
-                    urls.append(url)
+            )
+
+            for url in kandidat_urls:
+
+                if (
+                    url
+                    and url not in urls
+                ):
+                    urls.append(
+                        url
+                    )
 
         basbil["urls"] = urls
 
         # -------------------------------------------------------
-        # Fingerprint-information
+        # Antal dubbletter
         # -------------------------------------------------------
 
         basbil[
@@ -1089,27 +1448,152 @@ def deduplicera(
             "antal_dubblettannonser"
         ] = len(grupp)
 
-        # Bästa uppmätta fingerprint-score.
-        score = 100
+        # -------------------------------------------------------
+        # Fingerprint-information
+        # -------------------------------------------------------
 
-        if len(grupp) > 1:
-            score = 0
+        if len(grupp) <= 1:
 
-            for i, a in enumerate(grupp):
-                for b in grupp[i + 1:]:
-                    diagnostik = fingerprint_score(
-                        a,
-                        b,
+            basbil[
+                "fingerprint_score"
+            ] = SIKER_MATCHNING
+
+            basbil[
+                "fingerprint_confidence"
+            ] = SIKER_MATCHNING
+
+            basbil[
+                "fingerprint_matchningstyp"
+            ] = "unik"
+
+        else:
+
+            representant = _grupprepresentant(
+                grupp
+            )
+
+            basta_score = 0
+            basta_typ = "fingerprint"
+            basta_orsak = "fingerprint"
+
+            for bil in grupp:
+
+                if bil is representant:
+                    continue
+
+                diagnostik = fingerprint_score(
+                    representant,
+                    bil,
+                )
+
+                if (
+                    diagnostik["score"]
+                    > basta_score
+                ):
+                    basta_score = (
+                        diagnostik["score"]
                     )
 
-                    score = max(
-                        score,
-                        diagnostik["score"],
+                    basta_typ = (
+                        diagnostik[
+                            "matchningstyp"
+                        ]
                     )
+
+                    basta_orsak = (
+                        diagnostik[
+                            "orsak"
+                        ]
+                    )
+
+            basbil[
+                "fingerprint_score"
+            ] = basta_score
+
+            basbil[
+                "fingerprint_confidence"
+            ] = basta_score
+
+            basbil[
+                "fingerprint_matchningstyp"
+            ] = basta_typ
+
+            basbil[
+                "fingerprint_matchningsorsak"
+            ] = basta_orsak
+
+        # -------------------------------------------------------
+        # Spara annons-ID:n från alla källor.
+        # -------------------------------------------------------
+
+        annons_ids = []
+
+        for bil in grupp:
+
+            annons_id = bil.get(
+                "annons_id"
+            )
+
+            if (
+                annons_id
+                and annons_id not in annons_ids
+            ):
+                annons_ids.append(
+                    annons_id
+                )
 
         basbil[
-            "fingerprint_score"
-        ] = score
+            "dubblett_annons_ids"
+        ] = annons_ids
+
+        # -------------------------------------------------------
+        # Spara diagnostik per källa.
+        # -------------------------------------------------------
+
+        matchningar = []
+
+        if len(grupp) > 1:
+
+            representant = _grupprepresentant(
+                grupp
+            )
+
+            for bil in grupp:
+
+                if bil is representant:
+                    continue
+
+                diagnostik = fingerprint_score(
+                    representant,
+                    bil,
+                )
+
+                matchningar.append(
+                    {
+                        "kalla": bil.get(
+                            "kalla"
+                        ),
+                        "annons_id": bil.get(
+                            "annons_id"
+                        ),
+                        "score": diagnostik[
+                            "score"
+                        ],
+                        "confidence": diagnostik[
+                            "confidence"
+                        ],
+                        "matchningstyp": diagnostik[
+                            "matchningstyp"
+                        ],
+                        "orsak": diagnostik[
+                            "orsak"
+                        ],
+                    }
+                )
+
+        basbil[
+            "dubblett_matchningar"
+        ] = matchningar
 
         resultat.append(
             basbil
