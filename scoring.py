@@ -165,6 +165,24 @@ def berakna_fyndscore_breakdown(
 
     # =========================================================
     # 3. UTRUSTNING - MAX 5 POÄNG
+    #
+    # Volvo:
+    #   Ultimate       5
+    #   Plus           4
+    #   Inscription    3
+    #   Momentum       2
+    #   Core           1
+    #
+    # BMW:
+    #   M Sport        5
+    #   Luxury Line    4
+    #   Advantage      3
+    #   Active Edition 3
+    #   Sport Line     3
+    #   xLine          3
+    #
+    # Därefter kan dragkrok och värmare ge ytterligare poäng
+    # upp till max 5.
     # =========================================================
 
     utrustningsniva = (
@@ -172,6 +190,10 @@ def berakna_fyndscore_breakdown(
     ).lower()
 
     utrustningspoang = 0
+
+    # ---------------------------------------------------------
+    # Volvo
+    # ---------------------------------------------------------
 
     if "ultimate" in utrustningsniva:
         utrustningspoang = 5
@@ -187,6 +209,32 @@ def berakna_fyndscore_breakdown(
 
     elif "core" in utrustningsniva:
         utrustningspoang = 1
+
+    # ---------------------------------------------------------
+    # BMW
+    # ---------------------------------------------------------
+
+    elif "m sport" in utrustningsniva:
+        utrustningspoang = 5
+
+    elif "luxury line" in utrustningsniva:
+        utrustningspoang = 4
+
+    elif "advantage" in utrustningsniva:
+        utrustningspoang = 3
+
+    elif "active edition" in utrustningsniva:
+        utrustningspoang = 3
+
+    elif "sport line" in utrustningsniva:
+        utrustningspoang = 3
+
+    elif "xline" in utrustningsniva:
+        utrustningspoang = 3
+
+    # ---------------------------------------------------------
+    # Tillval
+    # ---------------------------------------------------------
 
     tillvalspoang = 0
 
