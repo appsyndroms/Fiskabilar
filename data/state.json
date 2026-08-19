@@ -1440,8 +1440,9 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
-    "senast_sedd": "2026-08-18",
-    "notifierad": false
+    "senast_sedd": "2026-08-19",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:8052"
   },
   "kal:v60:T6 AWD:2024:11120": {
     "forsta_sedd": "2026-08-17",
@@ -5806,5 +5807,13 @@
     "notifierad": true,
     "notifierad_pris": 309400,
     "migrerad_fran": "kal:v60:T6 AWD:2024:11120"
+  },
+  "url:https://www.wayke.se/objekt/4540b463-e3b6-44a1-9e75-fd34e392149a": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 359900,
+    "senaste_pris": 359900,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:8052"
   }
 }
