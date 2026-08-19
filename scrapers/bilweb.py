@@ -199,23 +199,13 @@ def _rensa_tal(
 #     330e
 #     330 e
 #
-# Våra variantdefinitioner använder:
+# Vi normaliserar båda till:
 #
 #     530e
 #     330e
 #
-# Därför normaliseras dessa skrivsätt innan identifiera_variant()
-# körs.
-#
-# Detta gäller endast 530e och 330e.
-#
-# Exempel:
-#
-#     "530 e xdrive m sport pano drag"
-#
-# blir:
-#
-#     "530e xdrive m sport pano drag"
+# Dessutom normaliseras xDrive och Touring för att göra kaross- och
+# variantkontrollen robust mot olika skrivsätt.
 #
 # ---------------------------------------------------------------------------
 
@@ -227,21 +217,246 @@ def _normalisera_bmw_modellslug(
     if not slug_text:
         return slug_text
 
+    slug_text = str(slug_text)
+
+    # ------------------------------------------------------------
+    # 530e / 530 e
+    # ------------------------------------------------------------
+
     slug_text = re.sub(
-        r"\b530\s+e\b",
+        r"\b530\s*e\b",
         "530e",
         slug_text,
         flags=re.IGNORECASE,
     )
 
+    # ------------------------------------------------------------
+    # 330e / 330 e
+    # ------------------------------------------------------------
+
     slug_text = re.sub(
-        r"\b330\s+e\b",
+        r"\b330\s*e\b",
         "330e",
         slug_text,
         flags=re.IGNORECASE,
     )
 
+    # ------------------------------------------------------------
+    # x Drive / x-drive / xdrive
+    # ------------------------------------------------------------
+
+    slug_text = re.sub(
+        r"\bx[\s-]*drive\b",
+        "xdrive",
+        slug_text,
+        flags=re.IGNORECASE,
+    )
+
+    # ------------------------------------------------------------
+    # Touring
+    # ------------------------------------------------------------
+
+    slug_text = re.sub(
+        r"\btouring\b",
+        "touring",
+        slug_text,
+        flags=re.IGNORECASE,
+    )
+
+    # ------------------------------------------------------------
+    # Normalisera whitespace
+    # ------------------------------------------------------------
+
+    slug_text = re.sub(
+        r"\s+",
+        " ",
+        slug_text,
+    ).strip()
+
     return slug_text
+
+
+# ---------------------------------------------------------------------------
+# BMW-specifik variant- och karosskontroll
+# ---------------------------------------------------------------------------
+#
+# Denna kontroll används eftersom Bilwebs modell-slugs kan vara
+# inkonsekventa.
+#
+# Exempel:
+#
+#     530e xdrive m sport ...
+#     530 e xdrive touring ...
+#     330e xdrive touring ...
+#
+# ska kunna identifieras oberoende av om e sitter ihop med modellnumret.
+#
+# Samtidigt får:
+#
+#     530 xdrive ...
+#
+# INTE matcha 530e.
+#
+# Karossen kontrolleras separat:
+#
+#     Touring krävs.
+#
+# Därmed ska exempelvis en 530e Sedan inte komma med i
+# 530e xDrive Touring-resultatet.
+# ---------------------------------------------------------------------------
+
+
+def _bmw_variant_och_kaross(
+    bilkonfig: dict,
+    slug_text: str,
+) -> str | None:
+
+    if bilkonfig.get(
+        "marke_slug"
+    ) != "bmw":
+
+        return None
+
+    text = _normalisera_bmw_modellslug(
+        slug_text
+    )
+
+    text_lower = text.lower()
+
+    modell_slug = bilkonfig.get(
+        "modell_slug",
+        "",
+    ).lower()
+
+    # ------------------------------------------------------------
+    # 530e xDrive Touring
+    # ------------------------------------------------------------
+
+    if modell_slug == "530e-xdrive-touring":
+
+        # Modell måste uttryckligen vara 530e.
+        #
+        # \b530\s*e\b accepterar:
+        #
+        #   530e
+        #   530 e
+        #
+        # men inte:
+        #
+        #   530
+        #   530i
+        #   530d
+        #
+
+        har_530e = re.search(
+            r"\b530\s*e\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_530e:
+            return None
+
+        # xDrive måste finnas.
+        har_xdrive = re.search(
+            r"\bx[\s-]*drive\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_xdrive:
+            return None
+
+        # Kaross måste vara Touring.
+        har_touring = re.search(
+            r"\btouring\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_touring:
+            return None
+
+        return "530e xDrive Touring"
+
+    # ------------------------------------------------------------
+    # 330e xDrive Touring
+    # ------------------------------------------------------------
+
+    if modell_slug == "330e-xdrive-touring":
+
+        # Accepterar både:
+        #
+        #   330e
+        #   330 e
+        #
+
+        har_330e = re.search(
+            r"\b330\s*e\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_330e:
+            return None
+
+        # xDrive krävs.
+
+        har_xdrive = re.search(
+            r"\bx[\s-]*drive\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_xdrive:
+            return None
+
+        # Touring krävs som kaross.
+
+        har_touring = re.search(
+            r"\btouring\b",
+            text_lower,
+            re.IGNORECASE,
+        )
+
+        if not har_touring:
+            return None
+
+        return "330e xDrive Touring"
+
+    return None
+
+
+def _identifiera_variant_bilweb(
+    bilkonfig: dict,
+    slug_text: str,
+) -> str | None:
+
+    # ------------------------------------------------------------
+    # BMW:
+    #
+    # Använd den robusta BMW-kontrollen ovan.
+    # ------------------------------------------------------------
+
+    if bilkonfig.get(
+        "marke_slug"
+    ) == "bmw":
+
+        return _bmw_variant_och_kaross(
+            bilkonfig,
+            slug_text,
+        )
+
+    # ------------------------------------------------------------
+    # Övriga märken:
+    #
+    # Använd befintlig generisk variantidentifiering.
+    # ------------------------------------------------------------
+
+    return identifiera_variant(
+        bilkonfig,
+        slug_text,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -867,17 +1082,17 @@ def _hamta_kandidat_urler(
         # ------------------------------------------------------------
         # BMW-normalisering.
         #
-        # Bilweb kan skriva:
-        #
-        #     530 e xdrive ...
-        #     330 e xdrive ...
-        #
-        # medan variantkonfigurationen använder:
+        # Accepterar både:
         #
         #     530e
-        #     330e
+        #     530 e
         #
-        # Normalisera därför innan variantmatchningen.
+        # samt:
+        #
+        #     330e
+        #     330 e
+        #
+        # xDrive och Touring normaliseras också.
         # ------------------------------------------------------------
 
         slug_text = _normalisera_bmw_modellslug(
@@ -885,17 +1100,17 @@ def _hamta_kandidat_urler(
         )
 
         # ------------------------------------------------------------
-        # Variantfilter sker INNAN detaljsidan hämtas.
+        # Variant- och karossfilter sker INNAN detaljsidan hämtas.
         # ------------------------------------------------------------
 
-        variant = identifiera_variant(
+        variant = _identifiera_variant_bilweb(
             bilkonfig,
             slug_text,
         )
 
         if variant is None:
 
-            if len(avvisade_slugs) < 3:
+            if len(avvisade_slugs) < 5:
 
                 avvisade_slugs.append(
                     slug_text
@@ -929,14 +1144,14 @@ def _hamta_kandidat_urler(
         f"{bilkonfig['modell_visning']} "
         f"{ar}: "
         f"{len(sedda_id)} unika annons-URL:er "
-        f"-> {len(kandidater)} matchade variant"
+        f"-> {len(kandidater)} matchade variant/kaross"
     )
 
     if avvisade_slugs:
 
         print(
             f"[bilweb]   Exempel på slugs som INTE "
-            f"matchade någon variant: "
+            f"matchade variant/kaross: "
             f"{avvisade_slugs}"
         )
 
