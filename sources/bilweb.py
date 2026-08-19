@@ -467,10 +467,27 @@ def hamta_annonser() -> list[dict]:
         f"matchade grundkraven totalt"
     )
 
+    # ------------------------------------------------------------
+    # PRESTANDA
+    #
+    # Totalt antal unika detaljsidor som behövdes under körningen
+    # är summan av nya hämtningar och cacheträffar.
+    #
+    # Exempel:
+    #   192 hämtades från nätet
+    #   2 återanvändes från cache
+    #   = 194 unika detaljsidor behövdes totalt
+    # ------------------------------------------------------------
+
+    detaljsidor_totalt = (
+        detaljsidor_hamtade
+        + detaljsidor_cachetraffar
+    )
+
     info(
         "[bilweb] PRESTANDA: "
-        f"{len(detaljsida_cache)} unika detaljsidor "
-        f"fanns i cache"
+        f"{detaljsidor_totalt} unika detaljsidor "
+        f"behövdes totalt"
     )
 
     info(
