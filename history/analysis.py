@@ -20,6 +20,7 @@ from .analysis_storage import (
 )
 
 from .analysis_trends import (
+    bygg_marknadstrender,
     berakna_marknadstrend_for_bil,
 )
 
@@ -34,11 +35,12 @@ def berika_med_historik(
 
     Trendinformationen är diagnostisk och påverkar inte 100-poängsscoren.
 
-    Trendanalysen ska byggas explicit av huvudflödet exakt en gång per
-    körning. Den här funktionen får därför aldrig själv starta trendanalysen.
+    Trendanalysen skickas normalt in färdigberäknad från huvudflödet.
+    Om den inte skickas in används ett tomt trendunderlag.
 
-    Om trender inte skickas in används ett tomt trendunderlag. Det gör att
-    historik kan läsas och berikas utan att trendanalysen körs som bieffekt.
+    Viktigt:
+    Den här funktionen får inte själv starta trendanalysen.
+    Trendanalysen körs explicit en gång från huvudflödet.
     """
 
     historik = berakna_historik(
