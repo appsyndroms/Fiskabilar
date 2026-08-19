@@ -155,6 +155,58 @@ REGNR_FALTNAMN = (
 
 
 # ---------------------------------------------------------------------------
+# BMW
+# ---------------------------------------------------------------------------
+#
+# Bilweb kan skriva:
+#
+#     530e
+#     530 e
+#     330e
+#     330 e
+#
+# Dessa ska alltid betraktas som samma modell.
+#
+# Vi normaliserar därför BMW:s modellbeteckning innan
+# identifiera_variant() körs.
+#
+# Kaross:
+#
+#     Touring
+#
+# ska kontrolleras separat. Om sluggen inte innehåller "touring"
+# hämtas detaljsidan ändå om modell + xDrive matchar. Där kontrolleras
+# sedan karossen mot detaljsidans text.
+# ---------------------------------------------------------------------------
+
+
+BMW_MODELL_REGEX = re.compile(
+    r"\b(530|330)\s*e\b",
+    re.IGNORECASE,
+)
+
+BMW_XDRIVE_REGEX = re.compile(
+    r"\bx\s*drive\b",
+    re.IGNORECASE,
+)
+
+BMW_TOURING_REGEX = re.compile(
+    r"\btouring\b",
+    re.IGNORECASE,
+)
+
+BMW_530E_REGEX = re.compile(
+    r"\b530\s*e\b",
+    re.IGNORECASE,
+)
+
+BMW_330E_REGEX = re.compile(
+    r"\b330\s*e\b",
+    re.IGNORECASE,
+)
+
+
+# ---------------------------------------------------------------------------
 # Hjälpfunktioner
 # ---------------------------------------------------------------------------
 
@@ -188,26 +240,6 @@ def _rensa_tal(
 # ---------------------------------------------------------------------------
 # BMW-modellslug-normalisering
 # ---------------------------------------------------------------------------
-#
-# Bilweb kan skriva BMW:s laddhybrider både som:
-#
-#     530e
-#     530 e
-#
-# samt:
-#
-#     330e
-#     330 e
-#
-# Vi normaliserar båda till:
-#
-#     530e
-#     330e
-#
-# Dessutom normaliseras xDrive och Touring för att göra kaross- och
-# variantkontrollen robust mot olika skrivsätt.
-#
-# ---------------------------------------------------------------------------
 
 
 def _normalisera_bmw_modellslug(
@@ -217,245 +249,190 @@ def _normalisera_bmw_modellslug(
     if not slug_text:
         return slug_text
 
-    slug_text = str(slug_text)
-
-    # ------------------------------------------------------------
-    # 530e / 530 e
-    # ------------------------------------------------------------
-
+    # 530 e -> 530e
     slug_text = re.sub(
-        r"\b530\s*e\b",
+        r"\b530\s+e\b",
         "530e",
         slug_text,
         flags=re.IGNORECASE,
     )
 
-    # ------------------------------------------------------------
-    # 330e / 330 e
-    # ------------------------------------------------------------
-
+    # 330 e -> 330e
     slug_text = re.sub(
-        r"\b330\s*e\b",
+        r"\b330\s+e\b",
         "330e",
         slug_text,
         flags=re.IGNORECASE,
     )
 
-    # ------------------------------------------------------------
-    # x Drive / x-drive / xdrive
-    # ------------------------------------------------------------
-
-    slug_text = re.sub(
-        r"\bx[\s-]*drive\b",
-        "xdrive",
-        slug_text,
-        flags=re.IGNORECASE,
-    )
-
-    # ------------------------------------------------------------
-    # Touring
-    # ------------------------------------------------------------
-
-    slug_text = re.sub(
-        r"\btouring\b",
-        "touring",
-        slug_text,
-        flags=re.IGNORECASE,
-    )
-
-    # ------------------------------------------------------------
-    # Normalisera whitespace
-    # ------------------------------------------------------------
-
-    slug_text = re.sub(
-        r"\s+",
-        " ",
-        slug_text,
-    ).strip()
-
     return slug_text
 
 
-# ---------------------------------------------------------------------------
-# BMW-specifik variant- och karosskontroll
-# ---------------------------------------------------------------------------
-#
-# Denna kontroll används eftersom Bilwebs modell-slugs kan vara
-# inkonsekventa.
-#
-# Exempel:
-#
-#     530e xdrive m sport ...
-#     530 e xdrive touring ...
-#     330e xdrive touring ...
-#
-# ska kunna identifieras oberoende av om e sitter ihop med modellnumret.
-#
-# Samtidigt får:
-#
-#     530 xdrive ...
-#
-# INTE matcha 530e.
-#
-# Karossen kontrolleras separat:
-#
-#     Touring krävs.
-#
-# Därmed ska exempelvis en 530e Sedan inte komma med i
-# 530e xDrive Touring-resultatet.
-# ---------------------------------------------------------------------------
+def _normalisera_bmw_matchtext(
+    text: str,
+) -> str:
 
+    """
+    Normaliserar text inför BMW-matchning.
 
-def _bmw_variant_och_kaross(
-    bilkonfig: dict,
-    slug_text: str,
-) -> str | None:
+    Exempel:
 
-    if bilkonfig.get(
-        "marke_slug"
-    ) != "bmw":
+        530 e xdrive touring
+        -> 530e xdrive touring
 
-        return None
+        330 e xdrive touring
+        -> 330e xdrive touring
 
-    text = _normalisera_bmw_modellslug(
-        slug_text
+    Även HTML/kommatecken etc. tolereras eftersom regexerna
+    nedan arbetar på vanlig text.
+    """
+
+    if not text:
+        return ""
+
+    text = str(text)
+
+    text = re.sub(
+        r"\b530\s+e\b",
+        "530e",
+        text,
+        flags=re.IGNORECASE,
     )
 
-    text_lower = text.lower()
+    text = re.sub(
+        r"\b330\s+e\b",
+        "330e",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    return text
+
+
+def _ar_bmw_modell(
+    bilkonfig: dict,
+) -> bool:
+
+    return (
+        bilkonfig.get("marke_slug") == "bmw"
+        and bilkonfig.get("modell_slug")
+        in {
+            "530e-xdrive-touring",
+            "330e-xdrive-touring",
+        }
+    )
+
+
+def _bmw_modell_matchar(
+    bilkonfig: dict,
+    text: str,
+) -> bool:
+
+    """
+    Kontrollerar BMW-modellen oberoende av om Bilweb skriver:
+
+        530e
+        530 e
+
+    respektive:
+
+        330e
+        330 e
+    """
+
+    text = _normalisera_bmw_matchtext(
+        text
+    )
 
     modell_slug = bilkonfig.get(
         "modell_slug",
         "",
-    ).lower()
-
-    # ------------------------------------------------------------
-    # 530e xDrive Touring
-    # ------------------------------------------------------------
+    )
 
     if modell_slug == "530e-xdrive-touring":
 
-        # Modell måste uttryckligen vara 530e.
-        #
-        # \b530\s*e\b accepterar:
-        #
-        #   530e
-        #   530 e
-        #
-        # men inte:
-        #
-        #   530
-        #   530i
-        #   530d
-        #
-
-        har_530e = re.search(
-            r"\b530\s*e\b",
-            text_lower,
-            re.IGNORECASE,
+        return (
+            BMW_530E_REGEX.search(text)
+            is not None
         )
-
-        if not har_530e:
-            return None
-
-        # xDrive måste finnas.
-        har_xdrive = re.search(
-            r"\bx[\s-]*drive\b",
-            text_lower,
-            re.IGNORECASE,
-        )
-
-        if not har_xdrive:
-            return None
-
-        # Kaross måste vara Touring.
-        har_touring = re.search(
-            r"\btouring\b",
-            text_lower,
-            re.IGNORECASE,
-        )
-
-        if not har_touring:
-            return None
-
-        return "530e xDrive Touring"
-
-    # ------------------------------------------------------------
-    # 330e xDrive Touring
-    # ------------------------------------------------------------
 
     if modell_slug == "330e-xdrive-touring":
 
-        # Accepterar både:
-        #
-        #   330e
-        #   330 e
-        #
-
-        har_330e = re.search(
-            r"\b330\s*e\b",
-            text_lower,
-            re.IGNORECASE,
+        return (
+            BMW_330E_REGEX.search(text)
+            is not None
         )
 
-        if not har_330e:
-            return None
-
-        # xDrive krävs.
-
-        har_xdrive = re.search(
-            r"\bx[\s-]*drive\b",
-            text_lower,
-            re.IGNORECASE,
-        )
-
-        if not har_xdrive:
-            return None
-
-        # Touring krävs som kaross.
-
-        har_touring = re.search(
-            r"\btouring\b",
-            text_lower,
-            re.IGNORECASE,
-        )
-
-        if not har_touring:
-            return None
-
-        return "330e xDrive Touring"
-
-    return None
+    return False
 
 
-def _identifiera_variant_bilweb(
+def _bmw_xdrive_matchar(
+    text: str,
+) -> bool:
+
+    if not text:
+        return False
+
+    text = str(text)
+
+    return (
+        BMW_XDRIVE_REGEX.search(text)
+        is not None
+    )
+
+
+def _bmw_touring_matchar(
+    text: str,
+) -> bool:
+
+    if not text:
+        return False
+
+    text = str(text)
+
+    return (
+        BMW_TOURING_REGEX.search(text)
+        is not None
+    )
+
+
+def _bmw_kraver_detaljkontroll(
     bilkonfig: dict,
     slug_text: str,
-) -> str | None:
+) -> bool:
 
-    # ------------------------------------------------------------
-    # BMW:
-    #
-    # Använd den robusta BMW-kontrollen ovan.
-    # ------------------------------------------------------------
+    """
+    Returnerar True när BMW-annonsen har rätt modell + xDrive
+    men sluggen inte själv bekräftar Touring.
 
-    if bilkonfig.get(
-        "marke_slug"
-    ) == "bmw":
+    Då ska detaljsidan hämtas och karossen verifieras där.
 
-        return _bmw_variant_och_kaross(
-            bilkonfig,
-            slug_text,
-        )
+    Om sluggen redan uttryckligen innehåller Touring behöver vi
+    inte göra en extra karosskontroll för att kvalificera kandidaten.
+    """
 
-    # ------------------------------------------------------------
-    # Övriga märken:
-    #
-    # Använd befintlig generisk variantidentifiering.
-    # ------------------------------------------------------------
+    if not _ar_bmw_modell(
+        bilkonfig
+    ):
+        return False
 
-    return identifiera_variant(
+    slug_text = _normalisera_bmw_matchtext(
+        slug_text
+    )
+
+    if not _bmw_modell_matchar(
         bilkonfig,
         slug_text,
+    ):
+        return False
+
+    if not _bmw_xdrive_matchar(
+        slug_text,
+    ):
+        return False
+
+    return not _bmw_touring_matchar(
+        slug_text
     )
 
 
@@ -989,6 +966,118 @@ def _extrahera_regnr(
 
 
 # ---------------------------------------------------------------------------
+# Kaross
+# ---------------------------------------------------------------------------
+
+
+def _extrahera_kaross(
+    text: str,
+) -> str | None:
+
+    """
+    Identifierar kaross från detaljsidans text.
+
+    För BMW 530e/330e är Touring den kaross vi vill ha.
+
+    Funktionen är avsiktligt enkel och konservativ:
+    den accepterar endast uttryckliga karossord.
+    """
+
+    if not text:
+        return None
+
+    normaliserad = re.sub(
+        r"\s+",
+        " ",
+        str(text),
+    ).strip()
+
+    if re.search(
+        r"\btouring\b",
+        normaliserad,
+        re.IGNORECASE,
+    ):
+        return "Touring"
+
+    if re.search(
+        r"\bcross\s*country\b",
+        normaliserad,
+        re.IGNORECASE,
+    ):
+        return "Cross Country"
+
+    if re.search(
+        r"\bkombi\b",
+        normaliserad,
+        re.IGNORECASE,
+    ):
+        return "Kombi"
+
+    if re.search(
+        r"\bsedan\b",
+        normaliserad,
+        re.IGNORECASE,
+    ):
+        return "Sedan"
+
+    if re.search(
+        r"\bsuv\b",
+        normaliserad,
+        re.IGNORECASE,
+    ):
+        return "SUV"
+
+    return None
+
+
+def _kaross_kravs_for_bil(
+    bilkonfig: dict,
+) -> str | None:
+
+    modell_slug = bilkonfig.get(
+        "modell_slug",
+        "",
+    )
+
+    if modell_slug in {
+        "530e-xdrive-touring",
+        "330e-xdrive-touring",
+    }:
+        return "Touring"
+
+    return None
+
+
+def _kaross_matchar(
+    bilkonfig: dict,
+    kaross: str | None,
+    text: str,
+) -> bool:
+
+    krav = _kaross_kravs_for_bil(
+        bilkonfig
+    )
+
+    if krav is None:
+        return True
+
+    if krav == "Touring":
+
+        if kaross == "Touring":
+            return True
+
+        # Fallback direkt mot texten.
+        return (
+            BMW_TOURING_REGEX.search(
+                text
+            )
+            is not None
+        )
+
+    return False
+
+
+# ---------------------------------------------------------------------------
 # Bilweb sökresultat
 # ---------------------------------------------------------------------------
 
@@ -1081,18 +1170,6 @@ def _hamta_kandidat_urler(
 
         # ------------------------------------------------------------
         # BMW-normalisering.
-        #
-        # Accepterar både:
-        #
-        #     530e
-        #     530 e
-        #
-        # samt:
-        #
-        #     330e
-        #     330 e
-        #
-        # xDrive och Touring normaliseras också.
         # ------------------------------------------------------------
 
         slug_text = _normalisera_bmw_modellslug(
@@ -1100,15 +1177,43 @@ def _hamta_kandidat_urler(
         )
 
         # ------------------------------------------------------------
-        # Variant- och karossfilter sker INNAN detaljsidan hämtas.
+        # Vanlig variantmatchning.
         # ------------------------------------------------------------
 
-        variant = _identifiera_variant_bilweb(
+        variant = identifiera_variant(
             bilkonfig,
             slug_text,
         )
 
-        if variant is None:
+        # ------------------------------------------------------------
+        # BMW-specialfall:
+        #
+        # Om Bilwebs slug innehåller rätt BMW-modell + xDrive
+        # men saknar "Touring", låter vi detaljsidan avgöra
+        # karossen.
+        #
+        # Detta gör att exempelvis:
+        #
+        #     530e xdrive m sport ...
+        #
+        # inte kastas bort bara för att "touring" saknas
+        # i sluggen.
+        #
+        # Samma gäller:
+        #
+        #     530 e xdrive ...
+        #     330e xdrive ...
+        #     330 e xdrive ...
+        # ------------------------------------------------------------
+
+        detalj_karosskontroll = (
+            _bmw_kraver_detaljkontroll(
+                bilkonfig,
+                slug_text,
+            )
+        )
+
+        if variant is None and not detalj_karosskontroll:
 
             if len(avvisade_slugs) < 5:
 
@@ -1117,6 +1222,16 @@ def _hamta_kandidat_urler(
                 )
 
             continue
+
+        if detalj_karosskontroll:
+
+            variant = (
+                "530e xDrive Touring"
+                if bilkonfig.get(
+                    "modell_slug"
+                ) == "530e-xdrive-touring"
+                else "330e xDrive Touring"
+            )
 
         href = a["href"]
 
@@ -1135,6 +1250,8 @@ def _hamta_kandidat_urler(
                 "arsmodell": int(
                     m.group("ar")
                 ),
+                "kraver_karosskontroll":
+                    detalj_karosskontroll,
             }
         )
 
@@ -1171,6 +1288,8 @@ def _hamta_pris_mil_fran_detaljsida(
     int | None,
     bool,
     str | None,
+    str | None,
+    str,
 ] | None:
 
     try:
@@ -1289,6 +1408,14 @@ def _hamta_pris_mil_fran_detaljsida(
         html,
     )
 
+    # ------------------------------------------------------------
+    # Kaross
+    # ------------------------------------------------------------
+
+    kaross = _extrahera_kaross(
+        text
+    )
+
     return (
         _rensa_tal(
             pris_match.group(1)
@@ -1299,6 +1426,8 @@ def _hamta_pris_mil_fran_detaljsida(
         antal_agare,
         ar_auktion,
         regnr,
+        kaross,
+        text,
     )
 
 
@@ -1518,12 +1647,34 @@ def hamta_annonser() -> list[dict]:
                     antal_agare,
                     ar_auktion,
                     regnr,
+                    kaross,
+                    detaljtext,
                 ) = resultat
 
                 regnr_detaljsidor += 1
 
                 if regnr:
                     regnr_hittade += 1
+
+                # ----------------------------------------------------
+                # Karosskontroll.
+                #
+                # För BMW annonser där sluggen saknade "touring"
+                # måste detaljsidan uttryckligen bekräfta Touring.
+                # ----------------------------------------------------
+
+                if kandidat.get(
+                    "kraver_karosskontroll",
+                    False,
+                ):
+
+                    if not _kaross_matchar(
+                        bilkonfig,
+                        kaross,
+                        detaljtext,
+                    ):
+
+                        continue
 
                 bil = {
                     "kalla": "bilweb",
@@ -1601,6 +1752,9 @@ def hamta_annonser() -> list[dict]:
 
                     "stor_batteri":
                         None,
+
+                    "kaross":
+                        kaross,
                 }
 
                 # ------------------------------------------------
