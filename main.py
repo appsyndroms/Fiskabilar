@@ -17,6 +17,7 @@ Flöde:
 
 Trendanalysen påverkar inte score eller valuation.
 """
+
 from app_logging.logger import info
 
 from datetime import datetime
@@ -588,4 +589,5 @@ def main():
 
 
 if __name__ == "__main__":
+    configure_from_argv()
     main()
