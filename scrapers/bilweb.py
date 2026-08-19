@@ -31,6 +31,10 @@ Ingen metod accepterar ett godtyckligt ABC123 från hela sidan.
 
 Detaljsidor cachas under varje körning så att samma URL aldrig hämtas
 mer än en gång.
+
+REGNR är diagnostisk information och är INTE ett grundkrav.
+En annons utan registreringsnummer ska därför inte generera ett
+individuellt felmeddelande.
 """
 
 import json
@@ -122,10 +126,6 @@ REGNR_REGEX = re.compile(
 )
 
 
-# Etiketter som Bilweb kan använda.
-#
-# Vi inkluderar flera vanliga varianter men kräver fortfarande att
-# etiketten uttryckligen finns innan ett regnr accepteras.
 REGNR_ETIKETT_REGEX = re.compile(
     r"(?:"
     r"\bregistreringsnummer\b"
@@ -142,7 +142,6 @@ REGNR_ETIKETT_REGEX = re.compile(
 )
 
 
-# Fält-/JSON-namn som kan förekomma i strukturerad data.
 REGNR_FALTNAMN = (
     "registrationnumber",
     "registration_number",
@@ -194,19 +193,6 @@ def _rensa_tal(
 def _normalisera_regnr(
     regnr: str | None,
 ) -> str | None:
-    """
-    Normaliserar registreringsnummer.
-
-    Exempel:
-
-        ABC 123
-        ABC-123
-        abc123
-
-    blir:
-
-        ABC123
-    """
 
     if not regnr:
         return None
@@ -220,7 +206,6 @@ def _normalisera_regnr(
     if len(normaliserat) not in (6, 7):
         return None
 
-    # Säkerställ svensk regnr-struktur.
     if not re.fullmatch(
         r"[A-ZÅÄÖ]{3}(?:\d{3}|\d{2}[A-Z])",
         normaliserat,
@@ -234,12 +219,6 @@ def _normalisera_regnr(
 def _extrahera_regnr_kandidat(
     text: str | None,
 ) -> str | None:
-    """
-    Letar efter ett regnr i en liten, redan identifierad textbit.
-
-    Funktionen får INTE användas på hela sidan utan att vi först har
-    konstaterat att texten hör ihop med ett registreringsnummerfält.
-    """
 
     if not text:
         return None
@@ -264,13 +243,6 @@ def _extrahera_regnr_kandidat(
 def _extrahera_regnr_etikett_samma_text(
     text: str,
 ) -> str | None:
-    """
-    Exempel:
-
-        Registreringsnummer ABC123
-        Registreringsnummer: ABC123
-        Reg.nr: ABC123
-    """
 
     if not text:
         return None
@@ -286,7 +258,6 @@ def _extrahera_regnr_etikett_samma_text(
         match.end():
     ]
 
-    # Bara små separators får finnas mellan etikett och värde.
     prefix = re.match(
         r"^[\s:;=\-–—]*",
         efter,
@@ -308,24 +279,6 @@ def _extrahera_regnr_etikett_samma_text(
 def _extrahera_regnr_dom(
     soup: BeautifulSoup,
 ) -> str | None:
-    """
-    Robust DOM-baserad regnr-extraktion.
-
-    Vi kräver alltid en uttrycklig regnr-etikett.
-
-    Därefter undersöks:
-
-    - samma textnod
-    - förälder
-    - syskon
-    - barn
-    - närliggande element
-    - närmaste container
-    """
-
-    # ------------------------------------------------------------------
-    # 1. Alla textnoder som innehåller regnr-etikett
-    # ------------------------------------------------------------------
 
     textnoder = soup.find_all(
         string=REGNR_ETIKETT_REGEX
@@ -334,10 +287,6 @@ def _extrahera_regnr_dom(
     for textnod in textnoder:
 
         text = str(textnod).strip()
-
-        # --------------------------------------------------------------
-        # Samma textnod
-        # --------------------------------------------------------------
 
         kandidat = _extrahera_regnr_etikett_samma_text(
             text
@@ -355,10 +304,6 @@ def _extrahera_regnr_dom(
         if element is None:
             continue
 
-        # --------------------------------------------------------------
-        # Samma element
-        # --------------------------------------------------------------
-
         element_text = element.get_text(
             " ",
             strip=True,
@@ -371,10 +316,6 @@ def _extrahera_regnr_dom(
         if kandidat:
             return kandidat
 
-        # --------------------------------------------------------------
-        # Barn
-        # --------------------------------------------------------------
-
         for child in element.find_all(
             recursive=True
         ):
@@ -384,7 +325,6 @@ def _extrahera_regnr_dom(
                 strip=True,
             )
 
-            # Undvik att söka över stora textmängder.
             if len(child_text) > 300:
                 continue
 
@@ -401,8 +341,6 @@ def _extrahera_regnr_dom(
                 if kandidat:
                     return kandidat
 
-                # Om etikett och värde ligger i separata
-                # element, undersök barnets syskon.
                 for sibling in child.find_all_next(
                     limit=5
                 ):
@@ -415,18 +353,12 @@ def _extrahera_regnr_dom(
                     if len(sibling_text) > 100:
                         continue
 
-                    kandidat = (
-                        _extrahera_regnr_kandidat(
-                            sibling_text
-                        )
+                    kandidat = _extrahera_regnr_kandidat(
+                        sibling_text
                     )
 
                     if kandidat:
                         return kandidat
-
-        # --------------------------------------------------------------
-        # Syskon
-        # --------------------------------------------------------------
 
         for sibling in element.find_all_next(
             limit=8
@@ -443,7 +375,6 @@ def _extrahera_regnr_dom(
             if len(sibling_text) > 150:
                 continue
 
-            # Stoppa om vi har kommit till en annan tydlig etikett.
             if (
                 sibling is not element
                 and REGNR_ETIKETT_REGEX.search(
@@ -467,10 +398,6 @@ def _extrahera_regnr_dom(
             if kandidat:
                 return kandidat
 
-        # --------------------------------------------------------------
-        # Närmaste större container
-        # --------------------------------------------------------------
-
         container = element
 
         for _ in range(4):
@@ -489,7 +416,6 @@ def _extrahera_regnr_dom(
                 strip=True,
             )
 
-            # Begränsa sökningen till rimligt små containers.
             if len(container_text) > 1000:
                 continue
 
@@ -504,7 +430,6 @@ def _extrahera_regnr_dom(
                 etikett_match.end():
             ]
 
-            # Leta bara nära etiketten.
             efter = efter[:100]
 
             kandidat = _extrahera_regnr_kandidat(
@@ -525,25 +450,9 @@ def _extrahera_regnr_dom(
 def _extrahera_regnr_attribut(
     soup: BeautifulSoup,
 ) -> str | None:
-    """
-    Letar efter regnr-attribut i element som samtidigt ligger nära
-    en uttrycklig regnr-etikett.
-
-    Exempel på tänkbara HTML-strukturer:
-
-        <div data-label="Registreringsnummer"
-             data-value="ABC123">
-
-        <div aria-label="Registreringsnummer">
-            ABC123
-        </div>
-
-    Vi accepterar inte ett generellt data-value från hela sidan.
-    """
 
     for element in soup.find_all(True):
 
-        # Alla attribut samlas till en liten lokal text.
         attributtext = " ".join(
             str(value)
             for key, value in element.attrs.items()
@@ -555,7 +464,6 @@ def _extrahera_regnr_attribut(
         ):
             continue
 
-        # Leta efter regnr i samma elements attribut.
         for key, value in element.attrs.items():
 
             if isinstance(value, list):
@@ -566,7 +474,6 @@ def _extrahera_regnr_attribut(
 
             value = str(value)
 
-            # Fält som explicit antyder regnr.
             key_normaliserad = re.sub(
                 r"[^a-z0-9]",
                 "",
@@ -586,7 +493,6 @@ def _extrahera_regnr_attribut(
                 if kandidat:
                     return kandidat
 
-        # Om själva elementet har etiketten, kontrollera dess text.
         element_text = element.get_text(
             " ",
             strip=True,
@@ -612,9 +518,6 @@ def _extrahera_regnr_attribut(
 def _iterera_json_objekt(
     obj,
 ):
-    """
-    Rekursiv generator för JSON-strukturer.
-    """
 
     if isinstance(obj, dict):
 
@@ -638,13 +541,6 @@ def _iterera_json_objekt(
 def _extrahera_regnr_json(
     soup: BeautifulSoup,
 ) -> str | None:
-    """
-    Försöker hitta registreringsnummer i JSON-LD eller annan
-    strukturerad JSON.
-
-    För att undvika falska träffar accepterar vi endast fält vars namn
-    uttryckligen indikerar registreringsnummer.
-    """
 
     for script in soup.find_all(
         "script"
@@ -660,7 +556,6 @@ def _extrahera_regnr_json(
         if not script_text:
             continue
 
-        # JSON-LD är mest relevant.
         typ = script.get(
             "type",
             "",
@@ -716,21 +611,13 @@ def _extrahera_regnr_json(
 
 
 # ---------------------------------------------------------------------------
-# REGNR från hela HTML-dokumentet – men endast tillsammans med etikett
+# REGNR från hela HTML-dokumentet
 # ---------------------------------------------------------------------------
 
 
 def _extrahera_regnr_html(
     html: str,
 ) -> str | None:
-    """
-    Sista fallback.
-
-    Vi söker inte efter regnr generellt.
-
-    Först måste en regnr-etikett hittas i HTML-källan.
-    Därefter undersöks endast ett litet område runt etiketten.
-    """
 
     if not html:
         return None
@@ -756,7 +643,6 @@ def _extrahera_regnr_html(
         start:slut
     ]
 
-    # HTML-taggar kan ligga mellan etikett och värde.
     område = re.sub(
         r"<[^>]+>",
         " ",
@@ -780,7 +666,6 @@ def _extrahera_regnr_html(
         etikett_match.end():
     ]
 
-    # Bara ett kort område efter etiketten.
     efter = efter[:100]
 
     return _extrahera_regnr_kandidat(
@@ -797,20 +682,7 @@ def _extrahera_regnr(
     soup: BeautifulSoup,
     html: str,
 ) -> str | None:
-    """
-    Huvudfunktion för registreringsnummer.
 
-    Prioritetsordning:
-
-        1. DOM
-        2. attribut
-        3. JSON-LD
-        4. HTML-fallback
-
-    Alla metoder kräver uttrycklig regnr-koppling.
-    """
-
-    # 1. DOM
     regnr = _extrahera_regnr_dom(
         soup
     )
@@ -818,7 +690,6 @@ def _extrahera_regnr(
     if regnr:
         return regnr
 
-    # 2. Attribut
     regnr = _extrahera_regnr_attribut(
         soup
     )
@@ -826,7 +697,6 @@ def _extrahera_regnr(
     if regnr:
         return regnr
 
-    # 3. JSON-LD
     regnr = _extrahera_regnr_json(
         soup
     )
@@ -834,7 +704,6 @@ def _extrahera_regnr(
     if regnr:
         return regnr
 
-    # 4. HTML-fallback
     regnr = _extrahera_regnr_html(
         html
     )
@@ -854,12 +723,6 @@ def _hamta_kandidat_urler(
     bilkonfig: dict,
     ar: int,
 ) -> list[dict]:
-    """
-    Hämtar Bilwebs sökresultatsida för modell/årsmodell.
-
-    Sidan används endast för att hitta kandidat-URL:er.
-    Pris och miltal läses aldrig från sökresultatet.
-    """
 
     marke_slug = bilkonfig[
         "marke_slug"
@@ -1011,17 +874,6 @@ def _hamta_pris_mil_fran_detaljsida(
     bool,
     str | None,
 ] | None:
-    """
-    Hämtar en annons egen detaljsida.
-
-    Returnerar:
-
-        pris
-        mil
-        antal ägare
-        auktion
-        registreringsnummer
-    """
 
     try:
 
@@ -1130,19 +982,18 @@ def _hamta_pris_mil_fran_detaljsida(
 
     # ------------------------------------------------------------
     # Registreringsnummer
+    #
+    # REGNR är diagnostisk information och inget grundkrav.
+    #
+    # Vi försöker fortfarande hitta det eftersom det är värdefullt
+    # för deduplicering, men frånvaro av REGNR är INTE ett fel och
+    # ska inte skapa ett individuellt loggmeddelande.
     # ------------------------------------------------------------
 
     regnr = _extrahera_regnr(
         soup,
         html,
     )
-
-    if not regnr:
-
-        print(
-            f"[bilweb]   REGNR saknas: "
-            f"{url}"
-        )
 
     return (
         _rensa_tal(
@@ -1336,10 +1187,22 @@ def hamta_annonser() -> list[dict]:
                         None,
                 }
 
+                # Berika annonsen från den information som redan finns
+                # i Bilwebs URL/slug.
                 bil = berika_fran_fritext(
                     bil,
                     bil["utrustningsniva"],
                 )
+
+                # ------------------------------------------------
+                # Grundkrav
+                #
+                # Först efter att den information vi faktiskt
+                # behöver från detaljsidan är hämtad avgör vi om
+                # bilen ska skickas vidare till Fiskabilar.
+                #
+                # REGNR är INTE ett grundkrav.
+                # ------------------------------------------------
 
                 fel = grundkrav_fel(
                     bil
@@ -1383,6 +1246,9 @@ def hamta_annonser() -> list[dict]:
 
     # ------------------------------------------------------------
     # REGNR-DIAGNOSTIK
+    #
+    # Detta är den enda informationen vi behöver skriva ut om
+    # REGNR-täckningen. Enskilda "REGNR saknas"-rader skrivs inte.
     # ------------------------------------------------------------
 
     print(
