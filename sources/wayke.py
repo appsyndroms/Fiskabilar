@@ -1,67 +1,83 @@
 """
-Scraper för Wayke - VERIFIERAD mot verklig sidstruktur 2026-08-09,
-utökad till V60+V90 2026-08-12, generaliserad till flera märken
-(inkl. BMW 530e xDrive Touring) 2026-08-13.
+Scraper för Wayke.
 
 Wayke är server-renderad (fungerar utan JavaScript), så vanlig
 requests.get() räcker. Vi bygger INTE på CSS-klasser här utan på de
 stabila textetiketterna ("Plats:", "Återförsäljare:", "Fuel Type:",
 "Mätarställning:", "Model Year:", "Gearbox Type:", "Kontantpris") som
-verifierades vara identiska för varje annonskort, oavsett märke.
+verifierats för annonskorten.
 
-URL-mönster (verifierat för volvo/v60, volvo/v90, bmw/530e-xdrive-touring):
-  https://www.wayke.se/sok/{marke_slug}/{modell_slug}/{arsmodell}
-  ex: https://www.wayke.se/sok/volvo/v60/2023
-      https://www.wayke.se/sok/bmw/530e-xdrive-touring/2023
+URL-mönster:
+    https://www.wayke.se/sok/{marke_slug}/{modell_slug}/{arsmodell}
 
-Notera: BMW:s modell_slug är redan variant-specifik (bara 530e xDrive
-Touring, inte 530i/530d), så variant_kraven för BMW är i praktiken
-alltid sant - men körs ändå genom samma generella logik för enkelhets
-skull och som skydd om Wayke skulle blanda in närliggande varianter.
+Exempel:
+    https://www.wayke.se/sok/volvo/v60/2023
+    https://www.wayke.se/sok/volvo/v90/2023
+    https://www.wayke.se/sok/bmw/530e-xdrive-touring/2023
 
-Enskilda annonser ligger på https://www.wayke.se/objekt/{uuid}. Sök-
-sidan innehåller en sådan länk per annonskort; vi matchar länkarna mot
-annonsblocken i den ordning de förekommer i HTML:n (se
-_extrahera_lankar()). Om antalet länkar inte stämmer med antalet
-tolkade annonser vågar vi inte gissa - då sätts url=None för alla i
-den körningen, hellre än att riskera att peka på fel bil.
+Enskilda annonser ligger på:
+    https://www.wayke.se/objekt/{uuid}
 
-OBSERVERAT: paginering via ?page=2 verkade INTE ändra resultatet vid
-test. Om en sökning har fler resultat än en sida visar kan Wayke ladda
-fler via en "Visa fler"-knapp med JS istället - Playwright/Selenium
-kan då behövas. Testa själv om du misstänker att du missar bilar.
+Sök-sidan kan innehålla samma annonslänk flera gånger i HTML:n.
+Därför dedupliceras objektlänkar globalt, men deras ursprungliga
+ordning bevaras.
 
-BUGFIX 2026-08-12: sålda bilar ("Sålt" ersätter "I lager" i texten)
-filtreras nu bort explicit - annars kunde de fångas upp av misstag
-eftersom "I lager" bara var ett frivilligt mönster i regexen.
+Om antalet unika objektlänkar fortfarande inte stämmer med antalet
+tolkade annonser vågar vi inte gissa vilken länk som hör till vilken
+bil. Då sätts url=None för alla annonser i den körningen.
+
+Sålda bilar filtreras bort explicit eftersom "Sålt"/"Såld" kan förekomma
+i dealer-fältet där "I lager" annars förväntades.
+
+Paginering via ?page=2 har tidigare inte ändrat resultatet vid test.
+Om en sökning har fler resultat än en sida visar kan Wayke eventuellt
+ladda fler via JavaScript ("Visa fler"). Playwright/Selenium kan då
+behövas.
 """
-from app_logging.logger import info
+
+from app_logging.logger import error, info, warning
 
 import re
 import time
+
 import requests
 from bs4 import BeautifulSoup
 
 from config import ARSMODELL_MIN, ARSMODELL_MAX, BILAR
-from sources import matchar_grundkrav, berika_fran_fritext, identifiera_variant
+from sources import (
+    berika_fran_fritext,
+    identifiera_variant,
+    matchar_grundkrav,
+)
+
 
 DELAY_SEKUNDER = 3.0
+
 BAS_URL = "https://www.wayke.se/sok/{marke}/{modell}/{ar}"
 
+WAYKE_BAS = "https://www.wayke.se"
+
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0 Safari/537.36"
+    ),
 }
 
 
 def _bygg_annons_regex(wayke_anchor: str) -> re.Pattern:
     """
-    Bygger annonsregexen dynamiskt per bilkonfig, eftersom ankartexten
-    (t.ex. "Volvo V60" eller "BMW 530e xDrive Touring") används för att
-    hitta var varje annonsblock börjar. Byggd och testad mot verklig
-    sidtext (se docstring ovan) för Volvo; BMW-strukturen verifierad
-    separat och följer identisk mall.
+    Bygger annonsregexen dynamiskt per bilkonfiguration.
+
+    Ankartexten, exempelvis "Volvo V60" eller
+    "BMW 530e xDrive Touring", används för att hitta var
+    varje annonsblock börjar.
+
+    Regexen bygger på de stabila textetiketter som verifierats
+    på Waykes söksidor.
     """
+
     return re.compile(
         r"Plats:(?P<plats>.*?)"
         r"Återförsäljare:(?P<dealer>.*?)"
@@ -75,37 +91,71 @@ def _bygg_annons_regex(wayke_anchor: str) -> re.Pattern:
     )
 
 
-# Fångar länkar till enskilda annonser i den ordning de förekommer i HTML:n.
-OBJEKT_LANK_REGEX = re.compile(r'href="(/objekt/[0-9a-fA-F-]+)"')
-WAYKE_BAS = "https://www.wayke.se"
+# Fångar länkar till enskilda annonser.
+#
+# En och samma annons kan förekomma flera gånger i HTML:n.
+# Därför dedupliceras resultatet i _extrahera_lankar().
+OBJEKT_LANK_REGEX = re.compile(
+    r'href="(/objekt/[0-9a-fA-F-]+)"'
+)
 
 
-def _extrahera_lankar(html: str, forvantat_antal: int) -> list[str | None]:
+def _extrahera_lankar(
+    html: str,
+    forvantat_antal: int,
+) -> list[str | None]:
     """
-    Plockar ut /objekt/-länkarna i dokumentordning. Om antalet inte
-    matchar antalet hittade annonser vågar vi inte gissa vilken länk
-    som hör till vilken bil - då returneras None för alla istället.
-    """
-    lankar = OBJEKT_LANK_REGEX.findall(html)
-    unika_i_ordning = []
+    Plockar ut unika /objekt/-länkar i dokumentordning.
 
-    for lank in lankar:
-        if not unika_i_ordning or unika_i_ordning[-1] != lank:
-            unika_i_ordning.append(lank)
+    Tidigare togs bara direkt efterföljande dubletter bort.
+    Det kunde ge exempelvis:
+
+        14 länkar hittade
+        13 annonser tolkade
+
+    om samma annonslänk förekom flera gånger i HTML:n med annat
+    innehåll mellan förekomsterna.
+
+    Nu dedupliceras länkar globalt samtidigt som första förekomsten
+    behåller sin ordning.
+
+    Om antalet fortfarande inte matchar antalet annonser returneras
+    None för alla annonser. Det är avsiktligt: vi ska hellre sakna
+    länkar en körning än koppla fel länk till fel bil.
+    """
+
+    hittade_lankar = OBJEKT_LANK_REGEX.findall(html)
+
+    unika_i_ordning: list[str] = []
+    sedda: set[str] = set()
+
+    for lank in hittade_lankar:
+        if lank in sedda:
+            continue
+
+        sedda.add(lank)
+        unika_i_ordning.append(lank)
 
     if len(unika_i_ordning) != forvantat_antal:
-        info(
-            f"[wayke] varning: {len(unika_i_ordning)} länkar hittade men "
+        warning(
+            f"[wayke] {len(unika_i_ordning)} unika länkar hittade men "
             f"{forvantat_antal} annonser tolkade - hoppar över länkning "
-            f"denna körning för att undvika felaktiga länkar."
+            "denna körning för att undvika felaktiga länkar."
         )
+
         return [None] * forvantat_antal
 
-    return [WAYKE_BAS + lank for lank in unika_i_ordning]
+    return [
+        WAYKE_BAS + lank
+        for lank in unika_i_ordning
+    ]
 
 
 def _rensa_tal(text: str) -> int:
+    """Tar bort allt utom siffror och returnerar heltal."""
+
     siffror = re.sub(r"\D", "", text)
+
     return int(siffror) if siffror else 0
 
 
@@ -113,25 +163,32 @@ def _tolka_titel(
     bilkonfig: dict,
     titel: str,
     plats: str,
-    dealer: str
+    dealer: str,
 ) -> dict | None:
+    """
+    Tolkar titel och grundinformation för ett annonsblock.
 
-    # Sålda bilar smyger med i dealer-fältet som "...SåldVolvo V60..."
-    # eftersom "Sålt"-statusen ersätter "I lager" i texten men fångas ändå
-    # av regexen (som har "I lager" som frivilligt). Filtrera bort dem
-    # explicit här - annars riskerar vi att mejla ut fynd på bilar som
-    # redan är sålda.
-    if re.search(r"sål[dt]", dealer, re.IGNORECASE):
+    Sålda bilar filtreras bort innan annonsen skapas.
+    """
+
+    # Sålda bilar kan förekomma i dealer-fältet som exempelvis:
+    # "...SåldVolvo V60..."
+    #
+    # "Sålt" och "Såld" hanteras båda.
+    if re.search(
+        r"sål[dt]",
+        dealer,
+        re.IGNORECASE,
+    ):
         return None
 
-    # Kontrollera variant mot ANKARE+titel tillsammans, inte bara titel.
-    # För Volvo räcker titel (t.ex. "Recharge T6 Core Edition"), men för
-    # BMW ligger hela variantnamnet ("530e xDrive Touring") redan i
-    # ankartexten - resttexten (titel) innehåller bara utrustningsdetaljer
-    # som "M Sport, Drag" och skulle aldrig matcha på egen hand.
+    # Kontrollera variant mot ankare + titel tillsammans.
+    #
+    # För Volvo innehåller titeln ofta variantinformationen.
+    # För BMW kan hela varianten redan finnas i wayke_anchor.
     variant = identifiera_variant(
         bilkonfig,
-        f"{bilkonfig['wayke_anchor']} {titel}"
+        f"{bilkonfig['wayke_anchor']} {titel}",
     )
 
     if variant is None:
@@ -153,19 +210,20 @@ def _tolka_titel(
 def _hamta_sida(
     marke: str,
     modell: str,
-    arsmodell: int
+    arsmodell: int,
 ) -> str:
+    """Hämtar en Wayke-söksida."""
 
     url = BAS_URL.format(
         marke=marke,
         modell=modell,
-        ar=arsmodell
+        ar=arsmodell,
     )
 
     resp = requests.get(
         url,
         headers=HEADERS,
-        timeout=15
+        timeout=15,
     )
 
     resp.raise_for_status()
@@ -174,12 +232,13 @@ def _hamta_sida(
 
 
 def hamta_annonser() -> list[dict]:
+    """Hämtar och tolkar annonser från Wayke."""
+
     info("[wayke] hämtar annonser...")
 
-    bilar = []
+    bilar: list[dict] = []
 
     for bilkonfig in BILAR:
-
         annons_regex = _bygg_annons_regex(
             bilkonfig["wayke_anchor"]
         )
@@ -188,38 +247,37 @@ def hamta_annonser() -> list[dict]:
         # Om det inte anges används de globala standardvärdena.
         arsmodell_min = bilkonfig.get(
             "arsmodell_min",
-            ARSMODELL_MIN
+            ARSMODELL_MIN,
         )
 
         arsmodell_max = bilkonfig.get(
             "arsmodell_max",
-            ARSMODELL_MAX
+            ARSMODELL_MAX,
         )
 
         for ar in range(
             arsmodell_min,
-            arsmodell_max + 1
+            arsmodell_max + 1,
         ):
-
             try:
                 html = _hamta_sida(
                     bilkonfig["marke_slug"],
                     bilkonfig["modell_slug"],
-                    ar
+                    ar,
                 )
 
-            except Exception as e:
-                info(
+            except Exception as exc:
+                error(
                     f"[wayke] FEL vid hämtning av "
                     f"{bilkonfig['marke_visning']} "
                     f"{bilkonfig['modell_visning']} "
-                    f"årsmodell {ar}: {e}"
+                    f"årsmodell {ar}: {exc}"
                 )
                 continue
 
             text = BeautifulSoup(
                 html,
-                "html.parser"
+                "html.parser",
             ).get_text(separator="")
 
             traffar = list(
@@ -228,76 +286,72 @@ def hamta_annonser() -> list[dict]:
 
             lankar = _extrahera_lankar(
                 html,
-                len(traffar)
+                len(traffar),
             )
 
-            for m, lank in zip(
+            for match, lank in zip(
                 traffar,
-                lankar
+                lankar,
             ):
-
                 bil = _tolka_titel(
                     bilkonfig,
-                    m.group("titel"),
-                    m.group("plats"),
-                    m.group("dealer")
+                    match.group("titel"),
+                    match.group("plats"),
+                    match.group("dealer"),
                 )
 
                 if bil is None:
                     continue
 
-                bil.update({
-                    "annonspris": _rensa_tal(
-                        m.group("pris")
-                    ),
-
-                    "arsmodell": int(
-                        m.group("ar")
-                    ),
-
-                    "miltal": _rensa_tal(
-                        m.group("mil")
-                    ),
-
-                    "vaxellada": (
-                        "Automat"
-                        if "aut" in m.group("gearbox").lower()
-                        else m.group("gearbox").strip()
-                    ),
-
-                    "skadad": False,
-                    "antal_agare": None,
-                    "import": None,
-                    "hyrbil": None,
-                    "servicehistorik": None,
-                    "senaste_service": None,
-                    "nasta_service": None,
-                    "forsta_registrering": None,
-                    "dragkrok": None,
-                    "varmare": None,
-                    "volvo_selekt": None,
-                    "stor_batteri": None,
-                    "url": lank,
-                })
+                bil.update(
+                    {
+                        "annonspris": _rensa_tal(
+                            match.group("pris")
+                        ),
+                        "arsmodell": int(
+                            match.group("ar")
+                        ),
+                        "miltal": _rensa_tal(
+                            match.group("mil")
+                        ),
+                        "vaxellada": (
+                            "Automat"
+                            if "aut"
+                            in match.group("gearbox").lower()
+                            else match.group("gearbox").strip()
+                        ),
+                        "skadad": False,
+                        "antal_agare": None,
+                        "import": None,
+                        "hyrbil": None,
+                        "servicehistorik": None,
+                        "senaste_service": None,
+                        "nasta_service": None,
+                        "forsta_registrering": None,
+                        "dragkrok": None,
+                        "varmare": None,
+                        "volvo_selekt": None,
+                        "stor_batteri": None,
+                        "url": lank,
+                    }
+                )
 
                 bil = berika_fran_fritext(
                     bil,
                     bil.get(
                         "utrustningsniva",
-                        ""
-                    )
+                        "",
+                    ),
                 )
 
                 if matchar_grundkrav(bil):
                     bilar.append(bil)
 
-            time.sleep(
-                DELAY_SEKUNDER
-            )
+            time.sleep(DELAY_SEKUNDER)
 
     info(
         f"[wayke] {len(bilar)} annonser "
-        f"matchade grundkraven"
+        "matchade grundkraven"
     )
 
     return bilar
