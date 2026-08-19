@@ -83,8 +83,16 @@ AUKTION_REGEX = re.compile(
 #   ABC12A
 #   ABC 12A
 #
-# Regexen används INTE på hela sidan.
-# Den används endast efter en uttrycklig regnr-etikett.
+# Regexen används INTE generellt på hela sidan.
+# Den används endast i närheten av en uttrycklig regnr-etikett.
+#
+# Detta är viktigt eftersom exempelvis:
+#
+#   BMW530
+#   BMW330
+#   V60T6
+#
+# annars skulle kunna feltolkas som registreringsnummer.
 # ---------------------------------------------------------------------------
 
 REGNR_REGEX = re.compile(
@@ -107,8 +115,9 @@ REGNR_ETIKETT_REGEX = re.compile(
     r"|registreringsnr"
     r"|reg\.?\s*nr"
     r"|regnr"
-    r")\b"
-    r"\s*:?",
+    r"|registration\s*number"
+    r"|registration"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -139,6 +148,10 @@ def _rensa_tal(
     return int(siffror) if siffror else 0
 
 
+# ---------------------------------------------------------------------------
+# Registreringsnummer - normalisering
+# ---------------------------------------------------------------------------
+
 def _normalisera_regnr(
     regnr: str | None,
 ) -> str | None:
@@ -154,6 +167,12 @@ def _normalisera_regnr(
     blir:
 
         ABC123
+
+    Även äldre format som:
+
+        ABC12A
+
+    stöds.
     """
 
     if not regnr:
@@ -168,71 +187,30 @@ def _normalisera_regnr(
     if len(normaliserat) not in (6, 7):
         return None
 
+    if not re.fullmatch(
+        r"[A-ZÅÄÖ]{3}(?:\d{3}|\d{2}[A-Z])",
+        normaliserat,
+    ):
+        return None
+
     return normaliserat
 
 
-def _extrahera_regnr(
+def _match_regnr(
     text: str,
 ) -> str | None:
     """
-    Extraherar registreringsnummer från detaljsidans text.
+    Försöker hitta ett registreringsnummer i ett begränsat textstycke.
 
-    Viktig säkerhetsprincip:
-
-    Vi letar INTE efter registreringsnummer generellt i hela sidan.
-
-    Först måste sidan innehålla en uttrycklig etikett som exempelvis:
-
-        Registreringsnummer
-        Registreringsnr
-        Reg nr
-        Reg.nr
-        Regnr
-
-    Därefter får ett registreringsnummer endast förekomma direkt efter
-    etiketten, bortsett från whitespace och kolon.
-
-    Detta förhindrar att exempelvis:
-
-        BMW530
-        BMW330
-        V60T6
-
-    feltolkas som registreringsnummer.
+    Denna funktion ska endast användas på text som redan är kopplad
+    till en registreringsnummer-etikett eller dess närmaste DOM-element.
     """
 
-    etikett_match = REGNR_ETIKETT_REGEX.search(
+    if not text:
+        return None
+
+    match = REGNR_REGEX.search(
         text
-    )
-
-    if not etikett_match:
-        return None
-
-    efter = text[
-        etikett_match.end():
-    ]
-
-    # Vi tillåter endast whitespace, kolon eller bindestreck
-    # mellan etiketten och själva registreringsnumret.
-    #
-    # Om det kommer en massa annan text först ska vi inte försöka
-    # gissa.
-    direkt_prefix = re.match(
-        r"^[\s:;\-]*",
-        efter,
-    )
-
-    if not direkt_prefix:
-        return None
-
-    start = direkt_prefix.end()
-
-    kandidattext = efter[
-        start:start + 20
-    ]
-
-    match = REGNR_REGEX.match(
-        kandidattext
     )
 
     if not match:
@@ -248,60 +226,137 @@ def _extrahera_regnr(
     )
 
 
+# ---------------------------------------------------------------------------
+# Registreringsnummer - textbaserad
+# ---------------------------------------------------------------------------
+
+def _extrahera_regnr(
+    text: str,
+) -> str | None:
+    """
+    Extraherar registreringsnummer från text.
+
+    Säkerhetsprincip:
+
+    Vi letar INTE efter registreringsnummer generellt i hela sidan.
+
+    Först måste sidan innehålla en uttrycklig etikett som exempelvis:
+
+        Registreringsnummer
+        Registreringsnr
+        Reg nr
+        Reg.nr
+        Regnr
+
+    Därefter undersöks endast ett begränsat område efter etiketten.
+
+    Detta förhindrar att exempelvis:
+
+        BMW530
+        BMW330
+        V60T6
+
+    feltolkas som registreringsnummer.
+    """
+
+    if not text:
+        return None
+
+    etikett_match = REGNR_ETIKETT_REGEX.search(
+        text
+    )
+
+    if not etikett_match:
+        return None
+
+    efter = text[
+        etikett_match.end():
+    ]
+
+    # Tillåt endast begränsat avstånd mellan etikett och värde.
+    #
+    # Detta stödjer exempelvis:
+    #
+    # Registreringsnummer: ABC123
+    # Registreringsnummer ABC 123
+    # Registreringsnummer
+    # ABC123
+    #
+    # men vi letar inte längre bort än 120 tecken.
+
+    kandidattext = efter[
+        :120
+    ]
+
+    return _match_regnr(
+        kandidattext
+    )
+
+
+# ---------------------------------------------------------------------------
+# Registreringsnummer - DOM-baserad
+# ---------------------------------------------------------------------------
+
 def _extrahera_regnr_dom(
     soup: BeautifulSoup,
 ) -> str | None:
     """
-    Försöker hitta registreringsnummer genom DOM-strukturen.
+    Robust DOM-baserad extraktion av registreringsnummer.
 
-    Detta är ännu säkrare än att söka i hela sidans sammanslagna text.
+    Bilweb kan placera etiketten och själva registreringsnumret
+    i olika DOM-element.
 
-    Vi letar efter ett element vars synliga text innehåller en
-    registreringsnummer-etikett och undersöker sedan samma element,
-    nästa syskon eller närmaste relevanta container.
+    Vi kontrollerar därför:
 
-    Om DOM-strukturen inte ger en entydig träff returneras None och
-    den strikta textbaserade metoden får försöka.
+      1. samma textnod
+      2. föräldraelement
+      3. förälderns barn
+      4. nästa syskon
+      5. nästa syskons barn
+      6. närmaste containers
+      7. ett begränsat lokalt DOM-område
+
+    Vi söker fortfarande aldrig efter registreringsnummer generellt
+    över hela sidan.
     """
 
-    etikett_element = None
-
-    for element in soup.find_all(
+    for etikett_node in soup.find_all(
         string=REGNR_ETIKETT_REGEX
     ):
-        text = str(element).strip()
 
-        if REGNR_ETIKETT_REGEX.search(
-            text
+        etikett_text = str(
+            etikett_node
+        ).strip()
+
+        if not REGNR_ETIKETT_REGEX.search(
+            etikett_text
         ):
-            etikett_element = element
-            break
+            continue
 
-    if etikett_element is None:
-        return None
+        # ------------------------------------------------------------
+        # 1. Samma textnod
+        # ------------------------------------------------------------
 
-    # ------------------------------------------------------------
-    # 1. Samma textnod
-    # ------------------------------------------------------------
+        kandidat = _match_regnr(
+            etikett_text
+        )
 
-    kandidat = _extrahera_regnr(
-        str(etikett_element)
-    )
+        if kandidat:
+            return kandidat
 
-    if kandidat:
-        return kandidat
+        parent = getattr(
+            etikett_node,
+            "parent",
+            None,
+        )
 
-    # ------------------------------------------------------------
-    # 2. Föräldraelement
-    # ------------------------------------------------------------
+        if parent is None:
+            continue
 
-    parent = getattr(
-        etikett_element,
-        "parent",
-        None,
-    )
+        # ------------------------------------------------------------
+        # 2. Föräldraelement
+        # ------------------------------------------------------------
 
-    if parent:
         parent_text = parent.get_text(
             " ",
             strip=True,
@@ -314,38 +369,143 @@ def _extrahera_regnr_dom(
         if kandidat:
             return kandidat
 
-    # ------------------------------------------------------------
-    # 3. Nästa syskon
-    # ------------------------------------------------------------
+        # ------------------------------------------------------------
+        # 3. Förälderns direkta barn
+        # ------------------------------------------------------------
 
-    if parent:
+        for child in parent.find_all(
+            recursive=False
+        ):
+
+            child_text = child.get_text(
+                " ",
+                strip=True,
+            )
+
+            kandidat = _match_regnr(
+                child_text
+            )
+
+            if kandidat:
+                return kandidat
+
+        # ------------------------------------------------------------
+        # 4. Nästa syskon
+        # ------------------------------------------------------------
+
         sibling = parent.find_next_sibling()
 
         if sibling:
+
             sibling_text = sibling.get_text(
                 " ",
                 strip=True,
             )
 
-            match = REGNR_REGEX.search(
+            kandidat = _match_regnr(
                 sibling_text
             )
 
-            if match:
-                kandidat = (
-                    f"{match.group(1)}"
-                    f"{match.group(2)}"
+            if kandidat:
+                return kandidat
+
+            # --------------------------------------------------------
+            # 5. Nästa syskons direkta barn
+            # --------------------------------------------------------
+
+            for child in sibling.find_all(
+                recursive=False
+            ):
+
+                child_text = child.get_text(
+                    " ",
+                    strip=True,
                 )
 
-                kandidat = _normalisera_regnr(
-                    kandidat
+                kandidat = _match_regnr(
+                    child_text
                 )
 
                 if kandidat:
                     return kandidat
 
+        # ------------------------------------------------------------
+        # 6. Närmaste containers
+        # ------------------------------------------------------------
+
+        container = parent
+
+        for _ in range(3):
+
+            container = getattr(
+                container,
+                "parent",
+                None,
+            )
+
+            if container is None:
+                break
+
+            container_text = container.get_text(
+                " ",
+                strip=True,
+            )
+
+            # Undvik att undersöka hela sidan eller enorma containers.
+            if len(container_text) > 500:
+                continue
+
+            if not REGNR_ETIKETT_REGEX.search(
+                container_text
+            ):
+                continue
+
+            kandidat = _extrahera_regnr(
+                container_text
+            )
+
+            if kandidat:
+                return kandidat
+
+        # ------------------------------------------------------------
+        # 7. Begränsat lokalt DOM-område
+        # ------------------------------------------------------------
+
+        delar = []
+
+        aktuellt = parent
+
+        for _ in range(3):
+
+            if aktuellt is None:
+                break
+
+            delar.append(
+                aktuellt.get_text(
+                    " ",
+                    strip=True,
+                )
+            )
+
+            aktuellt = aktuellt.find_next_sibling()
+
+        lokal_text = " ".join(
+            delar
+        )
+
+        kandidat = _extrahera_regnr(
+            lokal_text
+        )
+
+        if kandidat:
+            return kandidat
+
     return None
 
+
+# ---------------------------------------------------------------------------
+# Bilweb sökresultat
+# ---------------------------------------------------------------------------
 
 def _hamta_kandidat_urler(
     bilkonfig: dict,
@@ -355,6 +515,7 @@ def _hamta_kandidat_urler(
     Hämtar Bilwebs sökresultatsida för modell/årsmodell.
 
     Sidan används endast för att hitta kandidat-URL:er.
+
     Pris och miltal läses aldrig från sökresultatet.
     """
 
@@ -378,6 +539,7 @@ def _hamta_kandidat_urler(
     )
 
     try:
+
         resp = requests.get(
             sok_url,
             headers=HEADERS,
@@ -491,6 +653,10 @@ def _hamta_kandidat_urler(
 
     return kandidater
 
+
+# ---------------------------------------------------------------------------
+# Bilweb detaljsida
+# ---------------------------------------------------------------------------
 
 def _hamta_pris_mil_fran_detaljsida(
     url: str,
@@ -622,10 +788,11 @@ def _hamta_pris_mil_fran_detaljsida(
     # Registreringsnummer
     # ------------------------------------------------------------
     #
-    # Först försöker vi använda DOM-strukturen.
-    # Därefter den strikta textmetoden.
+    # Först DOM-baserad sökning.
     #
-    # Båda metoderna kräver uttrycklig regnr-etikett.
+    # Därefter strikt textbaserad fallback.
+    #
+    # Båda kräver en uttrycklig registreringsnummer-etikett.
     # ------------------------------------------------------------
 
     regnr = _extrahera_regnr_dom(
@@ -664,6 +831,10 @@ def _hamta_pris_mil_fran_detaljsida(
         regnr,
     )
 
+
+# ---------------------------------------------------------------------------
+# Huvudfunktion
+# ---------------------------------------------------------------------------
 
 def hamta_annonser() -> list[dict]:
 
@@ -765,11 +936,14 @@ def hamta_annonser() -> list[dict]:
 
                 bil = {
                     "kalla": "bilweb",
+
                     "url": url,
 
                     "annons_id":
                         kandidat["annons_id"],
 
+                    # REGNR är den starkaste identifieraren
+                    # när Bilweb uttryckligen anger den.
                     "regnr": regnr,
 
                     "marke_slug":
@@ -877,6 +1051,10 @@ def hamta_annonser() -> list[dict]:
                     f"klarade grundkraven "
                     f"efter kontroll av detaljsidor"
                 )
+
+    # ------------------------------------------------------------
+    # Sammanfattning
+    # ------------------------------------------------------------
 
     print(
         f"[bilweb] "
