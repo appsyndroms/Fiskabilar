@@ -12,7 +12,6 @@ under samma dygn inte ska tolkas som en marknadsrörelse.
 from app_logging.logger import info
 
 from collections import defaultdict
-from datetime import datetime
 from statistics import median
 from zoneinfo import ZoneInfo
 
@@ -31,11 +30,14 @@ TIDSZON = ZoneInfo(
 # Trendparametrar
 # ---------------------------------------------------------------------------
 
-MIN_TREND_DAGAR = 3
+# Två separata observationsdagar räcker för att fånga första rörelsen.
+MIN_TREND_DAGAR = 2
 
+# En förändring måste vara minst 1 % för att räknas som UPP eller NED.
 TREND_MIN_FORANDRING_PROCENT = 1.0
 
-MIN_TREND_STEG = 2
+# Ett steg mellan två separata observationsdagar räcker.
+MIN_TREND_STEG = 1
 
 
 def _trendkategori(
