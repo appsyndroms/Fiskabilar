@@ -5790,5 +5790,12 @@
     "senaste_pris": 489900,
     "senast_sedd": "2026-08-19",
     "notifierad": false
+  },
+  "reg:EXD16G": {
+    "forsta_sedd": "2026-08-19",
+    "forsta_pris": 429900,
+    "senaste_pris": 429900,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false
   }
 }
