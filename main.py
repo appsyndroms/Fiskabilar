@@ -17,41 +17,43 @@ Flöde:
 
 Trendanalysen påverkar inte score eller valuation.
 """
+from app_logging.logger import info
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from app_logging.logger import configure_from_argv
 from config import AKTIVA_KALLOR
-from dedup import deduplicera
-from state import (
+from matching.deduplicate import deduplicera
+from history.state import (
     ladda_state,
     spara_state,
     uppdatera_och_berika,
     redan_notifierad,
     markera_notifierad,
 )
-from valuation import (
+from valuation.market_value import (
     bygg_marknadsunderlag,
     berakna_fynd,
     berakna_miltalsdiagnostik,
     _ar_leasingannons,
 )
-from scoring import (
+from scoring.score import (
     berakna_fyndscore,
     berakna_fyndscore_breakdown,
     formatera_notis,
     bil_rubrik,
     score_niva,
 )
-from notify import skicka_epost
-from history import (
+from notifications.email import skicka_epost
+from history.analysis import (
     spara_annonsobservation,
     spara_marknadsvardesobservation,
     bygg_historikindex,
     berika_med_historik,
     bygg_marknadstrender,
 )
-from scrapers import blocket, wayke, bytbil, bilweb
+from sources import blocket, wayke, bytbil, bilweb
 
 
 KALLA_TILL_MODUL = {
@@ -83,15 +85,15 @@ def hamta_alla_annonser() -> list[dict]:
         modul = KALLA_TILL_MODUL.get(kalla)
 
         if modul is None:
-            print(f"Okänd källa i config: {kalla}")
+            info(f"Okänd källa i config: {kalla}")
             continue
 
         try:
             annonser = modul.hamta_annonser()
-            print(f"[KÄLLA] {kalla}: {len(annonser)} annonser")
+            info(f"[KÄLLA] {kalla}: {len(annonser)} annonser")
             alla.extend(annonser)
         except Exception as e:
-            print(f"FEL i källa '{kalla}': {e}")
+            info(f"FEL i källa '{kalla}': {e}")
 
     return alla
 
@@ -218,8 +220,8 @@ def _formatera_historikdiagnostik(k: dict) -> str | None:
 
 def _skriv_diagnostik(kandidater: list[dict]) -> None:
     if not kandidater:
-        print("\n=== DIAGNOSTIK ===")
-        print("Inga kandidater passerade valuation.")
+        info("\n=== DIAGNOSTIK ===")
+        info("Inga kandidater passerade valuation.")
         return
 
     kandidater = sorted(
@@ -228,12 +230,12 @@ def _skriv_diagnostik(kandidater: list[dict]) -> None:
         reverse=True,
     )
 
-    print("\n" + "=" * 80)
-    print("=== DIAGNOSTIK: BÄSTA KANDIDATER ===")
-    print("=" * 80)
+    info("\n" + "=" * 80)
+    info("=== DIAGNOSTIK: BÄSTA KANDIDATER ===")
+    info("=" * 80)
 
     for i, k in enumerate(kandidater[:DIAGNOSTIK_ANTAL], 1):
-        print(
+        info(
             f"{i:02d}. {k['score']:3d}/100 | "
             f"{k['arsmodell']} | {k['miltal']:,} mil | "
             f"{k['pris']:,} kr | diff +{k['diff']:,} | "
@@ -241,7 +243,7 @@ def _skriv_diagnostik(kandidater: list[dict]) -> None:
             .replace(",", " ")
         )
 
-        print(
+        info(
             "    "
             f"Pris: {k['prispoang']}/60 | "
             f"Miltal: {k['miltalspoang']}/20 | "
@@ -252,18 +254,18 @@ def _skriv_diagnostik(kandidater: list[dict]) -> None:
         historiktext = _formatera_historikdiagnostik(k)
 
         if historiktext:
-            print(f"    {historiktext}")
+            info(f"    {historiktext}")
 
-    print("=" * 80)
+    info("=" * 80)
 
 
 def main():
-    print("\n=== Bilfyndfilter startar ===\n")
+    info("\n=== Bilfyndfilter startar ===\n")
 
     if not _inom_aktiv_tid():
         nu = datetime.now(TIDSZON)
 
-        print(
+        info(
             f"Utanför aktiv tid ({nu.strftime('%H:%M')} svensk tid, "
             f"fönster {AKTIV_TID_START:02d}:00-"
             f"{AKTIV_TID_SLUT:02d}:00). Avslutar."
@@ -273,13 +275,13 @@ def main():
 
     raa_annonser = hamta_alla_annonser()
 
-    print(
+    info(
         f"Totalt {len(raa_annonser)} annonser innan dedup"
     )
 
     bilar = deduplicera(raa_annonser)
 
-    print(
+    info(
         f"{len(bilar)} unika bilar efter dedup"
     )
 
@@ -304,7 +306,7 @@ def main():
             )
 
         except Exception as e:
-            print(
+            info(
                 "[HISTORIK] Kunde inte läsa historik för annons: "
                 f"{e}"
             )
@@ -316,7 +318,7 @@ def main():
             spara_annonsobservation(bil)
 
         except Exception as e:
-            print(
+            info(
                 "[HISTORIK] Kunde inte spara annonsobservation: "
                 f"{e}"
             )
@@ -325,7 +327,7 @@ def main():
         bilar
     )
 
-    print(
+    info(
         f"{len(marknadsunderlag)} marknadskategorier byggda"
     )
 
@@ -364,7 +366,7 @@ def main():
             )
 
         except Exception as e:
-            print(
+            info(
                 f"[FEL valuation] {_annons_namn(bil)}: {e}"
             )
             continue
@@ -379,7 +381,7 @@ def main():
             )
 
         except Exception as e:
-            print(
+            info(
                 "[HISTORIK] Kunde inte spara värdeobservation: "
                 f"{e}"
             )
@@ -406,7 +408,7 @@ def main():
             )
 
         except Exception as e:
-            print(
+            info(
                 f"[FEL scoring] {_annons_namn(bil)}: {e}"
             )
             continue
@@ -482,7 +484,7 @@ def main():
         )
 
         if skickat:
-            print(
+            info(
                 f"Mejl skickat: {amne}"
             )
 
@@ -494,7 +496,7 @@ def main():
             statistik["mejl_skickade"] += 1
 
         else:
-            print(
+            info(
                 "OBS: mejl INTE skickat, "
                 "försöker igen nästa körning: "
                 f"{amne}"
@@ -518,7 +520,7 @@ def main():
         bygg_marknadstrender()
 
     except Exception as e:
-        print(
+        info(
             "[TREND] Kunde inte köra trendanalysen: "
             f"{e}"
         )
@@ -534,55 +536,55 @@ def main():
         kandidater
     )
 
-    print("\n" + "=" * 70)
-    print("=== SAMMANFATTNING ===")
-    print("=" * 70)
+    info("\n" + "=" * 70)
+    info("=== SAMMANFATTNING ===")
+    info("=" * 70)
 
-    print(
+    info(
         f"Totalt efter dedup: "
         f"{statistik['totalt']}"
     )
 
-    print(
+    info(
         f"Leasingannonser stoppade: "
         f"{statistik['leasing_stoppade']}"
     )
 
-    print(
+    info(
         f"Bilar under "
         f"{MIN_MILTAL_FOR_KANDIDAT:,} mil stoppade: "
         f"{statistik['miltal_stoppade']}"
         .replace(",", " ")
     )
 
-    print(
+    info(
         f"Valuation OK: "
         f"{statistik['valuation_ok']}"
     )
 
-    print(
+    info(
         f"Över prisdiff-gränsen "
         f"({MIN_DIFF_FOR_CANDIDATE:,} kr): "
         f"{statistik['under_diff']}"
         .replace(",", " ")
     )
 
-    print(
+    info(
         f"Score >= {MIN_SCORE_FOR_NOTIS}: "
         f"{statistik['score_ok']}"
     )
 
-    print(
+    info(
         f"Redan notifierade: "
         f"{statistik['redan_notifierade']}"
     )
 
-    print(
+    info(
         f"Mejl skickade: "
         f"{statistik['mejl_skickade']}"
     )
 
-    print("=" * 70)
+    info("=" * 70)
 
 
 if __name__ == "__main__":

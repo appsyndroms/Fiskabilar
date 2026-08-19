@@ -1,7 +1,7 @@
-# V60/V90/BMW 530e/330e-fyndfilter
+# V60/V90/BMW 530e-fyndfilter
 
 Automatiskt filter (kör var 15:e minut, mål ~30 min, 06-22 svensk tid)
-som letar efter Volvo V60/V90 Recharge (T6/T8 AWD) och BMW 330e 530e xDrive
+som letar efter Volvo V60/V90 Recharge (T6/T8 AWD) och BMW 530e xDrive
 Touring, räknar fram ett marknadsvärde per bil och mejlar dig
 **direkt** när en annons ligger tydligt under vad den borde kosta.
 
