@@ -1358,8 +1358,9 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 387990,
     "senaste_pris": 387990,
-    "senast_sedd": "2026-08-17",
-    "notifierad": false
+    "senast_sedd": "2026-08-19",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6103"
   },
   "kal:v60:T6 AWD:2022:9011": {
     "forsta_sedd": "2026-08-17",
@@ -2091,8 +2092,9 @@
     "forsta_pris": 339900,
     "senaste_pris": 339900,
     "senast_sedd": "2026-08-19",
-    "notifierad": false,
-    "migrerad_fran": "kal:v90:T6 AWD:2022:10320"
+    "notifierad": true,
+    "migrerad_fran": "kal:v90:T6 AWD:2022:10320",
+    "notifierad_pris": 339900
   },
   "url:https://www.wayke.se/objekt/426137de-5edb-449f-98c8-20094e770c2d": {
     "forsta_sedd": "2026-08-14",
@@ -5850,5 +5852,20 @@
     "notifierad": true,
     "notifierad_pris": 339800,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7383"
+  },
+  "url:https://www.wayke.se/objekt/0a61ed78-760c-4ecd-9921-2ad0fd2e980f": {
+    "forsta_sedd": "2026-08-19",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false
+  },
+  "reg:EPD98S": {
+    "forsta_sedd": "2026-08-17",
+    "forsta_pris": 387990,
+    "senaste_pris": 387990,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:6103"
   }
 }
