@@ -41,6 +41,11 @@ Detaljsidor hämtas parallellt med ett begränsat antal workers.
 Sökresultatsidor hämtas sekventiellt.
 
 Vi använder ingen artificiell delay efter detaljsidor.
+
+TIDIG FILTRERING:
+Årsmodell filtreras redan från URL:en innan detaljsidan hämtas.
+Det innebär att annonser som ligger utanför tillåtet årsmodellintervall
+aldrig får någon detalj-request.
 """
 
 import json
@@ -56,7 +61,6 @@ from bs4 import BeautifulSoup
 
 from config import BILAR, ARSMODELL_MIN, ARSMODELL_MAX
 from scrapers import (
-    matchar_grundkrav,
     grundkrav_fel,
     berika_fran_fritext,
     identifiera_variant,
@@ -71,11 +75,7 @@ from scrapers import (
 #
 # Detaljsidor hämtas parallellt.
 #
-# 6 samtidiga requests är en medvetet försiktig nivå:
-#
-#     - betydligt snabbare än sekventiell hämtning
-#     - begränsad belastning mot Bilweb
-#     - enkelt att justera senare
+# 6 samtidiga requests är en medvetet försiktig nivå.
 #
 # ---------------------------------------------------------------------------
 
@@ -790,6 +790,10 @@ def _hamta_kandidat_urler(
     kandidater = []
     avvisade_slugs = []
 
+    # Statistik för tidig filtrering.
+    avvisade_variant = 0
+    avvisade_arsmodell = 0
+
     for a in soup.find_all(
         "a",
         href=True,
@@ -819,9 +823,9 @@ def _hamta_kandidat_urler(
         )
 
         # ------------------------------------------------------------
-        # Variantfilter sker INNAN detaljsidan hämtas.
+        # 1. Variantfilter
         #
-        # En bortvald variant får alltså aldrig en detalj-request.
+        # Görs innan detaljsidan hämtas.
         # ------------------------------------------------------------
 
         variant = identifiera_variant(
@@ -831,11 +835,46 @@ def _hamta_kandidat_urler(
 
         if variant is None:
 
+            avvisade_variant += 1
+
             if len(avvisade_slugs) < 3:
 
                 avvisade_slugs.append(
                     slug_text
                 )
+
+            continue
+
+        # ------------------------------------------------------------
+        # 2. Årsmodellfilter
+        #
+        # Årsmodellen finns redan i Bilweb-URL:en.
+        #
+        # Därför finns det ingen anledning att hämta detaljsidan
+        # för en bil som vi redan nu vet ligger utanför intervallet.
+        # ------------------------------------------------------------
+
+        arsmodell = int(
+            m.group("ar")
+        )
+
+        arsmodell_min = bilkonfig.get(
+            "arsmodell_min",
+            ARSMODELL_MIN,
+        )
+
+        arsmodell_max = bilkonfig.get(
+            "arsmodell_max",
+            ARSMODELL_MAX,
+        )
+
+        if not (
+            arsmodell_min
+            <= arsmodell
+            <= arsmodell_max
+        ):
+
+            avvisade_arsmodell += 1
 
             continue
 
@@ -850,12 +889,18 @@ def _hamta_kandidat_urler(
         kandidater.append(
             {
                 "url": full_url,
-                "annons_id": annons_id,
-                "slug_text": slug_text,
-                "variant": variant,
-                "arsmodell": int(
-                    m.group("ar")
-                ),
+
+                "annons_id":
+                    annons_id,
+
+                "slug_text":
+                    slug_text,
+
+                "variant":
+                    variant,
+
+                "arsmodell":
+                    arsmodell,
             }
         )
 
@@ -865,8 +910,22 @@ def _hamta_kandidat_urler(
         f"{bilkonfig['modell_visning']} "
         f"{ar}: "
         f"{len(sedda_id)} unika annons-URL:er "
-        f"-> {len(kandidater)} matchade variant"
+        f"-> {len(kandidater)} matchade variant + årsmodell"
     )
+
+    if avvisade_variant:
+
+        print(
+            f"[bilweb]   Tidigt bortvalda varianter: "
+            f"{avvisade_variant}"
+        )
+
+    if avvisade_arsmodell:
+
+        print(
+            f"[bilweb]   Tidigt bortvalda årsmodeller: "
+            f"{avvisade_arsmodell}"
+        )
 
     if avvisade_slugs:
 
@@ -1051,10 +1110,6 @@ def _hamta_detaljsidor_parallellt(
 
     nya_kandidater = []
 
-    # ------------------------------------------------------------
-    # Identifiera vilka URL:er som faktiskt behöver hämtas.
-    # ------------------------------------------------------------
-
     for kandidat in kandidater:
 
         url = kandidat["url"]
@@ -1070,6 +1125,7 @@ def _hamta_detaljsidor_parallellt(
             )
 
     if not nya_kandidater:
+
         return resultat_per_url
 
     print(
@@ -1078,13 +1134,6 @@ def _hamta_detaljsidor_parallellt(
         f"parallellt med "
         f"{MAX_PARALLELLA_DETALJSIDOR} workers"
     )
-
-    # ------------------------------------------------------------
-    # Parallell hämtning.
-    #
-    # ThreadPoolExecutor passar bra här eftersom arbetet huvudsakligen
-    # består av nätverks-I/O.
-    # ------------------------------------------------------------
 
     with ThreadPoolExecutor(
         max_workers=MAX_PARALLELLA_DETALJSIDOR
@@ -1150,17 +1199,16 @@ def hamta_annonser() -> list[dict]:
     regnr_detaljsidor = 0
     regnr_hittade = 0
 
-    detaljsidor_hamtade = 0
-    detaljsidor_cache = 0
-
-    # ------------------------------------------------------------
-    # Detaljsidecache
-    #
-    # En URL hämtas maximalt en gång under hela körningen.
-    # Även misslyckade resultat cachas.
-    # ------------------------------------------------------------
-
     detaljsida_cache = {}
+
+    # ------------------------------------------------------------
+    # Håller reda på URL:er som faktiskt hämtats.
+    #
+    # Detta ger korrekt statistik även om samma annons förekommer
+    # på flera sökningar/årsmodellssidor.
+    # ------------------------------------------------------------
+
+    detaljsidor_hamtade_urler = set()
 
     for bilkonfig in BILAR:
 
@@ -1188,8 +1236,17 @@ def hamta_annonser() -> list[dict]:
                 continue
 
             # --------------------------------------------------------
-            # Hämta alla detaljsidor för denna sökning parallellt.
+            # Alla kandidater är nu redan filtrerade på:
+            #
+            #   - variant
+            #   - årsmodell
+            #
+            # Endast dessa får gå vidare till detaljsidor.
             # --------------------------------------------------------
+
+            cache_fore = set(
+                detaljsida_cache.keys()
+            )
 
             resultat_per_url = (
                 _hamta_detaljsidor_parallellt(
@@ -1198,33 +1255,24 @@ def hamta_annonser() -> list[dict]:
                 )
             )
 
-            # --------------------------------------------------------
-            # Statistik
-            # --------------------------------------------------------
+            cache_efter = set(
+                detaljsida_cache.keys()
+            )
 
-            for kandidat in kandidater:
+            nya_hamtade = (
+                cache_efter
+                - cache_fore
+            )
 
-                url = kandidat["url"]
-
-                if url in resultat_per_url:
-
-                    if (
-                        url in detaljsida_cache
-                        and kandidat["url"] not in {
-                            k["url"]
-                            for k in kandidater
-                            if k["url"] == url
-                        }
-                    ):
-                        detaljsidor_cache += 1
-
-            # Statistik räknas säkrare genom att jämföra
-            # cache-status före/efter i nästa steg.
-            #
-            # Vi räknar därför faktiskt antal resultat som finns
-            # i cachen efter hämtningen.
+            detaljsidor_hamtade_urler.update(
+                nya_hamtade
+            )
 
             rak_grundkrav = 0
+
+            # --------------------------------------------------------
+            # Bearbeta i kandidatordning.
+            # --------------------------------------------------------
 
             for kandidat in kandidater:
 
@@ -1235,9 +1283,6 @@ def hamta_annonser() -> list[dict]:
                 )
 
                 if resultat is None:
-
-                    # Kontrollera om URL:en verkligen var en cache-träff
-                    # eller om hämtningen misslyckades.
                     continue
 
                 (
@@ -1331,18 +1376,10 @@ def hamta_annonser() -> list[dict]:
                         None,
                 }
 
-                # ------------------------------------------------
-                # Berika annonsen från URL/slug.
-                # ------------------------------------------------
-
                 bil = berika_fran_fritext(
                     bil,
                     bil["utrustningsniva"],
                 )
-
-                # ------------------------------------------------
-                # Grundkrav
-                # ------------------------------------------------
 
                 fel = grundkrav_fel(
                     bil
@@ -1395,6 +1432,12 @@ def hamta_annonser() -> list[dict]:
         "[bilweb] PRESTANDA: "
         f"{len(detaljsida_cache)} unika detaljsidor "
         f"fanns i cache"
+    )
+
+    print(
+        "[bilweb] PRESTANDA: "
+        f"{len(detaljsidor_hamtade_urler)} "
+        f"detaljsidor hämtades från nätet"
     )
 
     print(
