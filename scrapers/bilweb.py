@@ -1137,14 +1137,7 @@ def _hamta_pris_mil_fran_detaljsida(
         html,
     )
 
-    if regnr:
-
-        print(
-            f"[bilweb]   REGNR hittat: "
-            f"{regnr}"
-        )
-
-    else:
+    if not regnr:
 
         print(
             f"[bilweb]   REGNR saknas: "
