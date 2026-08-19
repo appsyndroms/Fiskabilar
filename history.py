@@ -15,6 +15,12 @@ marknadens riktning.
 En trend identifieras först när det finns tillräckligt många observationer
 från separata kördagar. Detta förhindrar att flera körningar samma dag
 felaktigt tolkas som en marknadstrend.
+
+Trenddiagnostik hålls medvetet kort i loggen:
+- Endast identifierade upp- och nedtrender skrivs ut i detalj.
+- Kategorier med otillräckligt underlag skrivs inte individuellt.
+- Stabilt underlag skrivs inte individuellt.
+- En sammanfattande lägesbild skrivs alltid.
 """
 
 import json
@@ -28,6 +34,7 @@ from config import HISTORIK_FIL
 
 
 TIDSZON = ZoneInfo("Europe/Stockholm")
+
 
 # ---------------------------------------------------------------------------
 # Trendparametrar
@@ -477,9 +484,30 @@ def _logga_trendkategori(
     kategori: str,
     analys: dict,
 ) -> None:
-    """Skriver detaljerad diagnostik för en enskild marknadskategori."""
+    """
+    Skriver detaljerad diagnostik endast för riktiga trender.
+
+    Viktigt för loggstorleken:
+
+    - otillräckligt_underlag -> ingen logg
+    - stabil -> ingen logg
+    - upp -> detaljerad logg
+    - ned -> detaljerad logg
+
+    På så sätt kan hundratals marknadskategorier analyseras utan att
+    GitHub Actions-loggen fylls med information som inte kräver åtgärd.
+    """
 
     trend = analys.get("trend")
+
+    # ------------------------------------------------------------
+    # NYTT:
+    # Logga endast verkligt identifierade trender.
+    # ------------------------------------------------------------
+
+    if trend not in ("upp", "ned"):
+        return
+
     styrka = analys.get("trendstyrka", 0)
     dagar = analys.get("trend_observationsdagar", 0)
     forandring_kr = analys.get("trendforandring_kr", 0)
@@ -602,6 +630,9 @@ def bygg_marknadstrender() -> dict[str, dict]:
     }
 
     Trendanalysen påverkar inte score.
+
+    Loggningen är medvetet komprimerad:
+    endast identifierade upp- och nedtrender skrivs individuellt.
     """
 
     observationer = _las_observationer()
@@ -683,6 +714,15 @@ def bygg_marknadstrender() -> dict[str, dict]:
         "förändring per steg."
     )
 
+    # ------------------------------------------------------------
+    # Viktigt:
+    #
+    # Alla kategorier analyseras fortfarande.
+    # Endast loggningen är reducerad.
+    #
+    # Detta påverkar alltså INTE själva trendanalysen.
+    # ------------------------------------------------------------
+
     trender = {}
 
     for kategori, poster in sorted(
@@ -701,6 +741,7 @@ def bygg_marknadstrender() -> dict[str, dict]:
 
         trender[kategori] = analys
 
+        # Endast riktiga trender skrivs till loggen.
         _logga_trendkategori(
             kategori,
             analys,
