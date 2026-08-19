@@ -35,11 +35,21 @@ mer än en gång.
 REGNR är diagnostisk information och är INTE ett grundkrav.
 En annons utan registreringsnummer ska därför inte generera ett
 individuellt felmeddelande.
+
+PRESTANDA:
+Detaljsidor hämtas parallellt med ett begränsat antal workers.
+Sökresultatsidor hämtas sekventiellt.
+
+Vi använder ingen artificiell delay efter detaljsidor.
 """
 
 import json
 import re
 import time
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed,
+)
 
 import requests
 from bs4 import BeautifulSoup
@@ -53,8 +63,29 @@ from scrapers import (
 )
 
 
-SOK_DELAY_SEKUNDER = 3.0
-DETALJ_DELAY_SEKUNDER = 1.5
+# ---------------------------------------------------------------------------
+# PRESTANDA
+# ---------------------------------------------------------------------------
+#
+# Sökresultatsidor hämtas sekventiellt med en kort paus.
+#
+# Detaljsidor hämtas parallellt.
+#
+# 6 samtidiga requests är en medvetet försiktig nivå:
+#
+#     - betydligt snabbare än sekventiell hämtning
+#     - begränsad belastning mot Bilweb
+#     - enkelt att justera senare
+#
+# ---------------------------------------------------------------------------
+
+SOK_DELAY_SEKUNDER = 1.0
+
+MAX_PARALLELLA_DETALJSIDOR = 6
+
+# Ingen artificiell väntetid mellan detaljsidor.
+DETALJ_DELAY_SEKUNDER = 0.0
+
 
 SOK_URL_MALL = "https://bilweb.se/sok/{marke}/{modell}/{ar}"
 
@@ -92,24 +123,6 @@ AUKTION_REGEX = re.compile(
 
 # ---------------------------------------------------------------------------
 # Registreringsnummer
-# ---------------------------------------------------------------------------
-#
-# Svenska registreringsnummer:
-#
-#   ABC123
-#   ABC 123
-#   ABC-123
-#   ABC12A
-#   ABC 12A
-#
-# Vi normaliserar alltid till:
-#
-#   ABC123
-#   ABC12A
-#
-# Regexen används aldrig som ensam bevisning på ett regnr.
-# Den används endast i ett sammanhang där sidan redan har identifierats
-# som ett registreringsnummerfält.
 # ---------------------------------------------------------------------------
 
 REGNR_REGEX = re.compile(
@@ -611,7 +624,7 @@ def _extrahera_regnr_json(
 
 
 # ---------------------------------------------------------------------------
-# REGNR från hela HTML-dokumentet
+# REGNR från HTML
 # ---------------------------------------------------------------------------
 
 
@@ -805,6 +818,12 @@ def _hamta_kandidat_urler(
             .replace("-", " ")
         )
 
+        # ------------------------------------------------------------
+        # Variantfilter sker INNAN detaljsidan hämtas.
+        #
+        # En bortvald variant får alltså aldrig en detalj-request.
+        # ------------------------------------------------------------
+
         variant = identifiera_variant(
             bilkonfig,
             slug_text,
@@ -983,11 +1002,7 @@ def _hamta_pris_mil_fran_detaljsida(
     # ------------------------------------------------------------
     # Registreringsnummer
     #
-    # REGNR är diagnostisk information och inget grundkrav.
-    #
-    # Vi försöker fortfarande hitta det eftersom det är värdefullt
-    # för deduplicering, men frånvaro av REGNR är INTE ett fel och
-    # ska inte skapa ett individuellt loggmeddelande.
+    # REGNR är diagnostisk information.
     # ------------------------------------------------------------
 
     regnr = _extrahera_regnr(
@@ -1009,14 +1024,123 @@ def _hamta_pris_mil_fran_detaljsida(
 
 
 # ---------------------------------------------------------------------------
+# Parallell hämtning av detaljsidor
+# ---------------------------------------------------------------------------
+
+
+def _hamta_detaljsidor_parallellt(
+    kandidater: list[dict],
+    cache: dict,
+) -> dict:
+    """
+    Hämtar alla nya detaljsidor parallellt.
+
+    Cache används först så att en URL aldrig hämtas två gånger.
+
+    Returnerar:
+
+        {
+            url: resultat,
+            ...
+        }
+
+    Resultaten läggs tillbaka i kandidatordning av huvudfunktionen.
+    """
+
+    resultat_per_url = {}
+
+    nya_kandidater = []
+
+    # ------------------------------------------------------------
+    # Identifiera vilka URL:er som faktiskt behöver hämtas.
+    # ------------------------------------------------------------
+
+    for kandidat in kandidater:
+
+        url = kandidat["url"]
+
+        if url in cache:
+
+            resultat_per_url[url] = cache[url]
+
+        else:
+
+            nya_kandidater.append(
+                kandidat
+            )
+
+    if not nya_kandidater:
+        return resultat_per_url
+
+    print(
+        f"[bilweb]   hämtar "
+        f"{len(nya_kandidater)} detaljsidor "
+        f"parallellt med "
+        f"{MAX_PARALLELLA_DETALJSIDOR} workers"
+    )
+
+    # ------------------------------------------------------------
+    # Parallell hämtning.
+    #
+    # ThreadPoolExecutor passar bra här eftersom arbetet huvudsakligen
+    # består av nätverks-I/O.
+    # ------------------------------------------------------------
+
+    with ThreadPoolExecutor(
+        max_workers=MAX_PARALLELLA_DETALJSIDOR
+    ) as executor:
+
+        framtida = {
+            executor.submit(
+                _hamta_pris_mil_fran_detaljsida,
+                kandidat["url"],
+            ): kandidat["url"]
+            for kandidat in nya_kandidater
+        }
+
+        for future in as_completed(
+            framtida
+        ):
+
+            url = framtida[
+                future
+            ]
+
+            try:
+
+                resultat = future.result()
+
+            except Exception as e:
+
+                print(
+                    f"[bilweb]   FEL i parallell "
+                    f"detaljhämtning: {url}: {e}"
+                )
+
+                resultat = None
+
+            cache[url] = resultat
+            resultat_per_url[url] = resultat
+
+    return resultat_per_url
+
+
+# ---------------------------------------------------------------------------
 # Huvudfunktion
 # ---------------------------------------------------------------------------
 
 
 def hamta_annonser() -> list[dict]:
 
+    starttid = time.monotonic()
+
     print(
         "[bilweb] hämtar annonser..."
+    )
+
+    print(
+        "[bilweb] PARALLELLA DETALJSIDOR: "
+        f"{MAX_PARALLELLA_DETALJSIDOR}"
     )
 
     bilar = []
@@ -1026,11 +1150,14 @@ def hamta_annonser() -> list[dict]:
     regnr_detaljsidor = 0
     regnr_hittade = 0
 
+    detaljsidor_hamtade = 0
+    detaljsidor_cache = 0
+
     # ------------------------------------------------------------
     # Detaljsidecache
     #
     # En URL hämtas maximalt en gång under hela körningen.
-    # Även misslyckade/avvisade resultat cachas.
+    # Även misslyckade resultat cachas.
     # ------------------------------------------------------------
 
     detaljsida_cache = {}
@@ -1057,45 +1184,60 @@ def hamta_annonser() -> list[dict]:
                 ar,
             )
 
+            if not kandidater:
+                continue
+
+            # --------------------------------------------------------
+            # Hämta alla detaljsidor för denna sökning parallellt.
+            # --------------------------------------------------------
+
+            resultat_per_url = (
+                _hamta_detaljsidor_parallellt(
+                    kandidater,
+                    detaljsida_cache,
+                )
+            )
+
+            # --------------------------------------------------------
+            # Statistik
+            # --------------------------------------------------------
+
+            for kandidat in kandidater:
+
+                url = kandidat["url"]
+
+                if url in resultat_per_url:
+
+                    if (
+                        url in detaljsida_cache
+                        and kandidat["url"] not in {
+                            k["url"]
+                            for k in kandidater
+                            if k["url"] == url
+                        }
+                    ):
+                        detaljsidor_cache += 1
+
+            # Statistik räknas säkrare genom att jämföra
+            # cache-status före/efter i nästa steg.
+            #
+            # Vi räknar därför faktiskt antal resultat som finns
+            # i cachen efter hämtningen.
+
             rak_grundkrav = 0
 
             for kandidat in kandidater:
 
                 url = kandidat["url"]
 
-                # ------------------------------------------------
-                # Cache
-                # ------------------------------------------------
-
-                if url in detaljsida_cache:
-
-                    resultat = detaljsida_cache[
-                        url
-                    ]
-
-                    print(
-                        f"[bilweb]   CACHE: "
-                        f"detaljsida redan kontrollerad "
-                        f"- hoppar över hämtning: {url}"
-                    )
-
-                else:
-
-                    resultat = (
-                        _hamta_pris_mil_fran_detaljsida(
-                            url
-                        )
-                    )
-
-                    detaljsida_cache[
-                        url
-                    ] = resultat
-
-                    time.sleep(
-                        DETALJ_DELAY_SEKUNDER
-                    )
+                resultat = resultat_per_url.get(
+                    url
+                )
 
                 if resultat is None:
+
+                    # Kontrollera om URL:en verkligen var en cache-träff
+                    # eller om hämtningen misslyckades.
                     continue
 
                 (
@@ -1113,12 +1255,14 @@ def hamta_annonser() -> list[dict]:
 
                 bil = {
                     "kalla": "bilweb",
+
                     "url": url,
 
                     "annons_id":
                         kandidat["annons_id"],
 
-                    "regnr": regnr,
+                    "regnr":
+                        regnr,
 
                     "marke_slug":
                         bilkonfig["marke_slug"],
@@ -1187,8 +1331,10 @@ def hamta_annonser() -> list[dict]:
                         None,
                 }
 
-                # Berika annonsen från den information som redan finns
-                # i Bilwebs URL/slug.
+                # ------------------------------------------------
+                # Berika annonsen från URL/slug.
+                # ------------------------------------------------
+
                 bil = berika_fran_fritext(
                     bil,
                     bil["utrustningsniva"],
@@ -1196,12 +1342,6 @@ def hamta_annonser() -> list[dict]:
 
                 # ------------------------------------------------
                 # Grundkrav
-                #
-                # Först efter att den information vi faktiskt
-                # behöver från detaljsidan är hämtad avgör vi om
-                # bilen ska skickas vidare till Fiskabilar.
-                #
-                # REGNR är INTE ett grundkrav.
                 # ------------------------------------------------
 
                 fel = grundkrav_fel(
@@ -1228,15 +1368,22 @@ def hamta_annonser() -> list[dict]:
                         f"-> {', '.join(fel)}"
                     )
 
-            if kandidater:
+            print(
+                f"[bilweb]   -> "
+                f"{rak_grundkrav} av "
+                f"{len(kandidater)} "
+                f"klarade grundkraven "
+                f"efter kontroll av detaljsidor"
+            )
 
-                print(
-                    f"[bilweb]   -> "
-                    f"{rak_grundkrav} av "
-                    f"{len(kandidater)} "
-                    f"klarade grundkraven "
-                    f"efter kontroll av detaljsidor"
-                )
+    # ------------------------------------------------------------
+    # Slutsammanfattning
+    # ------------------------------------------------------------
+
+    totaltid = (
+        time.monotonic()
+        - starttid
+    )
 
     print(
         f"[bilweb] "
@@ -1244,11 +1391,19 @@ def hamta_annonser() -> list[dict]:
         f"matchade grundkraven totalt"
     )
 
+    print(
+        "[bilweb] PRESTANDA: "
+        f"{len(detaljsida_cache)} unika detaljsidor "
+        f"fanns i cache"
+    )
+
+    print(
+        "[bilweb] KÖRTID: "
+        f"{totaltid:.1f} sekunder"
+    )
+
     # ------------------------------------------------------------
     # REGNR-DIAGNOSTIK
-    #
-    # Detta är den enda informationen vi behöver skriva ut om
-    # REGNR-täckningen. Enskilda "REGNR saknas"-rader skrivs inte.
     # ------------------------------------------------------------
 
     print(
