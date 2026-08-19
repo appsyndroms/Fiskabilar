@@ -5110,5 +5110,19 @@
     "senast_sedd": "2026-08-19",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:4466"
+  },
+  "url:https://www.wayke.se/objekt/1641c67e-e32f-43c3-a00d-4b116adcc6c1": {
+    "forsta_sedd": "2026-08-19",
+    "forsta_pris": 359000,
+    "senaste_pris": 359000,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/38131b5c-33a1-44c8-95d0-2a60ace7f60f": {
+    "forsta_sedd": "2026-08-19",
+    "forsta_pris": 369000,
+    "senaste_pris": 369000,
+    "senast_sedd": "2026-08-19",
+    "notifierad": false
   }
 }
