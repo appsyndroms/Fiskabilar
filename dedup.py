@@ -31,6 +31,8 @@ Viktiga principer:
 - Utrustning används endast när båda källorna faktiskt anger information.
 - Dubblettgrupper använder en stabil representant för att undvika
   transitiv "chain matching".
+- Dedup-diagnostik skrivs till loggen så att matchningskvaliteten
+  kan verifieras i GitHub Actions.
 
 Alla numeriska och textbaserade signaler normaliseras innan matchning.
 """
@@ -57,6 +59,9 @@ SIKER_MATCHNING = 100
 
 # När variant saknas på ena sidan krävs flera oberoende starka signaler.
 MINSTA_STARKA_SIGNALER = 3
+
+# Fingerprint-matchningar under denna nivå loggas som REVIEW.
+REVIEW_SCORE_GRANS = 90
 
 
 # ---------------------------------------------------------------------------
@@ -641,6 +646,7 @@ def _utrustningssignal(
     kanda = 0
 
     for falt_namn in falt:
+
         finns_a = _bool_finns(
             a,
             falt_namn,
@@ -757,12 +763,6 @@ def _matchningsscore(
     if _arsmodell_matchar(a, b):
         score += 15
         detaljer["arsmodell"] = True
-
-    # Om årsmodell saknas på ena sidan får vi inga poäng,
-    # men det är inte en konflikt.
-    #
-    # Detta är viktigt eftersom olika annonssajter ofta
-    # presenterar årsmodell på olika sätt.
 
     # -------------------------------------------------------
     # Variant: 20 poäng
@@ -1152,10 +1152,6 @@ def fingerprint_score(
         }
     """
 
-    # -------------------------------------------------------
-    # Regnr
-    # -------------------------------------------------------
-
     if _regnr_matchar(a, b):
         return {
             "matchar": True,
@@ -1166,10 +1162,6 @@ def fingerprint_score(
             "detaljer": {},
         }
 
-    # -------------------------------------------------------
-    # VIN
-    # -------------------------------------------------------
-
     if _vin_matchar(a, b):
         return {
             "matchar": True,
@@ -1179,10 +1171,6 @@ def fingerprint_score(
             "matchningstyp": "vin",
             "detaljer": {},
         }
-
-    # -------------------------------------------------------
-    # Fingerprint
-    # -------------------------------------------------------
 
     score, detaljer = _matchningsscore(
         a,
@@ -1274,21 +1262,349 @@ def _grupprepresentant(
     Representanten ändras inte när nya annonser läggs till under
     själva matchningspasset.
 
-    Detta är viktigt för att undvika transitiv chain matching:
+    Detta är viktigt för att undvika transitiv chain matching.
 
-        A matchar B
-        B matchar C
+    OBS:
 
-    ska inte automatiskt innebära:
-
-        A + B + C
-
-    om C inte också matchar gruppens representant.
+    Funktionen används endast för att välja representant från
+    befintliga annonser. Själva grupperingen låter inte en ny
+    annons påverka tidigare gruppers identitet.
     """
 
     return max(
         grupp,
         key=_fullstandighetspoang,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Diagnostikformat
+# ---------------------------------------------------------------------------
+
+
+def _bil_beskrivning(
+    bil: dict,
+) -> str:
+    """
+    Skapar en kort, läsbar beskrivning för GitHub Actions-loggen.
+
+    Registreringsnummer/VIN skrivs inte ut här eftersom diagnostiken
+    inte behöver exponera dessa identifierare.
+    """
+
+    modell = (
+        bil.get("modell")
+        or "?"
+    )
+
+    variant = (
+        bil.get("variant")
+        or "?"
+    )
+
+    arsmodell = (
+        bil.get("arsmodell")
+        or "?"
+    )
+
+    miltal = (
+        bil.get("miltal")
+        if bil.get("miltal")
+        not in (None, "")
+        else "?"
+    )
+
+    pris = (
+        bil.get("annonspris")
+        if bil.get("annonspris")
+        not in (None, "")
+        else "?"
+    )
+
+    kalla = (
+        bil.get("kalla")
+        or "?"
+    )
+
+    return (
+        f"{kalla} | "
+        f"{modell} | "
+        f"{variant} | "
+        f"{arsmodell} | "
+        f"{miltal} mil | "
+        f"{pris} kr"
+    )
+
+
+def _skriv_dedup_logg(
+    bilar: list[dict],
+    grupper: list[list[dict]],
+) -> None:
+    """
+    Skriver sammanfattande dedup-diagnostik till stdout.
+
+    Loggen är avsiktligt kompakt.
+
+    Alla dubbletter skrivs inte ut. Endast:
+        - sammanfattande statistik
+        - matchningstyper
+        - källöverlapp
+        - scorefördelning
+        - osäkra fingerprint-matchningar
+
+    Detta gör loggen användbar i GitHub Actions utan att skapa
+    onödigt mycket output.
+    """
+
+    totalt = len(bilar)
+    unika = len(grupper)
+    dubbletter = totalt - unika
+
+    if totalt:
+        dubblettandel = (
+            dubbletter
+            / totalt
+        ) * 100
+    else:
+        dubblettandel = 0.0
+
+    print(
+        "[DEDUP] =================================================="
+    )
+
+    print(
+        f"[DEDUP] Före: {totalt} annonser"
+    )
+
+    print(
+        f"[DEDUP] Efter: {unika} unika bilar"
+    )
+
+    print(
+        f"[DEDUP] Dubbletter: {dubbletter}"
+    )
+
+    print(
+        f"[DEDUP] Dubblettandel: {dubblettandel:.1f}%"
+    )
+
+    # -------------------------------------------------------
+    # Matchningstyper
+    # -------------------------------------------------------
+
+    matchningstyper = {
+        "regnr": 0,
+        "vin": 0,
+        "fingerprint": 0,
+    }
+
+    fingerprint_scores = []
+
+    review_matchningar = []
+
+    for grupp in grupper:
+
+        if len(grupp) <= 1:
+            continue
+
+        representant = _grupprepresentant(
+            grupp
+        )
+
+        for bil in grupp:
+
+            if bil is representant:
+                continue
+
+            diagnostik = fingerprint_score(
+                representant,
+                bil,
+            )
+
+            typ = diagnostik[
+                "matchningstyp"
+            ]
+
+            if typ in matchningstyper:
+                matchningstyper[typ] += 1
+
+            score = diagnostik[
+                "score"
+            ]
+
+            if typ == "fingerprint":
+                fingerprint_scores.append(
+                    score
+                )
+
+                if (
+                    score
+                    < REVIEW_SCORE_GRANS
+                ):
+                    review_matchningar.append(
+                        (
+                            representant,
+                            bil,
+                            diagnostik,
+                        )
+                    )
+
+    print(
+        "[DEDUP] MATCHNINGSTYP"
+    )
+
+    print(
+        f"[DEDUP]   REGNR:       {matchningstyper['regnr']}"
+    )
+
+    print(
+        f"[DEDUP]   VIN:         {matchningstyper['vin']}"
+    )
+
+    print(
+        f"[DEDUP]   FINGERPRINT: {matchningstyper['fingerprint']}"
+    )
+
+    # -------------------------------------------------------
+    # Fingerprint-scorefördelning
+    # -------------------------------------------------------
+
+    print(
+        "[DEDUP] FINGERPRINT-SCORE"
+    )
+
+    score_intervall = {
+        "95-100": 0,
+        "90-94": 0,
+        "85-89": 0,
+        "82-84": 0,
+    }
+
+    for score in fingerprint_scores:
+
+        if score >= 95:
+            score_intervall["95-100"] += 1
+
+        elif score >= 90:
+            score_intervall["90-94"] += 1
+
+        elif score >= 85:
+            score_intervall["85-89"] += 1
+
+        else:
+            score_intervall["82-84"] += 1
+
+    print(
+        f"[DEDUP]   95-100: {score_intervall['95-100']}"
+    )
+
+    print(
+        f"[DEDUP]   90-94:  {score_intervall['90-94']}"
+    )
+
+    print(
+        f"[DEDUP]   85-89:  {score_intervall['85-89']}"
+    )
+
+    print(
+        f"[DEDUP]   82-84:  {score_intervall['82-84']}"
+    )
+
+    # -------------------------------------------------------
+    # Källöverlapp
+    # -------------------------------------------------------
+
+    kalloverlapp = {}
+
+    for grupp in grupper:
+
+        kallor = sorted(
+            {
+                bil.get("kalla")
+                for bil in grupp
+                if bil.get("kalla")
+            }
+        )
+
+        if len(kallor) < 2:
+            continue
+
+        nyckel = " + ".join(
+            kallor
+        )
+
+        kalloverlapp[
+            nyckel
+        ] = (
+            kalloverlapp.get(
+                nyckel,
+                0,
+            )
+            + 1
+        )
+
+    print(
+        "[DEDUP] KÄLLÖVERLAPP"
+    )
+
+    if kalloverlapp:
+
+        for nyckel, antal in sorted(
+            kalloverlapp.items(),
+            key=lambda item: (
+                -item[1],
+                item[0],
+            ),
+        ):
+            print(
+                f"[DEDUP]   {nyckel}: {antal}"
+            )
+
+    else:
+        print(
+            "[DEDUP]   inga källöverlapp"
+        )
+
+    # -------------------------------------------------------
+    # Osäkra fingerprint-matchningar
+    # -------------------------------------------------------
+
+    print(
+        "[DEDUP] REVIEW-MATCHNINGAR "
+        f"(score < {REVIEW_SCORE_GRANS})"
+    )
+
+    if review_matchningar:
+
+        # Högst score först.
+        review_matchningar.sort(
+            key=lambda item: item[2]["score"],
+            reverse=True,
+        )
+
+        for (
+            representant,
+            bil,
+            diagnostik,
+        ) in review_matchningar:
+
+            print(
+                "[DEDUP][REVIEW] "
+                f"score={diagnostik['score']} | "
+                f"{_bil_beskrivning(representant)} "
+                f"<-> "
+                f"{_bil_beskrivning(bil)}"
+            )
+
+    else:
+
+        print(
+            "[DEDUP]   inga fingerprint-matchningar "
+            "under review-gränsen"
+        )
+
+    print(
+        "[DEDUP] =================================================="
     )
 
 
@@ -1317,6 +1633,9 @@ def deduplicera(
     godtyckligt mot varje tidigare annons.
 
     Detta förhindrar transitiv chain matching.
+
+    Efter gruppering skrivs en sammanfattande diagnostik till
+    GitHub Actions-loggen.
     """
 
     grupper: list[list[dict]] = []
@@ -1379,6 +1698,15 @@ def deduplicera(
             grupper.append(
                 [bil]
             )
+
+    # -----------------------------------------------------------------------
+    # Diagnostik
+    # -----------------------------------------------------------------------
+
+    _skriv_dedup_logg(
+        bilar,
+        grupper,
+    )
 
     # -----------------------------------------------------------------------
     # Bygg slutresultat
