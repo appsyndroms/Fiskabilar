@@ -1,14 +1,14 @@
-name: TRACE - Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
+name: TRACE - Fyndkontroll för bilar
 
 on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: fyndkontroll-main
-  cancel-in-progress: false
+  group: fyndkontroll-trace
+  cancel-in-progress: true
 
 jobs:
   kontrollera-fynd:
@@ -31,10 +31,3 @@ jobs:
         env:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
         run: python -u main.py --log-level TRACE
-
-      - name: Spara historik och state
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Uppdaterar fyndhistorik"
-          file_pattern: "data/state.json data/market_history"
-          branch: main
