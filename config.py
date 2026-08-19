@@ -24,7 +24,14 @@ BILAR = [
         "bilweb_modell_slug": "v60",
         "arsmodell_min": 2022,
         "arsmodell_max": 2024,
-        "variant_kraven": {"T6 AWD": [r"\bt6\b"], "T8 AWD": [r"\bt8\b"]},
+        "variant_kraven": {
+            "T6 AWD": [
+                r"\bt6\b",
+            ],
+            "T8 AWD": [
+                r"\bt8\b",
+            ],
+        },
     },
     {
         "marke_slug": "volvo",
@@ -35,7 +42,14 @@ BILAR = [
         "bilweb_modell_slug": "v90",
         "arsmodell_min": 2022,
         "arsmodell_max": 2024,
-        "variant_kraven": {"T6 AWD": [r"\bt6\b"], "T8 AWD": [r"\bt8\b"]},
+        "variant_kraven": {
+            "T6 AWD": [
+                r"\bt6\b",
+            ],
+            "T8 AWD": [
+                r"\bt8\b",
+            ],
+        },
     },
     {
         "marke_slug": "bmw",
@@ -46,7 +60,11 @@ BILAR = [
         "bilweb_modell_slug": "530",
         "arsmodell_min": 2022,
         "arsmodell_max": 2024,
-        "variant_kraven": {"530e xDrive Touring": [r"530.?e", r"xdrive", r"touring"]},
+        "variant_kraven": {
+            "530e xDrive Touring": [
+                r"530.?e",
+            ],
+        },
     },
     {
         "marke_slug": "bmw",
@@ -57,7 +75,11 @@ BILAR = [
         "bilweb_modell_slug": "330",
         "arsmodell_min": 2024,
         "arsmodell_max": 2026,
-        "variant_kraven": {"330e xDrive Touring": [r"330.?e", r"xdrive", r"touring"]},
+        "variant_kraven": {
+            "330e xDrive Touring": [
+                r"330.?e",
+            ],
+        },
     },
 ]
 
@@ -73,18 +95,34 @@ EPOST_FRAN = "ronnie.engstrand@gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
-AKTIVA_KALLOR = ["wayke", "bilweb"]
+AKTIVA_KALLOR = [
+    "wayke",
+    "bilweb",
+]
 
-HYRBIL_NYCKELORD = ["hyrbil", "bilpool", "leasingbil", "tjänstebil", "flikbil"]
-SELEKT_NYCKELORD = ["volvo selekt", "selekt"]
+HYRBIL_NYCKELORD = [
+    "hyrbil",
+    "bilpool",
+    "leasingbil",
+    "tjänstebil",
+    "flikbil",
+]
+
+SELEKT_NYCKELORD = [
+    "volvo selekt",
+    "selekt",
+]
 
 STATE_FIL = "data/state.json"
 
 # --- Historik ---
+
 HISTORIK_FIL = "data/market_history.jsonl"
 HISTORIK_SPARA_VARJE_KORNING = True
 
 # --- Notifiering ---
+
 # En redan notifierad bil får en ny notis först när priset är minst
 # 15 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
+
 MIN_PRISSANKNING_FOR_NY_NOTIS = 15000
