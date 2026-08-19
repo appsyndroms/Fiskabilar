@@ -1,17 +1,14 @@
-name: DEBUG - Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
+name: DEBUG - Fyndkontroll för bilar
 
 on:
-  schedule:
-    - cron: "*/15 4-21 * * *"
-
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: fyndkontroll-main
-  cancel-in-progress: false
+  group: fyndkontroll-debug
+  cancel-in-progress: true
 
 jobs:
   kontrollera-fynd:
@@ -34,10 +31,3 @@ jobs:
         env:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
         run: python -u main.py --log-level DEBUG
-
-      - name: Spara historik och state
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Uppdaterar fyndhistorik"
-          file_pattern: "data/state.json data/market_history"
-          branch: main
