@@ -26,6 +26,10 @@ Om antalet unika objektlänkar fortfarande inte stämmer med antalet
 tolkade annonser vågar vi inte gissa vilken länk som hör till vilken
 bil. Då sätts url=None för alla annonser i den körningen.
 
+Vid mismatch skrivs kompakt diagnostik ut med samtliga objektlänkar
+och de annonser som regexen faktiskt tolkade. Detta används för att
+identifiera skillnader mellan Waykes HTML-struktur och annonsregexen.
+
 Sålda bilar filtreras bort explicit eftersom "Sålt"/"Såld" kan förekomma
 i dealer-fältet där "I lager" annars förväntades.
 
@@ -102,26 +106,11 @@ OBJEKT_LANK_REGEX = re.compile(
 
 def _extrahera_lankar(
     html: str,
-    forvantat_antal: int,
-) -> list[str | None]:
+) -> list[str]:
     """
     Plockar ut unika /objekt/-länkar i dokumentordning.
 
-    Tidigare togs bara direkt efterföljande dubletter bort.
-    Det kunde ge exempelvis:
-
-        14 länkar hittade
-        13 annonser tolkade
-
-    om samma annonslänk förekom flera gånger i HTML:n med annat
-    innehåll mellan förekomsterna.
-
-    Nu dedupliceras länkar globalt samtidigt som första förekomsten
-    behåller sin ordning.
-
-    Om antalet fortfarande inte matchar antalet annonser returneras
-    None för alla annonser. Det är avsiktligt: vi ska hellre sakna
-    länkar en körning än koppla fel länk till fel bil.
+    Alla dubletter tas bort globalt, inte bara direkt efter varandra.
     """
 
     hittade_lankar = OBJEKT_LANK_REGEX.findall(html)
@@ -136,25 +125,121 @@ def _extrahera_lankar(
         sedda.add(lank)
         unika_i_ordning.append(lank)
 
-    if len(unika_i_ordning) != forvantat_antal:
+    return unika_i_ordning
+
+
+def _logga_lankdiagnostik(
+    lankar: list[str],
+    traffar: list[re.Match],
+    bilkonfig: dict,
+    arsmodell: int,
+) -> None:
+    """
+    Skriver diagnostik när antalet Wayke-länkar och annonsblock
+    inte överensstämmer.
+
+    Diagnostiken är avsiktligt begränsad till just den aktuella
+    sökningen/årsmodellen så att Actions-loggen inte fylls med
+    onödig information vid normala körningar.
+    """
+
+    warning(
+        "[wayke] URL-diagnostik vid mismatch:"
+    )
+
+    warning(
+        f"[wayke]   Sökning: "
+        f"{bilkonfig['marke_visning']} "
+        f"{bilkonfig['modell_visning']} "
+        f"{arsmodell}"
+    )
+
+    warning(
+        f"[wayke]   Unika objektlänkar: "
+        f"{len(lankar)}"
+    )
+
+    warning(
+        f"[wayke]   Tolkade annonsblock: "
+        f"{len(traffar)}"
+    )
+
+    warning(
+        "[wayke]   Objektlänkar:"
+    )
+
+    for index, lank in enumerate(
+        lankar,
+        start=1,
+    ):
         warning(
-            f"[wayke] {len(unika_i_ordning)} unika länkar hittade men "
-            f"{forvantat_antal} annonser tolkade - hoppar över länkning "
-            "denna körning för att undvika felaktiga länkar."
+            f"[wayke]     {index:02d}. "
+            f"{WAYKE_BAS}{lank}"
         )
 
-        return [None] * forvantat_antal
+    warning(
+        "[wayke]   Tolkade annonsblock:"
+    )
 
-    return [
-        WAYKE_BAS + lank
-        for lank in unika_i_ordning
-    ]
+    for index, match in enumerate(
+        traffar,
+        start=1,
+    ):
+        titel = (
+            match.group("titel")
+            .strip()
+            .replace("\n", " ")
+        )
+
+        plats = (
+            match.group("plats")
+            .strip()
+            .replace("\n", " ")
+        )
+
+        dealer = (
+            match.group("dealer")
+            .strip()
+            .replace("\n", " ")
+        )
+
+        pris = (
+            match.group("pris")
+            .strip()
+            .replace("\n", " ")
+        )
+
+        mil = (
+            match.group("mil")
+            .strip()
+            .replace("\n", " ")
+        )
+
+        ar = (
+            match.group("ar")
+            .strip()
+        )
+
+        warning(
+            f"[wayke]     {index:02d}. "
+            f"{bilkonfig['wayke_anchor']} "
+            f"{titel[:100]} | "
+            f"{ar} | "
+            f"{mil} mil | "
+            f"{pris} kr | "
+            f"{plats[:60]} | "
+            f"{dealer[:60]}"
+        )
 
 
 def _rensa_tal(text: str) -> int:
     """Tar bort allt utom siffror och returnerar heltal."""
 
-    siffror = re.sub(r"\D", "", text)
+    siffror = re.sub(
+        r"\D",
+        "",
+        text,
+    )
 
     return int(siffror) if siffror else 0
 
@@ -175,6 +260,7 @@ def _tolka_titel(
     # "...SåldVolvo V60..."
     #
     # "Sålt" och "Såld" hanteras båda.
+
     if re.search(
         r"sål[dt]",
         dealer,
@@ -186,6 +272,7 @@ def _tolka_titel(
     #
     # För Volvo innehåller titeln ofta variantinformationen.
     # För BMW kan hela varianten redan finnas i wayke_anchor.
+
     variant = identifiera_variant(
         bilkonfig,
         f"{bilkonfig['wayke_anchor']} {titel}",
@@ -201,7 +288,10 @@ def _tolka_titel(
         "modell_slug": bilkonfig["modell_slug"],
         "modell": bilkonfig["modell_slug"],
         "variant": variant,
-        "utrustningsniva": titel.strip()[:60] or None,
+        "utrustningsniva": (
+            titel.strip()[:60]
+            or None
+        ),
         "plats": plats.strip(),
         "dealer": dealer.strip(),
     }
@@ -234,7 +324,9 @@ def _hamta_sida(
 def hamta_annonser() -> list[dict]:
     """Hämtar och tolkar annonser från Wayke."""
 
-    info("[wayke] hämtar annonser...")
+    info(
+        "[wayke] hämtar annonser..."
+    )
 
     bilar: list[dict] = []
 
@@ -245,6 +337,7 @@ def hamta_annonser() -> list[dict]:
 
         # Varje bilmodell kan ha ett eget årsintervall.
         # Om det inte anges används de globala standardvärdena.
+
         arsmodell_min = bilkonfig.get(
             "arsmodell_min",
             ARSMODELL_MIN,
@@ -278,20 +371,55 @@ def hamta_annonser() -> list[dict]:
             text = BeautifulSoup(
                 html,
                 "html.parser",
-            ).get_text(separator="")
+            ).get_text(
+                separator=""
+            )
 
             traffar = list(
                 annons_regex.finditer(text)
             )
 
             lankar = _extrahera_lankar(
-                html,
-                len(traffar),
+                html
             )
+
+            # ========================================================
+            # DIAGNOSTIK VID MISMATCH
+            #
+            # Vi jämför nu de faktiska unika objektlänkarna med
+            # annonsblocken som regexen har tolkat.
+            #
+            # Om de skiljer sig skriver vi ut båda uppsättningarna.
+            # Vi kopplar INTE länkar på chans.
+            # ========================================================
+
+            if len(lankar) != len(traffar):
+                _logga_lankdiagnostik(
+                    lankar,
+                    traffar,
+                    bilkonfig,
+                    ar,
+                )
+
+                # Ingen länkning vid osäkerhet.
+                #
+                # Antalet None matchar antalet annonsblock så att
+                # zip() nedan fortfarande fungerar säkert.
+
+                lankar_for_annonser = [
+                    None
+                    for _ in traffar
+                ]
+
+            else:
+                lankar_for_annonser = [
+                    WAYKE_BAS + lank
+                    for lank in lankar
+                ]
 
             for match, lank in zip(
                 traffar,
-                lankar,
+                lankar_for_annonser,
             ):
                 bil = _tolka_titel(
                     bilkonfig,
@@ -317,8 +445,12 @@ def hamta_annonser() -> list[dict]:
                         "vaxellada": (
                             "Automat"
                             if "aut"
-                            in match.group("gearbox").lower()
-                            else match.group("gearbox").strip()
+                            in match.group(
+                                "gearbox"
+                            ).lower()
+                            else match.group(
+                                "gearbox"
+                            ).strip()
                         ),
                         "skadad": False,
                         "antal_agare": None,
@@ -344,10 +476,14 @@ def hamta_annonser() -> list[dict]:
                     ),
                 )
 
-                if matchar_grundkrav(bil):
+                if matchar_grundkrav(
+                    bil
+                ):
                     bilar.append(bil)
 
-            time.sleep(DELAY_SEKUNDER)
+            time.sleep(
+                DELAY_SEKUNDER
+            )
 
     info(
         f"[wayke] {len(bilar)} annonser "
