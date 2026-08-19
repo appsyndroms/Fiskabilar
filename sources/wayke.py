@@ -22,13 +22,24 @@ Sök-sidan kan innehålla samma annonslänk flera gånger i HTML:n.
 Därför dedupliceras objektlänkar globalt, men deras ursprungliga
 ordning bevaras.
 
-Om antalet unika objektlänkar fortfarande inte stämmer med antalet
-tolkade annonser vågar vi inte gissa vilken länk som hör till vilken
-bil. Då sätts url=None för alla annonser i den körningen.
+VIKTIGT:
+Antalet objektlänkar och antalet tolkade annonsblock behöver inte vara
+samma. Waykes HTML kan innehålla objektlänkar som inte representerar
+ett annonsblock som vår regex kan tolka.
 
-Vid mismatch skrivs kompakt diagnostik ut med samtliga objektlänkar
-och de annonser som regexen faktiskt tolkade. Detta används för att
-identifiera skillnader mellan Waykes HTML-struktur och annonsregexen.
+Därför kopplas URL:er endast till annonser när matchningen är säker.
+Vid mismatch lämnas URL-fältet None i stället för att riskera att
+en bil får fel annonslänk.
+
+Vid mismatch skrivs diagnostik ut med:
+- antal unika objektlänkar
+- antal tolkade annonsblock
+- differensen
+- samtliga objektlänkar
+- samtliga tolkade annonsblock
+
+Detta gör det möjligt att felsöka Waykes HTML utan att skapa felaktiga
+länkningar.
 
 Sålda bilar filtreras bort explicit eftersom "Sålt"/"Såld" kan förekomma
 i dealer-fältet där "I lager" annars förväntades.
@@ -104,9 +115,7 @@ OBJEKT_LANK_REGEX = re.compile(
 )
 
 
-def _extrahera_lankar(
-    html: str,
-) -> list[str]:
+def _extrahera_lankar(html: str) -> list[str]:
     """
     Plockar ut unika /objekt/-länkar i dokumentordning.
 
@@ -128,6 +137,17 @@ def _extrahera_lankar(
     return unika_i_ordning
 
 
+def _normalisera_diagnostiktext(text: str) -> str:
+    """Gör text lämplig för kompakt diagnostik."""
+
+    return (
+        text
+        .strip()
+        .replace("\n", " ")
+        .replace("\r", " ")
+    )
+
+
 def _logga_lankdiagnostik(
     lankar: list[str],
     traffar: list[re.Match],
@@ -138,10 +158,20 @@ def _logga_lankdiagnostik(
     Skriver diagnostik när antalet Wayke-länkar och annonsblock
     inte överensstämmer.
 
-    Diagnostiken är avsiktligt begränsad till just den aktuella
-    sökningen/årsmodellen så att Actions-loggen inte fylls med
-    onödig information vid normala körningar.
+    Viktigt:
+    Vi försöker inte gissa vilken URL som hör till vilken annons.
+
+    Ett mismatch-fall kan exempelvis vara:
+
+        14 objektlänkar
+        13 annonsblock
+
+    Det betyder inte automatiskt att en av de 13 annonserna är fel.
+    Det kan vara en extra objektlänk i Waykes HTML som vår annonsregex
+    inte tolkar.
     """
+
+    differens = len(lankar) - len(traffar)
 
     warning(
         "[wayke] URL-diagnostik vid mismatch:"
@@ -164,6 +194,25 @@ def _logga_lankdiagnostik(
         f"{len(traffar)}"
     )
 
+    if differens > 0:
+        warning(
+            f"[wayke]   Skillnad: "
+            f"{differens} fler objektlänk(ar) "
+            "än tolkade annonsblock"
+        )
+
+    elif differens < 0:
+        warning(
+            f"[wayke]   Skillnad: "
+            f"{abs(differens)} fler tolkade annonsblock "
+            "än objektlänkar"
+        )
+
+    else:
+        warning(
+            "[wayke]   Skillnad: 0"
+        )
+
     warning(
         "[wayke]   Objektlänkar:"
     )
@@ -185,39 +234,28 @@ def _logga_lankdiagnostik(
         traffar,
         start=1,
     ):
-        titel = (
+        titel = _normalisera_diagnostiktext(
             match.group("titel")
-            .strip()
-            .replace("\n", " ")
         )
 
-        plats = (
+        plats = _normalisera_diagnostiktext(
             match.group("plats")
-            .strip()
-            .replace("\n", " ")
         )
 
-        dealer = (
+        dealer = _normalisera_diagnostiktext(
             match.group("dealer")
-            .strip()
-            .replace("\n", " ")
         )
 
-        pris = (
+        pris = _normalisera_diagnostiktext(
             match.group("pris")
-            .strip()
-            .replace("\n", " ")
         )
 
-        mil = (
+        mil = _normalisera_diagnostiktext(
             match.group("mil")
-            .strip()
-            .replace("\n", " ")
         )
 
-        ar = (
+        ar = _normalisera_diagnostiktext(
             match.group("ar")
-            .strip()
         )
 
         warning(
@@ -230,6 +268,16 @@ def _logga_lankdiagnostik(
             f"{plats[:60]} | "
             f"{dealer[:60]}"
         )
+
+    warning(
+        "[wayke]   URL-länkning: "
+        "SKIPPAD för denna sökning eftersom "
+        "antalet länkar och annonsblock inte matchar."
+    )
+
+    warning(
+        "[wayke]   Inga URL:er kopplas på chans."
+    )
 
 
 def _rensa_tal(text: str) -> int:
@@ -383,15 +431,29 @@ def hamta_annonser() -> list[dict]:
                 html
             )
 
-            # ========================================================
-            # DIAGNOSTIK VID MISMATCH
+            # --------------------------------------------------------
+            # URL-MATCHNING
             #
-            # Vi jämför nu de faktiska unika objektlänkarna med
-            # annonsblocken som regexen har tolkat.
+            # Vi kopplar URL:er endast när antalet länkar och
+            # tolkade annonsblock är identiskt.
             #
-            # Om de skiljer sig skriver vi ut båda uppsättningarna.
-            # Vi kopplar INTE länkar på chans.
-            # ========================================================
+            # Det är medvetet konservativt.
+            #
+            # Om Wayke exempelvis ger:
+            #
+            #   14 objektlänkar
+            #   13 annonsblock
+            #
+            # får vi INTE anta att:
+            #
+            #   länk 1 -> annons 1
+            #   länk 2 -> annons 2
+            #   ...
+            #
+            # eftersom en enda extra länk kan ligga var som helst.
+            #
+            # Felaktig URL är betydligt värre än saknad URL.
+            # --------------------------------------------------------
 
             if len(lankar) != len(traffar):
                 _logga_lankdiagnostik(
@@ -400,11 +462,6 @@ def hamta_annonser() -> list[dict]:
                     bilkonfig,
                     ar,
                 )
-
-                # Ingen länkning vid osäkerhet.
-                #
-                # Antalet None matchar antalet annonsblock så att
-                # zip() nedan fortfarande fungerar säkert.
 
                 lankar_for_annonser = [
                     None
