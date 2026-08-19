@@ -14,6 +14,7 @@ VAXELLADA = "Automat"
 UTESLUT_SKADAD = True
 
 # --- Bilar att bevaka ---
+
 BILAR = [
     {
         "marke_slug": "volvo",
@@ -117,7 +118,21 @@ STATE_FIL = "data/state.json"
 
 # --- Historik ---
 
+# Katalog för den nya månadsvis roterade historiken.
+#
+# Exempel:
+#   data/market_history/market_history_2026-08.jsonl
+#
+# analysis_storage.py använder denna katalog för både
+# skrivning och läsning av historiken.
+HISTORIK_KATALOG = "data/market_history"
+
+# Äldre historikfil som används vid migrering till den
+# månadsvis roterade strukturen.
+#
+# Denna fil ska inte längre användas som aktiv skrivfil.
 HISTORIK_FIL = "data/market_history/market_history.jsonl"
+
 HISTORIK_SPARA_VARJE_KORNING = True
 
 # --- Notifiering ---
