@@ -1,26 +1,14 @@
 name: Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
 
 on:
-  # Kör var 15:e minut, 04:00-21:59 UTC. Det här fönstret är medvetet
-  # bredare än 06:00-22:00 svensk tid för att täcka både sommartid
-  # (CEST, UTC+2) och vintertid (CET, UTC+1).
-  #
-  # main.py avgör sedan, mot Europe/Stockholm, om det faktiskt är
-  # inom det tillåtna lokala tidsfönstret.
   schedule:
     - cron: "*/15 4-21 * * *"
 
-  # Gör det möjligt att starta körningen manuellt från GitHub.
   workflow_dispatch: {}
 
 permissions:
-  # Krävs för att workflowen ska kunna committa tillbaka
-  # uppdaterad historik och state till repot.
   contents: write
 
-# Förhindra att två fyndkontroller kör samtidigt.
-# Om en ny körning startar medan en gammal fortfarande kör,
-# väntar den nya tills den gamla är klar.
 concurrency:
   group: fyndkontroll-main
   cancel-in-progress: false
@@ -47,12 +35,9 @@ jobs:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
         run: python -u main.py
 
-      # main.py uppdaterar historiken under körningen.
-      # Den måste sedan sparas tillbaka till GitHub så att nästa
-      # körning kan läsa tidigare observationer.
       - name: Spara historik och state
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Uppdaterar fyndhistorik"
-          file_pattern: "data/state.json data/market_history.jsonl"
+          file_pattern: "data/state.json data/market_history"
           branch: main
