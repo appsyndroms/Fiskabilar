@@ -117,7 +117,7 @@ STATE_FIL = "data/state.json"
 
 # --- Historik ---
 
-HISTORIK_FIL = "data/market_history.jsonl"
+HISTORIK_FIL = "data/market_history/market_history.jsonl"
 HISTORIK_SPARA_VARJE_KORNING = True
 
 # --- Notifiering ---
