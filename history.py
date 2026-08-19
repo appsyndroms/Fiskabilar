@@ -17,9 +17,10 @@ från separata kördagar. Detta förhindrar att flera körningar samma dag
 felaktigt tolkas som en marknadstrend.
 
 Trenddiagnostik hålls medvetet kort i loggen:
-- Endast identifierade upp- och nedtrender skrivs ut i detalj.
+- Endast identifierade upp- och nedtrender skrivs ut.
 - Kategorier med otillräckligt underlag skrivs inte individuellt.
 - Stabilt underlag skrivs inte individuellt.
+- Varje identifierad trend skrivs på EN rad.
 - En sammanfattande lägesbild skrivs alltid.
 """
 
@@ -485,17 +486,18 @@ def _logga_trendkategori(
     analys: dict,
 ) -> None:
     """
-    Skriver detaljerad diagnostik endast för riktiga trender.
+    Skriver EN kompakt diagnostikrad för riktiga trender.
 
     Viktigt för loggstorleken:
 
     - otillräckligt_underlag -> ingen logg
     - stabil -> ingen logg
-    - upp -> detaljerad logg
-    - ned -> detaljerad logg
+    - upp -> EN rad
+    - ned -> EN rad
 
-    På så sätt kan hundratals marknadskategorier analyseras utan att
-    GitHub Actions-loggen fylls med information som inte kräver åtgärd.
+    Detaljer som period, senaste observation och enskilda steg skrivs
+    inte ut här eftersom de annars snabbt gör Actions-loggen onödigt lång.
+    Själva trendinformationen finns fortfarande kvar i analysresultatet.
     """
 
     trend = analys.get("trend")
@@ -511,8 +513,6 @@ def _logga_trendkategori(
         0.0,
     )
 
-    dagliga_priser = analys.get("dagliga_priser") or []
-
     print(
         "[TREND] "
         f"{_kort_kategori(kategori)} | "
@@ -522,46 +522,6 @@ def _logga_trendkategori(
         f"förändring={_formatera_kr(forandring_kr)} "
         f"({_formatera_procent(forandring_procent)})"
     )
-
-    if analys.get("trend_start_dag"):
-        print(
-            "[TREND]   period: "
-            f"{analys['trend_start_dag']} -> "
-            f"{analys['trend_slut_dag']}"
-        )
-
-    if dagliga_priser:
-        senaste = dagliga_priser[-1]
-
-        print(
-            "[TREND]   senaste: "
-            f"{senaste['dag']} | "
-            f"{_formatera_kr(senaste['pris'])} | "
-            f"{senaste['antal_observationer']} observationer"
-        )
-
-    if len(dagliga_priser) >= 2:
-        for tidigare, senare in zip(
-            dagliga_priser[-4:],
-            dagliga_priser[-3:],
-        ):
-            steg_kr = senare["pris"] - tidigare["pris"]
-            steg_procent = _prisforandring_procent(
-                tidigare["pris"],
-                senare["pris"],
-            )
-
-            riktning = _klassificera_riktning(
-                steg_procent
-            )
-
-            print(
-                "[TREND]   steg "
-                f"{tidigare['dag']} -> {senare['dag']}: "
-                f"{_formatera_kr(steg_kr)} "
-                f"({_formatera_procent(steg_procent)}) "
-                f"[{riktning}]"
-            )
 
 
 def _logga_trendsammanfattning(
@@ -627,7 +587,8 @@ def bygg_marknadstrender() -> dict[str, dict]:
     Trendanalysen påverkar inte score.
 
     Loggningen är medvetet komprimerad:
-    endast identifierade upp- och nedtrender skrivs individuellt.
+    endast identifierade upp- och nedtrender skrivs individuellt,
+    och varje trend skrivs på en enda rad.
     """
 
     observationer = _las_observationer()
