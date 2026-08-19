@@ -500,11 +500,6 @@ def _logga_trendkategori(
 
     trend = analys.get("trend")
 
-    # ------------------------------------------------------------
-    # NYTT:
-    # Logga endast verkligt identifierade trender.
-    # ------------------------------------------------------------
-
     if trend not in ("upp", "ned"):
         return
 
@@ -714,15 +709,6 @@ def bygg_marknadstrender() -> dict[str, dict]:
         "förändring per steg."
     )
 
-    # ------------------------------------------------------------
-    # Viktigt:
-    #
-    # Alla kategorier analyseras fortfarande.
-    # Endast loggningen är reducerad.
-    #
-    # Detta påverkar alltså INTE själva trendanalysen.
-    # ------------------------------------------------------------
-
     trender = {}
 
     for kategori, poster in sorted(
@@ -741,7 +727,6 @@ def bygg_marknadstrender() -> dict[str, dict]:
 
         trender[kategori] = analys
 
-        # Endast riktiga trender skrivs till loggen.
         _logga_trendkategori(
             kategori,
             analys,
@@ -948,12 +933,18 @@ def berakna_historik(
 def berika_med_historik(
     bil: dict,
     historikindex: dict[str, dict],
+    trender: dict[str, dict] | None = None,
 ) -> dict:
     """
     Lägger historikfält och marknadstrend på bilens dict.
 
-    Viktigt:
     Trendinformationen är diagnostisk och påverkar inte 100-poängsscoren.
+
+    Trendanalysen skickas normalt in färdigberäknad från huvudflödet.
+    Detta är viktigt eftersom bygg_marknadstrender() annars skulle köras
+    en gång per bil och läsa igenom hela historikfilen varje gång.
+
+    Om trender inte skickas in byggs de som fallback.
     """
 
     historik = berakna_historik(
@@ -961,8 +952,30 @@ def berika_med_historik(
         historikindex,
     )
 
-    # Trendanalysen bygger på historiken före dagens observation.
-    trender = bygg_marknadstrender()
+    # ------------------------------------------------------------
+    # VIKTIG ÄNDRING:
+    #
+    # Trendanalysen ska normalt byggas EN gång per körning och
+    # sedan återanvändas för alla bilar.
+    #
+    # Tidigare kördes:
+    #
+    #     bygg_marknadstrender()
+    #
+    # här för varje enskild bil.
+    #
+    # Det skapade upprepade:
+    #
+    #     [TREND] Startar trendanalys.
+    #
+    # i Actions-loggen och läste dessutom hela historikfilen
+    # om och om igen.
+    #
+    # Nu kan huvudflödet skicka in färdigberäknade trender.
+    # ------------------------------------------------------------
+
+    if trender is None:
+        trender = bygg_marknadstrender()
 
     trend = berakna_marknadstrend_for_bil(
         bil,
