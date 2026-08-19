@@ -416,20 +416,34 @@ def _logga_trendkategori(
     kategori: str,
     analys: dict,
 ) -> None:
+    """
+    Skriver ut trendstatus för varje marknadskategori.
+
+    Alla kategorier skrivs ut, även när underlaget är otillräckligt
+    eller när marknaden klassificeras som stabil.
+    """
+
     trend = analys.get(
-        "trend"
+        "trend",
+        "otillrackligt_underlag",
     )
 
-    if trend not in (
-        "upp",
-        "ned",
-    ):
-        return
+    if trend == "upp":
+        status = "UPP"
+
+    elif trend == "ned":
+        status = "NED"
+
+    elif trend == "stabil":
+        status = "STABIL"
+
+    else:
+        status = "OTILLRACKLIGT_UNDERLAG"
 
     info(
         "[TREND] "
         f"{_kort_kategori(kategori)} | "
-        f"{trend.upper()} | "
+        f"{status} | "
         f"dagar={analys.get('trend_observationsdagar', 0)} | "
         f"steg={analys.get('trendstyrka', 0)} | "
         f"förändring={_formatera_kr(analys.get('trendforandring_kr', 0))} "
@@ -495,9 +509,11 @@ def bygg_marknadstrender() -> dict[str, dict]:
     info(
         "[TREND] =================================================="
     )
+
     info(
         "[TREND] Startar trendanalys."
     )
+
     info(
         "[TREND] Totalt antal historiska poster: "
         f"{len(observationer)}"
@@ -507,13 +523,16 @@ def bygg_marknadstrender() -> dict[str, dict]:
         info(
             "[TREND] Ingen historik hittades."
         )
+
         info(
             "[TREND] Trendanalys avslutad: "
             "otillräckligt underlag."
         )
+
         info(
             "[TREND] =================================================="
         )
+
         return {}
 
     antal_annonsobservationer = sum(
@@ -657,29 +676,35 @@ def berakna_marknadstrend_for_bil(
                 "trend",
                 "otillrackligt_underlag",
             ),
+
         "marknadstrend_styrka":
             trend.get(
                 "trendstyrka",
                 0,
             ),
+
         "marknadstrend_forandring_procent":
             trend.get(
                 "trendforandring_procent",
                 0.0,
             ),
+
         "marknadstrend_forandring_kr":
             trend.get(
                 "trendforandring_kr",
                 0.0,
             ),
+
         "marknadstrend_start":
             trend.get(
                 "trend_start_dag"
             ),
+
         "marknadstrend_slut":
             trend.get(
                 "trend_slut_dag"
             ),
+
         "marknadstrend_observationsdagar":
             trend.get(
                 "trend_observationsdagar",
