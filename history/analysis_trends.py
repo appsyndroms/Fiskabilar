@@ -5,6 +5,10 @@ Trendanalysen bygger på historiska annonsobservationer.
 
 Den är avsiktligt separerad från 100-poängsscoren och valuation.
 
+Trendanalysen använder ett rullande tidsfönster för att beskriva
+den aktuella marknadsrörelsen. Äldre historik sparas fortfarande
+men ska inte dominera den aktuella trenden.
+
 En trend kräver flera separata observationsdagar för att flera körningar
 under samma dygn inte ska tolkas som en marknadsrörelse.
 """
@@ -12,6 +16,7 @@ under samma dygn inte ska tolkas som en marknadsrörelse.
 from app_logging.logger import info
 
 from collections import defaultdict
+from datetime import timedelta
 from statistics import median
 from zoneinfo import ZoneInfo
 
@@ -38,6 +43,16 @@ TREND_MIN_FORANDRING_PROCENT = 1.0
 
 # Ett steg mellan två separata observationsdagar räcker.
 MIN_TREND_STEG = 1
+
+# Aktuell trend beräknas endast inom detta rullande tidsfönster.
+#
+# Exempel:
+# Om senaste observationen är 2026-08-19 används observationer
+# från och med 2026-08-06.
+#
+# Detta gör att gamla prisrörelser inte fortsätter att beskrivas
+# som en aktuell marknadstrend.
+TREND_FONSTER_DAGAR = 14
 
 
 def _trendkategori(
@@ -103,6 +118,10 @@ def _bygg_dagliga_priser(
     Bygger en observation per dag.
 
     Om samma bilkategori observerats flera gånger samma dag används medianen.
+
+    Detta är viktigt eftersom en körning kan innehålla många observationer
+    av samma marknad under samma dygn. Flera körningar samma dag ska därför
+    inte räknas som flera separata marknadsdagar.
     """
 
     per_dag: dict[
@@ -155,6 +174,77 @@ def _bygg_dagliga_priser(
     return resultat
 
 
+def _begransa_trendfonster(
+    dagliga_priser: list[dict],
+) -> list[dict]:
+    """
+    Begränsar dagliga priser till det aktuella trendfönstret.
+
+    Fönstret räknas bakåt från den senaste observationsdagen.
+
+    Exempel:
+
+        senaste dag = 2026-08-19
+        fönster     = 14 dagar
+
+    Då används observationer från och med 2026-08-06.
+
+    Det gör att den historiska JSONL-datan kan vara mycket större än
+    själva underlaget som används för aktuell trendanalys.
+    """
+
+    if not dagliga_priser:
+        return []
+
+    senaste_dag = dagliga_priser[-1].get(
+        "dag"
+    )
+
+    if not senaste_dag:
+        return []
+
+    try:
+        senaste_datum = (
+            __import__(
+                "datetime"
+            )
+            .date.fromisoformat(
+                senaste_dag
+            )
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return dagliga_priser
+
+    startdatum = (
+        senaste_datum
+        - timedelta(
+            days=TREND_FONSTER_DAGAR - 1
+        )
+    )
+
+    return [
+        post
+        for post in dagliga_priser
+        if (
+            isinstance(
+                post.get("dag"),
+                str,
+            )
+            and startdatum
+            <= __import__(
+                "datetime"
+            )
+            .date.fromisoformat(
+                post["dag"]
+            )
+            <= senaste_datum
+        )
+    ]
+
+
 def _prisforandring_procent(
     tidigare: float,
     senare: float,
@@ -203,6 +293,9 @@ def _analysera_trendsegment(
       - minst MIN_TREND_DAGAR
       - minst MIN_TREND_STEG konsekutiva rörelser
       - varje rörelse över tröskeln
+
+    Endast dagliga observationer som redan ligger inom det rullande
+    trendfönstret ska skickas in till denna funktion.
     """
 
     resultat = {
@@ -501,7 +594,11 @@ def _logga_trendsammanfattning(
 
 def bygg_marknadstrender() -> dict[str, dict]:
     """
-    Analyserar hela historiken och bygger marknadstrender.
+    Analyserar hela historiken och bygger aktuella marknadstrender.
+
+    Den historiska JSONL-datan kan innehålla många månader av historik,
+    men den aktuella trendanalysen använder endast ett rullande
+    trendfönster på TREND_FONSTER_DAGAR.
 
     Trendanalysen påverkar inte score eller valuation.
     """
@@ -589,6 +686,11 @@ def bygg_marknadstrender() -> dict[str, dict]:
     )
 
     info(
+        "[TREND] Rullande trendfönster: "
+        f"{TREND_FONSTER_DAGAR} dagar."
+    )
+
+    info(
         "[TREND] Premisser: "
         f"minst {MIN_TREND_DAGAR} separata observationsdagar, "
         f"minst {MIN_TREND_STEG} konsekutiva steg, "
@@ -601,9 +703,15 @@ def bygg_marknadstrender() -> dict[str, dict]:
     for kategori, poster in sorted(
         per_kategori.items()
     ):
-        dagliga_priser = (
+        alla_dagliga_priser = (
             _bygg_dagliga_priser(
                 poster
+            )
+        )
+
+        dagliga_priser = (
+            _begransa_trendfonster(
+                alla_dagliga_priser
             )
         )
 
@@ -617,9 +725,14 @@ def bygg_marknadstrender() -> dict[str, dict]:
             kategori
         )
 
+        # Spara endast det aktuella trendfönstret i trendresultatet.
         analys[
             "dagliga_priser"
         ] = dagliga_priser
+
+        analys[
+            "trend_fonster_dagar"
+        ] = TREND_FONSTER_DAGAR
 
         trender[
             kategori
@@ -664,12 +777,27 @@ def berakna_marknadstrend_for_bil(
         return {
             "marknadstrend":
                 "otillrackligt_underlag",
-            "marknadstrend_styrka": 0,
-            "marknadstrend_forandring_procent": 0.0,
-            "marknadstrend_forandring_kr": 0.0,
-            "marknadstrend_start": None,
-            "marknadstrend_slut": None,
-            "marknadstrend_observationsdagar": 0,
+
+            "marknadstrend_styrka":
+                0,
+
+            "marknadstrend_forandring_procent":
+                0.0,
+
+            "marknadstrend_forandring_kr":
+                0.0,
+
+            "marknadstrend_start":
+                None,
+
+            "marknadstrend_slut":
+                None,
+
+            "marknadstrend_observationsdagar":
+                0,
+
+            "marknadstrend_fonster_dagar":
+                TREND_FONSTER_DAGAR,
         }
 
     return {
@@ -711,5 +839,11 @@ def berakna_marknadstrend_for_bil(
             trend.get(
                 "trend_observationsdagar",
                 0,
+            ),
+
+        "marknadstrend_fonster_dagar":
+            trend.get(
+                "trend_fonster_dagar",
+                TREND_FONSTER_DAGAR,
             ),
     }
