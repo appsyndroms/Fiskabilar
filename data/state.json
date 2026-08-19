@@ -5737,5 +5737,13 @@
     "senast_sedd": "2026-08-19",
     "notifierad": true,
     "notifierad_pris": 459000
+  },
+  "reg:RKB29M": {
+    "forsta_sedd": "2026-08-19",
+    "forsta_pris": 394900,
+    "senaste_pris": 394900,
+    "senast_sedd": "2026-08-19",
+    "notifierad": true,
+    "notifierad_pris": 394900
   }
 }
