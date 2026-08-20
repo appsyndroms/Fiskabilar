@@ -6,7 +6,7 @@ Justera fritt utan att röra övrig kod.
 # --- Grundkrav (gäller alla bilar nedan) ---
 
 ARSMODELL_MIN = 2022
-ARSMODELL_MAX = 2024
+ARSMODELL_MAX = 2026
 
 MIN_MIL = 1000
 MAX_MIL = 12000
@@ -23,8 +23,8 @@ BILAR = [
         "modell_visning": "V60",
         "wayke_anchor": "Volvo V60",
         "bilweb_modell_slug": "v60",
-        "arsmodell_min": 2022,
-        "arsmodell_max": 2024,
+        "arsmodell_min": 2023,
+        "arsmodell_max": 2026,
         "variant_kraven": {
             "T6 AWD": [
                 r"\bt6\b",
@@ -41,8 +41,8 @@ BILAR = [
         "modell_visning": "V90",
         "wayke_anchor": "Volvo V90",
         "bilweb_modell_slug": "v90",
-        "arsmodell_min": 2022,
-        "arsmodell_max": 2024,
+        "arsmodell_min": 2023,
+        "arsmodell_max": 2026,
         "variant_kraven": {
             "T6 AWD": [
                 r"\bt6\b",
@@ -59,7 +59,7 @@ BILAR = [
         "modell_visning": "530e xDrive Touring",
         "wayke_anchor": "BMW 530e xDrive Touring",
         "bilweb_modell_slug": "530",
-        "arsmodell_min": 2022,
+        "arsmodell_min": 2024,
         "arsmodell_max": 2024,
         "variant_kraven": {
             "530e xDrive Touring": [
