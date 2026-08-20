@@ -6912,5 +6912,61 @@
     "senaste_pris": 509900,
     "senast_sedd": "2026-08-20",
     "notifierad": false
+  },
+  "reg:HAW47U": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 379900,
+    "senaste_pris": 379900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:RCF00Y": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:GSK20H": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:TNL69B": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:NBH22H": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/475b5580-8f68-4921-83fe-e1f7fc506cd8": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:HRA31H": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 479000,
+    "senaste_pris": 479000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:ZTR03B": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
   }
 }
