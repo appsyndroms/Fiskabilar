@@ -3496,7 +3496,7 @@
   "reg:TET27S": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 424900,
-    "senaste_pris": 424900,
+    "senaste_pris": 409900,
     "senast_sedd": "2026-08-20",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:9986"
@@ -7046,6 +7046,69 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:DAN13Y": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:JAP337": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:XEK86D": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:JKK42C": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:JFH43A": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 514900,
+    "senaste_pris": 514900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:ELJ61K": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 429500,
+    "senaste_pris": 429500,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:PNT71A": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 429900,
+    "senaste_pris": 429900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:TAC68Y": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 449900,
+    "senaste_pris": 449900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:ORC51A": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 578400,
+    "senaste_pris": 578400,
     "senast_sedd": "2026-08-20",
     "notifierad": false
   }
