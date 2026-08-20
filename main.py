@@ -479,6 +479,11 @@ def main():
             f"{diff_formaterad} kr under marknad"
         )
 
+        url = (
+            bil.get("urls") or
+            [bil.get("url") or ""]
+        )[0]
+
         skickat = skicka_epost(
             amne,
             text,
@@ -486,7 +491,8 @@ def main():
 
         if skickat:
             info(
-                f"Mejl skickat: {amne}"
+                f"Mejl skickat: {amne} | "
+                f"URL: {url}"
             )
 
             markera_notifierad(
@@ -500,7 +506,8 @@ def main():
             info(
                 "OBS: mejl INTE skickat, "
                 "försöker igen nästa körning: "
-                f"{amne}"
+                f"{amne} | "
+                f"URL: {url}"
             )
 
     # ------------------------------------------------------------
