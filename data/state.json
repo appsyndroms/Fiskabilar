@@ -1548,8 +1548,8 @@
   "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 424800,
-    "senaste_pris": 424800,
-    "senast_sedd": "2026-08-19",
+    "senaste_pris": 419800,
+    "senast_sedd": "2026-08-20",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999"
   },
@@ -3323,8 +3323,9 @@
     "forsta_pris": 399800,
     "senaste_pris": 399800,
     "senast_sedd": "2026-08-20",
-    "notifierad": false,
-    "migrerad_fran": "kal:v60:T6 AWD:2023:4757"
+    "notifierad": true,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4757",
+    "notifierad_pris": 399800
   },
   "reg:MWN48R": {
     "forsta_sedd": "2026-08-14",
@@ -3855,8 +3856,9 @@
     "forsta_pris": 359500,
     "senaste_pris": 359500,
     "senast_sedd": "2026-08-20",
-    "notifierad": false,
-    "migrerad_fran": "kal:v90:T6 AWD:2023:9412"
+    "notifierad": true,
+    "migrerad_fran": "kal:v90:T6 AWD:2023:9412",
+    "notifierad_pris": 359500
   },
   "reg:BPG18A": {
     "forsta_sedd": "2026-08-16",
@@ -5340,8 +5342,8 @@
   "url:https://www.wayke.se/objekt/a47d35fc-13dd-4e75-b31f-b227367867bb": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 424900,
-    "senaste_pris": 424900,
-    "senast_sedd": "2026-08-19",
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-20",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:9986"
   },
@@ -7010,5 +7012,20 @@
     "senaste_pris": 469000,
     "senast_sedd": "2026-08-20",
     "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/13065196-70fd-4ad9-9929-5d2609e9e3ea": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 559000,
+    "senaste_pris": 559000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/df349bee-c2cb-4b0b-a708-03cb0ad865f0": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 424800,
+    "senaste_pris": 419800,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999"
   }
 }
