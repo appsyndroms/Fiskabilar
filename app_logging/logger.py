@@ -28,12 +28,15 @@ _LEVEL = LogLevel.QUIET
 
 def set_level(value: str | LogLevel | None) -> None:
     global _LEVEL
+
     if value is None:
         _LEVEL = LogLevel.QUIET
         return
+
     if isinstance(value, LogLevel):
         _LEVEL = value
         return
+
     try:
         _LEVEL = LogLevel[str(value).upper()]
     except KeyError as exc:
@@ -48,10 +51,29 @@ def get_level() -> LogLevel:
 
 
 def _write(message: str) -> None:
-    print(message, file=sys.stdout, flush=True)
+    print(
+        message,
+        file=sys.stdout,
+        flush=True,
+    )
 
 
-def log(message: str, level: LogLevel = LogLevel.INFO) -> None:
+def always(message: str) -> None:
+    """
+    Skriver alltid ut meddelandet, oberoende av loggnivå.
+
+    Används för händelser som måste kunna granskas i exempelvis
+    GitHub Actions även när körningen använder QUIET.
+    """
+    _write(
+        str(message)
+    )
+
+
+def log(
+    message: str,
+    level: LogLevel = LogLevel.INFO,
+) -> None:
     if _LEVEL >= level:
         _write(message)
 
@@ -59,18 +81,33 @@ def log(message: str, level: LogLevel = LogLevel.INFO) -> None:
 def info(message: str) -> None:
     text = str(message)
     upper = text.upper()
-    if "FEL" in upper or "ERROR" in upper or "VARNING" in upper:
+
+    if (
+        "FEL" in upper
+        or "ERROR" in upper
+        or "VARNING" in upper
+    ):
         _write(text)
         return
-    log(text, LogLevel.INFO)
+
+    log(
+        text,
+        LogLevel.INFO,
+    )
 
 
 def debug(message: str) -> None:
-    log(message, LogLevel.DEBUG)
+    log(
+        message,
+        LogLevel.DEBUG,
+    )
 
 
 def trace(message: str) -> None:
-    log(message, LogLevel.TRACE)
+    log(
+        message,
+        LogLevel.TRACE,
+    )
 
 
 def warning(message: str) -> None:
@@ -83,15 +120,32 @@ def error(message: str) -> None:
     _write(message)
 
 
-def configure_from_argv(argv: list[str] | None = None) -> LogLevel:
-    parser = argparse.ArgumentParser(add_help=True)
+def configure_from_argv(
+    argv: list[str] | None = None,
+) -> LogLevel:
+    parser = argparse.ArgumentParser(
+        add_help=True
+    )
+
     parser.add_argument(
         "--log-level",
-        choices=("QUIET", "INFO", "DEBUG", "TRACE"),
+        choices=(
+            "QUIET",
+            "INFO",
+            "DEBUG",
+            "TRACE",
+        ),
         default=None,
         type=str.upper,
         help="Loggnivå. Standard: QUIET.",
     )
-    args, _ = parser.parse_known_args(argv)
-    set_level(args.log_level)
+
+    args, _ = parser.parse_known_args(
+        argv
+    )
+
+    set_level(
+        args.log_level
+    )
+
     return get_level()
