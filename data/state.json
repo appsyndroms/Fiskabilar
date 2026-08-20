@@ -6799,5 +6799,47 @@
     "senaste_pris": 439500,
     "senast_sedd": "2026-08-20",
     "notifierad": false
+  },
+  "reg:MBP38L": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 369900,
+    "senaste_pris": 369900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:BXS92G": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 489600,
+    "senaste_pris": 489600,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/d80d654d-7364-4e8e-8067-e3ee1403eab1": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:JBJ43P": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 519000,
+    "senaste_pris": 519000,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/191eafc6-da4f-47d9-999d-747bac834502": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 534900,
+    "senaste_pris": 534900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
+  },
+  "reg:NUP32T": {
+    "forsta_sedd": "2026-08-20",
+    "forsta_pris": 505900,
+    "senaste_pris": 505900,
+    "senast_sedd": "2026-08-20",
+    "notifierad": false
   }
 }
