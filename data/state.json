@@ -7223,5 +7223,34 @@
     "senaste_pris": 547700,
     "senast_sedd": "2026-08-21",
     "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/605a2a09-44e8-4d64-b100-3607661f3d63": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/b826244e-6251-4c1a-b331-2fe6bfda91fe": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/43fbaf10-18f5-45b4-9103-17e6d2a4783a": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 484900,
+    "senaste_pris": 484900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": true,
+    "notifierad_pris": 484900
+  },
+  "reg:EBJ63G": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 547700,
+    "senaste_pris": 547700,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
   }
 }
