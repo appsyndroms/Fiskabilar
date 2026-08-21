@@ -7394,5 +7394,13 @@
     "senaste_pris": 544700,
     "senast_sedd": "2026-08-21",
     "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/f4b14f93-729e-4aaf-af54-b8f14d20a502": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 359990,
+    "senaste_pris": 359990,
+    "senast_sedd": "2026-08-21",
+    "notifierad": true,
+    "notifierad_pris": 359990
   }
 }
