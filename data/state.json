@@ -6036,7 +6036,7 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 429800,
     "senaste_pris": 429800,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-21",
     "notifierad": false
   },
   "reg:EFB98E": {
@@ -7402,5 +7402,68 @@
     "senast_sedd": "2026-08-21",
     "notifierad": true,
     "notifierad_pris": 359990
+  },
+  "reg:WCK45X": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:WCK46D": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:KED16L": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:EWB09P": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 559900,
+    "senaste_pris": 559900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:EOJ07B": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:ZMJ60G": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:LYG00U": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 489900,
+    "senaste_pris": 489900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:WBM42S": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 549000,
+    "senaste_pris": 549000,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:WCG95X": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 519000,
+    "senaste_pris": 519000,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
   }
 }
