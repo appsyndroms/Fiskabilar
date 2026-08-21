@@ -3710,7 +3710,7 @@
   "reg:SRX77B": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 309400,
-    "senaste_pris": 309400,
+    "senaste_pris": 314900,
     "senast_sedd": "2026-08-21",
     "notifierad": true,
     "notifierad_pris": 309400,
@@ -3746,7 +3746,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-21",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2024:3805"
   },
@@ -3754,7 +3754,7 @@
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-21",
     "notifierad": true,
     "notifierad_pris": 399900,
     "migrerad_fran": "kal:v60:T6 AWD:2024:4291"
@@ -5849,7 +5849,7 @@
   "url:https://www.wayke.se/objekt/633e090b-5648-44d8-b920-bbb48c649cfb": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 339800,
-    "senaste_pris": 339800,
+    "senaste_pris": 334800,
     "senast_sedd": "2026-08-21",
     "notifierad": true,
     "notifierad_pris": 339800,
@@ -7017,7 +7017,7 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 559000,
     "senaste_pris": 559000,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-21",
     "notifierad": false
   },
   "url:https://www.wayke.se/objekt/df349bee-c2cb-4b0b-a708-03cb0ad865f0": {
@@ -7279,6 +7279,105 @@
     "forsta_sedd": "2026-08-21",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/9e25e389-b29a-4bc1-aecb-4bff06a651a9": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 479000,
+    "senaste_pris": 479000,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:FZW72F": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 449900,
+    "senaste_pris": 449900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": true,
+    "notifierad_pris": 449900
+  },
+  "url:https://www.wayke.se/objekt/3564aa25-cb10-4193-93b8-91babd1ed886": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/b8465363-7c13-4b97-a4d0-99c0695f6ef6": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/b2277485-eaab-4684-94ba-93a7b1adebb6": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/3effc624-daba-4e84-8c2a-13b69be59db5": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 559900,
+    "senaste_pris": 559900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/5a4d1d58-3bf1-477b-9a8a-5297a6ad054a": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:CPM12Y": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:POJ06X": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:BMJ06P": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:BHG82L": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 484900,
+    "senaste_pris": 484900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/6a17796c-23fb-4df2-83c4-d840a55456d8": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 489900,
+    "senaste_pris": 489900,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:FCS18Z": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 409000,
+    "senaste_pris": 409000,
+    "senast_sedd": "2026-08-21",
+    "notifierad": false
+  },
+  "reg:DYY97X": {
+    "forsta_sedd": "2026-08-21",
+    "forsta_pris": 329800,
+    "senaste_pris": 329800,
     "senast_sedd": "2026-08-21",
     "notifierad": false
   }
