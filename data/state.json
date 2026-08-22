@@ -3922,7 +3922,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 444000,
     "senaste_pris": 444000,
-    "senast_sedd": "2026-08-21",
+    "senast_sedd": "2026-08-22",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:7700"
   },
@@ -6800,7 +6800,7 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 439500,
     "senaste_pris": 439500,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-22",
     "notifierad": false
   },
   "reg:MBP38L": {
@@ -7541,6 +7541,20 @@
     "forsta_sedd": "2026-08-22",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "reg:DRM87W": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "reg:JYJ53G": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
     "senast_sedd": "2026-08-22",
     "notifierad": false
   }
