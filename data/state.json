@@ -6828,7 +6828,7 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
-    "senast_sedd": "2026-08-20",
+    "senast_sedd": "2026-08-22",
     "notifierad": false
   },
   "url:https://www.wayke.se/objekt/191eafc6-da4f-47d9-999d-747bac834502": {
@@ -7584,6 +7584,27 @@
     "forsta_sedd": "2026-08-22",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "reg:ZHD607": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 424500,
+    "senaste_pris": 424500,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "url:https://www.wayke.se/objekt/b3fb8a9f-c3cc-4fb2-9043-ca90ae15ea4b": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 464700,
+    "senaste_pris": 464700,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "reg:HJJ78P": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 429000,
+    "senaste_pris": 429000,
     "senast_sedd": "2026-08-22",
     "notifierad": false
   }
