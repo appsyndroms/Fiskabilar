@@ -5311,7 +5311,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-19",
+    "senast_sedd": "2026-08-22",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:6506"
   },
@@ -6849,7 +6849,7 @@
     "forsta_sedd": "2026-08-20",
     "forsta_pris": 464700,
     "senaste_pris": 464700,
-    "senast_sedd": "2026-08-21",
+    "senast_sedd": "2026-08-22",
     "notifierad": false
   },
   "url:https://www.wayke.se/objekt/cfa3cfe4-22c8-4a91-982b-f277a10f754d": {
@@ -7605,6 +7605,13 @@
     "forsta_sedd": "2026-08-22",
     "forsta_pris": 429000,
     "senaste_pris": 429000,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
+  },
+  "reg:RMM39H": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 399000,
+    "senaste_pris": 399000,
     "senast_sedd": "2026-08-22",
     "notifierad": false
   }
