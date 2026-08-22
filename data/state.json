@@ -7557,5 +7557,20 @@
     "senaste_pris": 509900,
     "senast_sedd": "2026-08-22",
     "notifierad": false
+  },
+  "reg:CJA15L": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 359990,
+    "senaste_pris": 359990,
+    "senast_sedd": "2026-08-22",
+    "notifierad": true,
+    "notifierad_pris": 359990
+  },
+  "url:https://www.wayke.se/objekt/b17a6c3d-5d4b-4a53-bd1e-a985574f0fda": {
+    "forsta_sedd": "2026-08-22",
+    "forsta_pris": 429000,
+    "senaste_pris": 429000,
+    "senast_sedd": "2026-08-22",
+    "notifierad": false
   }
 }
