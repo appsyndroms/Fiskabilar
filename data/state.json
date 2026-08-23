@@ -7621,5 +7621,19 @@
     "senaste_pris": 386900,
     "senast_sedd": "2026-08-22",
     "notifierad": false
+  },
+  "reg:RRB37H": {
+    "forsta_sedd": "2026-08-23",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-23",
+    "notifierad": false
+  },
+  "reg:UDR08H": {
+    "forsta_sedd": "2026-08-23",
+    "forsta_pris": 489900,
+    "senaste_pris": 489900,
+    "senast_sedd": "2026-08-23",
+    "notifierad": false
   }
 }
