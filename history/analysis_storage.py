@@ -3,13 +3,14 @@ Lagring och läsning av Fiskabilars historik.
 
 Ansvarar för:
 
+- vehicle identity
 - annonsnycklar
 - JSONL-skrivning
 - månadsvis filrotation
 - migrering av äldre market_history.jsonl
 - läsning av alla historikmånader
 - historikindex
-- historikdiagnostik för enskilda annonser
+- historikdiagnostik för enskilda fordon
 
 Trendanalysen ligger separat i analysis_trends.py.
 """
@@ -28,8 +29,14 @@ from config import (
     HISTORIK_KATALOG,
 )
 
+from .identity import (
+    resolve_vehicle_id,
+)
 
-TIDSZON = ZoneInfo("Europe/Stockholm")
+
+TIDSZON = ZoneInfo(
+    "Europe/Stockholm"
+)
 
 
 def _nu() -> str:
@@ -40,12 +47,43 @@ def _nu() -> str:
     )
 
 
-def _annonsnyckel(bil: dict) -> str:
-    regnr = bil.get("regnr")
+def _annonsnyckel(
+    bil: dict,
+) -> str:
+    """
+    Canonical historiknyckel.
+
+    Nya observationer använder vehicle_id.
+
+    Äldre nyckelformat finns kvar som fallback för att
+    gamla historikposter fortfarande ska kunna läsas.
+    """
+
+    vehicle_id = bil.get(
+        "vehicle_id"
+    )
+
+    if not vehicle_id:
+        vehicle_id = resolve_vehicle_id(
+            bil
+        )
+
+    if vehicle_id:
+        bil[
+            "vehicle_id"
+        ] = vehicle_id
+
+        return str(
+            vehicle_id
+        )
+
+    regnr = bil.get(
+        "regnr"
+    )
 
     if regnr:
         return (
-            f"reg:"
+            "reg:"
             f"{str(regnr).upper().replace(' ', '')}"
         )
 
@@ -54,7 +92,9 @@ def _annonsnyckel(bil: dict) -> str:
         bil.get("url"),
     ):
         if value:
-            return str(value).strip()
+            return str(
+                value
+            ).strip()
 
     return (
         f"kal:{str(bil.get('modell') or '').lower()}:"
@@ -70,10 +110,13 @@ def _manadsfil() -> str:
     Returnerar aktuell månads historikfil.
 
     Exempel:
+
         data/market_history/market_history_2026-08.jsonl
     """
 
-    nu = datetime.now(TIDSZON)
+    nu = datetime.now(
+        TIDSZON
+    )
 
     return os.path.join(
         HISTORIK_KATALOG,
@@ -88,18 +131,20 @@ def _migrera_legacy() -> None:
         data/market_history/market_history.jsonl
 
     till aktuell månadsfil.
-
-    Detta görs bara om legacy-filen finns och aktuell månadsfil
-    ännu inte finns.
     """
 
     legacy = HISTORIK_FIL
+
     aktuell = _manadsfil()
 
-    if not os.path.exists(legacy):
+    if not os.path.exists(
+        legacy
+    ):
         return
 
-    if os.path.exists(aktuell):
+    if os.path.exists(
+        aktuell
+    ):
         return
 
     os.makedirs(
@@ -126,14 +171,6 @@ def _migrera_legacy() -> None:
 
 
 def _historikfiler() -> list[str]:
-    """
-    Returnerar samtliga historikfiler.
-
-    Alla månadsfiler läses för att historiken ska vara komplett.
-
-    Legacy-filen tas också med om den fortfarande finns.
-    """
-
     os.makedirs(
         HISTORIK_KATALOG,
         exist_ok=True,
@@ -146,7 +183,9 @@ def _historikfiler() -> list[str]:
         )
     )
 
-    if os.path.exists(HISTORIK_FIL):
+    if os.path.exists(
+        HISTORIK_FIL
+    ):
         filer.append(
             HISTORIK_FIL
         )
@@ -156,14 +195,9 @@ def _historikfiler() -> list[str]:
     )
 
 
-def _skriv(post: dict) -> None:
-    """
-    Skriver till aktuell månadsfil.
-
-    Vid första skrivningen efter en månadsgräns skapas automatiskt
-    en ny JSONL-fil.
-    """
-
+def _skriv(
+    post: dict,
+) -> None:
     os.makedirs(
         HISTORIK_KATALOG,
         exist_ok=True,
@@ -182,7 +216,10 @@ def _skriv(post: dict) -> None:
             json.dumps(
                 post,
                 ensure_ascii=False,
-                separators=(",", ":"),
+                separators=(
+                    ",",
+                    ":",
+                ),
             )
             + "\n"
         )
@@ -191,41 +228,93 @@ def _skriv(post: dict) -> None:
 def spara_annonsobservation(
     bil: dict,
 ) -> None:
-    """Sparar en komplett marknadsobservation för aktuell bil."""
+    """
+    Sparar en komplett marknadsobservation.
+
+    vehicle_id är den permanenta identiteten för det fysiska
+    fordonet. Annons-ID och URL sparas fortfarande som diagnostik.
+    """
+
+    vehicle_id = resolve_vehicle_id(
+        bil
+    )
+
+    bil[
+        "vehicle_id"
+    ] = vehicle_id
 
     post = {
         "typ": "annons",
         "tid": _nu(),
-        "annons_nyckel": _annonsnyckel(bil),
-        "annons_id": bil.get("annons_id"),
-        "regnr": bil.get("regnr"),
-        "modell": bil.get("modell"),
-        "variant": bil.get("variant"),
-        "arsmodell": bil.get("arsmodell"),
-        "miltal": bil.get("miltal"),
-        "pris": bil.get("annonspris"),
+
+        "vehicle_id": vehicle_id,
+
+        "annons_nyckel": _annonsnyckel(
+            bil
+        ),
+
+        "annons_id": bil.get(
+            "annons_id"
+        ),
+
+        "regnr": bil.get(
+            "regnr"
+        ),
+
+        "vin": bil.get(
+            "vin"
+        ),
+
+        "modell": bil.get(
+            "modell"
+        ),
+
+        "variant": bil.get(
+            "variant"
+        ),
+
+        "arsmodell": bil.get(
+            "arsmodell"
+        ),
+
+        "miltal": bil.get(
+            "miltal"
+        ),
+
+        "pris": bil.get(
+            "annonspris"
+        ),
+
         "utrustningsniva": bil.get(
             "utrustningsniva"
         ),
+
         "dragkrok": bool(
             bil.get("dragkrok")
         ),
+
         "varmare": bool(
             bil.get("varmare")
         ),
+
         "volvo_selekt": bool(
             bil.get("volvo_selekt")
         ),
+
         "stor_batteri": bool(
             bil.get("stor_batteri")
         ),
+
         "kallor": bil.get(
             "kallor",
             [],
         ),
+
         "url": (
             bil.get("urls")
-            or [bil.get("url")]
+            or [
+                bil.get("url")
+            ]
         )[0]
         if (
             bil.get("urls")
@@ -234,14 +323,29 @@ def spara_annonsobservation(
         else None,
     }
 
-    _skriv(post)
+    _skriv(
+        post
+    )
 
 
 def spara_marknadsvardesobservation(
     bil: dict,
     vardering: dict,
 ) -> None:
-    """Sparar modellens värdering och styrkan på jämförelseunderlaget."""
+    """
+    Sparar modellens värdering.
+
+    Även värdeobservationen kopplas till samma vehicle_id
+    som annonsobservationen.
+    """
+
+    vehicle_id = resolve_vehicle_id(
+        bil
+    )
+
+    bil[
+        "vehicle_id"
+    ] = vehicle_id
 
     diagnostik = (
         vardering.get(
@@ -252,45 +356,66 @@ def spara_marknadsvardesobservation(
 
     post = {
         "typ": "marknadsvarde",
+
         "tid": _nu(),
-        "annons_nyckel": _annonsnyckel(bil),
-        "modell": bil.get("modell"),
-        "variant": bil.get("variant"),
-        "arsmodell": bil.get("arsmodell"),
-        "miltal": bil.get("miltal"),
-        "annonspris": bil.get("annonspris"),
+
+        "vehicle_id": vehicle_id,
+
+        "annons_nyckel": _annonsnyckel(
+            bil
+        ),
+
+        "modell": bil.get(
+            "modell"
+        ),
+
+        "variant": bil.get(
+            "variant"
+        ),
+
+        "arsmodell": bil.get(
+            "arsmodell"
+        ),
+
+        "miltal": bil.get(
+            "miltal"
+        ),
+
+        "annonspris": bil.get(
+            "annonspris"
+        ),
+
         "marknadsvarde": vardering.get(
             "marknadsvarde"
         ),
+
         "diff": vardering.get(
             "diff"
         ),
+
         "fyndprocent": vardering.get(
             "fyndprocent"
         ),
+
         "jamforelseantal": vardering.get(
             "jamforelseantal"
         ),
+
         "underlagsstyrka": vardering.get(
             "underlagsstyrka"
         ),
+
         "median_justerat": diagnostik.get(
             "median_justerat"
         ),
     }
 
-    _skriv(post)
+    _skriv(
+        post
+    )
 
 
 def _las_observationer() -> list[dict]:
-    """
-    Läser samtliga historikfiler och ignorerar trasiga enskilda rader.
-
-    Detta är själva nyckeln till månadsrotationen:
-    historiken delas upp på filer, men logiskt behandlas den fortfarande
-    som en enda append-only historik.
-    """
-
     observationer = []
 
     for fil in _historikfiler():
@@ -300,6 +425,7 @@ def _las_observationer() -> list[dict]:
                 "r",
                 encoding="utf-8",
             ) as f:
+
                 for rad in f:
                     rad = rad.strip()
 
@@ -330,17 +456,25 @@ def _las_observationer() -> list[dict]:
 
 def bygg_historikindex() -> dict[str, dict]:
     """
-    Bygger ett index med tidigare observationer per annonsnyckel.
+    Bygger historikindex.
 
-    Dagens körning har ännu inte sparats när funktionen normalt anropas,
-    vilket gör att historikfältet endast beskriver tidigare körningar.
+    Nya poster använder vehicle_id.
+
+    Äldre poster använder annons_nyckel. De läses fortfarande
+    så att befintlig historik inte försvinner.
     """
 
     index: dict[str, dict] = {}
 
     for post in _las_observationer():
-        nyckel = post.get(
-            "annons_nyckel"
+
+        nyckel = (
+            post.get(
+                "vehicle_id"
+            )
+            or post.get(
+                "annons_nyckel"
+            )
         )
 
         if not nyckel:
@@ -359,12 +493,16 @@ def bygg_historikindex() -> dict[str, dict]:
         )
 
         if typ == "annons":
-            data["annonser"].append(
+            data[
+                "annonser"
+            ].append(
                 post
             )
 
         elif typ == "marknadsvarde":
-            data["varderingar"].append(
+            data[
+                "varderingar"
+            ].append(
                 post
             )
 
@@ -401,13 +539,22 @@ def berakna_historik(
     historikindex: dict[str, dict],
 ) -> dict:
     """
-    Beräknar historiska nyckeltal för aktuell annons.
-
-    Returnerar endast information från tidigare observationer.
+    Beräknar historiska nyckeltal för aktuell bil.
     """
 
-    nyckel = _annonsnyckel(
+    vehicle_id = resolve_vehicle_id(
         bil
+    )
+
+    bil[
+        "vehicle_id"
+    ] = vehicle_id
+
+    nyckel = (
+        vehicle_id
+        or _annonsnyckel(
+            bil
+        )
     )
 
     data = (
@@ -433,21 +580,29 @@ def berakna_historik(
 
     annonser.sort(
         key=lambda x:
-        x.get("tid")
+        x.get(
+            "tid"
+        )
         or ""
     )
 
     varderingar.sort(
         key=lambda x:
-        x.get("tid")
+        x.get(
+            "tid"
+        )
         or ""
     )
 
     priser = [
-        post.get("pris")
+        post.get(
+            "pris"
+        )
         for post in annonser
         if isinstance(
-            post.get("pris"),
+            post.get(
+                "pris"
+            ),
             (int, float),
         )
     ]
@@ -469,6 +624,7 @@ def berakna_historik(
     }
 
     if annonser:
+
         historik[
             "historik_forsta_pris"
         ] = (
@@ -486,6 +642,7 @@ def berakna_historik(
         )
 
         if priser:
+
             historik[
                 "historik_prisforandring"
             ] = (
@@ -508,6 +665,7 @@ def berakna_historik(
         )
 
         if forsta_tid:
+
             nu = datetime.now(
                 TIDSZON
             )
@@ -536,6 +694,7 @@ def berakna_historik(
     ]
 
     if marknadsvarden:
+
         historik[
             "historik_marknadsvarde"
         ] = (
@@ -545,6 +704,7 @@ def berakna_historik(
         if len(
             marknadsvarden
         ) >= 2:
+
             historik[
                 "historik_marknadsvarde_forandring"
             ] = (
