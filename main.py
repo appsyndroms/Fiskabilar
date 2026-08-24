@@ -6,13 +6,14 @@ Huvudflöde:
 2. Hämta annonser.
 3. Deduplicera.
 4. Uppdatera state.
-5. Läs och berika med långtidshistorik.
-6. Spara dagens annonsobservationer.
-7. Bygg marknadsunderlag.
-8. Processa kandidater.
-9. Kör trendanalys.
-10. Spara state.
-11. Skriv diagnostik och sammanfattning.
+5. Kör identity-diagnostik.
+6. Läs och berika med långtidshistorik.
+7. Spara dagens annonsobservationer.
+8. Bygg marknadsunderlag.
+9. Processa kandidater.
+10. Kör trendanalys.
+11. Spara state.
+12. Skriv diagnostik och sammanfattning.
 
 Detaljerad logik ligger i pipeline-modulerna.
 """
@@ -26,6 +27,10 @@ from history.state import (
     ladda_state,
     spara_state,
     uppdatera_och_berika,
+)
+
+from history.identity import (
+    logga_identity_diagnostik,
 )
 
 from history.analysis import (
@@ -80,7 +85,7 @@ def main():
     )
 
     # ------------------------------------------------------------
-    # STATE
+    # STATE / IDENTITY
     # ------------------------------------------------------------
 
     state = ladda_state()
@@ -89,6 +94,22 @@ def main():
         bilar,
         state,
     )
+
+    # Identity resolution körs redan av
+    # uppdatera_och_berika().
+    #
+    # Diagnostiken körs därför först här, när alla bilar
+    # har fått sitt vehicle_id.
+    try:
+        logga_identity_diagnostik(
+            bilar
+        )
+
+    except Exception as e:
+        info(
+            "[IDENTITY] Kunde inte skriva "
+            f"identity-diagnostik: {e}"
+        )
 
     # ------------------------------------------------------------
     # HISTORIK
