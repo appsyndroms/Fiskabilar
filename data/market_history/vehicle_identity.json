@@ -945,7 +945,12 @@
     "reg:OZH50K": "vehicle:00000298",
     "source:bilweb:12846723": "vehicle:00000298",
     "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2026-kombi-12846723": "vehicle:00000298",
-    "fp:9fef275b5875f3e1": "vehicle:00000298"
+    "fp:9fef275b5875f3e1": "vehicle:00000298",
+    "url:https://www.wayke.se/objekt/f20964e1-73fb-4c62-9c38-b60957618c5a": "vehicle:00000299",
+    "fp:06433404128f709e": "vehicle:00000299",
+    "url:https://www.wayke.se/objekt/d599acd8-b11b-4282-948c-9d55b1563b13": "vehicle:00000169",
+    "url:https://www.wayke.se/objekt/fecb1786-4b2d-43dc-bbf3-5b10f6e8916a": "vehicle:00000300",
+    "fp:8ae3f7dab8321021": "vehicle:00000300"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -3981,7 +3986,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/02b310c8-f5e7-4d0c-93c8-db0a3c859c39",
+      "last_seen": "https://www.wayke.se/objekt/d599acd8-b11b-4282-948c-9d55b1563b13",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -6308,6 +6313,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000299": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/f20964e1-73fb-4c62-9c38-b60957618c5a",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000300": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/fecb1786-4b2d-43dc-bbf3-5b10f6e8916a",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
