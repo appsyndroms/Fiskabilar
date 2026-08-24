@@ -6,21 +6,29 @@ Ansvarar för att tolka historik för ett fordon som en livscykel:
 - första observation
 - senaste observation
 - antal observationer
+- antal observationsdagar
 - första och senaste pris
 - prisförändringar
 - antal dagar på marknaden
-- senaste observationstid
+- dagar sedan senaste observation
 - om annonsen verkar aktiv
 - om annonsen verkar ha försvunnit
 - om annonsen senare återkommer
+- antal tidigare återkomster
 
 Lifecycle-analysen ändrar inte fyndscore eller valuation.
 
-Den bygger enbart på historikindexet.
+Den bygger enbart på historikindexet och använder samma
+canonical vehicle identity som övriga historikfunktioner.
 """
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+from .identity import (
+    canonical_vehicle_id,
+    resolve_vehicle_id,
+)
 
 
 TIDSZON = ZoneInfo(
@@ -155,8 +163,12 @@ def _prisforandringar(
                             if tid
                             else post.get("tid")
                         ),
-                        "gammalt_pris": tidigare_pris,
-                        "nytt_pris": pris,
+                        "gammalt_pris": (
+                            tidigare_pris
+                        ),
+                        "nytt_pris": (
+                            pris
+                        ),
                         "forandring": (
                             pris
                             - tidigare_pris
@@ -224,6 +236,72 @@ def _detektera_gap(
     return resultat
 
 
+def _hitta_vehicle_id(
+    bil: dict,
+) -> str | None:
+    """
+    Hämtar aktuell canonical vehicle_id.
+
+    Samma identity-regler används som i övriga
+    historikfunktioner.
+    """
+
+    vehicle_id = bil.get(
+        "vehicle_id"
+    )
+
+    if not vehicle_id:
+        vehicle_id = resolve_vehicle_id(
+            bil
+        )
+
+    if not vehicle_id:
+        return None
+
+    return canonical_vehicle_id(
+        vehicle_id
+    )
+
+
+def _tomt_resultat(
+    status: str,
+) -> dict:
+    """
+    Returnerar ett komplett lifecycle-resultat
+    utan observationer.
+    """
+
+    return {
+        "lifecycle_status": status,
+
+        "lifecycle_observationer": 0,
+
+        "lifecycle_observationsdagar": 0,
+
+        "lifecycle_dagar": 0,
+
+        "lifecycle_forsta_observation": None,
+
+        "lifecycle_senaste_observation": None,
+
+        "lifecycle_dagar_sedan_senaste_observation": None,
+
+        "lifecycle_forsta_pris": None,
+
+        "lifecycle_senaste_pris": None,
+
+        "lifecycle_prisforandring": 0,
+
+        "lifecycle_prisforandringar": [],
+
+        "lifecycle_gap": [],
+
+        "lifecycle_aterkomst": False,
+
+        "lifecycle_antal_aterkomster": 0,
+    }
+
+
 def analysera_livscykel(
     bil: dict,
     historikindex: dict[str, dict],
@@ -233,26 +311,24 @@ def analysera_livscykel(
 
     Resultatet är diagnostiskt och påverkar inte
     score eller valuation.
+
+    Historiken identifieras via canonical vehicle_id,
+    vilket gör att äldre identiteter som blivit alias
+    till samma fordon samlas korrekt.
     """
 
-    vehicle_id = bil.get(
-        "vehicle_id"
+    vehicle_id = _hitta_vehicle_id(
+        bil
     )
 
     if not vehicle_id:
-        return {
-            "lifecycle_status": "OKAND",
-            "lifecycle_observationer": 0,
-            "lifecycle_dagar": 0,
-            "lifecycle_forsta_observation": None,
-            "lifecycle_senaste_observation": None,
-            "lifecycle_forsta_pris": None,
-            "lifecycle_senaste_pris": None,
-            "lifecycle_prisforandringar": [],
-            "lifecycle_prisforandring": 0,
-            "lifecycle_gap": [],
-            "lifecycle_aterkomst": False,
-        }
+        return _tomt_resultat(
+            "OKAND"
+        )
+
+    bil[
+        "vehicle_id"
+    ] = vehicle_id
 
     data = (
         historikindex.get(
@@ -271,20 +347,9 @@ def analysera_livscykel(
     )
 
     if not observationer:
-
-        return {
-            "lifecycle_status": "NY",
-            "lifecycle_observationer": 0,
-            "lifecycle_dagar": 0,
-            "lifecycle_forsta_observation": None,
-            "lifecycle_senaste_observation": None,
-            "lifecycle_forsta_pris": None,
-            "lifecycle_senaste_pris": None,
-            "lifecycle_prisforandringar": [],
-            "lifecycle_prisforandring": 0,
-            "lifecycle_gap": [],
-            "lifecycle_aterkomst": False,
-        }
+        return _tomt_resultat(
+            "NY"
+        )
 
     forsta_tid = _parse_tid(
         observationer[0].get(
@@ -366,31 +431,35 @@ def analysera_livscykel(
         observationer
     )
 
-    aterkomst = (
-        len(gap) > 0
-        and senaste_dagar is not None
+    aktiv = (
+        senaste_dagar is not None
         and senaste_dagar <= AKTIVITETSDAGAR
     )
 
-    if senaste_dagar is not None:
+    antal_aterkomster = len(
+        gap
+    )
 
-        if senaste_dagar <= AKTIVITETSDAGAR:
-            status = "AKTIV"
+    if aktiv:
+
+        if gap:
+            status = "ATERKOMMEN"
 
         else:
-            status = "FORSVUNNEN"
+            status = "AKTIV"
 
     else:
-        status = "OKAND"
 
-    if aterkomst:
-        status = "ATERKOMMEN"
+        status = "FORSVUNNEN"
+
+    if senaste_dagar is None:
+        status = "OKAND"
 
     return {
         "lifecycle_status": status,
 
-        "lifecycle_observationer": len(
-            observationer
+        "lifecycle_observationer": (
+            len(observationer)
         ),
 
         "lifecycle_observationsdagar": (
@@ -433,9 +502,15 @@ def analysera_livscykel(
             prisforandringar
         ),
 
-        "lifecycle_gap": gap,
+        "lifecycle_gap": (
+            gap
+        ),
 
         "lifecycle_aterkomst": (
-            aterkomst
+            status == "ATERKOMMEN"
+        ),
+
+        "lifecycle_antal_aterkomster": (
+            antal_aterkomster
         ),
     }
