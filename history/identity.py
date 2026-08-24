@@ -33,6 +33,7 @@ import json
 import os
 import re
 import unicodedata
+from collections import Counter
 from hashlib import sha1
 
 from app_logging.logger import info
@@ -44,6 +45,16 @@ IDENTITY_FIL = os.path.join(
     HISTORIK_KATALOG,
     "vehicle_identity.json",
 )
+
+
+IDENTIFIERINGS_PRIORITET = {
+    "regnr": 0,
+    "vin": 1,
+    "source_id": 2,
+    "url": 3,
+    "fingerprint": 4,
+    "new": 5,
+}
 
 
 def _tom_store() -> dict:
@@ -234,7 +245,9 @@ def _fingerprint(bil: dict) -> str:
     return f"fp:{digest}"
 
 
-def _identifierare(bil: dict) -> list[tuple[str, str]]:
+def _identifierare(
+    bil: dict,
+) -> list[tuple[str, str]]:
     """
     Returnerar identifierare i prioriterad ordning.
     """
@@ -357,7 +370,9 @@ def _ladda() -> dict:
     return data
 
 
-def _spara(data: dict) -> None:
+def _spara(
+    data: dict,
+) -> None:
     os.makedirs(
         HISTORIK_KATALOG,
         exist_ok=True,
@@ -808,29 +823,285 @@ def identity_diagnostik(
     bil: dict,
 ) -> dict:
     """
-    Returnerar identifieringsinformation för diagnostik.
+    Returnerar detaljerad identifieringsinformation för diagnostik.
+
+    Funktionen ändrar inte identity resolution.
+
+    Returnerar bland annat:
+
+    - canonical vehicle_id
+    - vilka identifierare bilen har
+    - vilka identifierare som redan finns i identity-store
+    - vilken identifierare som matchade först
+    - om flera identity-spår pekar på olika vehicle_id
+    - vilken identifieringsstyrka bilen har
     """
+
+    data = _ladda()
 
     vehicle_id = bil.get(
         "vehicle_id"
     )
 
     if vehicle_id:
-        vehicle_id = canonical_vehicle_id(
-            vehicle_id
+        vehicle_id = _canonical_vehicle_id(
+            data,
+            str(vehicle_id),
         )
 
     identifierare = _identifierare(
         bil
     )
 
-    return {
-        "vehicle_id": vehicle_id,
-        "identifierare": [
+    matchningar = []
+
+    for typ, value in identifierare:
+        befintlig = data[
+            "identifiers"
+        ].get(
+            value
+        )
+
+        if befintlig:
+            befintlig = _canonical_vehicle_id(
+                data,
+                befintlig,
+            )
+
+        matchningar.append(
             {
                 "typ": typ,
                 "value": value,
+                "matchar": (
+                    befintlig
+                    if befintlig
+                    else None
+                ),
+                "matchar_current": (
+                    befintlig == vehicle_id
+                    if befintlig and vehicle_id
+                    else False
+                ),
             }
-            for typ, value in identifierare
-        ],
+        )
+
+    matchade = [
+        item
+        for item in matchningar
+        if item["matchar"]
+    ]
+
+    matchade_vehicle_ids = {
+        item["matchar"]
+        for item in matchade
+        if item["matchar"]
     }
+
+    konflikt = (
+        len(
+            matchade_vehicle_ids
+        )
+        > 1
+    )
+
+    matchningstyp = None
+
+    if matchade:
+        matchningstyp = min(
+            matchade,
+            key=lambda item: IDENTIFIERINGS_PRIORITET.get(
+                item["typ"],
+                99,
+            ),
+        )["typ"]
+
+    identifier_strength = None
+
+    if vehicle_id:
+        vehicle = data.get(
+            "vehicles",
+            {},
+        ).get(
+            vehicle_id,
+            {},
+        )
+
+        identifier_strength = vehicle.get(
+            "identifier_strength"
+        )
+
+    return {
+        "vehicle_id": vehicle_id,
+        "matchningstyp": matchningstyp,
+        "identifier_strength": identifier_strength,
+        "konflikt": konflikt,
+        "identifierare": matchningar,
+    }
+
+
+def identity_diagnostik_sammanfattning(
+    bilar: list[dict],
+) -> dict:
+    """
+    Sammanställer identity resolution för en hel körning.
+
+    Funktionen är avsedd för loggning/diagnostik och påverkar
+    inte själva identity resolution, valuation eller score.
+
+    Returnerar:
+
+    - totalt antal bilar
+    - antal unika vehicle_id
+    - antal matchningar per identifieringstyp
+    - antal nya identities
+    - antal konflikter
+    """
+
+    typer = Counter()
+    styrkor = Counter()
+
+    vehicle_ids = set()
+    konflikter = 0
+
+    for bil in bilar:
+        diagnostik = identity_diagnostik(
+            bil
+        )
+
+        vehicle_id = diagnostik.get(
+            "vehicle_id"
+        )
+
+        if vehicle_id:
+            vehicle_ids.add(
+                vehicle_id
+            )
+
+        matchningstyp = diagnostik.get(
+            "matchningstyp"
+        )
+
+        if matchningstyp:
+            typer[
+                matchningstyp
+            ] += 1
+        else:
+            typer[
+                "new"
+            ] += 1
+
+        identifier_strength = diagnostik.get(
+            "identifier_strength"
+        )
+
+        if identifier_strength:
+            styrkor[
+                identifier_strength
+            ] += 1
+
+        if diagnostik.get(
+            "konflikt"
+        ):
+            konflikter += 1
+
+    return {
+        "totalt": len(
+            bilar
+        ),
+        "unika_vehicle_id": len(
+            vehicle_ids
+        ),
+        "matchningstyper": dict(
+            typer
+        ),
+        "identifieringsstyrkor": dict(
+            styrkor
+        ),
+        "konflikter": konflikter,
+    }
+
+
+def logga_identity_diagnostik(
+    bilar: list[dict],
+) -> dict:
+    """
+    Loggar en kompakt identity-sammanfattning.
+
+    Avsedd att anropas efter att bilarna har fått vehicle_id.
+
+    Returnerar samtidigt diagnostikobjektet så att caller kan
+    använda informationen vidare utan att läsa identity-store igen.
+    """
+
+    sammanfattning = identity_diagnostik_sammanfattning(
+        bilar
+    )
+
+    typer = sammanfattning[
+        "matchningstyper"
+    ]
+
+    styrkor = sammanfattning[
+        "identifieringsstyrkor"
+    ]
+
+    info(
+        "[IDENTITY] =================================================="
+    )
+
+    info(
+        "[IDENTITY] "
+        f"{sammanfattning['totalt']} bilar analyserade"
+    )
+
+    info(
+        "[IDENTITY] "
+        f"{sammanfattning['unika_vehicle_id']} unika vehicle_id"
+    )
+
+    info(
+        "[IDENTITY] MATCHNINGSTYP"
+    )
+
+    for typ in (
+        "regnr",
+        "vin",
+        "source_id",
+        "url",
+        "fingerprint",
+        "new",
+    ):
+        info(
+            "[IDENTITY]   "
+            f"{typ.upper():12} "
+            f"{typer.get(typ, 0)}"
+        )
+
+    info(
+        "[IDENTITY] IDENTIFIERINGSSTYRKA"
+    )
+
+    for typ in (
+        "regnr",
+        "vin",
+        "source_id",
+        "url",
+        "fingerprint",
+        "new",
+    ):
+        info(
+            "[IDENTITY]   "
+            f"{typ.upper():12} "
+            f"{styrkor.get(typ, 0)}"
+        )
+
+    info(
+        "[IDENTITY] "
+        f"KONFLIKTER: {sammanfattning['konflikter']}"
+    )
+
+    info(
+        "[IDENTITY] =================================================="
+    )
+
+    return sammanfattning
