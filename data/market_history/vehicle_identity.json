@@ -859,7 +859,11 @@
     "url:https://bilweb.se/kronobergs-lan/volvo-v60-t6-recharge-core-bright-plug-in-awd-4x4-2025-kombi-12622314": "vehicle:00000270",
     "fp:0c6dfb1188a5ae88": "vehicle:00000270",
     "url:https://www.wayke.se/objekt/d90cb1a4-f9f6-4615-bffb-74fd1c9780bc": "vehicle:00000271",
-    "fp:1985aa8f413345c3": "vehicle:00000271"
+    "fp:1985aa8f413345c3": "vehicle:00000271",
+    "url:https://www.wayke.se/objekt/83051e30-3cb4-496a-8ac8-d70e5109f3d1": "vehicle:00000272",
+    "fp:df78b3ab7b07ee84": "vehicle:00000272",
+    "url:https://www.wayke.se/objekt/ef1c2eab-143c-47a7-be7a-1459a3708f12": "vehicle:00000273",
+    "fp:55d61fe8ea4ca60c": "vehicle:00000273"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -5732,6 +5736,42 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/d90cb1a4-f9f6-4615-bffb-74fd1c9780bc",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000272": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/83051e30-3cb4-496a-8ac8-d70e5109f3d1",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000273": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/ef1c2eab-143c-47a7-be7a-1459a3708f12",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
