@@ -94,9 +94,10 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 459800,
     "senaste_pris": 459800,
-    "senast_sedd": "2026-08-18",
+    "senast_sedd": "2026-08-24",
     "notifierad": false,
-    "migrerad_fran": "kal:v60:T6 AWD:2023:4923"
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4923",
+    "vehicle_id": "vehicle:00000269"
   },
   "kal:v60:T6 AWD:2023:5087": {
     "forsta_sedd": "2026-08-14",
@@ -9950,6 +9951,72 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439500,
     "senaste_pris": 439500,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000263": {
+    "vehicle_id": "vehicle:00000263",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000264": {
+    "vehicle_id": "vehicle:00000264",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 359990,
+    "senaste_pris": 359990,
+    "senast_sedd": "2026-08-24",
+    "notifierad": true,
+    "notifierad_pris": 359990
+  },
+  "vehicle:00000265": {
+    "vehicle_id": "vehicle:00000265",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 455990,
+    "senaste_pris": 455990,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000266": {
+    "vehicle_id": "vehicle:00000266",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 504900,
+    "senaste_pris": 504900,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000267": {
+    "vehicle_id": "vehicle:00000267",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 509900,
+    "senaste_pris": 509900,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000268": {
+    "vehicle_id": "vehicle:00000268",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 449600,
+    "senaste_pris": 449600,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000269": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 459800,
+    "senaste_pris": 459800,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false,
+    "migrerad_fran": "kal:v60:T6 AWD:2023:4923",
+    "vehicle_id": "vehicle:00000269"
+  },
+  "vehicle:00000270": {
+    "vehicle_id": "vehicle:00000270",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 445000,
+    "senaste_pris": 445000,
     "senast_sedd": "2026-08-24",
     "notifierad": false
   }
