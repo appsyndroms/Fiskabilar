@@ -990,7 +990,49 @@
     "fp:56039cef85b10497": "vehicle:00000318",
     "url:https://www.wayke.se/objekt/85348fc8-c9f5-4d1b-a75d-28b9b46122e6": "vehicle:00000319",
     "fp:cada8c1884012b5a": "vehicle:00000319",
-    "fp:7d0c496679a9a690": "vehicle:00000083"
+    "fp:7d0c496679a9a690": "vehicle:00000083",
+    "reg:GRA06U": "vehicle:00000320",
+    "source:bilweb:12847742": "vehicle:00000320",
+    "url:https://bilweb.se/vastmanlands-lan/volvo-v60-recharge-t6-core-edition-drag-backkamera-2023-kombi-12847742": "vehicle:00000320",
+    "fp:6811d3f71b2fd64f": "vehicle:00000320",
+    "reg:GAJ19B": "vehicle:00000321",
+    "source:bilweb:12847719": "vehicle:00000321",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-ranta-fri-service-2026-kombi-12847719": "vehicle:00000321",
+    "fp:c15ef75f4a4f00c9": "vehicle:00000321",
+    "reg:YHJ59E": "vehicle:00000322",
+    "source:bilweb:12847720": "vehicle:00000322",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-ranta-fri-service-2026-kombi-12847720": "vehicle:00000322",
+    "fp:3c601c6796114b10": "vehicle:00000322",
+    "reg:TCL88M": "vehicle:00000323",
+    "source:bilweb:12847721": "vehicle:00000323",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-ranta-fri-service-2026-kombi-12847721": "vehicle:00000323",
+    "fp:8073520ddaf892df": "vehicle:00000323",
+    "reg:LWA99C": "vehicle:00000324",
+    "source:bilweb:12847722": "vehicle:00000324",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-ranta-fri-service-2026-kombi-12847722": "vehicle:00000324",
+    "fp:18a16fe193140e0c": "vehicle:00000324",
+    "reg:GWB03U": "vehicle:00000325",
+    "source:bilweb:12847723": "vehicle:00000325",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-ranta-fri-service-2026-kombi-12847723": "vehicle:00000325",
+    "fp:43dbef1022db8257": "vehicle:00000325",
+    "reg:ZOL43N": "vehicle:00000326",
+    "source:bilweb:12784692": "vehicle:00000326",
+    "url:https://bilweb.se/orebro-lan/volvo-v90-recharge-t6-plus-dark-2023-kombi-12784692": "vehicle:00000326",
+    "fp:3a1f0e08d7179bed": "vehicle:00000326",
+    "reg:KWR26P": "vehicle:00000327",
+    "source:bilweb:12847600": "vehicle:00000327",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-t6-awd-recharge-2024-kombi-12847600": "vehicle:00000327",
+    "fp:299456498d8d1f25": "vehicle:00000327",
+    "reg:OOZ23G": "vehicle:00000328",
+    "source:bilweb:12847716": "vehicle:00000328",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t8-plus-bright-lader-b-kamera-2024-kombi-12847716": "vehicle:00000328",
+    "fp:4aca49ac1d501da6": "vehicle:00000328",
+    "url:https://www.wayke.se/objekt/1d54e970-3bc9-4d16-8afe-8244be25e648": "vehicle:00000329",
+    "fp:ffc7e2d979d58f74": "vehicle:00000329",
+    "reg:WBH99Z": "vehicle:00000330",
+    "source:bilweb:12622290": "vehicle:00000330",
+    "url:https://bilweb.se/kronobergs-lan/volvo-v60-t6-recharge-core-bright-plug-in-awd-4x4-lader-2025-kombi-12622290": "vehicle:00000330",
+    "fp:5e65ea6ea2d23fc8": "vehicle:00000330"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -6731,6 +6773,204 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000320": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "GRA06U",
+        "vin": null
+      },
+      "last_seen": "12847742",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000321": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "GAJ19B",
+        "vin": null
+      },
+      "last_seen": "12847719",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000322": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "YHJ59E",
+        "vin": null
+      },
+      "last_seen": "12847720",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000323": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "TCL88M",
+        "vin": null
+      },
+      "last_seen": "12847721",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000324": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "LWA99C",
+        "vin": null
+      },
+      "last_seen": "12847722",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000325": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "GWB03U",
+        "vin": null
+      },
+      "last_seen": "12847723",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000326": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "ZOL43N",
+        "vin": null
+      },
+      "last_seen": "12784692",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000327": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "KWR26P",
+        "vin": null
+      },
+      "last_seen": "12847600",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000328": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": "OOZ23G",
+        "vin": null
+      },
+      "last_seen": "12847716",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000329": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/1d54e970-3bc9-4d16-8afe-8244be25e648",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000330": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "WBH99Z",
+        "vin": null
+      },
+      "last_seen": "12622290",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
