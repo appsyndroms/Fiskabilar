@@ -653,8 +653,10 @@ def resolve_vehicle_id(
     """
     Returnerar canonical vehicle_id för bilen.
 
-    Om en starkare identifierare dyker upp senare kan
-    tidigare identiteter slås ihop.
+    Resolutionen sparar även hur identity faktiskt bestämdes.
+    Detta används av diagnostiken så att exempelvis en ny bil
+    inte felaktigt rapporteras som "regnr" bara för att regnr
+    registreras i identity-store efter resolution.
 
     Exempel:
 
@@ -713,6 +715,8 @@ def resolve_vehicle_id(
         # Första identifieraren är den starkaste.
         _, starkaste_typ, canonical = hittade[0]
 
+        matched_existing = True
+
     else:
         canonical = _ny_vehicle_id(
             data
@@ -730,6 +734,7 @@ def resolve_vehicle_id(
         }
 
         starkaste_typ = "new"
+        matched_existing = False
 
     # Om flera identifierare pekar på olika identiteter
     # har vi hittat ett identity conflict.
@@ -746,6 +751,10 @@ def resolve_vehicle_id(
             unika.append(
                 vehicle_id
             )
+
+    konflikt = bool(
+        unika
+    )
 
     for duplicate in unika:
         _merge_vehicle(
@@ -774,21 +783,19 @@ def resolve_vehicle_id(
         },
     )
 
-    data[
+    vehicle = data[
         "vehicles"
     ][
         canonical
-    ][
+    ]
+
+    vehicle[
         "metadata"
     ] = _metadata(
         bil
     )
 
-    data[
-        "vehicles"
-    ][
-        canonical
-    ][
+    vehicle[
         "last_seen"
     ] = bil.get(
         "annons_id"
@@ -796,13 +803,24 @@ def resolve_vehicle_id(
         "url"
     )
 
-    data[
-        "vehicles"
-    ][
-        canonical
-    ][
+    vehicle[
         "identifier_strength"
     ] = starkaste_typ
+
+    # Spara själva resolution-beslutet.
+    #
+    # Detta är viktigt eftersom alla identifierare registreras
+    # efter resolution. Diagnostiken ska därför kunna skilja
+    # mellan "identifieraren som faktiskt matchade" och
+    # "identifierare som nu finns registrerade".
+    vehicle[
+        "resolution"
+    ] = {
+        "matchningstyp": starkaste_typ,
+        "identifier_strength": starkaste_typ,
+        "matched_existing": matched_existing,
+        "konflikt": konflikt,
+    }
 
     data[
         "version"
@@ -832,7 +850,7 @@ def identity_diagnostik(
     - canonical vehicle_id
     - vilka identifierare bilen har
     - vilka identifierare som redan finns i identity-store
-    - vilken identifierare som matchade först
+    - vilken identifierare som faktiskt användes för resolution
     - om flera identity-spår pekar på olika vehicle_id
     - vilken identifieringsstyrka bilen har
     """
@@ -885,55 +903,89 @@ def identity_diagnostik(
             }
         )
 
-    matchade = [
-        item
-        for item in matchningar
-        if item["matchar"]
-    ]
-
-    matchade_vehicle_ids = {
-        item["matchar"]
-        for item in matchade
-        if item["matchar"]
-    }
-
-    konflikt = (
-        len(
-            matchade_vehicle_ids
-        )
-        > 1
+    vehicle = data.get(
+        "vehicles",
+        {},
+    ).get(
+        vehicle_id,
+        {},
     )
 
-    matchningstyp = None
+    resolution = vehicle.get(
+        "resolution",
+        {},
+    )
 
-    if matchade:
-        matchningstyp = min(
-            matchade,
-            key=lambda item: IDENTIFIERINGS_PRIORITET.get(
-                item["typ"],
-                99,
-            ),
-        )["typ"]
+    # Resolution-beslutet sparades när bilen faktiskt
+    # identifierades. Vi använder detta i stället för att
+    # rekonstruera beslutet från dagens identity-store.
+    matchningstyp = resolution.get(
+        "matchningstyp"
+    )
 
-    identifier_strength = None
+    identifier_strength = resolution.get(
+        "identifier_strength"
+    )
 
-    if vehicle_id:
-        vehicle = data.get(
-            "vehicles",
-            {},
-        ).get(
-            vehicle_id,
-            {},
-        )
+    matched_existing = resolution.get(
+        "matched_existing"
+    )
 
+    konflikt = resolution.get(
+        "konflikt"
+    )
+
+    # Äldre identity-stores kan sakna resolution-fältet.
+    # För dem faller vi tillbaka på befintlig information.
+    if matchningstyp is None:
+        matchade = [
+            item
+            for item in matchningar
+            if item["matchar"]
+        ]
+
+        if matchade:
+            matchningstyp = min(
+                matchade,
+                key=lambda item: IDENTIFIERINGS_PRIORITET.get(
+                    item["typ"],
+                    99,
+                ),
+            )["typ"]
+
+            matched_existing = True
+
+        else:
+            matchningstyp = "new"
+            matched_existing = False
+
+    if identifier_strength is None:
         identifier_strength = vehicle.get(
             "identifier_strength"
+        )
+
+    if identifier_strength is None:
+        identifier_strength = matchningstyp
+
+    if konflikt is None:
+        matchade_vehicle_ids = {
+            item["matchar"]
+            for item in matchningar
+            if item["matchar"]
+        }
+
+        konflikt = (
+            len(
+                matchade_vehicle_ids
+            )
+            > 1
         )
 
     return {
         "vehicle_id": vehicle_id,
         "matchningstyp": matchningstyp,
         "identifier_strength": identifier_strength,
+        "matched_existing": matched_existing,
         "konflikt": konflikt,
         "identifierare": matchningar,
     }
