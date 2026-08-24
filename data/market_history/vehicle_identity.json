@@ -825,7 +825,19 @@
     "reg:RBX68K": "vehicle:00000258",
     "source:bilweb:12492897": "vehicle:00000258",
     "url:https://bilweb.se/varmlands-lan/bmw-330-e-xdrive-touring-m-sport-privatleasing-2025-kombi-12492897": "vehicle:00000258",
-    "fp:fe72fec681805d60": "vehicle:00000258"
+    "fp:fe72fec681805d60": "vehicle:00000258",
+    "url:https://www.wayke.se/objekt/4a25aa86-3eda-4529-96c4-b057db7192b2": "vehicle:00000259",
+    "fp:2b05110998f5f428": "vehicle:00000259",
+    "url:https://www.wayke.se/objekt/e45a30b1-5842-4794-9e40-d6a54e17233d": "vehicle:00000260",
+    "fp:32d43d9dd55f128a": "vehicle:00000260",
+    "reg:TDG88M": "vehicle:00000261",
+    "source:bilweb:12788325": "vehicle:00000261",
+    "url:https://bilweb.se/uppsala-lan/volvo-v90-recharge-t6-awd-core-edition-blis-2024-kombi-12788325": "vehicle:00000261",
+    "fp:456a76053978b096": "vehicle:00000261",
+    "reg:LNR02R": "vehicle:00000262",
+    "source:bilweb:12630086": "vehicle:00000262",
+    "url:https://bilweb.se/blekinge-lan/volvo-v90-t6-core-edition-ii-outlet-dragkrok-halvautoma-2025-kombi-12630086": "vehicle:00000262",
+    "fp:22c88899bfb2e797": "vehicle:00000262"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -5464,6 +5476,78 @@
         "vin": null
       },
       "last_seen": "12492897",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000259": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/4a25aa86-3eda-4529-96c4-b057db7192b2",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000260": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/e45a30b1-5842-4794-9e40-d6a54e17233d",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000261": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "TDG88M",
+        "vin": null
+      },
+      "last_seen": "12788325",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000262": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "LNR02R",
+        "vin": null
+      },
+      "last_seen": "12630086",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",

@@ -1154,10 +1154,11 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 418800,
     "senaste_pris": 418800,
-    "senast_sedd": "2026-08-18",
+    "senast_sedd": "2026-08-24",
     "notifierad": true,
     "notifierad_pris": 418800,
-    "migrerad_fran": "kal:v90:T6 AWD:2024:3999"
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3999",
+    "vehicle_id": "vehicle:00000261"
   },
   "kal:v90:T6 AWD:2024:5692": {
     "forsta_sedd": "2026-08-15",
@@ -9917,5 +9918,39 @@
     "notifierad_pris": 4495,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2",
     "vehicle_id": "vehicle:00000258"
+  },
+  "vehicle:00000259": {
+    "vehicle_id": "vehicle:00000259",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 514900,
+    "senaste_pris": 514900,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000260": {
+    "vehicle_id": "vehicle:00000260",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 519000,
+    "senaste_pris": 519000,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
+  },
+  "vehicle:00000261": {
+    "forsta_sedd": "2026-08-15",
+    "forsta_pris": 418800,
+    "senaste_pris": 418800,
+    "senast_sedd": "2026-08-24",
+    "notifierad": true,
+    "notifierad_pris": 418800,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:3999",
+    "vehicle_id": "vehicle:00000261"
+  },
+  "vehicle:00000262": {
+    "vehicle_id": "vehicle:00000262",
+    "forsta_sedd": "2026-08-24",
+    "forsta_pris": 439500,
+    "senaste_pris": 439500,
+    "senast_sedd": "2026-08-24",
+    "notifierad": false
   }
 }
