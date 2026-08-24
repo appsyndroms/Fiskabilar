@@ -9,6 +9,10 @@ Historiken är uppdelad i:
 - analysis_trends.py
     Marknadstrender.
 
+- lifecycle.py
+    Annonsens livscykel från första observation till
+    prisändringar, försvinnande och eventuell återkomst.
+
 Denna fil fungerar som ett stabilt API för resten av applikationen.
 """
 
@@ -24,6 +28,10 @@ from .analysis_trends import (
     berakna_marknadstrend_for_bil,
 )
 
+from .lifecycle import (
+    analysera_livscykel,
+)
+
 
 def berika_med_historik(
     bil: dict,
@@ -31,15 +39,23 @@ def berika_med_historik(
     trender: dict[str, dict] | None = None,
 ) -> dict:
     """
-    Lägger historikfält och marknadstrend på bilens dict.
+    Lägger historikfält, marknadstrend och livscykelstatus
+    på bilens dict.
 
-    Trendinformationen är diagnostisk och påverkar inte 100-poängsscoren.
+    Trendinformationen är diagnostisk och påverkar inte
+    100-poängsscoren.
 
-    Trendanalysen skickas normalt in färdigberäknad från huvudflödet.
+    Lifecycle-informationen är diagnostisk och påverkar inte
+    100-poängsscoren eller valuation.
+
+    Trendinformationen skickas normalt in färdigberäknad
+    från huvudflödet.
+
     Om den inte skickas in används ett tomt trendunderlag.
 
     Viktigt:
     Den här funktionen får inte själv starta trendanalysen.
+
     Trendanalysen körs explicit en gång från huvudflödet.
     """
 
@@ -56,12 +72,21 @@ def berika_med_historik(
         trender,
     )
 
+    lifecycle = analysera_livscykel(
+        bil,
+        historikindex,
+    )
+
     bil.update(
         historik
     )
 
     bil.update(
         trend
+    )
+
+    bil.update(
+        lifecycle
     )
 
     return bil
