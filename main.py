@@ -7,7 +7,7 @@ Huvudflöde:
 3. Deduplicera.
 4. Uppdatera state.
 5. Kör identity-diagnostik.
-6. Läs och berika med långtidshistorik.
+6. Läs och berika med historik, trend och annonsens livscykel.
 7. Spara dagens annonsobservationer.
 8. Bygg marknadsunderlag.
 9. Processa kandidater.
@@ -112,13 +112,24 @@ def main():
         )
 
     # ------------------------------------------------------------
-    # HISTORIK
+    # HISTORIK / LIFECYCLE
     # ------------------------------------------------------------
 
+    # Historikindexet byggs före dagens observationer sparas.
+    # Det innebär att historik, trend och lifecycle baseras
+    # på tidigare körningar och inte på den observation som
+    # precis ska skrivas.
     historikindex = bygg_historikindex()
 
     for bil in bilar:
         try:
+            # berika_med_historik() lägger på:
+            #
+            # - långtidshistorik
+            # - marknadstrend
+            # - annonsens livscykel
+            #
+            # Lifecycle påverkar inte score eller valuation.
             berika_med_historik(
                 bil,
                 historikindex,
@@ -130,6 +141,8 @@ def main():
                 f"historik för annons: {e}"
             )
 
+    # Dagens observation sparas först efter att historiken
+    # har beräknats. Nästa körning kan då se dagens observation.
     for bil in bilar:
         try:
             spara_annonsobservation(
