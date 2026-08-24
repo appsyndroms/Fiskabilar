@@ -857,7 +857,9 @@
     "reg:WBH99U": "vehicle:00000270",
     "source:bilweb:12622314": "vehicle:00000270",
     "url:https://bilweb.se/kronobergs-lan/volvo-v60-t6-recharge-core-bright-plug-in-awd-4x4-2025-kombi-12622314": "vehicle:00000270",
-    "fp:0c6dfb1188a5ae88": "vehicle:00000270"
+    "fp:0c6dfb1188a5ae88": "vehicle:00000270",
+    "url:https://www.wayke.se/objekt/d90cb1a4-f9f6-4615-bffb-74fd1c9780bc": "vehicle:00000271",
+    "fp:1985aa8f413345c3": "vehicle:00000271"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -5716,6 +5718,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000271": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/d90cb1a4-f9f6-4615-bffb-74fd1c9780bc",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
