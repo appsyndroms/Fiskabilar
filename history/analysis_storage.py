@@ -4,6 +4,7 @@ Lagring och läsning av Fiskabilars historik.
 Ansvarar för:
 
 - vehicle identity
+- canonical vehicle identity / aliases
 - annonsnycklar
 - JSONL-skrivning
 - månadsvis filrotation
@@ -30,6 +31,7 @@ from config import (
 )
 
 from .identity import (
+    canonical_vehicle_id,
     resolve_vehicle_id,
 )
 
@@ -53,7 +55,7 @@ def _annonsnyckel(
     """
     Canonical historiknyckel.
 
-    Nya observationer använder vehicle_id.
+    Nya observationer använder canonical vehicle_id.
 
     Äldre nyckelformat finns kvar som fallback för att
     gamla historikposter fortfarande ska kunna läsas.
@@ -67,6 +69,10 @@ def _annonsnyckel(
         vehicle_id = resolve_vehicle_id(
             bil
         )
+
+    vehicle_id = canonical_vehicle_id(
+        vehicle_id
+    )
 
     if vehicle_id:
         bil[
@@ -239,6 +245,10 @@ def spara_annonsobservation(
         bil
     )
 
+    vehicle_id = canonical_vehicle_id(
+        vehicle_id
+    )
+
     bil[
         "vehicle_id"
     ] = vehicle_id
@@ -335,12 +345,16 @@ def spara_marknadsvardesobservation(
     """
     Sparar modellens värdering.
 
-    Även värdeobservationen kopplas till samma vehicle_id
-    som annonsobservationen.
+    Även värdeobservationen kopplas till samma canonical
+    vehicle_id som annonsobservationen.
     """
 
     vehicle_id = resolve_vehicle_id(
         bil
+    )
+
+    vehicle_id = canonical_vehicle_id(
+        vehicle_id
     )
 
     bil[
@@ -454,28 +468,55 @@ def _las_observationer() -> list[dict]:
     return observationer
 
 
+def _canonical_post_vehicle_id(
+    post: dict,
+) -> str | None:
+    """
+    Översätter både nya och gamla vehicle_id till
+    aktuell canonical identity.
+
+    Om posten saknar vehicle_id returneras None.
+    """
+
+    vehicle_id = post.get(
+        "vehicle_id"
+    )
+
+    if not vehicle_id:
+        return None
+
+    return canonical_vehicle_id(
+        str(vehicle_id)
+    )
+
+
 def bygg_historikindex() -> dict[str, dict]:
     """
     Bygger historikindex.
 
-    Nya poster använder vehicle_id.
+    Alla vehicle_id normaliseras genom identity store innan
+    de placeras i indexet.
 
-    Äldre poster använder annons_nyckel. De läses fortfarande
-    så att befintlig historik inte försvinner.
+    Det innebär att en gammal identity som senare blivit
+    alias till en canonical identity automatiskt hamnar
+    tillsammans med den nya identiteten.
+
+    Äldre poster utan vehicle_id använder annons_nyckel
+    som fallback.
     """
 
     index: dict[str, dict] = {}
 
     for post in _las_observationer():
 
-        nyckel = (
-            post.get(
-                "vehicle_id"
-            )
-            or post.get(
+        nyckel = _canonical_post_vehicle_id(
+            post
+        )
+
+        if not nyckel:
+            nyckel = post.get(
                 "annons_nyckel"
             )
-        )
 
         if not nyckel:
             continue
@@ -544,6 +585,10 @@ def berakna_historik(
 
     vehicle_id = resolve_vehicle_id(
         bil
+    )
+
+    vehicle_id = canonical_vehicle_id(
+        vehicle_id
     )
 
     bil[
