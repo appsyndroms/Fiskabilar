@@ -1725,11 +1725,11 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 627000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
-    "vehicle_id": "vehicle:00000312"
+    "vehicle_id": "vehicle:00000333"
   },
   "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348": {
     "forsta_sedd": "2026-08-18",
@@ -7749,7 +7749,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000004": {
@@ -7765,14 +7765,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 369900,
     "senaste_pris": 369900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000006": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 299900,
     "senaste_pris": 299900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 299900,
     "migrerad_fran": "kal:v60:T6 AWD:2023:11580",
@@ -7783,14 +7783,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000008": {
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:4757",
     "vehicle_id": "vehicle:00000008"
@@ -7799,7 +7799,7 @@
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:8052",
     "vehicle_id": "vehicle:00000009"
@@ -7809,7 +7809,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 424500,
     "senaste_pris": 424500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000011": {
@@ -7817,7 +7817,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479000,
     "senaste_pris": 479000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000012": {
@@ -7825,7 +7825,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 449900
   },
@@ -7834,7 +7834,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000014": {
@@ -7842,7 +7842,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000015": {
@@ -7850,7 +7850,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 589900,
     "senaste_pris": 589900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000016": {
@@ -7858,7 +7858,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479000,
     "senaste_pris": 479000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000017": {
@@ -7866,14 +7866,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 379900,
     "senaste_pris": 379900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000018": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 309400,
     "senaste_pris": 314900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 309400,
     "migrerad_fran": "kal:v60:T6 AWD:2024:11120",
@@ -7884,7 +7884,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000020": {
@@ -7892,7 +7892,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000021": {
@@ -7900,7 +7900,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 359000,
     "senaste_pris": 359000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000022": {
@@ -7908,7 +7908,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 464700,
     "senaste_pris": 464700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000023": {
@@ -7916,15 +7916,15 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429000,
     "senaste_pris": 429000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000024": {
     "vehicle_id": "vehicle:00000024",
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 393990,
-    "senaste_pris": 393990,
-    "senast_sedd": "2026-08-24",
+    "senaste_pris": 389990,
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000025": {
@@ -7932,7 +7932,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429000,
     "senaste_pris": 429000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000026": {
@@ -7940,15 +7940,16 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449000,
     "senaste_pris": 449000,
-    "senast_sedd": "2026-08-24",
-    "notifierad": false
+    "senast_sedd": "2026-08-25",
+    "notifierad": true,
+    "notifierad_pris": 449000
   },
   "vehicle:00000027": {
     "vehicle_id": "vehicle:00000027",
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000028": {
@@ -7956,7 +7957,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000029": {
@@ -7972,7 +7973,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409500,
     "senaste_pris": 409500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000031": {
@@ -7980,7 +7981,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000032": {
@@ -7988,7 +7989,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489600,
     "senaste_pris": 489600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000033": {
@@ -7996,7 +7997,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000034": {
@@ -8004,7 +8005,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 389800,
     "senaste_pris": 389800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000035": {
@@ -8012,7 +8013,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 386900,
     "senaste_pris": 386900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000036": {
@@ -8020,7 +8021,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000037": {
@@ -8028,7 +8029,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489600,
     "senaste_pris": 489600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000038": {
@@ -8036,7 +8037,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429800,
     "senaste_pris": 429800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000039": {
@@ -8044,7 +8045,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489000,
     "senaste_pris": 489000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000040": {
@@ -8052,7 +8053,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479000,
     "senaste_pris": 479000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000041": {
@@ -8060,7 +8061,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489000,
     "senaste_pris": 489000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000042": {
@@ -8068,7 +8069,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419800,
     "senaste_pris": 419800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000043": {
@@ -8076,7 +8077,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489000,
     "senaste_pris": 489000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000044": {
@@ -8084,7 +8085,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429800,
     "senaste_pris": 429800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000045": {
@@ -8092,7 +8093,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439500,
     "senaste_pris": 439500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000046": {
@@ -8100,7 +8101,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000047": {
@@ -8116,7 +8117,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000049": {
@@ -8124,7 +8125,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000050": {
@@ -8132,7 +8133,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000051": {
@@ -8140,7 +8141,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 559900,
     "senaste_pris": 559900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000052": {
@@ -8148,7 +8149,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000053": {
@@ -8293,7 +8294,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000071": {
@@ -8301,14 +8302,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 369000,
     "senaste_pris": 369000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000072": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 389900,
     "senaste_pris": 389900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:7300",
     "vehicle_id": "vehicle:00000072"
@@ -8317,7 +8318,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:6506",
     "vehicle_id": "vehicle:00000073"
@@ -8326,7 +8327,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 359000,
     "senaste_pris": 359000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:9001",
     "vehicle_id": "vehicle:00000074"
@@ -8335,7 +8336,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:10022",
     "vehicle_id": "vehicle:00000075"
@@ -8344,7 +8345,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:5900",
     "vehicle_id": "vehicle:00000076"
@@ -8362,7 +8363,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:7500",
     "vehicle_id": "vehicle:00000078"
@@ -8380,7 +8381,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000081": {
@@ -8388,7 +8389,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429500,
     "senaste_pris": 429500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000082": {
@@ -8396,7 +8397,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469000,
     "senaste_pris": 469000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000083": {
@@ -8404,7 +8405,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 394900,
     "senaste_pris": 394900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 394900
   },
@@ -8413,7 +8414,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000085": {
@@ -8421,14 +8422,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459500,
     "senaste_pris": 459500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000086": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 469800,
     "senaste_pris": 469800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:4495",
     "vehicle_id": "vehicle:00000086"
@@ -8437,7 +8438,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 369000,
     "senaste_pris": 369000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 369000,
     "migrerad_fran": "kal:v90:T6 AWD:2024:11336",
@@ -8447,7 +8448,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:5434",
     "vehicle_id": "vehicle:00000088"
@@ -8456,7 +8457,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 409990,
     "senaste_pris": 409990,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:10929",
     "vehicle_id": "vehicle:00000089"
@@ -8464,8 +8465,8 @@
   "vehicle:00000090": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 425990,
-    "senaste_pris": 419990,
-    "senast_sedd": "2026-08-24",
+    "senaste_pris": 414990,
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:5611",
     "vehicle_id": "vehicle:00000090"
@@ -8473,8 +8474,8 @@
   "vehicle:00000091": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 414990,
-    "senaste_pris": 408990,
-    "senast_sedd": "2026-08-24",
+    "senaste_pris": 404990,
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:8570",
     "vehicle_id": "vehicle:00000091"
@@ -8483,7 +8484,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389000,
     "senaste_pris": 399900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 399900,
     "migrerad_fran": "kal:v90:T6 AWD:2024:7480",
@@ -8494,7 +8495,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 549000,
     "senaste_pris": 549000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000094": {
@@ -8502,7 +8503,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000095": {
@@ -8510,7 +8511,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439600,
     "senaste_pris": 439600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000096": {
@@ -8518,7 +8519,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419900,
     "senaste_pris": 419900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000097": {
@@ -8526,7 +8527,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 498900,
     "senaste_pris": 498900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000098": {
@@ -8534,7 +8535,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429500,
     "senaste_pris": 429500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000099": {
@@ -8542,7 +8543,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469800,
     "senaste_pris": 469800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000100": {
@@ -8550,7 +8551,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469800,
     "senaste_pris": 469800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000101": {
@@ -8558,7 +8559,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 464800,
     "senaste_pris": 464800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000102": {
@@ -8566,7 +8567,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 559900,
     "senaste_pris": 559900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000103": {
@@ -8574,7 +8575,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 498900,
     "senaste_pris": 498900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000104": {
@@ -8582,7 +8583,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469000,
     "senaste_pris": 469000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000105": {
@@ -8590,7 +8591,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449000,
     "senaste_pris": 449000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000106": {
@@ -8598,7 +8599,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000107": {
@@ -8606,7 +8607,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499000,
     "senaste_pris": 499000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000108": {
@@ -8614,7 +8615,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499000,
     "senaste_pris": 489000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000109": {
@@ -8622,7 +8623,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479800,
     "senaste_pris": 479800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000110": {
@@ -8630,7 +8631,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000111": {
@@ -8638,7 +8639,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479000,
     "senaste_pris": 479000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000112": {
@@ -8646,7 +8647,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000113": {
@@ -8654,7 +8655,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000114": {
@@ -8662,7 +8663,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 479500,
     "senaste_pris": 479500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000115": {
@@ -8686,7 +8687,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000118": {
@@ -8694,7 +8695,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000119": {
@@ -8702,7 +8703,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000120": {
@@ -8710,7 +8711,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 495000,
     "senaste_pris": 495000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000121": {
@@ -8718,7 +8719,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000122": {
@@ -8734,7 +8735,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 545000,
     "senaste_pris": 545000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000124": {
@@ -8742,7 +8743,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499900,
     "senaste_pris": 499900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000125": {
@@ -8750,7 +8751,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499500,
     "senaste_pris": 499500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000126": {
@@ -8758,7 +8759,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000127": {
@@ -8766,7 +8767,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 534900,
     "senaste_pris": 534900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000128": {
@@ -8774,7 +8775,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 524800,
     "senaste_pris": 524800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000129": {
@@ -8782,7 +8783,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 629000,
     "senaste_pris": 629000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000130": {
@@ -8798,7 +8799,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000132": {
@@ -8806,7 +8807,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 494900,
     "senaste_pris": 494900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000133": {
@@ -8814,7 +8815,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000134": {
@@ -8822,7 +8823,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 554900,
     "senaste_pris": 554900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000135": {
@@ -8830,7 +8831,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 494900,
     "senaste_pris": 494900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000136": {
@@ -8838,7 +8839,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000137": {
@@ -8846,7 +8847,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 659000,
     "senaste_pris": 659000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000138": {
@@ -8854,7 +8855,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499900,
     "senaste_pris": 499900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000139": {
@@ -8862,14 +8863,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 524900,
     "senaste_pris": 524900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000140": {
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 499800,
     "senaste_pris": 499800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:7354",
     "vehicle_id": "vehicle:00000140"
@@ -8878,7 +8879,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 419000,
     "senaste_pris": 419000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:10924",
     "vehicle_id": "vehicle:00000141"
@@ -8887,7 +8888,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:530e-xdrive-touring:530e xDrive Touring:2024:5276",
     "vehicle_id": "vehicle:00000142"
@@ -8896,7 +8897,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 319800,
     "senaste_pris": 319800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 319800,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:9669",
@@ -8906,7 +8907,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 439000,
     "senaste_pris": 435000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580",
     "vehicle_id": "vehicle:00000144"
@@ -8915,7 +8916,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 449000,
     "senaste_pris": 439000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7350",
     "vehicle_id": "vehicle:00000145"
@@ -8924,7 +8925,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 438990,
     "senaste_pris": 438990,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:5812",
     "vehicle_id": "vehicle:00000146"
@@ -8933,7 +8934,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 307900,
     "senaste_pris": 307900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 307900,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:11759",
@@ -8942,8 +8943,8 @@
   "vehicle:00000148": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 447990,
-    "senaste_pris": 447990,
-    "senast_sedd": "2026-08-24",
+    "senaste_pris": 442990,
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3191",
     "vehicle_id": "vehicle:00000148"
@@ -8952,7 +8953,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 389000,
     "senaste_pris": 389000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:10170",
     "vehicle_id": "vehicle:00000149"
@@ -8961,7 +8962,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 359900,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7098",
@@ -8971,7 +8972,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 424800,
     "senaste_pris": 419800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4999",
     "vehicle_id": "vehicle:00000151"
@@ -8980,7 +8981,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 339800,
     "senaste_pris": 334800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 339800,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:7383",
@@ -8990,7 +8991,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:6105",
     "notifierad_pris": 399900,
@@ -9000,7 +9001,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 445000,
     "senaste_pris": 445000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:3800",
     "vehicle_id": "vehicle:00000154"
@@ -9010,7 +9011,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000156": {
@@ -9018,7 +9019,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 459900
   },
@@ -9026,7 +9027,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5770",
     "vehicle_id": "vehicle:00000157"
@@ -9035,7 +9036,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:1740",
     "vehicle_id": "vehicle:00000158"
@@ -9044,7 +9045,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 489000,
     "senaste_pris": 489000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 489000,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:502",
@@ -9054,7 +9055,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 528600,
     "senaste_pris": 528600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2445",
     "vehicle_id": "vehicle:00000160"
@@ -9063,7 +9064,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2300",
     "vehicle_id": "vehicle:00000161"
@@ -9072,7 +9073,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509800,
     "senaste_pris": 509800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:484",
     "vehicle_id": "vehicle:00000162"
@@ -9081,7 +9082,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 509500,
     "senaste_pris": 509500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:5350",
     "vehicle_id": "vehicle:00000163"
@@ -9090,7 +9091,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 629200,
     "senaste_pris": 629200,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:0",
     "vehicle_id": "vehicle:00000164"
@@ -9100,7 +9101,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 547700,
     "senaste_pris": 547700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000166": {
@@ -9108,7 +9109,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 544700,
     "senaste_pris": 544700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000167": {
@@ -9116,14 +9117,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 559000,
     "senaste_pris": 559000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000168": {
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 598700,
     "senaste_pris": 548700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:918",
     "vehicle_id": "vehicle:00000168"
@@ -9132,7 +9133,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 680150,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9142,7 +9143,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 548700,
     "senaste_pris": 548700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 548700,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1348",
@@ -9152,7 +9153,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 598700,
     "senaste_pris": 598700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 598700,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1357",
@@ -9162,7 +9163,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 548700,
     "senaste_pris": 548700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 548700,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1010",
@@ -9172,7 +9173,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 658900,
     "senaste_pris": 658900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1000",
     "vehicle_id": "vehicle:00000173"
@@ -9181,7 +9182,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 639900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9191,7 +9192,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 695700,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9201,7 +9202,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 629000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9211,7 +9212,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 673800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9221,7 +9222,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 639900,
     "senaste_pris": 639900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:500",
     "vehicle_id": "vehicle:00000178"
@@ -9230,7 +9231,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 589000,
     "senaste_pris": 589000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 589000,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:2",
@@ -9240,7 +9241,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 652200,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9250,7 +9251,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 549800,
     "senaste_pris": 549800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 549800,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:1200",
@@ -9260,7 +9261,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 680150,
     "senaste_pris": 642750,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 597500,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
@@ -9270,7 +9271,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:8985",
     "vehicle_id": "vehicle:00000183"
@@ -9279,7 +9280,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 359800,
     "senaste_pris": 359800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:7368",
     "vehicle_id": "vehicle:00000184"
@@ -9288,7 +9289,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 336990,
     "senaste_pris": 334990,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:10702",
     "vehicle_id": "vehicle:00000185"
@@ -9297,7 +9298,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 339000,
     "senaste_pris": 344900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2023:10634",
     "vehicle_id": "vehicle:00000186"
@@ -9306,7 +9307,7 @@
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2024:8176",
     "vehicle_id": "vehicle:00000187"
@@ -9316,7 +9317,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 389800,
     "senaste_pris": 389800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 389800
   },
@@ -9325,7 +9326,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000190": {
@@ -9333,7 +9334,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419900,
     "senaste_pris": 419900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000191": {
@@ -9341,7 +9342,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 329800,
     "senaste_pris": 329800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000192": {
@@ -9349,7 +9350,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000193": {
@@ -9364,7 +9365,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 414900,
     "senaste_pris": 414900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 414900,
     "migrerad_fran": "kal:v60:T8 AWD:2024:9778",
@@ -9375,14 +9376,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439900,
     "senaste_pris": 439900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000196": {
     "forsta_sedd": "2026-08-17",
     "forsta_pris": 374900,
     "senaste_pris": 374900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 374900,
     "migrerad_fran": "kal:v60:T6 AWD:2024:7222",
@@ -9392,7 +9393,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T8 AWD:2024:3601",
     "vehicle_id": "vehicle:00000197"
@@ -9401,7 +9402,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 394900,
     "senaste_pris": 394900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2024:7540",
     "vehicle_id": "vehicle:00000198"
@@ -9410,7 +9411,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 469900,
     "senaste_pris": 469900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v60:T6 AWD:2024:4589",
     "vehicle_id": "vehicle:00000199"
@@ -9437,7 +9438,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000203": {
@@ -9445,7 +9446,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439500,
     "senaste_pris": 439500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000204": {
@@ -9453,7 +9454,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 369900,
     "senaste_pris": 369900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000205": {
@@ -9461,7 +9462,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 4895,
     "senaste_pris": 4895,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000206": {
@@ -9469,7 +9470,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419500,
     "senaste_pris": 419500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000207": {
@@ -9477,7 +9478,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489500,
     "senaste_pris": 489500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000208": {
@@ -9485,7 +9486,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 369800,
     "senaste_pris": 369800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000209": {
@@ -9493,7 +9494,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459000,
     "senaste_pris": 459000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000210": {
@@ -9501,7 +9502,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000211": {
@@ -9509,7 +9510,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 399900
   },
@@ -9526,7 +9527,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439500,
     "senaste_pris": 439500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000214": {
@@ -9534,7 +9535,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000215": {
@@ -9542,15 +9543,16 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 429500,
     "senaste_pris": 429500,
-    "senast_sedd": "2026-08-24",
-    "notifierad": false
+    "senast_sedd": "2026-08-25",
+    "notifierad": true,
+    "notifierad_pris": 429500
   },
   "vehicle:00000216": {
     "vehicle_id": "vehicle:00000216",
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439000,
     "senaste_pris": 439000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000217": {
@@ -9574,14 +9576,14 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 388900,
     "senaste_pris": 388900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000220": {
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 409800,
     "senaste_pris": 409800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:11694",
     "vehicle_id": "vehicle:00000220"
@@ -9590,7 +9592,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 347900,
     "senaste_pris": 347900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 347900,
     "migrerad_fran": "kal:v90:T6 AWD:2023:10220",
@@ -9600,7 +9602,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 389900,
     "senaste_pris": 389900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:11397",
     "vehicle_id": "vehicle:00000222"
@@ -9609,7 +9611,7 @@
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 358800,
     "senaste_pris": 358800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:10634",
     "vehicle_id": "vehicle:00000223"
@@ -9618,7 +9620,7 @@
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 359500,
     "senaste_pris": 359500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:9412",
     "vehicle_id": "vehicle:00000224"
@@ -9627,7 +9629,7 @@
     "forsta_sedd": "2026-08-16",
     "forsta_pris": 424900,
     "senaste_pris": 424900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:2273",
     "vehicle_id": "vehicle:00000225"
@@ -9636,7 +9638,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 389000,
     "senaste_pris": 389000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:6371",
     "vehicle_id": "vehicle:00000226"
@@ -9645,7 +9647,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 429900,
     "senaste_pris": 429900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:5273",
     "vehicle_id": "vehicle:00000227"
@@ -9663,7 +9665,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399900,
     "senaste_pris": 399900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:10512",
     "vehicle_id": "vehicle:00000229"
@@ -9672,7 +9674,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 454000,
     "senaste_pris": 454000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:5500",
     "vehicle_id": "vehicle:00000230"
@@ -9681,7 +9683,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 399800,
     "senaste_pris": 399800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 399800,
     "migrerad_fran": "kal:v90:T6 AWD:2024:6476",
@@ -9691,7 +9693,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 455000,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:7287",
     "vehicle_id": "vehicle:00000232"
@@ -9700,7 +9702,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 539600,
     "senaste_pris": 539600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T8 AWD:2024:6700",
     "vehicle_id": "vehicle:00000233"
@@ -9709,7 +9711,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 449900,
     "migrerad_fran": "kal:v90:T8 AWD:2024:9505",
@@ -9719,7 +9721,7 @@
     "forsta_sedd": "2026-08-15",
     "forsta_pris": 409000,
     "senaste_pris": 409000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2024:9465",
     "vehicle_id": "vehicle:00000235"
@@ -9754,7 +9756,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 495000,
     "senaste_pris": 495000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000240": {
@@ -9762,7 +9764,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469500,
     "senaste_pris": 469500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000241": {
@@ -9770,7 +9772,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000242": {
@@ -9778,7 +9780,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 399500,
     "senaste_pris": 399500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000243": {
@@ -9786,7 +9788,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499500,
     "senaste_pris": 499500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000244": {
@@ -9794,7 +9796,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000245": {
@@ -9802,7 +9804,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000246": {
@@ -9810,7 +9812,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469500,
     "senaste_pris": 469500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000247": {
@@ -9818,7 +9820,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459900,
     "senaste_pris": 459900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000248": {
@@ -9826,7 +9828,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 478900,
     "senaste_pris": 478900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000249": {
@@ -9834,7 +9836,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 434500,
     "senaste_pris": 434500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 434500
   },
@@ -9843,7 +9845,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419500,
     "senaste_pris": 419500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 419500
   },
@@ -9852,7 +9854,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 434500,
     "senaste_pris": 434500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 434500
   },
@@ -9861,7 +9863,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 419500,
     "senaste_pris": 419500,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 419500
   },
@@ -9870,7 +9872,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 389000,
     "senaste_pris": 389000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 389000
   },
@@ -9878,7 +9880,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 399000,
     "senaste_pris": 399000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:8860",
     "vehicle_id": "vehicle:00000254"
@@ -9887,7 +9889,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 359900,
     "senaste_pris": 5425,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 5425,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:6085",
@@ -9898,7 +9900,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 459000,
     "senaste_pris": 459000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 459000
   },
@@ -9906,7 +9908,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 659000,
     "senaste_pris": 659000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:550",
     "vehicle_id": "vehicle:00000257"
@@ -9915,7 +9917,7 @@
     "forsta_sedd": "2026-08-18",
     "forsta_pris": 4495,
     "senaste_pris": 4495,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 4495,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2025:2",
@@ -9926,7 +9928,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 514900,
     "senaste_pris": 514900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000260": {
@@ -9985,7 +9987,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000267": {
@@ -10018,7 +10020,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 445000,
     "senaste_pris": 445000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000271": {
@@ -10026,7 +10028,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000272": {
@@ -10034,7 +10036,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 514900,
     "senaste_pris": 514900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000273": {
@@ -10050,7 +10052,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 469000,
     "senaste_pris": 469000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000275": {
@@ -10058,7 +10060,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000276": {
@@ -10066,7 +10068,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000277": {
@@ -10074,7 +10076,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000278": {
@@ -10082,7 +10084,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000279": {
@@ -10090,7 +10092,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000280": {
@@ -10098,7 +10100,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 504900,
     "senaste_pris": 504900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000281": {
@@ -10106,7 +10108,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 409900,
     "senaste_pris": 409900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000282": {
@@ -10114,7 +10116,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 519000,
     "senaste_pris": 519000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000283": {
@@ -10202,7 +10204,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000294": {
@@ -10210,7 +10212,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449600,
     "senaste_pris": 449600,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000295": {
@@ -10218,7 +10220,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000296": {
@@ -10226,7 +10228,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 499900,
     "senaste_pris": 499900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000297": {
@@ -10234,7 +10236,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449800,
     "senaste_pris": 449800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000298": {
@@ -10250,7 +10252,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 359900,
     "senaste_pris": 359900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000300": {
@@ -10308,7 +10310,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 449800,
     "senaste_pris": 449800,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000307": {
@@ -10340,7 +10342,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 389000,
     "senaste_pris": 389000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000311": {
@@ -10366,7 +10368,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 394900,
     "senaste_pris": 394900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 394900
   },
@@ -10428,7 +10430,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 349000,
     "senaste_pris": 349000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000321": {
@@ -10436,7 +10438,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000322": {
@@ -10444,7 +10446,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 514900,
     "senaste_pris": 514900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000323": {
@@ -10452,7 +10454,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000324": {
@@ -10460,7 +10462,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 514900,
     "senaste_pris": 514900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000325": {
@@ -10468,7 +10470,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 509900,
     "senaste_pris": 509900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000326": {
@@ -10485,7 +10487,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 380000,
     "senaste_pris": 380000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": true,
     "notifierad_pris": 380000
   },
@@ -10494,7 +10496,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 539900,
     "senaste_pris": 539900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000329": {
@@ -10502,7 +10504,7 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 489900,
     "senaste_pris": 489900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   },
   "vehicle:00000330": {
@@ -10510,7 +10512,65 @@
     "forsta_sedd": "2026-08-24",
     "forsta_pris": 439000,
     "senaste_pris": 439000,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000331": {
+    "vehicle_id": "vehicle:00000331",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 419000,
+    "senaste_pris": 419000,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000332": {
+    "vehicle_id": "vehicle:00000332",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 417900,
+    "senaste_pris": 417900,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000333": {
+    "forsta_sedd": "2026-08-18",
+    "forsta_pris": 680150,
+    "senaste_pris": 627000,
+    "senast_sedd": "2026-08-25",
+    "notifierad": true,
+    "notifierad_pris": 597500,
+    "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2026:0",
+    "vehicle_id": "vehicle:00000333"
+  },
+  "vehicle:00000334": {
+    "vehicle_id": "vehicle:00000334",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 599900,
+    "senaste_pris": 599900,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000335": {
+    "vehicle_id": "vehicle:00000335",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 639900,
+    "senaste_pris": 639900,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000336": {
+    "vehicle_id": "vehicle:00000336",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 569000,
+    "senaste_pris": 569000,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000337": {
+    "vehicle_id": "vehicle:00000337",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 399900,
+    "senaste_pris": 399900,
+    "senast_sedd": "2026-08-25",
     "notifierad": false
   }
 }
