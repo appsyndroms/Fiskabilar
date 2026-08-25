@@ -1083,7 +1083,11 @@
     "reg:CMB39J": "vehicle:00000344",
     "source:bilweb:12848480": "vehicle:00000344",
     "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-12848480": "vehicle:00000344",
-    "fp:d0bf3555a04e3cf8": "vehicle:00000344"
+    "fp:d0bf3555a04e3cf8": "vehicle:00000344",
+    "url:https://www.wayke.se/objekt/1a119f3f-0a3a-4b35-b5c2-bc8ae7692129": "vehicle:00000345",
+    "fp:2cc7a2231ad6bae9": "vehicle:00000345",
+    "fp:81448f2dfd01a54c": "vehicle:00000341",
+    "fp:15183204ad76a321": "vehicle:00000272"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7274,6 +7278,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000345": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/1a119f3f-0a3a-4b35-b5c2-bc8ae7692129",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
