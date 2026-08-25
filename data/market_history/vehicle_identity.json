@@ -1064,7 +1064,10 @@
     "reg:ECP61H": "vehicle:00000337",
     "source:bilweb:12847968": "vehicle:00000337",
     "url:https://bilweb.se/kronobergs-lan/volvo-v90-recharge-t6-awd-core-edition-adaptiv-fart-drag-varmare-2024-kombi-12847968": "vehicle:00000337",
-    "fp:ffd8f4aca6709ceb": "vehicle:00000337"
+    "fp:ffd8f4aca6709ceb": "vehicle:00000337",
+    "fp:a281c97d89f09328": "vehicle:00000070",
+    "url:https://www.wayke.se/objekt/00eca4cb-aca6-4318-aecd-58e37f5c0d67": "vehicle:00000338",
+    "fp:fc31bb6ff4392e5e": "vehicle:00000338"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7129,6 +7132,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000338": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/00eca4cb-aca6-4318-aecd-58e37f5c0d67",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
