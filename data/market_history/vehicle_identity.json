@@ -1067,7 +1067,23 @@
     "fp:ffd8f4aca6709ceb": "vehicle:00000337",
     "fp:a281c97d89f09328": "vehicle:00000070",
     "url:https://www.wayke.se/objekt/00eca4cb-aca6-4318-aecd-58e37f5c0d67": "vehicle:00000338",
-    "fp:fc31bb6ff4392e5e": "vehicle:00000338"
+    "fp:fc31bb6ff4392e5e": "vehicle:00000338",
+    "url:https://www.wayke.se/objekt/7365c07c-6138-4473-9359-7f6f0988aed5": "vehicle:00000339",
+    "fp:9e3d0be45b7a3f5f": "vehicle:00000339",
+    "url:https://www.wayke.se/objekt/53c3a866-dcc8-4839-a6fd-1398f047e5fb": "vehicle:00000340",
+    "fp:0da6849fc4cec6e6": "vehicle:00000340",
+    "url:https://www.wayke.se/objekt/0f34d314-0ddc-43a7-bce3-9945b15dc6c8": "vehicle:00000341",
+    "fp:0d594bfb9ea94cea": "vehicle:00000341",
+    "url:https://www.wayke.se/objekt/f6347f3f-d019-42a8-9672-3f2d4c3d1083": "vehicle:00000342",
+    "fp:63bfb6590696dc9f": "vehicle:00000342",
+    "reg:PWN54S": "vehicle:00000343",
+    "source:bilweb:12848476": "vehicle:00000343",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-recharge-t8-plus-dark-2024-kombi-12848476": "vehicle:00000343",
+    "fp:13b95b21ef141918": "vehicle:00000343",
+    "reg:CMB39J": "vehicle:00000344",
+    "source:bilweb:12848480": "vehicle:00000344",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-12848480": "vehicle:00000344",
+    "fp:d0bf3555a04e3cf8": "vehicle:00000344"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7150,6 +7166,114 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000339": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/7365c07c-6138-4473-9359-7f6f0988aed5",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000340": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/53c3a866-dcc8-4839-a6fd-1398f047e5fb",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000341": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/0f34d314-0ddc-43a7-bce3-9945b15dc6c8",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000342": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/f6347f3f-d019-42a8-9672-3f2d4c3d1083",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000343": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": "PWN54S",
+        "vin": null
+      },
+      "last_seen": "12848476",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000344": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "CMB39J",
+        "vin": null
+      },
+      "last_seen": "12848480",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
