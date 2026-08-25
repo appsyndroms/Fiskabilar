@@ -10480,7 +10480,7 @@
     "forsta_sedd": "2026-08-14",
     "forsta_pris": 449900,
     "senaste_pris": 449900,
-    "senast_sedd": "2026-08-24",
+    "senast_sedd": "2026-08-25",
     "notifierad": false,
     "migrerad_fran": "kal:v90:T6 AWD:2023:6506",
     "vehicle_id": "vehicle:00000326"
@@ -10750,6 +10750,14 @@
     "forsta_sedd": "2026-08-25",
     "forsta_pris": 544700,
     "senaste_pris": 544700,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
+  },
+  "vehicle:00000360": {
+    "vehicle_id": "vehicle:00000360",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 508800,
+    "senaste_pris": 508800,
     "senast_sedd": "2026-08-25",
     "notifierad": false
   }

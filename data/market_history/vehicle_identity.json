@@ -1130,7 +1130,13 @@
     "fp:7a614b4c61644316": "vehicle:00000358",
     "url:https://www.wayke.se/objekt/1e8c2b71-0cb7-46eb-9805-73fc47096f64": "vehicle:00000359",
     "fp:153e5e7dfef4b52a": "vehicle:00000359",
-    "fp:db3e561e9b5cdcb1": "vehicle:00000171"
+    "fp:db3e561e9b5cdcb1": "vehicle:00000171",
+    "reg:WBX53R": "vehicle:00000360",
+    "source:bilweb:12849105": "vehicle:00000360",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-2025-kombi-12849105": "vehicle:00000360",
+    "fp:352ed9f0419a268a": "vehicle:00000360",
+    "source:bilweb:12849134": "vehicle:00000344",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-360-harmankardon-2025-kombi-12849134": "vehicle:00000344"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7316,7 +7322,7 @@
         "regnr": "CMB39J",
         "vin": null
       },
-      "last_seen": "12848480",
+      "last_seen": "12849134",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -7591,6 +7597,24 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000360": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": "WBX53R",
+        "vin": null
+      },
+      "last_seen": "12849105",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
