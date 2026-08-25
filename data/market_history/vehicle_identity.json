@@ -1093,7 +1093,9 @@
     "url:https://www.wayke.se/objekt/159ab3d5-dabf-4475-9891-7ec0d7b3a4f9": "vehicle:00000347",
     "fp:95539213647bfbb2": "vehicle:00000347",
     "url:https://www.wayke.se/objekt/8ec70f48-e6dc-4ea8-bad5-010eac10ab85": "vehicle:00000348",
-    "fp:46c511887aff581c": "vehicle:00000348"
+    "fp:46c511887aff581c": "vehicle:00000348",
+    "url:https://www.wayke.se/objekt/7f6a7ef4-9d74-4836-8270-bd93319195e4": "vehicle:00000349",
+    "fp:dfbd5f70606c70e6": "vehicle:00000349"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7352,6 +7354,24 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/8ec70f48-e6dc-4ea8-bad5-010eac10ab85",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000349": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/7f6a7ef4-9d74-4836-8270-bd93319195e4",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
