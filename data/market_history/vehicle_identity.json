@@ -1172,7 +1172,9 @@
     "fp:3166e40524df784d": "vehicle:00000365",
     "fp:a0d4c494c15adba1": "vehicle:00000318",
     "url:https://www.wayke.se/objekt/019ff0f3-b8f3-7236-b577-e9b8b1251896": "vehicle:00000366",
-    "fp:31d2bf947ad3a680": "vehicle:00000366"
+    "fp:31d2bf947ad3a680": "vehicle:00000366",
+    "url:https://www.wayke.se/objekt/12f20c06-0503-4044-8fe4-7603e69964fd": "vehicle:00000367",
+    "fp:9920e303868bd8ae": "vehicle:00000367"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7755,6 +7757,24 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/019ff0f3-b8f3-7236-b577-e9b8b1251896",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000367": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/12f20c06-0503-4044-8fe4-7603e69964fd",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",

@@ -10809,5 +10809,13 @@
     "notifierad": false,
     "migrerad_fran": "kal:330e-xdrive-touring:330e xDrive Touring:2024:4580",
     "vehicle_id": "vehicle:00000366"
+  },
+  "vehicle:00000367": {
+    "vehicle_id": "vehicle:00000367",
+    "forsta_sedd": "2026-08-25",
+    "forsta_pris": 549990,
+    "senaste_pris": 549990,
+    "senast_sedd": "2026-08-25",
+    "notifierad": false
   }
 }
