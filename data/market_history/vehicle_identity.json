@@ -1226,7 +1226,14 @@
     "fp:75fa2d475ebbd80f": "vehicle:00000379",
     "fp:255530e5858708ca": "vehicle:00000144",
     "url:https://www.wayke.se/objekt/0962c738-c658-4a28-b97b-98ab3e639257": "vehicle:00000380",
-    "fp:c65e272188c565d4": "vehicle:00000380"
+    "fp:c65e272188c565d4": "vehicle:00000380",
+    "fp:655cd14e432861d2": "vehicle:00000350",
+    "url:https://www.wayke.se/objekt/8a5f06e7-f67f-40cc-b3bb-a8a95421efee": "vehicle:00000381",
+    "fp:d3136dddd155f623": "vehicle:00000381",
+    "url:https://www.wayke.se/objekt/920c9664-8398-415a-b4b4-328a260be9fa": "vehicle:00000382",
+    "fp:69c0cc9ba6e2b723": "vehicle:00000382",
+    "url:https://www.wayke.se/objekt/30fee119-3065-4cd1-92b8-c92651bcda94": "vehicle:00000383",
+    "fp:838821104cec2c9a": "vehicle:00000383"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8061,6 +8068,60 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/0962c738-c658-4a28-b97b-98ab3e639257",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000381": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8a5f06e7-f67f-40cc-b3bb-a8a95421efee",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000382": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/920c9664-8398-415a-b4b4-328a260be9fa",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000383": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/30fee119-3065-4cd1-92b8-c92651bcda94",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
