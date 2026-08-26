@@ -1261,7 +1261,13 @@
     "reg:JGJ020": "vehicle:00000393",
     "source:bilweb:12850656": "vehicle:00000393",
     "url:https://bilweb.se/kronobergs-lan/bmw-330-e-touring-m-sport-drag-adaptiv-fart-carplay-rattvarme-2024-kombi-12850656": "vehicle:00000393",
-    "fp:4ebb7f67d2879a90": "vehicle:00000393"
+    "fp:4ebb7f67d2879a90": "vehicle:00000393",
+    "url:https://www.wayke.se/objekt/fed4c794-152c-4ae2-9077-ac53848e173e": "vehicle:00000394",
+    "fp:340dc709126cbdc8": "vehicle:00000394",
+    "reg:JBW24U": "vehicle:00000395",
+    "source:bilweb:12850693": "vehicle:00000395",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-lagerbil-2026-kombi-12850693": "vehicle:00000395",
+    "fp:9d13b4fcdccc7d69": "vehicle:00000395"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8330,6 +8336,42 @@
         "vin": null
       },
       "last_seen": "12850656",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000394": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/fed4c794-152c-4ae2-9077-ac53848e173e",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000395": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "JBW24U",
+        "vin": null
+      },
+      "last_seen": "12850693",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",

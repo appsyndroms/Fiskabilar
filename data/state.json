@@ -11026,5 +11026,21 @@
     "senaste_pris": 409900,
     "senast_sedd": "2026-08-26",
     "notifierad": false
+  },
+  "vehicle:00000394": {
+    "vehicle_id": "vehicle:00000394",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 499900,
+    "senaste_pris": 499900,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000395": {
+    "vehicle_id": "vehicle:00000395",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 608800,
+    "senaste_pris": 608800,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
   }
 }
