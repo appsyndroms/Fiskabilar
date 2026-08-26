@@ -1354,7 +1354,15 @@
     "reg:REL76E": "vehicle:00000422",
     "source:bilweb:12851338": "vehicle:00000422",
     "url:https://bilweb.se/ostergotlands-lan/volvo-v90-recharge-t8-ultimate-dark-2023-kombi-12851338": "vehicle:00000422",
-    "fp:c15ee9adc79c7c21": "vehicle:00000422"
+    "fp:c15ee9adc79c7c21": "vehicle:00000422",
+    "url:https://www.wayke.se/objekt/e5c915e7-b377-4dcc-a0a3-be9495ce14e3": "vehicle:00000423",
+    "fp:05fb8fb2fc0d0772": "vehicle:00000423",
+    "url:https://www.wayke.se/objekt/6406372f-18c9-472f-9f1c-e8f937dacd7b": "vehicle:00000424",
+    "fp:806c694ee7dda736": "vehicle:00000424",
+    "url:https://www.wayke.se/objekt/029fb7d4-b3da-478d-9d13-cf6e1b609cc1": "vehicle:00000425",
+    "fp:183425359d112147": "vehicle:00000425",
+    "url:https://www.wayke.se/objekt/e849f541-185c-4df8-a839-9c2a27664564": "vehicle:00000426",
+    "fp:f8a5aad255b08d5c": "vehicle:00000426"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8949,6 +8957,78 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000423": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/e5c915e7-b377-4dcc-a0a3-be9495ce14e3",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000424": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/6406372f-18c9-472f-9f1c-e8f937dacd7b",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000425": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/029fb7d4-b3da-478d-9d13-cf6e1b609cc1",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000426": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/e849f541-185c-4df8-a839-9c2a27664564",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
