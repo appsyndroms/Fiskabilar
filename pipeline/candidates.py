@@ -52,6 +52,10 @@ MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 MIN_MILTAL_FOR_KANDIDAT = 1000
 
+# Bilar över denna milgräns kan fortfarande visas i
+# kandidatdiagnostiken men får aldrig generera mejl.
+MAX_MILTAL_FOR_NOTIS = 6000
+
 
 def _annons_namn(
     bil: dict,
@@ -276,6 +280,7 @@ def processa_kandidater(
         "min_score": MIN_SCORE_FOR_NOTIS,
         "min_diff": MIN_DIFF_FOR_CANDIDATE,
         "min_miltal": MIN_MILTAL_FOR_KANDIDAT,
+        "max_miltal_notis": MAX_MILTAL_FOR_NOTIS,
     }
 
     kandidater = []
@@ -423,6 +428,29 @@ def processa_kandidater(
         statistik[
             "score_ok"
         ] += 1
+
+        # --------------------------------------------------------
+        # MILTALSGRÄNS FÖR NOTIS
+        # --------------------------------------------------------
+
+        if (
+            miltal
+            > MAX_MILTAL_FOR_NOTIS
+        ):
+            kandidater.append(
+                _logga_kandidat(
+                    bil,
+                    vardering,
+                    score,
+                    (
+                        "STOPP: miltal > "
+                        f"{MAX_MILTAL_FOR_NOTIS:,}"
+                        " mil - ingen notis"
+                    ),
+                )
+            )
+
+            continue
 
         # --------------------------------------------------------
         # DUPLICERAD NOTIFIERING
