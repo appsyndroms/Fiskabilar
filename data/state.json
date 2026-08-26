@@ -493,7 +493,7 @@
     "notifierad": true,
     "notifierad_pris": 409900,
     "migrerad_fran": "kal:v90:T6 AWD:2024:5300",
-    "vehicle_id": "vehicle:00000401"
+    "vehicle_id": "vehicle:00000420"
   },
   "kal:v90:T6 AWD:2024:7287": {
     "forsta_sedd": "2026-08-14",
@@ -11208,6 +11208,64 @@
     "forsta_sedd": "2026-08-26",
     "forsta_pris": 380000,
     "senaste_pris": 380000,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000416": {
+    "vehicle_id": "vehicle:00000416",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 479800,
+    "senaste_pris": 479800,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000417": {
+    "vehicle_id": "vehicle:00000417",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 549900,
+    "senaste_pris": 549900,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000418": {
+    "vehicle_id": "vehicle:00000418",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 479900,
+    "senaste_pris": 479900,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000419": {
+    "vehicle_id": "vehicle:00000419",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 509800,
+    "senaste_pris": 509800,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000420": {
+    "forsta_sedd": "2026-08-14",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-26",
+    "notifierad": true,
+    "notifierad_pris": 409900,
+    "migrerad_fran": "kal:v90:T6 AWD:2024:5300",
+    "vehicle_id": "vehicle:00000420"
+  },
+  "vehicle:00000421": {
+    "vehicle_id": "vehicle:00000421",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 409900,
+    "senaste_pris": 409900,
+    "senast_sedd": "2026-08-26",
+    "notifierad": false
+  },
+  "vehicle:00000422": {
+    "vehicle_id": "vehicle:00000422",
+    "forsta_sedd": "2026-08-26",
+    "forsta_pris": 419900,
+    "senaste_pris": 419900,
     "senast_sedd": "2026-08-26",
     "notifierad": false
   }
