@@ -1267,7 +1267,11 @@
     "reg:JBW24U": "vehicle:00000395",
     "source:bilweb:12850693": "vehicle:00000395",
     "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-lagerbil-2026-kombi-12850693": "vehicle:00000395",
-    "fp:9d13b4fcdccc7d69": "vehicle:00000395"
+    "fp:9d13b4fcdccc7d69": "vehicle:00000395",
+    "url:https://www.wayke.se/objekt/5cdee097-c262-47da-bacc-138b469fed38": "vehicle:00000396",
+    "fp:f71db411611ee4b5": "vehicle:00000396",
+    "url:https://www.wayke.se/objekt/66770747-5ef7-430f-8d75-68e2dd214a2b": "vehicle:00000397",
+    "fp:f8879176a7873503": "vehicle:00000397"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8376,6 +8380,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000396": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/5cdee097-c262-47da-bacc-138b469fed38",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000397": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/66770747-5ef7-430f-8d75-68e2dd214a2b",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
