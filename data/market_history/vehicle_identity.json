@@ -1211,7 +1211,20 @@
     "reg:WXR48S": "vehicle:00000376",
     "source:bilweb:12849999": "vehicle:00000376",
     "url:https://bilweb.se/kalmar-lan/volvo-v60-t6-awd-plus-dark-nordic-edition-360-kamera-dr-2026-kombi-12849999": "vehicle:00000376",
-    "fp:86011d2b00d1ceb9": "vehicle:00000376"
+    "fp:86011d2b00d1ceb9": "vehicle:00000376",
+    "reg:JAM90U": "vehicle:00000377",
+    "source:bilweb:12850453": "vehicle:00000377",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t8-awd-ultimate-dark-pano-360-hud-hk-drag-2024-kombi-12850453": "vehicle:00000377",
+    "fp:af547f7f0d37f138": "vehicle:00000377",
+    "reg:FMY18T": "vehicle:00000378",
+    "source:bilweb:12850125": "vehicle:00000378",
+    "url:https://bilweb.se/vasterbottens-lan/volvo-v60-recharge-t8-plus-dark-2024-kombi-12850125": "vehicle:00000378",
+    "fp:7bb8ddb5bf22e5d6": "vehicle:00000378",
+    "reg:ZTP166": "vehicle:00000379",
+    "source:bilweb:12850058": "vehicle:00000379",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t6-plus-dark-dragkrok-lader-2023-kombi-12850058": "vehicle:00000379",
+    "fp:75fa2d475ebbd80f": "vehicle:00000379",
+    "fp:255530e5858708ca": "vehicle:00000144"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -7974,6 +7987,60 @@
         "vin": null
       },
       "last_seen": "12849999",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000377": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": "JAM90U",
+        "vin": null
+      },
+      "last_seen": "12850453",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000378": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": "FMY18T",
+        "vin": null
+      },
+      "last_seen": "12850125",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000379": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "ZTP166",
+        "vin": null
+      },
+      "last_seen": "12850058",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
