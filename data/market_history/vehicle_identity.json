@@ -1370,7 +1370,9 @@
     "url:https://www.wayke.se/objekt/32d4ec7f-cea0-43a3-86b0-6b2730866cd4": "vehicle:00000429",
     "fp:cdea018c44c713bd": "vehicle:00000429",
     "url:https://www.wayke.se/objekt/a5e2985e-dec4-431f-aa0d-ab4478129fdc": "vehicle:00000430",
-    "fp:6b0d37a06eec1d8b": "vehicle:00000430"
+    "fp:6b0d37a06eec1d8b": "vehicle:00000430",
+    "url:https://www.wayke.se/objekt/8917c8a3-29a6-4a38-8f50-fae0f7b21914": "vehicle:00000431",
+    "fp:700cc02f8cf5ea6a": "vehicle:00000431"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -9105,6 +9107,24 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/a5e2985e-dec4-431f-aa0d-ab4478129fdc",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000431": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8917c8a3-29a6-4a38-8f50-fae0f7b21914",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
