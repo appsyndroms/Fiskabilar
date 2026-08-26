@@ -1224,7 +1224,9 @@
     "source:bilweb:12850058": "vehicle:00000379",
     "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t6-plus-dark-dragkrok-lader-2023-kombi-12850058": "vehicle:00000379",
     "fp:75fa2d475ebbd80f": "vehicle:00000379",
-    "fp:255530e5858708ca": "vehicle:00000144"
+    "fp:255530e5858708ca": "vehicle:00000144",
+    "url:https://www.wayke.se/objekt/0962c738-c658-4a28-b97b-98ab3e639257": "vehicle:00000380",
+    "fp:c65e272188c565d4": "vehicle:00000380"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8045,6 +8047,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000380": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/0962c738-c658-4a28-b97b-98ab3e639257",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
