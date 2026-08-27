@@ -188,16 +188,37 @@ def _hamta_kandidat_urler(
 
             continue
 
+        # --------------------------------------------------------
+        # Om BMW-modellen kräver detaljkontroll av kaross
+        # har vi redan konstaterat modell + xDrive från sluggen.
+        #
+        # Varianten hämtas från konfigurationen i stället för
+        # att hårdkodas här. Det gör att samma flöde fungerar
+        # även om fler BMW-modeller läggs till senare.
+        # --------------------------------------------------------
+
         if detalj_karosskontroll:
 
-            variant = (
-                "530e xDrive Touring"
-                if bilkonfig.get(
-                    "modell_slug"
-                )
-                == "530e-xdrive-touring"
-                else "330e xDrive Touring"
+            variant_kraven = bilkonfig.get(
+                "variant_kraven",
+                {}
             )
+
+            if len(variant_kraven) == 1:
+
+                variant = next(
+                    iter(
+                        variant_kraven
+                    )
+                )
+
+            else:
+
+                variant = (
+                    bilkonfig.get(
+                        "modell_visning"
+                    )
+                )
 
         href = a["href"]
 
