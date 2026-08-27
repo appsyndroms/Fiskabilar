@@ -20,6 +20,10 @@ from app_logging.logger import (
     always,
 )
 
+from config import (
+    DEBUG,
+)
+
 from valuation.market_value import (
     berakna_fynd,
     berakna_miltalsdiagnostik,
@@ -51,16 +55,6 @@ from history.state import (
 MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 MIN_MILTAL_FOR_KANDIDAT = 1000
-
-# DEBUG-läge:
-# När DEBUG=True får inga mejl skickas.
-#
-# Viktigt:
-# - kandidater beräknas fortfarande
-# - diagnostics fungerar fortfarande
-# - valuation/scoring fungerar fortfarande
-# - notifieringsstate ändras inte
-DEBUG = False
 
 
 def _annons_namn(
