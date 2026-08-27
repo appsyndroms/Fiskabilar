@@ -36,8 +36,20 @@ jobs:
         run: python -u main.py
 
       - name: Spara historik, identity och state
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Uppdaterar fyndhistorik, identity och state"
-          file_pattern: "data/state.json data/market_history"
-          branch: main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/state.json data/market_history
+
+          if git diff --cached --quiet; then
+            echo "Ingen förändring att committa."
+            exit 0
+          fi
+
+          git commit -m "Uppdaterar fyndhistorik, identity och state"
+
+          git fetch origin main
+          git rebase origin/main
+
+          git push origin HEAD:main
