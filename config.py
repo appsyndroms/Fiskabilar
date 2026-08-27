@@ -139,5 +139,12 @@ HISTORIK_SPARA_VARJE_KORNING = True
 
 # En redan notifierad bil får en ny notis först när priset är minst
 # 15 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
-
 MIN_PRISSANKNING_FOR_NY_NOTIS = 15000
+
+# ------------------------------------------------------------
+# DEBUG
+# ------------------------------------------------------------
+
+# När DEBUG=True körs hela kandidatpipen men inga mejl skickas.
+# Notifieringsstate markeras inte heller.
+DEBUG = False
