@@ -123,6 +123,63 @@ def _formatera_historikdiagnostik(
     )
 
 
+def _formatera_miltalsdiagnostik(
+    kandidat: dict,
+) -> str:
+
+    miltal = kandidat.get(
+        "miltal",
+        0,
+    )
+
+    miltalspoang = kandidat.get(
+        "miltalspoang",
+        0,
+    )
+
+    try:
+        miltal = int(miltal)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        miltal = 0
+
+    try:
+        miltalspoang = int(miltalspoang)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        miltalspoang = 0
+
+    max_poang = 20
+
+    miltalsavdrag = max(
+        0,
+        max_poang - miltalspoang,
+    )
+
+    if miltal >= 10000:
+        klass = "MYCKET HÖG MIL"
+    elif miltal >= 8000:
+        klass = "HÖG MIL"
+    elif miltal >= 5000:
+        klass = "NORMAL/HÖG MIL"
+    else:
+        klass = "NORMAL/LÅG MIL"
+
+    return (
+        f"Miltal: {miltal:,} mil → "
+        f"{miltalspoang}/{max_poang} "
+        f"(-{miltalsavdrag} p) | "
+        f"{klass}"
+    ).replace(
+        ",",
+        " ",
+    )
+
+
 def _parse_tid(
     value,
 ) -> datetime | None:
@@ -611,6 +668,13 @@ def skriv_diagnostik(
             f"{kandidat['utrustningspoang']}/5 | "
             f"Trygghet: "
             f"{kandidat['trygghetspoang']}/15"
+        )
+
+        info(
+            "    "
+            + _formatera_miltalsdiagnostik(
+                kandidat
+            )
         )
 
         historik = (
