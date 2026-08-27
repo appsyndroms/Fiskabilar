@@ -115,13 +115,13 @@ BASPRIS = {
 # MARKNADSUNDERLAG
 # =========================================================
 
-MIN_JAMFORELSEBILAR = 3
+MIN_JAMFORELSEBILAR = 5
 MAX_JAMFORELSEBILAR = 15
 
 PRIMAR_MAX_MILTALSSKILLNAD = 1500
 MAX_MILTALSSKILLNAD = 3000
 
-KR_PER_MIL_AVVIKELSE = 12.0
+KR_PER_MIL_AVVIKELSE = 10.0
 
 MIN_MILTAL = 1000
 
@@ -876,7 +876,7 @@ def _hamta_jamforelsebilar(
     2. Aktuell annons exkluderas.
     3. Endast bilar inom relevant miltalsintervall används.
     4. Först försöks ett primärt intervall på ±1 500 mil.
-    5. Om färre än tre finns utökas intervallet till ±3 000 mil.
+    5. Om färre än fem finns utökas intervallet till ±3 000 mil.
     6. De närmaste bilarna väljs.
     7. Maximalt 15 jämförelsebilar används.
 
@@ -1389,7 +1389,7 @@ def _berakna_marknadspris_fran_jamforelser(
     Medianen tas först efter att varje jämförelsebil har
     normaliserats mot målbilens miltal och utrustning.
 
-    Färre än tre användbara jämförelser innebär att det empiriska
+    Färre än fem användbara jämförelser innebär att det empiriska
     underlaget är otillräckligt och funktionen returnerar None.
 
     None betyder uttryckligen:
