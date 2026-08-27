@@ -30,4 +30,5 @@ jobs:
       - name: Kör fyndfilter
         env:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
+          DEBUG: "true"
         run: python -u main.py --log-level TRACE
