@@ -3,6 +3,9 @@ Konfiguration för bilfyndfiltret.
 Justera fritt utan att röra övrig kod.
 """
 
+import os
+
+
 # --- Grundkrav (gäller alla bilar nedan) ---
 
 ARSMODELL_MIN = 2022
@@ -12,6 +15,7 @@ MIN_MIL = 1000
 MAX_MIL = 12000
 VAXELLADA = "Automat"
 UTESLUT_SKADAD = True
+
 
 # --- Bilar att bevaka ---
 
@@ -84,6 +88,7 @@ BILAR = [
     },
 ]
 
+
 FYND_TROSKEL = 20000
 EXTREMT_FYND_TROSKEL = 35000
 
@@ -96,10 +101,12 @@ EPOST_FRAN = "ronnie.engstrand@gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
+
 AKTIVA_KALLOR = [
     "wayke",
     "bilweb",
 ]
+
 
 HYRBIL_NYCKELORD = [
     "hyrbil",
@@ -109,12 +116,15 @@ HYRBIL_NYCKELORD = [
     "flikbil",
 ]
 
+
 SELEKT_NYCKELORD = [
     "volvo selekt",
     "selekt",
 ]
 
+
 STATE_FIL = "data/state.json"
+
 
 # --- Historik ---
 
@@ -135,16 +145,29 @@ HISTORIK_FIL = "data/market_history/market_history.jsonl"
 
 HISTORIK_SPARA_VARJE_KORNING = True
 
+
 # --- Notifiering ---
 
 # En redan notifierad bil får en ny notis först när priset är minst
 # 15 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
 MIN_PRISSANKNING_FOR_NY_NOTIS = 15000
 
+
 # ------------------------------------------------------------
 # DEBUG
 # ------------------------------------------------------------
 
+# DEBUG styrs via miljövariabeln DEBUG.
+#
+# Vanlig körning:
+#   DEBUG saknas -> False
+#
+# Debug-körning:
+#   DEBUG=true -> True
+#
 # När DEBUG=True körs hela kandidatpipen men inga mejl skickas.
 # Notifieringsstate markeras inte heller.
-DEBUG = False
+DEBUG = os.getenv(
+    "DEBUG",
+    "false",
+).lower() == "true"
