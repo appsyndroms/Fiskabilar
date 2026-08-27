@@ -4,6 +4,13 @@ Sparar kortsiktig körnings-/notifieringsstate.
 State använder Fiskabilars identity resolution när vehicle_id
 finns. Därmed följer notifieringshistoriken samma fysiska bil
 även när annons-ID eller URL förändras.
+
+Annonslivscykel:
+- NY
+- AKTIV
+- SAKNAS
+- FÖRSVUNNEN
+- ÅTERKOMMEN
 """
 
 from app_logging.logger import info
@@ -22,6 +29,11 @@ from config import (
 from .identity import (
     resolve_vehicle_id,
 )
+
+
+# En enstaka missad körning ska inte räcka för att kalla en
+# annons försvunnen. Två konsekutiva missade körningar krävs.
+ANTAL_MISSAR_FOR_FORSVUNNEN = 2
 
 
 def _nyckel(
@@ -242,6 +254,162 @@ def spara_state(
         )
 
 
+def _normalisera_livscykel_state(
+    historik: dict,
+) -> None:
+    """
+    Säkerställer att äldre state får de fält som
+    livscykeln behöver utan att befintlig historik ändras.
+    """
+
+    historik.setdefault(
+        "status",
+        "AKTIV",
+    )
+
+    historik.setdefault(
+        "missade_korningar",
+        0,
+    )
+
+    historik.setdefault(
+        "antal_observationer",
+        0,
+    )
+
+    historik.setdefault(
+        "antal_prisandringar",
+        0,
+    )
+
+    historik.setdefault(
+        "prisandringar",
+        [],
+    )
+
+
+def _registrera_prisandring(
+    historik: dict,
+    gammalt_pris,
+    nytt_pris,
+    datum: str,
+) -> None:
+    """
+    Registrerar en faktisk förändring mellan två
+    konsekutiva observationer.
+    """
+
+    if (
+        not isinstance(
+            gammalt_pris,
+            (int, float),
+        )
+        or not isinstance(
+            nytt_pris,
+            (int, float),
+        )
+        or gammalt_pris == nytt_pris
+    ):
+        return
+
+    forandring = (
+        nytt_pris
+        - gammalt_pris
+    )
+
+    historik[
+        "antal_prisandringar"
+    ] = (
+        historik.get(
+            "antal_prisandringar",
+            0,
+        )
+        + 1
+    )
+
+    historik.setdefault(
+        "prisandringar",
+        [],
+    ).append(
+        {
+            "datum": datum,
+            "fran": gammalt_pris,
+            "till": nytt_pris,
+            "forandring": forandring,
+        }
+    )
+
+    historik[
+        "senaste_prisandring"
+    ] = datum
+
+
+def _markera_forsvunna(
+    state: dict,
+    dagens_nycklar: set[str],
+    idag: str,
+) -> None:
+    """
+    Markerar bilar som inte längre finns i dagens resultat.
+
+    En missad körning ger SAKNAS.
+    Två konsekutiva missade körningar ger FÖRSVUNNEN.
+
+    När bilen återkommer senare återanvänds samma state
+    tack vare identity resolution.
+    """
+
+    for nyckel, historik in state.items():
+
+        if not isinstance(
+            historik,
+            dict,
+        ):
+            continue
+
+        if nyckel in dagens_nycklar:
+            continue
+
+        _normalisera_livscykel_state(
+            historik
+        )
+
+        missar = (
+            historik.get(
+                "missade_korningar",
+                0,
+            )
+            + 1
+        )
+
+        historik[
+            "missade_korningar"
+        ] = missar
+
+        if (
+            missar
+            >= ANTAL_MISSAR_FOR_FORSVUNNEN
+        ):
+            if (
+                historik.get(
+                    "status"
+                )
+                != "FÖRSVUNNEN"
+            ):
+                historik[
+                    "forsvunnen_datum"
+                ] = idag
+
+            historik[
+                "status"
+            ] = "FÖRSVUNNEN"
+
+        else:
+            historik[
+                "status"
+            ] = "SAKNAS"
+
+
 def uppdatera_och_berika(
     bilar: list[dict],
     state: dict,
@@ -253,13 +421,34 @@ def uppdatera_och_berika(
     - dagar_ute
     - prissankning_kr
     - prissankning_relevant
+    - livscykelstatus
+    - prisandring
+
+    Livscykeln följer bilen mellan körningar:
+
+        NY
+         ↓
+       AKTIV
+       ↙   ↘
+    SAKNAS  PRISÄNDRING
+       ↓
+    FÖRSVUNNEN
+       ↓
+    ÅTERKOMMEN
+       ↓
+      AKTIV
     """
 
     idag = date.today().isoformat()
 
-    resultat = []
+    # ------------------------------------------------------------
+    # IDENTIFIERA DAGENS BILAR INNAN STATE ÄNDRAS
+    # ------------------------------------------------------------
+
+    dagens_nycklar = set()
 
     for bil in bilar:
+
         vehicle_id = resolve_vehicle_id(
             bil
         )
@@ -268,12 +457,47 @@ def uppdatera_och_berika(
             "vehicle_id"
         ] = vehicle_id
 
+        nyckel = _nyckel(
+            bil
+        )
+
+        dagens_nycklar.add(
+            nyckel
+        )
+
+    # ------------------------------------------------------------
+    # MARKERA BILAR SOM INTE FINNS I DAGENS RESULTAT
+    # ------------------------------------------------------------
+
+    _markera_forsvunna(
+        state,
+        dagens_nycklar,
+        idag,
+    )
+
+    resultat = []
+
+    # ------------------------------------------------------------
+    # BEARBETA DAGENS BILAR
+    # ------------------------------------------------------------
+
+    for bil in bilar:
+
+        vehicle_id = bil.get(
+            "vehicle_id"
+        )
+
         nyckel, historik = _hamta_historik(
             bil,
             state,
         )
 
+        # --------------------------------------------------------
+        # NY BIL
+        # --------------------------------------------------------
+
         if historik is None:
+
             state[
                 nyckel
             ] = {
@@ -287,6 +511,12 @@ def uppdatera_och_berika(
                 ],
                 "senast_sedd": idag,
                 "notifierad": False,
+
+                "status": "NY",
+                "missade_korningar": 0,
+                "antal_observationer": 1,
+                "antal_prisandringar": 0,
+                "prisandringar": [],
             }
 
             bil[
@@ -301,7 +531,37 @@ def uppdatera_och_berika(
                 "prissankning_relevant"
             ] = False
 
+            bil[
+                "prisandring"
+            ] = 0
+
+            bil[
+                "livscykelstatus"
+            ] = "NY"
+
+        # --------------------------------------------------------
+        # BEFINTLIG BIL
+        # --------------------------------------------------------
+
         else:
+
+            _normalisera_livscykel_state(
+                historik
+            )
+
+            tidigare_status = historik.get(
+                "status",
+                "AKTIV",
+            )
+
+            gammalt_pris = historik.get(
+                "senaste_pris"
+            )
+
+            nytt_pris = bil.get(
+                "annonspris"
+            )
+
             forsta_sedd = date.fromisoformat(
                 historik[
                     "forsta_sedd"
@@ -317,9 +577,7 @@ def uppdatera_och_berika(
                 historik[
                     "forsta_pris"
                 ]
-                - bil[
-                    "annonspris"
-                ]
+                - nytt_pris
             )
 
             bil[
@@ -339,11 +597,99 @@ def uppdatera_och_berika(
                 >= MIN_DAGAR_FOR_SANKNING_RELEVANT
             )
 
+            # ----------------------------------------------------
+            # PRISÄNDRING
+            # ----------------------------------------------------
+
+            prisandrad = (
+                isinstance(
+                    gammalt_pris,
+                    (int, float),
+                )
+                and isinstance(
+                    nytt_pris,
+                    (int, float),
+                )
+                and gammalt_pris
+                != nytt_pris
+            )
+
+            if prisandrad:
+
+                _registrera_prisandring(
+                    historik,
+                    gammalt_pris,
+                    nytt_pris,
+                    idag,
+                )
+
+                bil[
+                    "prisandring"
+                ] = (
+                    nytt_pris
+                    - gammalt_pris
+                )
+
+            else:
+
+                bil[
+                    "prisandring"
+                ] = 0
+
+            # ----------------------------------------------------
+            # ÅTERKOMMEN
+            # ----------------------------------------------------
+
+            aterkommen = (
+                tidigare_status
+                == "FÖRSVUNNEN"
+            )
+
+            if aterkommen:
+
+                historik[
+                    "aterkommen_datum"
+                ] = idag
+
+                bil[
+                    "livscykelstatus"
+                ] = "ÅTERKOMMEN"
+
+            else:
+
+                bil[
+                    "livscykelstatus"
+                ] = "AKTIV"
+
+            # ----------------------------------------------------
+            # ÅTERSTÄLL AKTIV STATE
+            # ----------------------------------------------------
+
+            historik[
+                "status"
+            ] = (
+                "ÅTERKOMMEN"
+                if aterkommen
+                else "AKTIV"
+            )
+
+            historik[
+                "missade_korningar"
+            ] = 0
+
+            historik[
+                "antal_observationer"
+            ] = (
+                historik.get(
+                    "antal_observationer",
+                    0,
+                )
+                + 1
+            )
+
             historik[
                 "senaste_pris"
-            ] = bil[
-                "annonspris"
-            ]
+            ] = nytt_pris
 
             historik[
                 "senast_sedd"
@@ -417,6 +763,7 @@ def markera_notifierad(
     )
 
     if historik is not None:
+
         state[
             nyckel
         ][
