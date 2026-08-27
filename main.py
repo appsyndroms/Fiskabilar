@@ -52,14 +52,19 @@ from pipeline.candidates import processa_kandidater
 from pipeline.diagnostics import (
     skriv_diagnostik,
     skriv_sammanfattning,
+    skriv_livscykel_diagnostik,
 )
 
 
 def main():
-    info("\n=== Bilfyndfilter startar ===\n")
+    info(
+        "\n=== Bilfyndfilter startar ===\n"
+    )
 
     if not inom_aktiv_tid():
-        info("Utanför aktiv tid. Avslutar.")
+        info(
+            "Utanför aktiv tid. Avslutar."
+        )
         return
 
     # ------------------------------------------------------------
@@ -117,9 +122,39 @@ def main():
 
     # Historikindexet byggs före dagens observationer sparas.
     # Det innebär att historik, trend och lifecycle baseras
-    # på tidigare körningar och inte på den observation som
-    # precis ska skrivas.
+    # på tidigare körningar.
     historikindex = bygg_historikindex()
+
+    # ------------------------------------------------------------
+    # ANNONSENS LIVSCYKEL
+    # ------------------------------------------------------------
+
+    # Livscykeldiagnostiken jämför dagens population
+    # med historikindexet.
+    #
+    # Därmed kan vi redan denna körning se:
+    #
+    # - NY
+    # - AKTIV
+    # - ÅTERKOMMEN
+    # - FÖRSVUNNEN
+    #
+    # Den påverkar inte score eller valuation.
+    try:
+        skriv_livscykel_diagnostik(
+            bilar,
+            historikindex,
+        )
+
+    except Exception as e:
+        info(
+            "[LIFECYCLE] Kunde inte skriva "
+            f"livscykeldiagnostik: {e}"
+        )
+
+    # ------------------------------------------------------------
+    # HISTORIKBERIKNING
+    # ------------------------------------------------------------
 
     for bil in bilar:
         try:
