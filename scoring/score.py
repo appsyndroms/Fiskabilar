@@ -33,6 +33,85 @@ def bil_rubrik(bil: dict) -> str:
     return f"{marke_visning} {modell_visning}".strip()
 
 
+def berakna_historikspoang(
+    bil: dict,
+) -> int:
+    """
+    Beräknar historikens påverkan på fyndscore.
+
+    Historiken fungerar som en separat signal på +/- 5 poäng.
+
+    Positiva signaler:
+        +5  Stor dokumenterad prisnedgång och lång exponering
+        +4  Stor dokumenterad prisnedgång
+        +3  Tydlig dokumenterad prisnedgång
+        +2  Mindre dokumenterad prisnedgång
+        +1  Tidigare observation utan tydlig negativ signal
+
+    Negativa signaler:
+        -1  Lång exponering utan prisjustering
+        -2  Mycket lång exponering utan prisjustering
+
+    Historiken används inte för att ändra marknadsvärdet.
+    """
+
+    observationer = bil.get(
+        "historik_observationer",
+        0,
+    ) or 0
+
+    dagar = bil.get(
+        "historik_dagar",
+        0,
+    ) or 0
+
+    prisfall = bil.get(
+        "historik_prisfall",
+        0,
+    ) or 0
+
+    # Ingen användbar historik.
+    if observationer <= 0:
+        return 0
+
+    # ---------------------------------------------------------
+    # POSITIV HISTORIK
+    # ---------------------------------------------------------
+
+    # Stor prisnedgång + bilen har dessutom legat ute länge.
+    if prisfall >= 20000 and dagar >= 30:
+        return 5
+
+    # Stor dokumenterad prisnedgång.
+    if prisfall >= 20000:
+        return 4
+
+    # Tydlig dokumenterad prisnedgång.
+    if prisfall >= 10000:
+        return 3
+
+    # Mindre men verklig prisnedgång.
+    if prisfall >= 5000:
+        return 2
+
+    # Tidigare observation utan tydlig negativ signal.
+    if observationer >= 2:
+        return 1
+
+    # ---------------------------------------------------------
+    # NEGATIV HISTORIK
+    # ---------------------------------------------------------
+
+    # Lång exponering utan att priset förändrats.
+    if dagar >= 90 and prisfall <= 0:
+        return -2
+
+    if dagar >= 45 and prisfall <= 0:
+        return -1
+
+    return 0
+
+
 def berakna_fyndscore_breakdown(
     bil: dict,
     vardering: dict,
@@ -41,10 +120,15 @@ def berakna_fyndscore_breakdown(
     Beräknar fyndscore och returnerar även komponenterna.
 
     Viktning:
+
         Prisvärde       60 p
         Miltal          20 p
         Utrustning       5 p
         Trygghet        15 p
+        Historik        +/-5 p
+
+    Historiken fungerar som en separat marknadssignal och
+    påverkar inte själva marknadsvärderingen.
 
     Returnerar exempelvis:
 
@@ -53,7 +137,9 @@ def berakna_fyndscore_breakdown(
             "miltal": 15,
             "utrustning": 3,
             "trygghet": 8,
-            "total": 60,
+            "historik": 3,
+            "auktion_avdrag": 0,
+            "total": 63,
         }
     """
 
@@ -278,7 +364,15 @@ def berakna_fyndscore_breakdown(
         trygghetspoang += 3
 
     # =========================================================
-    # 5. AUKTION
+    # 5. HISTORIK - +/- 5 POÄNG
+    # =========================================================
+
+    historikspoang = berakna_historikspoang(
+        bil
+    )
+
+    # =========================================================
+    # 6. AUKTION
     # =========================================================
 
     auktion_avdrag = 0
@@ -295,6 +389,7 @@ def berakna_fyndscore_breakdown(
         + miltalspoang
         + utrustningspoang
         + trygghetspoang
+        + historikspoang
         - auktion_avdrag
     )
 
@@ -308,6 +403,7 @@ def berakna_fyndscore_breakdown(
         "miltal": miltalspoang,
         "utrustning": utrustningspoang,
         "trygghet": trygghetspoang,
+        "historik": historikspoang,
         "auktion_avdrag": auktion_avdrag,
         "total": total,
     }
