@@ -465,6 +465,50 @@ def formatera_notis(
         ).replace(",", " "),
     ]
 
+    # ---------------------------------------------------------
+    # PRISHISTORIK
+    # ---------------------------------------------------------
+
+    historik_priser = (
+        bil.get("historik_priser")
+        or []
+    )
+
+    if len(historik_priser) >= 2:
+
+        prisserie = " → ".join(
+            f"{pris:,}".replace(",", " ")
+            for pris in historik_priser
+        )
+
+        rader.append(
+            f"⚠️ Prishistorik: "
+            f"{prisserie} kr"
+        )
+
+        total_prisforandring = (
+            historik_priser[-1]
+            - historik_priser[0]
+        )
+
+        if total_prisforandring < 0:
+
+            rader.append(
+                (
+                    f"Total sänkning: "
+                    f"{abs(total_prisforandring):,} kr"
+                ).replace(",", " ")
+            )
+
+        elif total_prisforandring > 0:
+
+            rader.append(
+                (
+                    f"Total prisökning: "
+                    f"{total_prisforandring:,} kr"
+                ).replace(",", " ")
+            )
+
     if bil.get("auktion"):
         rader.append(
             "⚠️ AUKTIONSPRIS - INTE ett fast köp-nu-pris, "
