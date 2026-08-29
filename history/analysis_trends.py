@@ -1087,4 +1087,24 @@ def berakna_marknadstrend_for_bil(
                 0,
             ),
 
-        "marknad_antal
+        "marknad_antal_forandring_procent":
+            trend.get(
+                "marknad_antal_forandring_procent",
+                0.0,
+            ),
+
+        "marknad_minsta_pris":
+            trend.get(
+                "marknad_minsta_pris"
+            ),
+
+        "marknad_hogsta_pris":
+            trend.get(
+                "marknad_hogsta_pris"
+            ),
+
+        "marknad_prisintervall":
+            trend.get(
+                "marknad_prisintervall"
+            ),
+    }
