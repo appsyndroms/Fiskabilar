@@ -11,6 +11,10 @@ men ska inte dominera den aktuella trenden.
 
 En trend kräver flera separata observationsdagar för att flera körningar
 under samma dygn inte ska tolkas som en marknadsrörelse.
+
+Utöver prisrörelsen beskriver analysen även marknadens storlek och
+prisintervall inom trendfönstret. Detta gör att historiken kan användas
+som ett faktiskt marknadsunderlag och inte bara som en prisindikator.
 """
 
 from app_logging.logger import info
@@ -122,6 +126,11 @@ def _bygg_dagliga_priser(
     Detta är viktigt eftersom en körning kan innehålla många observationer
     av samma marknad under samma dygn. Flera körningar samma dag ska därför
     inte räknas som flera separata marknadsdagar.
+
+    Förutom medianpriset sparas även:
+      - antal observationer
+      - lägsta pris
+      - högsta pris
     """
 
     per_dag: dict[
@@ -166,6 +175,12 @@ def _bygg_dagliga_priser(
                     priser
                 ),
                 "antal_observationer": len(
+                    priser
+                ),
+                "lagsta_pris": min(
+                    priser
+                ),
+                "hogsta_pris": max(
                     priser
                 ),
             }
@@ -225,24 +240,45 @@ def _begransa_trendfonster(
         )
     )
 
-    return [
-        post
-        for post in dagliga_priser
-        if (
-            isinstance(
-                post.get("dag"),
-                str,
-            )
-            and startdatum
-            <= __import__(
-                "datetime"
-            )
-            .date.fromisoformat(
-                post["dag"]
-            )
-            <= senaste_datum
+    resultat = []
+
+    for post in dagliga_priser:
+        dag = post.get(
+            "dag"
         )
-    ]
+
+        if not isinstance(
+            dag,
+            str,
+        ):
+            continue
+
+        try:
+            datum = (
+                __import__(
+                    "datetime"
+                )
+                .date.fromisoformat(
+                    dag
+                )
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+            continue
+
+        if (
+            startdatum
+            <= datum
+            <= senaste_datum
+        ):
+            resultat.append(
+                post
+            )
+
+    return resultat
 
 
 def _prisforandring_procent(
@@ -283,6 +319,151 @@ def _klassificera_riktning(
     return "oforandrad"
 
 
+def _analysera_marknadsstorlek(
+    dagliga_priser: list[dict],
+) -> dict:
+    """
+    Analyserar marknadens storlek inom trendfönstret.
+
+    Antalet observationer används som marknadsindikator.
+
+    Första och senaste observationsdag jämförs. Detta säger exempelvis
+    om det finns fler eller färre observerade bilar än tidigare.
+
+    Det är observationer, inte unika fordon. Livscykelanalysen ansvarar
+    för identitet och annonsers livscykel.
+    """
+
+    resultat = {
+        "marknad_antal_forsta_dag": 0,
+        "marknad_antal_senaste_dag": 0,
+        "marknad_antal_forandring": 0,
+        "marknad_antal_forandring_procent": 0.0,
+        "marknad_minsta_pris": None,
+        "marknad_hogsta_pris": None,
+        "marknad_prisintervall": None,
+    }
+
+    if not dagliga_priser:
+        return resultat
+
+    forsta = dagliga_priser[0]
+    senaste = dagliga_priser[-1]
+
+    antal_forsta = forsta.get(
+        "antal_observationer",
+        0,
+    )
+
+    antal_senaste = senaste.get(
+        "antal_observationer",
+        0,
+    )
+
+    if not isinstance(
+        antal_forsta,
+        (int, float),
+    ):
+        antal_forsta = 0
+
+    if not isinstance(
+        antal_senaste,
+        (int, float),
+    ):
+        antal_senaste = 0
+
+    resultat[
+        "marknad_antal_forsta_dag"
+    ] = int(
+        antal_forsta
+    )
+
+    resultat[
+        "marknad_antal_senaste_dag"
+    ] = int(
+        antal_senaste
+    )
+
+    resultat[
+        "marknad_antal_forandring"
+    ] = int(
+        antal_senaste
+        - antal_forsta
+    )
+
+    if antal_forsta > 0:
+        resultat[
+            "marknad_antal_forandring_procent"
+        ] = (
+            (
+                antal_senaste
+                - antal_forsta
+            )
+            / antal_forsta
+        ) * 100.0
+
+    lagsta_priser = [
+        post.get(
+            "lagsta_pris"
+        )
+        for post in dagliga_priser
+        if isinstance(
+            post.get(
+                "lagsta_pris"
+            ),
+            (int, float),
+        )
+    ]
+
+    hogsta_priser = [
+        post.get(
+            "hogsta_pris"
+        )
+        for post in dagliga_priser
+        if isinstance(
+            post.get(
+                "hogsta_pris"
+            ),
+            (int, float),
+        )
+    ]
+
+    if lagsta_priser:
+        resultat[
+            "marknad_minsta_pris"
+        ] = min(
+            lagsta_priser
+        )
+
+    if hogsta_priser:
+        resultat[
+            "marknad_hogsta_pris"
+        ] = max(
+            hogsta_priser
+        )
+
+    if (
+        resultat[
+            "marknad_minsta_pris"
+        ] is not None
+        and resultat[
+            "marknad_hogsta_pris"
+        ] is not None
+    ):
+        resultat[
+            "marknad_prisintervall"
+        ] = (
+            resultat[
+                "marknad_hogsta_pris"
+            ]
+            - resultat[
+                "marknad_minsta_pris"
+            ]
+        )
+
+    return resultat
+
+
 def _analysera_trendsegment(
     dagliga_priser: list[dict],
 ) -> dict:
@@ -309,6 +490,12 @@ def _analysera_trendsegment(
             dagliga_priser
         ),
     }
+
+    resultat.update(
+        _analysera_marknadsstorlek(
+            dagliga_priser
+        )
+    )
 
     if (
         len(dagliga_priser)
@@ -542,7 +729,10 @@ def _logga_trendkategori(
         f"dagar={analys.get('trend_observationsdagar', 0)} | "
         f"steg={analys.get('trendstyrka', 0)} | "
         f"förändring={_formatera_kr(analys.get('trendforandring_kr', 0))} "
-        f"({_formatera_procent(analys.get('trendforandring_procent', 0.0))})"
+        f"({_formatera_procent(analys.get('trendforandring_procent', 0.0))}) | "
+        f"marknad={analys.get('marknad_antal_senaste_dag', 0)} "
+        f"({analys.get('marknad_antal_forandring', 0):+d}) | "
+        f"spann={_formatera_kr(analys.get('marknad_prisintervall'))}"
     )
 
 
@@ -599,6 +789,17 @@ def bygg_marknadstrender() -> dict[str, dict]:
     Den historiska JSONL-datan kan innehålla många månader av historik,
     men den aktuella trendanalysen använder endast ett rullande
     trendfönster på TREND_FONSTER_DAGAR.
+
+    Trendanalysen innehåller:
+      - prisutveckling
+      - trendriktning
+      - trendstyrka
+      - antal observationsdagar
+      - marknadens storlek
+      - förändring av marknadsstorlek
+      - lägsta observerade pris
+      - högsta observerade pris
+      - prisintervall
 
     Trendanalysen påverkar inte score eller valuation.
     """
@@ -798,6 +999,27 @@ def berakna_marknadstrend_for_bil(
 
             "marknadstrend_fonster_dagar":
                 TREND_FONSTER_DAGAR,
+
+            "marknad_antal_forsta_dag":
+                0,
+
+            "marknad_antal_senaste_dag":
+                0,
+
+            "marknad_antal_forandring":
+                0,
+
+            "marknad_antal_forandring_procent":
+                0.0,
+
+            "marknad_minsta_pris":
+                None,
+
+            "marknad_hogsta_pris":
+                None,
+
+            "marknad_prisintervall":
+                None,
         }
 
     return {
@@ -846,4 +1068,23 @@ def berakna_marknadstrend_for_bil(
                 "trend_fonster_dagar",
                 TREND_FONSTER_DAGAR,
             ),
-    }
+
+        "marknad_antal_forsta_dag":
+            trend.get(
+                "marknad_antal_forsta_dag",
+                0,
+            ),
+
+        "marknad_antal_senaste_dag":
+            trend.get(
+                "marknad_antal_senaste_dag",
+                0,
+            ),
+
+        "marknad_antal_forandring":
+            trend.get(
+                "marknad_antal_forandring",
+                0,
+            ),
+
+        "marknad_antal
