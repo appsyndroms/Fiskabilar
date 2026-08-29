@@ -149,8 +149,8 @@ HISTORIK_SPARA_VARJE_KORNING = True
 # --- Notifiering ---
 
 # En redan notifierad bil får en ny notis först när priset är minst
-# 15 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
-MIN_PRISSANKNING_FOR_NY_NOTIS = 15000
+# 10 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
+MIN_PRISSANKNING_FOR_NY_NOTIS = 10000
 
 
 # ------------------------------------------------------------
