@@ -103,6 +103,9 @@ def _logga_kandidat(
         "trygghetspoang": breakdown[
             "trygghet"
         ],
+        "historikspoang": breakdown[
+            "historik"
+        ],
         "auktion_avdrag": breakdown[
             "auktion_avdrag"
         ],
