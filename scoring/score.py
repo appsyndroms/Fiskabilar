@@ -251,24 +251,6 @@ def berakna_fyndscore_breakdown(
 
     # =========================================================
     # 3. UTRUSTNING - MAX 5 POÄNG
-    #
-    # Volvo:
-    #   Ultimate       5
-    #   Plus           4
-    #   Inscription    3
-    #   Momentum       2
-    #   Core           1
-    #
-    # BMW:
-    #   M Sport        5
-    #   Luxury Line    4
-    #   Advantage      3
-    #   Active Edition 3
-    #   Sport Line     3
-    #   xLine          3
-    #
-    # Därefter kan dragkrok och värmare ge ytterligare poäng
-    # upp till max 5.
     # =========================================================
 
     utrustningsniva = (
@@ -467,6 +449,19 @@ def formatera_notis(
 
     # ---------------------------------------------------------
     # PRISHISTORIK
+    #
+    # Visar hela den dokumenterade prisserien:
+    #
+    #     x → y → z
+    #
+    # Endast olika prisnivåer visas. Om priset exempelvis
+    # observerats flera gånger på samma nivå blir det:
+    #
+    #     469 000 → 449 000 → 439 000 kr
+    #
+    # istället för:
+    #
+    #     469 000 → 469 000 → 469 000 → 449 000 → ...
     # ---------------------------------------------------------
 
     historik_priser = (
@@ -474,21 +469,35 @@ def formatera_notis(
         or []
     )
 
-    if len(historik_priser) >= 2:
+    # Ta bort upprepade prisobservationer men behåll ordningen.
+    unika_historik_priser = []
+
+    for pris in historik_priser:
+
+        if pris is None:
+            continue
+
+        if not unika_historik_priser:
+            unika_historik_priser.append(pris)
+            continue
+
+        if pris != unika_historik_priser[-1]:
+            unika_historik_priser.append(pris)
+
+    if len(unika_historik_priser) >= 2:
 
         prisserie = " → ".join(
             f"{pris:,}".replace(",", " ")
-            for pris in historik_priser
+            for pris in unika_historik_priser
         )
 
         rader.append(
-            f"⚠️ Prishistorik: "
-            f"{prisserie} kr"
+            f"⚠️ Prishistorik: {prisserie} kr"
         )
 
         total_prisforandring = (
-            historik_priser[-1]
-            - historik_priser[0]
+            unika_historik_priser[-1]
+            - unika_historik_priser[0]
         )
 
         if total_prisforandring < 0:
