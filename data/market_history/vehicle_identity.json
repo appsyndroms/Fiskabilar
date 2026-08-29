@@ -1701,7 +1701,9 @@
     "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-2025-kombi-12857685": "vehicle:00000155",
     "source:bilweb:12857646": "vehicle:00000161",
     "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-2025-kombi-12857646": "vehicle:00000161",
-    "url:https://www.wayke.se/objekt/08ab503b-48e3-4e15-bca8-b9048d4b96d6": "vehicle:00000169"
+    "url:https://www.wayke.se/objekt/08ab503b-48e3-4e15-bca8-b9048d4b96d6": "vehicle:00000169",
+    "url:https://www.wayke.se/objekt/03e65325-c075-4868-8195-d135bf579c6f": "vehicle:00000513",
+    "fp:a0661606054e23da": "vehicle:00000513"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -10916,6 +10918,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000513": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/03e65325-c075-4868-8195-d135bf579c6f",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
