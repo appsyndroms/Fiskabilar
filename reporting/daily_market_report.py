@@ -787,6 +787,13 @@ def _bygg_rapport(
                 )
             )
 
+            url = item.get("url")
+
+            if url:
+                rader.append(
+                    f"    URL: {url}"
+                )
+
     else:
         rader.append(
             "Inga fynd över fyndgränsen idag."
