@@ -1,13 +1,13 @@
-name: DEBUG – Daglig marknadsrapport Fiskabilar
+name: DEBUG - Daglig marknadsrapport Fiskabilar
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: fiskabilar-data-write-debug
+  group: fiskabilar-daily-market-report-debug
   cancel-in-progress: false
 
 jobs:
@@ -29,49 +29,17 @@ jobs:
           cache: "pip"
 
       - name: Installera beroenden
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
-      - name: Skapa daglig marknadsrapport – DEBUG
-        env:
-          DEBUG: "true"
+      - name: Kör debugrapport
         run: |
           echo "=================================================="
           echo "DEBUG: Daglig marknadsrapport"
           echo "=================================================="
           echo "MEJL KOMMER INTE ATT SKICKAS"
+          echo "INGEN RAPPORTFIL KOMMER ATT SKAPAS"
+          echo "PRODUKTIONSLOGGEN KOMMER INTE ATT ÄNDRAS"
           echo "=================================================="
 
-          python -u reporting/daily_market_report.py --debug
-
-      - name: Visa skapade rapportfiler
-        if: always()
-        run: |
-          echo "=================================================="
-          echo "DEBUG: Rapportfiler"
-          echo "=================================================="
-
-          if [ -d "data/daily_reports" ]; then
-            find data/daily_reports -type f -maxdepth 2 -print | sort
-          else
-            echo "Katalogen data/daily_reports finns inte."
-          fi
-
-      - name: Spara rapportlogg
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add data/daily_reports
-
-          if git diff --cached --quiet; then
-            echo "Ingen förändring i rapportloggen."
-            exit 0
-          fi
-
-          git commit -m "DEBUG: Sparar daglig marknadsrapport"
-
-          git fetch origin main
-          git rebase origin/main
-
-          git push origin HEAD:main
+          python -u -m reporting.daily_market_report_debug
