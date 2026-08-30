@@ -111,7 +111,7 @@ def skapa_debugrapport() -> int:
         trender = _trender()
 
         # -----------------------------------------------------
-        # BYGG RAPPORTEN
+        # BYGG SAMMA RAPPORT SOM PRODUKTIONEN
         # -----------------------------------------------------
 
         text = _bygg_rapport(
