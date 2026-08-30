@@ -1,131 +1,65 @@
-“””
-Debugversion av daglig marknadsrapport för Fiskabilar\.
+"""
+Debugversion av daglig marknadsrapport för Fiskabilar.
 
 Används för att verifiera rapportens innehåll manuellt innan
-den riktiga dagliga rapporten körs i produktion\.
+den riktiga dagliga rapporten körs i produktion.
 
 VIKTIGT:
 
-- Läser samma marknadshistorik som produktionsrapporten\.
-- Använder samma analysfunktioner\.
-- Bygger samma rapport\.
-- Skriver rapporten till Actions\-loggen\.
-- Skapar INGEN rapportfil\.
-- Ändrar INTE daily\_market\_report\-loggen\.
-- Skickar ALDRIG mejl\.
+- Läser samma marknadshistorik som produktionsrapporten.
+- Använder samma analysfunktioner.
+- Bygger samma rapport.
+- Skriver rapporten till Actions-loggen.
+- Skapar INGEN rapportfil.
+- Ändrar INTE daily_market_report-loggen.
+- Skickar ALDRIG mejl.
 
 Debugkörningen är därför helt isolerad från den riktiga
-rapportkörningen klockan 22:00\.
-“””
+rapportkörningen klockan 22:00.
+"""
 
-from **future** import annotations
+from __future__ import annotations
 
-import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app\_logging\.logger import always, error
+from app_logging.logger import always, error
 
-from reporting\.daily\_market\_report import &#40;
-\_bygg\_rapport,
-\_forandringar,
-\_fynd,
-\_trender,
-&#41;
-
-TIDSZON = ZoneInfo&#40;
-“Europe/Stockholm”
-&#41;
-
-def \_nu&#40;&#41; \-\> datetime:
-return datetime\.now&#40;
-TIDSZON
-&#41;
-
-def skapa\_debugrapport&#40;&#41; \-\> int:
-“””
-Bygger dagens marknadsrapport utan att skriva någon
-rapportlogg och utan att skicka mejl\.
-“””
-
-```
-now = _nu()
-
-datum = now.date().isoformat()
-
-always(
-    "============================================================"
+from reporting.daily_market_report import (
+    _bygg_rapport,
+    _forandringar,
+    _fynd,
+    _trender,
 )
 
-always(
-    "FISKABILAR – DEBUG AV DAGLIG MARKNADSRAPPORT"
+
+TIDSZON = ZoneInfo(
+    "Europe/Stockholm"
 )
 
-always(
-    "============================================================"
-)
 
-always(
-    f"[DEBUG] Datum: {datum}"
-)
-
-always(
-    "[DEBUG] VIKTIGT: Ingen rapportfil skrivs."
-)
-
-always(
-    "[DEBUG] VIKTIGT: Inget mejl skickas."
-)
-
-always(
-    "[DEBUG] VIKTIGT: Produktionsloggen ändras inte."
-)
-
-try:
-
-    # -----------------------------------------------------
-    # BYGG SAMMA DATA SOM PRODUKTIONSRAPPORTEN
-    # -----------------------------------------------------
-
-    always(
-        "[DEBUG] Bygger förändringsanalys..."
+def _nu() -> datetime:
+    return datetime.now(
+        TIDSZON
     )
 
-    forandringar = _forandringar(
-        datum
+
+def skapa_debugrapport() -> int:
+    """
+    Bygger dagens marknadsrapport utan att skriva någon
+    rapportlogg och utan att skicka mejl.
+    """
+
+    now = _nu()
+
+    datum = now.date().isoformat()
+
+    always(
+        "============================================================"
     )
 
     always(
-        "[DEBUG] Bygger fyndanalys..."
-    )
-
-    fynd = _fynd(
-        datum
-    )
-
-    always(
-        "[DEBUG] Bygger trendanalys..."
-    )
-
-    trender = _trender()
-
-    # -----------------------------------------------------
-    # BYGG RAPPORTEN
-    # -----------------------------------------------------
-
-    text = _bygg_rapport(
-        datum,
-        forandringar,
-        fynd,
-        trender,
-    )
-
-    # -----------------------------------------------------
-    # DIAGNOSTIK
-    # -----------------------------------------------------
-
-    always(
-        ""
+        "FISKABILAR – DEBUG AV DAGLIG MARKNADSRAPPORT"
     )
 
     always(
@@ -133,147 +67,215 @@ try:
     )
 
     always(
-        "DEBUG – SAMMANFATTNING"
+        f"[DEBUG] Datum: {datum}"
     )
 
     always(
-        "============================================================"
+        "[DEBUG] VIKTIGT: Ingen rapportfil skrivs."
     )
 
     always(
-        (
-            "Observerade bilar idag: "
-            f"{forandringar['antal_idag']}"
-        )
+        "[DEBUG] VIKTIGT: Inget mejl skickas."
     )
 
     always(
-        (
-            "Observerade bilar igår: "
-            f"{forandringar['antal_igar']}"
-        )
+        "[DEBUG] VIKTIGT: Produktionsloggen ändras inte."
     )
 
-    always(
-        (
-            "Nya annonser: "
-            f"{len(forandringar['nya'])}"
-        )
-    )
+    try:
 
-    always(
-        (
-            "Prisändringar: "
-            f"{len(forandringar['prisandringar'])}"
-        )
-    )
+        # -----------------------------------------------------
+        # BYGG SAMMA DATA SOM PRODUKTIONSRAPPORTEN
+        # -----------------------------------------------------
 
-    always(
-        (
-            "Försvunna annonser: "
-            f"{len(forandringar['forsvunna'])}"
-        )
-    )
-
-    always(
-        (
-            "Fynd: "
-            f"{len(fynd)}"
-        )
-    )
-
-    always(
-        (
-            "Trend upp: "
-            f"{len(trender['upp'])}"
-        )
-    )
-
-    always(
-        (
-            "Trend ned: "
-            f"{len(trender['ned'])}"
-        )
-    )
-
-    always(
-        (
-            "Trend stabil: "
-            f"{trender['stabil']}"
-        )
-    )
-
-    always(
-        (
-            "Trend otillräckligt: "
-            f"{trender['otillrackligt']}"
-        )
-    )
-
-    # -----------------------------------------------------
-    # HELA RAPPORTEN
-    # -----------------------------------------------------
-
-    always(
-        ""
-    )
-
-    always(
-        "============================================================"
-    )
-
-    always(
-        "DEBUG – HELA RAPPORTEN"
-    )
-
-    always(
-        "============================================================"
-    )
-
-    for rad in text.splitlines():
         always(
-            rad
+            "[DEBUG] Bygger förändringsanalys..."
         )
 
-    always(
-        "============================================================"
+        forandringar = _forandringar(
+            datum
+        )
+
+        always(
+            "[DEBUG] Bygger fyndanalys..."
+        )
+
+        fynd = _fynd(
+            datum
+        )
+
+        always(
+            "[DEBUG] Bygger trendanalys..."
+        )
+
+        trender = _trender()
+
+        # -----------------------------------------------------
+        # BYGG RAPPORTEN
+        # -----------------------------------------------------
+
+        text = _bygg_rapport(
+            datum,
+            forandringar,
+            fynd,
+            trender,
+        )
+
+        # -----------------------------------------------------
+        # DIAGNOSTIK
+        # -----------------------------------------------------
+
+        always(
+            ""
+        )
+
+        always(
+            "============================================================"
+        )
+
+        always(
+            "DEBUG – SAMMANFATTNING"
+        )
+
+        always(
+            "============================================================"
+        )
+
+        always(
+            (
+                "Observerade bilar idag: "
+                f"{forandringar['antal_idag']}"
+            )
+        )
+
+        always(
+            (
+                "Observerade bilar igår: "
+                f"{forandringar['antal_igar']}"
+            )
+        )
+
+        always(
+            (
+                "Nya annonser: "
+                f"{len(forandringar['nya'])}"
+            )
+        )
+
+        always(
+            (
+                "Prisändringar: "
+                f"{len(forandringar['prisandringar'])}"
+            )
+        )
+
+        always(
+            (
+                "Försvunna annonser: "
+                f"{len(forandringar['forsvunna'])}"
+            )
+        )
+
+        always(
+            (
+                "Fynd: "
+                f"{len(fynd)}"
+            )
+        )
+
+        always(
+            (
+                "Trend upp: "
+                f"{len(trender['upp'])}"
+            )
+        )
+
+        always(
+            (
+                "Trend ned: "
+                f"{len(trender['ned'])}"
+            )
+        )
+
+        always(
+            (
+                "Trend stabil: "
+                f"{trender['stabil']}"
+            )
+        )
+
+        always(
+            (
+                "Trend otillräckligt: "
+                f"{trender['otillrackligt']}"
+            )
+        )
+
+        # -----------------------------------------------------
+        # HELA RAPPORTEN
+        # -----------------------------------------------------
+
+        always(
+            ""
+        )
+
+        always(
+            "============================================================"
+        )
+
+        always(
+            "DEBUG – HELA RAPPORTEN"
+        )
+
+        always(
+            "============================================================"
+        )
+
+        for rad in text.splitlines():
+
+            always(
+                rad
+            )
+
+        always(
+            "============================================================"
+        )
+
+        always(
+            "[DEBUG] Rapporten byggdes utan fel."
+        )
+
+        always(
+            "[DEBUG] Ingen fil har skrivits."
+        )
+
+        always(
+            "[DEBUG] Inget mejl har skickats."
+        )
+
+        always(
+            "============================================================"
+        )
+
+        return 0
+
+    except Exception as exc:
+
+        error(
+            "[DEBUG] Fel vid rapportgenerering: "
+            f"{exc}"
+        )
+
+        return 1
+
+
+def main() -> None:
+
+    raise SystemExit(
+        skapa_debugrapport()
     )
 
-    always(
-        "[DEBUG] Rapporten byggdes utan fel."
-    )
 
-    always(
-        "[DEBUG] Ingen fil har skrivits."
-    )
+if __name__ == "__main__":
 
-    always(
-        "[DEBUG] Inget mejl har skickats."
-    )
-
-    always(
-        "============================================================"
-    )
-
-    return 0
-
-except Exception as exc:
-
-    error(
-        "[DEBUG] Fel vid rapportgenerering: "
-        f"{exc}"
-    )
-
-    return 1
-```
-
-def main&#40;&#41; \-\> None:
-
-```
-raise SystemExit(
-    skapa_debugrapport()
-)
-```
-
-if **name** == “**main**”:
-main&#40;&#41;
+    main()
