@@ -146,6 +146,18 @@ HISTORIK_FIL = "data/market_history/market_history.jsonl"
 HISTORIK_SPARA_VARJE_KORNING = True
 
 
+# --- Daglig marknadsrapport ---
+
+# Katalog där de dagliga rapporterna sparas.
+#
+# Rapporterna ska sparas oavsett om körningen sker via
+# GitHub Actions eller manuellt.
+#
+# Exempel:
+#   data/daily_reports/daily_report_2026-08-30.json
+DAILY_REPORT_KATALOG = "data/daily_reports"
+
+
 # --- Notifiering ---
 
 # En redan notifierad bil får en ny notis först när priset är minst
