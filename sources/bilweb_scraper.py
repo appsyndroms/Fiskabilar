@@ -63,107 +63,10 @@ AUKTION_REGEX = re.compile(
     re.IGNORECASE,
 )
 
-_DIAGNOSTIK_LOGGAD = False
-
 
 def _rensa_tal(text: str) -> int:
     siffror = re.sub(r"\D", "", text)
     return int(siffror) if siffror else 0
-
-
-def _logga_detaljsida_diagnostik(
-    url: str,
-    resp: requests.Response,
-    html: str,
-    text: str,
-) -> None:
-    """
-    Loggar rådata från den första detaljsida där pris eller miltal
-    inte kunde hittas.
-    """
-
-    global _DIAGNOSTIK_LOGGAD
-
-    if _DIAGNOSTIK_LOGGAD:
-        return
-
-    _DIAGNOSTIK_LOGGAD = True
-
-    html_lower = html.lower()
-
-    markers = {
-        "pris": "pris" in html_lower,
-        "mil": re.search(
-            r"\bmil\b",
-            html,
-            re.IGNORECASE,
-        ) is not None,
-        "kr": "kr" in html_lower,
-        "regdatum": "regdatum" in html_lower,
-        "next_data": "__next_data__" in html_lower,
-        "jsonld": "application/ld+json" in html_lower,
-        "cloudflare": "cloudflare" in html_lower,
-        "captcha": "captcha" in html_lower,
-        "access_denied": "access denied" in html_lower,
-        "forbidden": "forbidden" in html_lower,
-    }
-
-    info("")
-    info("[bilweb] ===== DETALJSIDE-DIAGNOSTIK =====")
-    info(f"[bilweb] URL: {url}")
-    info(f"[bilweb] HTTP-status: {resp.status_code}")
-    info(f"[bilweb] Slutlig URL: {resp.url}")
-    info(
-        "[bilweb] Content-Type: "
-        f"{resp.headers.get('Content-Type')}"
-    )
-    info(
-        "[bilweb] Server: "
-        f"{resp.headers.get('Server')}"
-    )
-    info(
-        "[bilweb] HTML-längd: "
-        f"{len(html)} tecken"
-    )
-    info(
-        "[bilweb] Redirects: "
-        f"{len(resp.history)}"
-    )
-
-    if resp.history:
-        for i, history_response in enumerate(
-            resp.history,
-            start=1,
-        ):
-            info(
-                "[bilweb]   redirect "
-                f"{i}: {history_response.status_code} "
-                f"{history_response.url}"
-            )
-
-    info("[bilweb] Markörer:")
-
-    for name, value in markers.items():
-        info(
-            f"[bilweb]   {name}: {value}"
-        )
-
-    info(
-        "[bilweb] ----- RÅ HTML, "
-        "första 2000 tecknen -----"
-    )
-    info(html[:2000])
-
-    info(
-        "[bilweb] ----- EXTRAHERAD TEXT, "
-        "första 2000 tecknen -----"
-    )
-    info(text[:2000])
-
-    info(
-        "[bilweb] ===== SLUT DIAGNOSTIK ====="
-    )
-    info("")
 
 
 def _hamta_json_ld(
@@ -189,7 +92,6 @@ def _hamta_json_ld(
 
         try:
             data = json.loads(innehall)
-
         except Exception:
             continue
 
@@ -360,11 +262,6 @@ def _pris_fran_meta(
         if siffror:
             return int(siffror)
 
-    # Bilwebs meta description:
-    #
-    # Köp Volvo ... — 6 750 mil — El/Bensin —
-    # Automatisk — Pris 479 800 kr — Säljs i Malmö.
-    #
     meta_description = soup.find(
         "meta",
         attrs={
@@ -502,7 +399,7 @@ def hamta_pris_mil_fran_detaljsida(
     # Bilweb visar exempelvis:
     #
     # 479 800:-
-    #
+
     pris = _pris_fran_synlig_text(
         text
     )
@@ -624,27 +521,24 @@ def hamta_pris_mil_fran_detaljsida(
             json_ld
         )
 
-    # ---------------------------------------------------------
-    # Diagnostik
-    # ---------------------------------------------------------
+    # Nya bilar kan sakna registrerad mätarställning.
+    # Bilweb visar då "Mätarställning –".
+    if miltal is None:
+
+        mil_match = re.search(
+            r"(?:^|\n)"
+            r"\s*Mätarställning"
+            r"\s*\n+"
+            r"\s*[–—-]"
+            r"\s*(?:\n|$)",
+            text,
+            re.IGNORECASE,
+        )
+
+        if mil_match:
+            miltal = 0
 
     if pris is None or miltal is None:
-
-        _logga_detaljsida_diagnostik(
-            url=url,
-            resp=resp,
-            html=html,
-            text=text,
-        )
-
-        info(
-            "[bilweb]   Kunde inte tolka "
-            "pris/mil på detaljsidan: "
-            f"pris={'OK' if pris is not None else 'SAKNAS'}, "
-            f"mil={'OK' if miltal is not None else 'SAKNAS'}: "
-            f"{url}"
-        )
-
         return None
 
     # ---------------------------------------------------------
