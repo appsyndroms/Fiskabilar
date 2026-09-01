@@ -44,12 +44,12 @@ HEADERS = {
 }
 
 PRIS_DETALJ_REGEX = re.compile(
-    r"Pris\s*(?:\([^)]*\))?\s*([\d\s]+?)\s*kr",
+    r"Pris\s*(?:\([^)]*\))?\s*([\d\s]+?)\s*(?:kr|:-)",
     re.IGNORECASE,
 )
 
 MIL_DETALJ_REGEX = re.compile(
-    r"Mil\s+([\d\s]+?)\s+1:a\s+regdatum",
+    r"Mätarställning\s+([\d\s]+?)\s+mil",
     re.IGNORECASE,
 )
 
@@ -59,7 +59,7 @@ AGARE_DETALJ_REGEX = re.compile(
 )
 
 AUKTION_REGEX = re.compile(
-    r"auktionsobjekt",
+    r"auktionsobjekt|Priset är ett uppskattat högsta slutpris",
     re.IGNORECASE,
 )
 
@@ -116,13 +116,28 @@ def _logga_detaljsida_diagnostik(
     info(f"[bilweb] URL: {url}")
     info(f"[bilweb] HTTP-status: {resp.status_code}")
     info(f"[bilweb] Slutlig URL: {resp.url}")
-    info(f"[bilweb] Content-Type: {resp.headers.get('Content-Type')}")
-    info(f"[bilweb] Server: {resp.headers.get('Server')}")
-    info(f"[bilweb] HTML-längd: {len(html)} tecken")
-    info(f"[bilweb] Redirects: {len(resp.history)}")
+    info(
+        f"[bilweb] Content-Type: "
+        f"{resp.headers.get('Content-Type')}"
+    )
+    info(
+        f"[bilweb] Server: "
+        f"{resp.headers.get('Server')}"
+    )
+    info(
+        f"[bilweb] HTML-längd: "
+        f"{len(html)} tecken"
+    )
+    info(
+        f"[bilweb] Redirects: "
+        f"{len(resp.history)}"
+    )
 
     if resp.history:
-        for i, history_response in enumerate(resp.history, start=1):
+        for i, history_response in enumerate(
+            resp.history,
+            start=1,
+        ):
             info(
                 "[bilweb]   redirect "
                 f"{i}: {history_response.status_code} "
@@ -130,23 +145,37 @@ def _logga_detaljsida_diagnostik(
             )
 
     info("[bilweb] Markörer:")
-    for name, value in markers.items():
-        info(f"[bilweb]   {name}: {value}")
 
-    info("[bilweb] ----- RÅ HTML, första 2000 tecknen -----")
+    for name, value in markers.items():
+        info(
+            f"[bilweb]   {name}: {value}"
+        )
+
+    info(
+        "[bilweb] ----- RÅ HTML, "
+        "första 2000 tecknen -----"
+    )
     info(html[:2000])
 
-    info("[bilweb] ----- EXTRAHERAD TEXT, första 2000 tecknen -----")
+    info(
+        "[bilweb] ----- EXTRAHERAD TEXT, "
+        "första 2000 tecknen -----"
+    )
     info(text[:2000])
 
-    info("[bilweb] ===== SLUT DIAGNOSTIK =====")
+    info(
+        "[bilweb] ===== SLUT DIAGNOSTIK ====="
+    )
     info("")
 
 
-def _hamta_json_ld(soup: BeautifulSoup) -> list[dict]:
+def _hamta_json_ld(
+    soup: BeautifulSoup,
+) -> list[dict]:
     """
     Hämtar JSON-LD-block från sidan.
-    Returnerar endast objekt som faktiskt går att tolka som dict.
+    Returnerar endast objekt som faktiskt går att
+    tolka som dict.
     """
 
     resultat = []
@@ -155,13 +184,17 @@ def _hamta_json_ld(soup: BeautifulSoup) -> list[dict]:
         "script",
         attrs={"type": "application/ld+json"},
     ):
-        innehall = script.string or script.get_text(strip=True)
+        innehall = (
+            script.string
+            or script.get_text(strip=True)
+        )
 
         if not innehall:
             continue
 
         try:
             data = json.loads(innehall)
+
         except Exception:
             continue
 
@@ -178,30 +211,46 @@ def _hamta_json_ld(soup: BeautifulSoup) -> list[dict]:
     return resultat
 
 
-def _hitta_rekursivt(data, nycklar: set[str]):
+def _hitta_rekursivt(
+    data,
+    nycklar: set[str],
+):
     """
-    Söker rekursivt efter första förekomsten av någon av nycklarna.
+    Söker rekursivt efter första förekomsten
+    av någon av nycklarna.
     """
 
     if isinstance(data, dict):
         for key, value in data.items():
+
             if key.lower() in nycklar:
                 return value
 
-            resultat = _hitta_rekursivt(value, nycklar)
+            resultat = _hitta_rekursivt(
+                value,
+                nycklar,
+            )
+
             if resultat is not None:
                 return resultat
 
     elif isinstance(data, list):
         for item in data:
-            resultat = _hitta_rekursivt(item, nycklar)
+
+            resultat = _hitta_rekursivt(
+                item,
+                nycklar,
+            )
+
             if resultat is not None:
                 return resultat
 
     return None
 
 
-def _pris_fran_json_ld(json_ld: list[dict]) -> int | None:
+def _pris_fran_json_ld(
+    json_ld: list[dict],
+) -> int | None:
     value = _hitta_rekursivt(
         json_ld,
         {
@@ -218,14 +267,21 @@ def _pris_fran_json_ld(json_ld: list[dict]) -> int | None:
         return int(value)
 
     if isinstance(value, str):
-        siffror = re.sub(r"[^\d]", "", value)
+        siffror = re.sub(
+            r"[^\d]",
+            "",
+            value,
+        )
+
         if siffror:
             return int(siffror)
 
     return None
 
 
-def _mil_fran_json_ld(json_ld: list[dict]) -> int | None:
+def _mil_fran_json_ld(
+    json_ld: list[dict],
+) -> int | None:
     value = _hitta_rekursivt(
         json_ld,
         {
@@ -246,33 +302,62 @@ def _mil_fran_json_ld(json_ld: list[dict]) -> int | None:
         return int(value)
 
     if isinstance(value, str):
-        siffror = re.sub(r"[^\d]", "", value)
+        siffror = re.sub(
+            r"[^\d]",
+            "",
+            value,
+        )
+
         if siffror:
             return int(siffror)
 
     return None
 
 
-def _pris_fran_meta(soup: BeautifulSoup) -> int | None:
+def _pris_fran_meta(
+    soup: BeautifulSoup,
+) -> int | None:
     """
     Försöker hitta pris i vanliga meta-attribut.
     """
 
     kandidater = [
-        soup.find("meta", attrs={"property": "product:price:amount"}),
-        soup.find("meta", attrs={"name": "price"}),
-        soup.find("meta", attrs={"itemprop": "price"}),
+        soup.find(
+            "meta",
+            attrs={
+                "property":
+                    "product:price:amount",
+            },
+        ),
+        soup.find(
+            "meta",
+            attrs={
+                "name": "price",
+            },
+        ),
+        soup.find(
+            "meta",
+            attrs={
+                "itemprop": "price",
+            },
+        ),
     ]
 
     for meta in kandidater:
+
         if not meta:
             continue
 
         value = meta.get("content")
+
         if not value:
             continue
 
-        siffror = re.sub(r"[^\d]", "", value)
+        siffror = re.sub(
+            r"[^\d]",
+            "",
+            value,
+        )
 
         if siffror:
             return int(siffror)
@@ -280,7 +365,9 @@ def _pris_fran_meta(soup: BeautifulSoup) -> int | None:
     return None
 
 
-def _mil_fran_html_attribut(soup: BeautifulSoup) -> int | None:
+def _mil_fran_html_attribut(
+    soup: BeautifulSoup,
+) -> int | None:
     """
     Söker efter attribut som kan innehålla miltal.
     """
@@ -294,13 +381,19 @@ def _mil_fran_html_attribut(soup: BeautifulSoup) -> int | None:
     }
 
     for element in soup.find_all(True):
+
         for namn in attribut_namn:
+
             value = element.get(namn)
 
             if value is None:
                 continue
 
-            siffror = re.sub(r"[^\d]", "", str(value))
+            siffror = re.sub(
+                r"[^\d]",
+                "",
+                str(value),
+            )
 
             if siffror:
                 return int(siffror)
@@ -311,19 +404,23 @@ def _mil_fran_html_attribut(soup: BeautifulSoup) -> int | None:
 def hamta_pris_mil_fran_detaljsida(
     url: str,
 ) -> dict | None:
+
     try:
         resp = requests.get(
             url,
             headers=HEADERS,
             timeout=15,
         )
+
         resp.raise_for_status()
 
     except Exception as e:
+
         info(
-            f"[bilweb]   FEL vid hämtning av detaljsida "
-            f"{url}: {e}"
+            "[bilweb]   FEL vid hämtning "
+            f"av detaljsida {url}: {e}"
         )
+
         return None
 
     html = resp.text
@@ -344,8 +441,23 @@ def hamta_pris_mil_fran_detaljsida(
 
     pris = None
 
+    # Vanligt format:
+    #
+    # Pris
+    # 325 000 kr
+    #
+    # eller:
+    #
+    # Pris
+    # 325 000:-
+    #
     pris_match = re.search(
-        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
+        r"(?:^|\n)"
+        r"\s*Pris"
+        r"\s*(?:\([^)]*\))?"
+        r"\s*\n+"
+        r"\s*([\d\s]+)"
+        r"\s*(?:kr|:-)",
         text,
         re.IGNORECASE,
     )
@@ -355,7 +467,31 @@ def hamta_pris_mil_fran_detaljsida(
             pris_match.group(1)
         )
 
+    # Auktionsformat:
+    #
+    # Auktion
+    # 325 000:-
+    # Priset är ett uppskattat högsta slutpris
+    #
     if pris is None:
+
+        pris_match = re.search(
+            r"(?:^|\n)"
+            r"\s*([\d\s]+)"
+            r"\s*(?:kr|:-)"
+            r"\s*\n+"
+            r"\s*Priset är",
+            text,
+            re.IGNORECASE,
+        )
+
+        if pris_match:
+            pris = _rensa_tal(
+                pris_match.group(1)
+            )
+
+    if pris is None:
+
         pris_match = PRIS_DETALJ_REGEX.search(
             text.replace("\n", " ")
         )
@@ -366,12 +502,18 @@ def hamta_pris_mil_fran_detaljsida(
             )
 
     if pris is None:
-        pris = _pris_fran_meta(soup)
+        pris = _pris_fran_meta(
+            soup
+        )
 
-    json_ld = _hamta_json_ld(soup)
+    json_ld = _hamta_json_ld(
+        soup
+    )
 
     if pris is None:
-        pris = _pris_fran_json_ld(json_ld)
+        pris = _pris_fran_json_ld(
+            json_ld
+        )
 
     # ---------------------------------------------------------
     # Miltal
@@ -379,8 +521,17 @@ def hamta_pris_mil_fran_detaljsida(
 
     miltal = None
 
+    # Bilwebs faktiska format:
+    #
+    # Mätarställning
+    # 9 489 mil
+    #
     mil_match = re.search(
-        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
+        r"(?:^|\n)"
+        r"\s*Mätarställning"
+        r"\s*\n+"
+        r"\s*(\d[\d\s]*)"
+        r"\s+mil",
         text,
         re.IGNORECASE,
     )
@@ -391,6 +542,7 @@ def hamta_pris_mil_fran_detaljsida(
         )
 
     if miltal is None:
+
         mil_match = MIL_DETALJ_REGEX.search(
             text
         )
@@ -415,6 +567,7 @@ def hamta_pris_mil_fran_detaljsida(
     # ---------------------------------------------------------
 
     if pris is None or miltal is None:
+
         _logga_detaljsida_diagnostik(
             url=url,
             resp=resp,
@@ -423,8 +576,8 @@ def hamta_pris_mil_fran_detaljsida(
         )
 
         info(
-            "[bilweb]   Kunde inte tolka pris/mil "
-            f"på detaljsidan: "
+            "[bilweb]   Kunde inte tolka "
+            "pris/mil på detaljsidan: "
             f"pris={'OK' if pris is not None else 'SAKNAS'}, "
             f"mil={'OK' if miltal is not None else 'SAKNAS'}: "
             f"{url}"
@@ -489,13 +642,18 @@ def hamta_detaljsidor_parallellt(
     antal_cache = 0
 
     for kandidat in kandidater:
+
         url = kandidat.get("url")
 
         if not url:
             continue
 
         if url in cache:
-            kandidat_data = dict(kandidat)
+
+            kandidat_data = dict(
+                kandidat
+            )
+
             kandidat_data.update(
                 cache[url]
             )
@@ -504,17 +662,25 @@ def hamta_detaljsidor_parallellt(
             antal_cache += 1
 
         else:
+
             urls_att_hamta.append(
-                (url, kandidat)
+                (
+                    url,
+                    kandidat,
+                )
             )
 
-    antal_hamtade = len(urls_att_hamta)
+    antal_hamtade = len(
+        urls_att_hamta
+    )
 
     if urls_att_hamta:
+
         info(
             "[bilweb]   hämtar "
-            f"{len(urls_att_hamta)} detaljsidor parallellt "
-            f"med {MAX_PARALLELLA_DETALJSIDOR} workers"
+            f"{len(urls_att_hamta)} "
+            "detaljsidor parallellt med "
+            f"{MAX_PARALLELLA_DETALJSIDOR} workers"
         )
 
         with ThreadPoolExecutor(
@@ -532,17 +698,25 @@ def hamta_detaljsidor_parallellt(
                 for url, kandidat in urls_att_hamta
             }
 
-            for future in as_completed(futures):
-                url, kandidat = futures[future]
+            for future in as_completed(
+                futures
+            ):
+
+                url, kandidat = futures[
+                    future
+                ]
 
                 try:
                     detaljdata = future.result()
 
                 except Exception as e:
+
                     info(
-                        "[bilweb]   FEL i detaljsida-worker "
+                        "[bilweb]   FEL i "
+                        "detaljsida-worker "
                         f"{url}: {e}"
                     )
+
                     continue
 
                 if not detaljdata:
@@ -550,7 +724,10 @@ def hamta_detaljsidor_parallellt(
 
                 cache[url] = detaljdata
 
-                kandidat_data = dict(kandidat)
+                kandidat_data = dict(
+                    kandidat
+                )
+
                 kandidat_data.update(
                     detaljdata
                 )
