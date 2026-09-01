@@ -12,6 +12,7 @@ Här ligger:
 - cache
 """
 
+import json
 import re
 
 from concurrent.futures import (
@@ -75,10 +76,369 @@ def _rensa_tal(
     siffror = re.sub(
         r"\D",
         "",
-        text,
+        str(text),
     )
 
     return int(siffror) if siffror else 0
+
+
+def _normalisera_text(
+    text: str,
+) -> str:
+
+    return re.sub(
+        r"\s+",
+        " ",
+        text,
+    ).strip()
+
+
+def _extrahera_jsonld(
+    soup: BeautifulSoup,
+) -> list:
+
+    resultat = []
+
+    for script in soup.find_all(
+        "script",
+        attrs={
+            "type": re.compile(
+                r"application/ld\+json",
+                re.IGNORECASE,
+            )
+        },
+    ):
+
+        innehall = script.string or script.get_text()
+
+        if not innehall:
+            continue
+
+        try:
+
+            data = json.loads(
+                innehall
+            )
+
+        except (
+            json.JSONDecodeError,
+            TypeError,
+        ):
+
+            continue
+
+        if isinstance(
+            data,
+            list,
+        ):
+
+            resultat.extend(
+                data
+            )
+
+        else:
+
+            resultat.append(
+                data
+            )
+
+    return resultat
+
+
+def _hitta_varde_i_jsonld(
+    data,
+    nycklar: set[str],
+):
+
+    if isinstance(
+        data,
+        dict,
+    ):
+
+        for key, value in data.items():
+
+            if key.lower() in nycklar:
+
+                if isinstance(
+                    value,
+                    (str, int, float),
+                ):
+
+                    return value
+
+                if isinstance(
+                    value,
+                    dict,
+                ):
+
+                    for undernyckel in (
+                        "value",
+                        "amount",
+                    ):
+
+                        if undernyckel in value:
+
+                            return value[
+                                undernyckel
+                            ]
+
+            resultat = (
+                _hitta_varde_i_jsonld(
+                    value,
+                    nycklar,
+                )
+            )
+
+            if resultat is not None:
+
+                return resultat
+
+    elif isinstance(
+        data,
+        list,
+    ):
+
+        for item in data:
+
+            resultat = (
+                _hitta_varde_i_jsonld(
+                    item,
+                    nycklar,
+                )
+            )
+
+            if resultat is not None:
+
+                return resultat
+
+    return None
+
+
+def _extrahera_pris_fran_jsonld(
+    soup: BeautifulSoup,
+) -> int | None:
+
+    jsonld_data = _extrahera_jsonld(
+        soup
+    )
+
+    pris = _hitta_varde_i_jsonld(
+        jsonld_data,
+        {
+            "price",
+            "lowprice",
+            "highprice",
+        },
+    )
+
+    if pris is None:
+        return None
+
+    try:
+
+        return _rensa_tal(
+            pris
+        )
+
+    except (
+        ValueError,
+        TypeError,
+    ):
+
+        return None
+
+
+def _extrahera_pris_fran_meta(
+    soup: BeautifulSoup,
+) -> int | None:
+
+    meta_namn = {
+        "price",
+        "product:price:amount",
+        "og:price:amount",
+    }
+
+    for meta in soup.find_all(
+        "meta"
+    ):
+
+        namn = (
+            meta.get("property")
+            or meta.get("name")
+            or ""
+        ).lower()
+
+        if namn not in meta_namn:
+            continue
+
+        content = meta.get(
+            "content"
+        )
+
+        if not content:
+            continue
+
+        pris = _rensa_tal(
+            content
+        )
+
+        if pris > 0:
+
+            return pris
+
+    return None
+
+
+def _extrahera_pris_fran_text(
+    text: str,
+) -> int | None:
+
+    # Försök först med den tidigare, mer precisa parsningen.
+    pris_match = re.search(
+        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
+        text,
+        re.IGNORECASE,
+    )
+
+    if pris_match:
+
+        return _rensa_tal(
+            pris_match.group(1)
+        )
+
+    # Bilweb kan även presentera pris och värde
+    # på samma rad eller med varierande whitespace.
+    pris_match = PRIS_DETALJ_REGEX.search(
+        text.replace(
+            "\n",
+            " ",
+        )
+    )
+
+    if pris_match:
+
+        return _rensa_tal(
+            pris_match.group(1)
+        )
+
+    # Mer tolerant fallback:
+    # "Pris 299 900 kr"
+    # "Pris: 299 900 kr"
+    # "Pris (inkl. moms) 299 900 kr"
+    pris_match = re.search(
+        r"\bPris\b"
+        r"(?:\s*\([^)]*\))?"
+        r"\s*:?"
+        r"\s*([\d][\d\s]{2,})\s*kr\b",
+        text,
+        re.IGNORECASE,
+    )
+
+    if pris_match:
+
+        return _rensa_tal(
+            pris_match.group(1)
+        )
+
+    return None
+
+
+def _extrahera_miltal_fran_text(
+    text: str,
+) -> int | None:
+
+    # Tidigare format:
+    # Mil
+    # 12 345
+    # 1:a regdatum
+    mil_match = re.search(
+        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
+        text,
+        re.IGNORECASE,
+    )
+
+    if mil_match:
+
+        return _rensa_tal(
+            mil_match.group(1)
+        )
+
+    # Tidigare fallback.
+    mil_match = MIL_DETALJ_REGEX.search(
+        text
+    )
+
+    if mil_match:
+
+        return _rensa_tal(
+            mil_match.group(1)
+        )
+
+    # Mer tolerant format:
+    # "Mil 12 345"
+    # "Mil: 12 345"
+    # "Mil\n12 345"
+    #
+    # Begränsa sökningen till ett rimligt antal
+    # tecken efter "Mil" för att inte råka fånga
+    # andra nummer längre ned på sidan.
+    mil_match = re.search(
+        r"\bMil\b"
+        r"\s*:?"
+        r"\s*(\d[\d\s]{1,10})"
+        r"(?:\s*(?:mil|1:a\s+regdatum|km)\b|(?=\s|$))",
+        text,
+        re.IGNORECASE,
+    )
+
+    if mil_match:
+
+        mil = _rensa_tal(
+            mil_match.group(1)
+        )
+
+        if 0 < mil < 1_000_000:
+
+            return mil
+
+    return None
+
+
+def _extrahera_miltal_fran_html(
+    soup: BeautifulSoup,
+) -> int | None:
+
+    # Bilweb kan ha data-attribut eller
+    # andra strukturerade attribut för mätarställning.
+    kandidater = (
+        "mileage",
+        "mileageFromOdometer",
+        "odometer",
+        "kilometers",
+        "kilometer",
+        "miltal",
+    )
+
+    for tag in soup.find_all():
+
+        for attribut in kandidater:
+
+            value = tag.get(
+                attribut
+            )
+
+            if value is None:
+                continue
+
+            mil = _rensa_tal(
+                value
+            )
+
+            if 0 <= mil < 1_000_000:
+
+                return mil
+
+    return None
 
 
 def hamta_pris_mil_fran_detaljsida(
@@ -116,48 +476,108 @@ def hamta_pris_mil_fran_detaljsida(
         strip=True,
     )
 
-    pris_match = re.search(
-        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
-        text,
-        re.IGNORECASE,
+    normaliserad_text = _normalisera_text(
+        text
     )
 
-    mil_match = re.search(
-        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
-        text,
-        re.IGNORECASE,
+    # ---------------------------------------------------------
+    # Pris
+    # ---------------------------------------------------------
+
+    pris = _extrahera_pris_fran_jsonld(
+        soup
     )
 
-    if not pris_match:
+    if pris is None:
 
-        pris_match = PRIS_DETALJ_REGEX.search(
-            text.replace(
-                "\n",
-                " ",
-            )
+        pris = _extrahera_pris_fran_meta(
+            soup
         )
 
-    if not mil_match:
+    if pris is None:
 
-        mil_match = MIL_DETALJ_REGEX.search(
+        pris = _extrahera_pris_fran_text(
             text
         )
 
-    if not pris_match or not mil_match:
+    # ---------------------------------------------------------
+    # Miltal
+    # ---------------------------------------------------------
+
+    miltal = _extrahera_miltal_fran_text(
+        text
+    )
+
+    if miltal is None:
+
+        miltal = _extrahera_miltal_fran_html(
+            soup
+        )
+
+    # JSON-LD kan ibland innehålla mätarställning
+    # via mileageFromOdometer/Odometer.
+    if miltal is None:
+
+        jsonld_data = _extrahera_jsonld(
+            soup
+        )
+
+        odometer = _hitta_varde_i_jsonld(
+            jsonld_data,
+            {
+                "mileagefromodometer",
+                "odometer",
+                "mileage",
+            },
+        )
+
+        if isinstance(
+            odometer,
+            dict,
+        ):
+
+            odometer = (
+                odometer.get(
+                    "value"
+                )
+                or odometer.get(
+                    "amount"
+                )
+            )
+
+        if odometer is not None:
+
+            kandidat_miltal = _rensa_tal(
+                odometer
+            )
+
+            if 0 <= kandidat_miltal < 1_000_000:
+
+                miltal = kandidat_miltal
+
+    # ---------------------------------------------------------
+    # Diagnostik
+    # ---------------------------------------------------------
+
+    if pris is None or miltal is None:
 
         info(
             f"[bilweb]   Kunde inte tolka "
-            f"pris/mil på detaljsidan: {url}"
+            f"pris/mil på detaljsidan: "
+            f"pris={'OK' if pris is not None else 'SAKNAS'}, "
+            f"mil={'OK' if miltal is not None else 'SAKNAS'}: "
+            f"{url}"
         )
 
         return None
 
+    # ---------------------------------------------------------
+    # Övriga fält
+    # ---------------------------------------------------------
+
     agare_match = (
         AGARE_DETALJ_REGEX.search(
-            text.replace(
-                "\n",
-                " ",
-            )
+            normaliserad_text
         )
     )
 
@@ -186,12 +606,8 @@ def hamta_pris_mil_fran_detaljsida(
     )
 
     return {
-        "pris": _rensa_tal(
-            pris_match.group(1)
-        ),
-        "miltal": _rensa_tal(
-            mil_match.group(1)
-        ),
+        "pris": pris,
+        "miltal": miltal,
         "antal_agare": antal_agare,
         "auktion": ar_auktion,
         "regnr": regnr,
