@@ -1,4 +1,3 @@
-```python
 """
 HTTP- och detaljsidelogik för Bilweb.
 
@@ -563,4 +562,3 @@ def hamta_detaljsidor_parallellt(
         antal_hamtade,
         antal_cache,
     )
-```
