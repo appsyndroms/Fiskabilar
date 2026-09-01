@@ -1,3 +1,4 @@
+```python
 """
 HTTP- och detaljsidelogik för Bilweb.
 
@@ -35,7 +36,6 @@ from .bilweb_bmw import (
 
 MAX_PARALLELLA_DETALJSIDOR = 6
 
-
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -44,186 +44,167 @@ HEADERS = {
     ),
 }
 
-
 PRIS_DETALJ_REGEX = re.compile(
     r"Pris\s*(?:\([^)]*\))?\s*([\d\s]+?)\s*kr",
     re.IGNORECASE,
 )
-
 
 MIL_DETALJ_REGEX = re.compile(
     r"Mil\s+([\d\s]+?)\s+1:a\s+regdatum",
     re.IGNORECASE,
 )
 
-
 AGARE_DETALJ_REGEX = re.compile(
     r"Antal\s+ägare\s+(\d+)",
     re.IGNORECASE,
 )
-
 
 AUKTION_REGEX = re.compile(
     r"auktionsobjekt",
     re.IGNORECASE,
 )
 
+_DIAGNOSTIK_LOGGAD = False
 
-def _rensa_tal(
-    text: str,
-) -> int:
 
-    siffror = re.sub(
-        r"\D",
-        "",
-        str(text),
-    )
-
+def _rensa_tal(text: str) -> int:
+    siffror = re.sub(r"\D", "", text)
     return int(siffror) if siffror else 0
 
 
-def _normalisera_text(
+def _logga_detaljsida_diagnostik(
+    url: str,
+    resp: requests.Response,
+    html: str,
     text: str,
-) -> str:
+) -> None:
+    """
+    Loggar rådata från den första detaljsida där pris eller miltal
+    inte kunde hittas.
 
-    return re.sub(
-        r"\s+",
-        " ",
-        text,
-    ).strip()
+    Syftet är att avgöra om Bilweb skickar:
+    - riktig HTML
+    - en JS-shell
+    - ett bot-/captcha-svar
+    - en redirect
+    - eller data i något annat format.
+    """
+
+    global _DIAGNOSTIK_LOGGAD
+
+    if _DIAGNOSTIK_LOGGAD:
+        return
+
+    _DIAGNOSTIK_LOGGAD = True
+
+    html_lower = html.lower()
+
+    markers = {
+        "pris": "pris" in html_lower,
+        "mil": re.search(r"\bmil\b", html, re.IGNORECASE) is not None,
+        "kr": "kr" in html_lower,
+        "regdatum": "regdatum" in html_lower,
+        "next_data": "__next_data__" in html_lower,
+        "jsonld": "application/ld+json" in html_lower,
+        "cloudflare": "cloudflare" in html_lower,
+        "captcha": "captcha" in html_lower,
+        "access_denied": "access denied" in html_lower,
+        "forbidden": "forbidden" in html_lower,
+    }
+
+    info("")
+    info("[bilweb] ===== DETALJSIDE-DIAGNOSTIK =====")
+    info(f"[bilweb] URL: {url}")
+    info(f"[bilweb] HTTP-status: {resp.status_code}")
+    info(f"[bilweb] Slutlig URL: {resp.url}")
+    info(f"[bilweb] Content-Type: {resp.headers.get('Content-Type')}")
+    info(f"[bilweb] Server: {resp.headers.get('Server')}")
+    info(f"[bilweb] HTML-längd: {len(html)} tecken")
+    info(f"[bilweb] Redirects: {len(resp.history)}")
+
+    if resp.history:
+        for i, history_response in enumerate(resp.history, start=1):
+            info(
+                "[bilweb]   redirect "
+                f"{i}: {history_response.status_code} "
+                f"{history_response.url}"
+            )
+
+    info("[bilweb] Markörer:")
+    for name, value in markers.items():
+        info(f"[bilweb]   {name}: {value}")
+
+    info("[bilweb] ----- RÅ HTML, första 2000 tecknen -----")
+    info(html[:2000])
+
+    info("[bilweb] ----- EXTRAHERAD TEXT, första 2000 tecknen -----")
+    info(text[:2000])
+
+    info("[bilweb] ===== SLUT DIAGNOSTIK =====")
+    info("")
 
 
-def _extrahera_jsonld(
-    soup: BeautifulSoup,
-) -> list:
+def _hamta_json_ld(soup: BeautifulSoup) -> list[dict]:
+    """
+    Hämtar JSON-LD-block från sidan.
+    Returnerar endast objekt som faktiskt går att tolka som dict.
+    """
 
     resultat = []
 
     for script in soup.find_all(
         "script",
-        attrs={
-            "type": re.compile(
-                r"application/ld\+json",
-                re.IGNORECASE,
-            )
-        },
+        attrs={"type": "application/ld+json"},
     ):
-
-        innehall = script.string or script.get_text()
+        innehall = script.string or script.get_text(strip=True)
 
         if not innehall:
             continue
 
         try:
-
-            data = json.loads(
-                innehall
-            )
-
-        except (
-            json.JSONDecodeError,
-            TypeError,
-        ):
-
+            data = json.loads(innehall)
+        except Exception:
             continue
 
-        if isinstance(
-            data,
-            list,
-        ):
+        if isinstance(data, dict):
+            resultat.append(data)
 
+        elif isinstance(data, list):
             resultat.extend(
-                data
-            )
-
-        else:
-
-            resultat.append(
-                data
+                item
+                for item in data
+                if isinstance(item, dict)
             )
 
     return resultat
 
 
-def _hitta_varde_i_jsonld(
-    data,
-    nycklar: set[str],
-):
+def _hitta_rekursivt(data, nycklar: set[str]):
+    """
+    Söker rekursivt efter första förekomsten av någon av nycklarna.
+    """
 
-    if isinstance(
-        data,
-        dict,
-    ):
-
+    if isinstance(data, dict):
         for key, value in data.items():
-
             if key.lower() in nycklar:
+                return value
 
-                if isinstance(
-                    value,
-                    (str, int, float),
-                ):
-
-                    return value
-
-                if isinstance(
-                    value,
-                    dict,
-                ):
-
-                    for undernyckel in (
-                        "value",
-                        "amount",
-                    ):
-
-                        if undernyckel in value:
-
-                            return value[
-                                undernyckel
-                            ]
-
-            resultat = (
-                _hitta_varde_i_jsonld(
-                    value,
-                    nycklar,
-                )
-            )
-
+            resultat = _hitta_rekursivt(value, nycklar)
             if resultat is not None:
-
                 return resultat
 
-    elif isinstance(
-        data,
-        list,
-    ):
-
+    elif isinstance(data, list):
         for item in data:
-
-            resultat = (
-                _hitta_varde_i_jsonld(
-                    item,
-                    nycklar,
-                )
-            )
-
+            resultat = _hitta_rekursivt(item, nycklar)
             if resultat is not None:
-
                 return resultat
 
     return None
 
 
-def _extrahera_pris_fran_jsonld(
-    soup: BeautifulSoup,
-) -> int | None:
-
-    jsonld_data = _extrahera_jsonld(
-        soup
-    )
-
-    pris = _hitta_varde_i_jsonld(
-        jsonld_data,
+def _pris_fran_json_ld(json_ld: list[dict]) -> int | None:
+    value = _hitta_rekursivt(
+        json_ld,
         {
             "price",
             "lowprice",
@@ -231,212 +212,99 @@ def _extrahera_pris_fran_jsonld(
         },
     )
 
-    if pris is None:
+    if value is None:
         return None
 
-    try:
+    if isinstance(value, (int, float)):
+        return int(value)
 
-        return _rensa_tal(
-            pris
-        )
+    if isinstance(value, str):
+        siffror = re.sub(r"[^\d]", "", value)
+        if siffror:
+            return int(siffror)
 
-    except (
-        ValueError,
-        TypeError,
-    ):
+    return None
 
+
+def _mil_fran_json_ld(json_ld: list[dict]) -> int | None:
+    value = _hitta_rekursivt(
+        json_ld,
+        {
+            "mileagefromodometer",
+            "odometervalue",
+            "mileage",
+            "miltal",
+        },
+    )
+
+    if value is None:
         return None
 
+    if isinstance(value, dict):
+        value = value.get("value")
 
-def _extrahera_pris_fran_meta(
-    soup: BeautifulSoup,
-) -> int | None:
+    if isinstance(value, (int, float)):
+        return int(value)
 
-    meta_namn = {
-        "price",
-        "product:price:amount",
-        "og:price:amount",
+    if isinstance(value, str):
+        siffror = re.sub(r"[^\d]", "", value)
+        if siffror:
+            return int(siffror)
+
+    return None
+
+
+def _pris_fran_meta(soup: BeautifulSoup) -> int | None:
+    """
+    Försöker hitta pris i vanliga meta-attribut.
+    """
+
+    kandidater = [
+        soup.find("meta", attrs={"property": "product:price:amount"}),
+        soup.find("meta", attrs={"name": "price"}),
+        soup.find("meta", attrs={"itemprop": "price"}),
+    ]
+
+    for meta in kandidater:
+        if not meta:
+            continue
+
+        value = meta.get("content")
+        if not value:
+            continue
+
+        siffror = re.sub(r"[^\d]", "", value)
+
+        if siffror:
+            return int(siffror)
+
+    return None
+
+
+def _mil_fran_html_attribut(soup: BeautifulSoup) -> int | None:
+    """
+    Söker efter attribut som kan innehålla miltal.
+    """
+
+    attribut_namn = {
+        "data-mileage",
+        "data-milage",
+        "data-miltal",
+        "data-odometer",
+        "data-km",
     }
 
-    for meta in soup.find_all(
-        "meta"
-    ):
-
-        namn = (
-            meta.get("property")
-            or meta.get("name")
-            or ""
-        ).lower()
-
-        if namn not in meta_namn:
-            continue
-
-        content = meta.get(
-            "content"
-        )
-
-        if not content:
-            continue
-
-        pris = _rensa_tal(
-            content
-        )
-
-        if pris > 0:
-
-            return pris
-
-    return None
-
-
-def _extrahera_pris_fran_text(
-    text: str,
-) -> int | None:
-
-    # Försök först med den tidigare, mer precisa parsningen.
-    pris_match = re.search(
-        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
-        text,
-        re.IGNORECASE,
-    )
-
-    if pris_match:
-
-        return _rensa_tal(
-            pris_match.group(1)
-        )
-
-    # Bilweb kan även presentera pris och värde
-    # på samma rad eller med varierande whitespace.
-    pris_match = PRIS_DETALJ_REGEX.search(
-        text.replace(
-            "\n",
-            " ",
-        )
-    )
-
-    if pris_match:
-
-        return _rensa_tal(
-            pris_match.group(1)
-        )
-
-    # Mer tolerant fallback:
-    # "Pris 299 900 kr"
-    # "Pris: 299 900 kr"
-    # "Pris (inkl. moms) 299 900 kr"
-    pris_match = re.search(
-        r"\bPris\b"
-        r"(?:\s*\([^)]*\))?"
-        r"\s*:?"
-        r"\s*([\d][\d\s]{2,})\s*kr\b",
-        text,
-        re.IGNORECASE,
-    )
-
-    if pris_match:
-
-        return _rensa_tal(
-            pris_match.group(1)
-        )
-
-    return None
-
-
-def _extrahera_miltal_fran_text(
-    text: str,
-) -> int | None:
-
-    # Tidigare format:
-    # Mil
-    # 12 345
-    # 1:a regdatum
-    mil_match = re.search(
-        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
-        text,
-        re.IGNORECASE,
-    )
-
-    if mil_match:
-
-        return _rensa_tal(
-            mil_match.group(1)
-        )
-
-    # Tidigare fallback.
-    mil_match = MIL_DETALJ_REGEX.search(
-        text
-    )
-
-    if mil_match:
-
-        return _rensa_tal(
-            mil_match.group(1)
-        )
-
-    # Mer tolerant format:
-    # "Mil 12 345"
-    # "Mil: 12 345"
-    # "Mil\n12 345"
-    #
-    # Begränsa sökningen till ett rimligt antal
-    # tecken efter "Mil" för att inte råka fånga
-    # andra nummer längre ned på sidan.
-    mil_match = re.search(
-        r"\bMil\b"
-        r"\s*:?"
-        r"\s*(\d[\d\s]{1,10})"
-        r"(?:\s*(?:mil|1:a\s+regdatum|km)\b|(?=\s|$))",
-        text,
-        re.IGNORECASE,
-    )
-
-    if mil_match:
-
-        mil = _rensa_tal(
-            mil_match.group(1)
-        )
-
-        if 0 < mil < 1_000_000:
-
-            return mil
-
-    return None
-
-
-def _extrahera_miltal_fran_html(
-    soup: BeautifulSoup,
-) -> int | None:
-
-    # Bilweb kan ha data-attribut eller
-    # andra strukturerade attribut för mätarställning.
-    kandidater = (
-        "mileage",
-        "mileageFromOdometer",
-        "odometer",
-        "kilometers",
-        "kilometer",
-        "miltal",
-    )
-
-    for tag in soup.find_all():
-
-        for attribut in kandidater:
-
-            value = tag.get(
-                attribut
-            )
+    for element in soup.find_all(True):
+        for namn in attribut_namn:
+            value = element.get(namn)
 
             if value is None:
                 continue
 
-            mil = _rensa_tal(
-                value
-            )
+            siffror = re.sub(r"[^\d]", "", str(value))
 
-            if 0 <= mil < 1_000_000:
-
-                return mil
+            if siffror:
+                return int(siffror)
 
     return None
 
@@ -444,24 +312,19 @@ def _extrahera_miltal_fran_html(
 def hamta_pris_mil_fran_detaljsida(
     url: str,
 ) -> dict | None:
-
     try:
-
         resp = requests.get(
             url,
             headers=HEADERS,
             timeout=15,
         )
-
         resp.raise_for_status()
 
     except Exception as e:
-
         info(
-            f"[bilweb]   FEL vid hämtning av "
-            f"detaljsida {url}: {e}"
+            f"[bilweb]   FEL vid hämtning av detaljsida "
+            f"{url}: {e}"
         )
-
         return None
 
     html = resp.text
@@ -476,94 +339,93 @@ def hamta_pris_mil_fran_detaljsida(
         strip=True,
     )
 
-    normaliserad_text = _normalisera_text(
-        text
-    )
-
     # ---------------------------------------------------------
     # Pris
     # ---------------------------------------------------------
 
-    pris = _extrahera_pris_fran_jsonld(
-        soup
+    pris = None
+
+    pris_match = re.search(
+        r"(?:^|\n)\s*Pris\s*(?:\([^)]*\))?\s*\n+\s*([\d\s]+)\s*kr",
+        text,
+        re.IGNORECASE,
     )
 
-    if pris is None:
-
-        pris = _extrahera_pris_fran_meta(
-            soup
+    if pris_match:
+        pris = _rensa_tal(
+            pris_match.group(1)
         )
 
     if pris is None:
-
-        pris = _extrahera_pris_fran_text(
-            text
+        pris_match = PRIS_DETALJ_REGEX.search(
+            text.replace("\n", " ")
         )
+
+        if pris_match:
+            pris = _rensa_tal(
+                pris_match.group(1)
+            )
+
+    if pris is None:
+        pris = _pris_fran_meta(soup)
+
+    json_ld = _hamta_json_ld(soup)
+
+    if pris is None:
+        pris = _pris_fran_json_ld(json_ld)
 
     # ---------------------------------------------------------
     # Miltal
     # ---------------------------------------------------------
 
-    miltal = _extrahera_miltal_fran_text(
-        text
+    miltal = None
+
+    mil_match = re.search(
+        r"(?:^|\n)\s*Mil\s*\n+\s*(\d[\d\s]*)\s*(?:\n|$)",
+        text,
+        re.IGNORECASE,
     )
 
-    if miltal is None:
+    if mil_match:
+        miltal = _rensa_tal(
+            mil_match.group(1)
+        )
 
-        miltal = _extrahera_miltal_fran_html(
+    if miltal is None:
+        mil_match = MIL_DETALJ_REGEX.search(
+            text
+        )
+
+        if mil_match:
+            miltal = _rensa_tal(
+                mil_match.group(1)
+            )
+
+    if miltal is None:
+        miltal = _mil_fran_html_attribut(
             soup
         )
 
-    # JSON-LD kan ibland innehålla mätarställning
-    # via mileageFromOdometer/Odometer.
     if miltal is None:
-
-        jsonld_data = _extrahera_jsonld(
-            soup
+        miltal = _mil_fran_json_ld(
+            json_ld
         )
-
-        odometer = _hitta_varde_i_jsonld(
-            jsonld_data,
-            {
-                "mileagefromodometer",
-                "odometer",
-                "mileage",
-            },
-        )
-
-        if isinstance(
-            odometer,
-            dict,
-        ):
-
-            odometer = (
-                odometer.get(
-                    "value"
-                )
-                or odometer.get(
-                    "amount"
-                )
-            )
-
-        if odometer is not None:
-
-            kandidat_miltal = _rensa_tal(
-                odometer
-            )
-
-            if 0 <= kandidat_miltal < 1_000_000:
-
-                miltal = kandidat_miltal
 
     # ---------------------------------------------------------
     # Diagnostik
     # ---------------------------------------------------------
 
     if pris is None or miltal is None:
+        _logga_detaljsida_diagnostik(
+            url=url,
+            resp=resp,
+            html=html,
+            text=text,
+        )
 
         info(
-            f"[bilweb]   Kunde inte tolka "
-            f"pris/mil på detaljsidan: "
+            "[bilweb]   Kunde inte tolka pris/mil "
+            f"på detaljsidan: "
             f"pris={'OK' if pris is not None else 'SAKNAS'}, "
             f"mil={'OK' if miltal is not None else 'SAKNAS'}: "
             f"{url}"
@@ -575,24 +437,18 @@ def hamta_pris_mil_fran_detaljsida(
     # Övriga fält
     # ---------------------------------------------------------
 
-    agare_match = (
-        AGARE_DETALJ_REGEX.search(
-            normaliserad_text
-        )
+    agare_match = AGARE_DETALJ_REGEX.search(
+        text.replace("\n", " ")
     )
 
     antal_agare = (
-        int(
-            agare_match.group(1)
-        )
+        int(agare_match.group(1))
         if agare_match
         else None
     )
 
     ar_auktion = (
-        AUKTION_REGEX.search(
-            text
-        )
+        AUKTION_REGEX.search(text)
         is not None
     )
 
@@ -602,7 +458,7 @@ def hamta_pris_mil_fran_detaljsida(
     )
 
     kaross = extrahera_kaross(
-        text
+        text,
     )
 
     return {
@@ -620,81 +476,91 @@ def hamta_detaljsidor_parallellt(
     kandidater: list[dict],
     cache: dict,
 ) -> tuple[dict, int, int]:
+    """
+    Hämtar detaljsidor parallellt.
 
-    resultat_per_url = {}
+    Returnerar:
+        resultat, antal_hamtade, antal_cache
+    """
 
-    nya_kandidater = []
+    resultat = {}
 
-    cachetraffar = 0
+    urls_att_hamta = []
+
+    antal_cache = 0
 
     for kandidat in kandidater:
+        url = kandidat.get("url")
 
-        url = kandidat["url"]
+        if not url:
+            continue
 
         if url in cache:
-
-            resultat_per_url[url] = cache[url]
-            cachetraffar += 1
-
-        else:
-
-            nya_kandidater.append(
-                kandidat
+            kandidat_data = dict(kandidat)
+            kandidat_data.update(
+                cache[url]
             )
 
-    if not nya_kandidater:
+            resultat[url] = kandidat_data
+            antal_cache += 1
 
-        return (
-            resultat_per_url,
-            cachetraffar,
-            0,
+        else:
+            urls_att_hamta.append(
+                (url, kandidat)
+            )
+
+    antal_hamtade = len(urls_att_hamta)
+
+    if urls_att_hamta:
+        info(
+            "[bilweb]   hämtar "
+            f"{len(urls_att_hamta)} detaljsidor parallellt "
+            f"med {MAX_PARALLELLA_DETALJSIDOR} workers"
         )
 
-    info(
-        f"[bilweb]   hämtar "
-        f"{len(nya_kandidater)} detaljsidor "
-        f"parallellt med "
-        f"{MAX_PARALLELLA_DETALJSIDOR} workers"
-    )
+        with ThreadPoolExecutor(
+            max_workers=MAX_PARALLELLA_DETALJSIDOR
+        ) as executor:
 
-    with ThreadPoolExecutor(
-        max_workers=MAX_PARALLELLA_DETALJSIDOR
-    ) as executor:
+            futures = {
+                executor.submit(
+                    hamta_pris_mil_fran_detaljsida,
+                    url,
+                ): (
+                    url,
+                    kandidat,
+                )
+                for url, kandidat in urls_att_hamta
+            }
 
-        framtida = {
-            executor.submit(
-                hamta_pris_mil_fran_detaljsida,
-                kandidat["url"],
-            ): kandidat["url"]
-            for kandidat in nya_kandidater
-        }
+            for future in as_completed(futures):
+                url, kandidat = futures[future]
 
-        for future in as_completed(
-            framtida
-        ):
+                try:
+                    detaljdata = future.result()
 
-            url = framtida[
-                future
-            ]
+                except Exception as e:
+                    info(
+                        "[bilweb]   FEL i detaljsida-worker "
+                        f"{url}: {e}"
+                    )
+                    continue
 
-            try:
+                if not detaljdata:
+                    continue
 
-                resultat = future.result()
+                cache[url] = detaljdata
 
-            except Exception as e:
-
-                info(
-                    f"[bilweb]   FEL i parallell "
-                    f"detaljhämtning: {url}: {e}"
+                kandidat_data = dict(kandidat)
+                kandidat_data.update(
+                    detaljdata
                 )
 
-                resultat = None
-
-            cache[url] = resultat
-            resultat_per_url[url] = resultat
+                resultat[url] = kandidat_data
 
     return (
-        resultat_per_url,
-        cachetraffar,
-        len(nya_kandidater),
+        resultat,
+        antal_hamtade,
+        antal_cache,
     )
+```
