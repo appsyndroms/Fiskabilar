@@ -46,9 +46,9 @@ jobs:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
         run: |
           if [ "${{ inputs.force_email }}" = "true" ]; then
-            python -u reporting/daily_market_report.py --force-email
+            python -u -m reporting.daily_market_report --force-email
           else
-            python -u reporting/daily_market_report.py
+            python -u -m reporting.daily_market_report
           fi
 
       - name: Spara rapportlogg
