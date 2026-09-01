@@ -80,13 +80,6 @@ def _logga_detaljsida_diagnostik(
     """
     Loggar rådata från den första detaljsida där pris eller miltal
     inte kunde hittas.
-
-    Syftet är att avgöra om Bilweb skickar:
-    - riktig HTML
-    - en JS-shell
-    - ett bot-/captcha-svar
-    - en redirect
-    - eller data i något annat format.
     """
 
     global _DIAGNOSTIK_LOGGAD
@@ -100,7 +93,11 @@ def _logga_detaljsida_diagnostik(
 
     markers = {
         "pris": "pris" in html_lower,
-        "mil": re.search(r"\bmil\b", html, re.IGNORECASE) is not None,
+        "mil": re.search(
+            r"\bmil\b",
+            html,
+            re.IGNORECASE,
+        ) is not None,
         "kr": "kr" in html_lower,
         "regdatum": "regdatum" in html_lower,
         "next_data": "__next_data__" in html_lower,
@@ -117,19 +114,19 @@ def _logga_detaljsida_diagnostik(
     info(f"[bilweb] HTTP-status: {resp.status_code}")
     info(f"[bilweb] Slutlig URL: {resp.url}")
     info(
-        f"[bilweb] Content-Type: "
+        "[bilweb] Content-Type: "
         f"{resp.headers.get('Content-Type')}"
     )
     info(
-        f"[bilweb] Server: "
+        "[bilweb] Server: "
         f"{resp.headers.get('Server')}"
     )
     info(
-        f"[bilweb] HTML-längd: "
+        "[bilweb] HTML-längd: "
         f"{len(html)} tecken"
     )
     info(
-        f"[bilweb] Redirects: "
+        "[bilweb] Redirects: "
         f"{len(resp.history)}"
     )
 
@@ -174,8 +171,6 @@ def _hamta_json_ld(
 ) -> list[dict]:
     """
     Hämtar JSON-LD-block från sidan.
-    Returnerar endast objekt som faktiskt går att
-    tolka som dict.
     """
 
     resultat = []
@@ -319,14 +314,17 @@ def _pris_fran_meta(
 ) -> int | None:
     """
     Försöker hitta pris i vanliga meta-attribut.
+
+    Bilweb har bland annat priset i:
+        <meta name="description"
+              content="... Pris 479 800 kr ...">
     """
 
     kandidater = [
         soup.find(
             "meta",
             attrs={
-                "property":
-                    "product:price:amount",
+                "property": "product:price:amount",
             },
         ),
         soup.find(
@@ -361,6 +359,64 @@ def _pris_fran_meta(
 
         if siffror:
             return int(siffror)
+
+    # Bilwebs meta description:
+    #
+    # Köp Volvo ... — 6 750 mil — El/Bensin —
+    # Automatisk — Pris 479 800 kr — Säljs i Malmö.
+    #
+    meta_description = soup.find(
+        "meta",
+        attrs={
+            "name": "description",
+        },
+    )
+
+    if meta_description:
+        content = meta_description.get(
+            "content",
+            "",
+        )
+
+        match = re.search(
+            r"Pris\s+([\d\s]+)\s+kr",
+            content,
+            re.IGNORECASE,
+        )
+
+        if match:
+            return _rensa_tal(
+                match.group(1)
+            )
+
+    return None
+
+
+def _pris_fran_synlig_text(
+    text: str,
+) -> int | None:
+    """
+    Försöker hitta Bilwebs synliga prisformat.
+
+    Exempel:
+        479 800:-
+        325 000 kr
+        479800:-
+    """
+
+    match = re.search(
+        r"(?<!\d)"
+        r"(\d[\d\s]{2,})"
+        r"\s*(?:kr|:-)"
+        r"(?!\w)",
+        text,
+        re.IGNORECASE,
+    )
+
+    if match:
+        return _rensa_tal(
+            match.group(1)
+        )
 
     return None
 
@@ -441,38 +497,36 @@ def hamta_pris_mil_fran_detaljsida(
 
     pris = None
 
-    # Vanligt format:
+    # 1. Pris i synlig text.
     #
-    # Pris
-    # 325 000 kr
+    # Bilweb visar exempelvis:
     #
-    # eller:
+    # 479 800:-
     #
-    # Pris
-    # 325 000:-
-    #
-    pris_match = re.search(
-        r"(?:^|\n)"
-        r"\s*Pris"
-        r"\s*(?:\([^)]*\))?"
-        r"\s*\n+"
-        r"\s*([\d\s]+)"
-        r"\s*(?:kr|:-)",
-        text,
-        re.IGNORECASE,
+    pris = _pris_fran_synlig_text(
+        text
     )
 
-    if pris_match:
-        pris = _rensa_tal(
-            pris_match.group(1)
+    # 2. Klassisk "Pris 479 800 kr".
+    if pris is None:
+
+        pris_match = re.search(
+            r"(?:^|\n)"
+            r"\s*Pris"
+            r"\s*(?:\([^)]*\))?"
+            r"\s*\n+"
+            r"\s*([\d\s]+)"
+            r"\s*(?:kr|:-)",
+            text,
+            re.IGNORECASE,
         )
 
-    # Auktionsformat:
-    #
-    # Auktion
-    # 325 000:-
-    # Priset är ett uppskattat högsta slutpris
-    #
+        if pris_match:
+            pris = _rensa_tal(
+                pris_match.group(1)
+            )
+
+    # 3. Auktionsformat.
     if pris is None:
 
         pris_match = re.search(
@@ -490,6 +544,7 @@ def hamta_pris_mil_fran_detaljsida(
                 pris_match.group(1)
             )
 
+    # 4. Prisregex mot hela texten.
     if pris is None:
 
         pris_match = PRIS_DETALJ_REGEX.search(
@@ -501,7 +556,9 @@ def hamta_pris_mil_fran_detaljsida(
                 pris_match.group(1)
             )
 
+    # 5. Meta description / price-meta.
     if pris is None:
+
         pris = _pris_fran_meta(
             soup
         )
@@ -510,7 +567,9 @@ def hamta_pris_mil_fran_detaljsida(
         soup
     )
 
+    # 6. JSON-LD.
     if pris is None:
+
         pris = _pris_fran_json_ld(
             json_ld
         )
@@ -524,8 +583,9 @@ def hamta_pris_mil_fran_detaljsida(
     # Bilwebs faktiska format:
     #
     # Mätarställning
-    # 9 489 mil
+    # 6 750 mil
     #
+
     mil_match = re.search(
         r"(?:^|\n)"
         r"\s*Mätarställning"
@@ -553,11 +613,13 @@ def hamta_pris_mil_fran_detaljsida(
             )
 
     if miltal is None:
+
         miltal = _mil_fran_html_attribut(
             soup
         )
 
     if miltal is None:
+
         miltal = _mil_fran_json_ld(
             json_ld
         )
