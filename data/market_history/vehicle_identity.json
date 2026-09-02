@@ -2487,7 +2487,36 @@
     "url:https://www.wayke.se/objekt/744685c4-30c1-4c6e-bfa9-0f1e0f704d35": "vehicle:00000701",
     "fp:e2223eab773bc647": "vehicle:00000701",
     "url:https://www.wayke.se/objekt/0345d7c8-9207-4c7a-9d77-18c1ad66cef1": "vehicle:00000702",
-    "fp:06c3221c120c51fd": "vehicle:00000702"
+    "fp:06c3221c120c51fd": "vehicle:00000702",
+    "reg:SWA10J": "vehicle:00000703",
+    "source:bilweb:360708": "vehicle:00000703",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v60-recharge-t8-plus-bright-2023-kombi-360708": "vehicle:00000703",
+    "fp:8eb9573d88593c7b": "vehicle:00000703",
+    "url:https://www.wayke.se/objekt/8021168d-496b-4804-b944-c5d9a90834cd": "vehicle:00000704",
+    "fp:d3174afe8a03a24f": "vehicle:00000704",
+    "reg:TFP51N": "vehicle:00000705",
+    "source:bilweb:361448": "vehicle:00000705",
+    "url:https://bilweb.se/skane-lan/volvo-v90-recharge-t6-core-edition-keyless-dragkrok-blis-navigation-2023-kombi-361448": "vehicle:00000705",
+    "fp:da8dc1a9303b4ce9": "vehicle:00000705",
+    "url:https://www.wayke.se/objekt/348e3b33-9c43-430c-8e89-2569041f6463": "vehicle:00000088",
+    "source:bilweb:346124": "vehicle:00000093",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-t8-awd-recharge-455hk-2025-kombi-346124": "vehicle:00000093",
+    "fp:8bb17623929ef788": "vehicle:00000110",
+    "reg:ZYS16P": "vehicle:00000706",
+    "source:bilweb:359967": "vehicle:00000706",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-lader-h-k-360kamera-2026-kombi-359967": "vehicle:00000706",
+    "fp:acad5a730bc278d5": "vehicle:00000706",
+    "reg:CRA47P": "vehicle:00000707",
+    "source:bilweb:361623": "vehicle:00000707",
+    "url:https://bilweb.se/stockholms-lan/bmw-530-e-xdrive-touring-292hk-m-sport-h-k-drag-2024-kombi-361623": "vehicle:00000707",
+    "fp:7776eea3120dfa70": "vehicle:00000707",
+    "source:bilweb:360996": "vehicle:00000486",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v90-recharge-t6-core-edition-ii-2024-kombi-360996": "vehicle:00000486",
+    "fp:d68402ae8d017bff": "vehicle:00000486",
+    "reg:RAR13G": "vehicle:00000708",
+    "source:bilweb:360893": "vehicle:00000708",
+    "url:https://bilweb.se/kronobergs-lan/bmw-530-e-xdrive-touring-m-sport-farthallare-b-kam-sensatec-lader-2024-kombi-360893": "vehicle:00000708",
+    "fp:cd4c689c8dc12f3f": "vehicle:00000708"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -4065,7 +4094,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/d576b9ee-60bd-4eeb-a630-83e8fd106f4e",
+      "last_seen": "https://www.wayke.se/objekt/348e3b33-9c43-430c-8e89-2569041f6463",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -4155,7 +4184,7 @@
         "regnr": "WBM42S",
         "vin": null
       },
-      "last_seen": "12851879",
+      "last_seen": "346124",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -11229,7 +11258,7 @@
         "regnr": "FOS72K",
         "vin": null
       },
-      "last_seen": "332230",
+      "last_seen": "360996",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -15122,6 +15151,114 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000703": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2023,
+        "regnr": "SWA10J",
+        "vin": null
+      },
+      "last_seen": "360708",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000704": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8021168d-496b-4804-b944-c5d9a90834cd",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000705": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "TFP51N",
+        "vin": null
+      },
+      "last_seen": "361448",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000706": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "ZYS16P",
+        "vin": null
+      },
+      "last_seen": "359967",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000707": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "CRA47P",
+        "vin": null
+      },
+      "last_seen": "361623",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000708": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "RAR13G",
+        "vin": null
+      },
+      "last_seen": "360893",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
