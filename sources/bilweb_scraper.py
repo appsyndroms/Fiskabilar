@@ -48,6 +48,27 @@ PRIS_DETALJ_REGEX = re.compile(
     re.IGNORECASE,
 )
 
+KONTANTPRIS_REGEX = re.compile(
+    r"(?:Kontantpris|Kontant)"
+    r"\s*:?\s*"
+    r"([\d\s]+?)"
+    r"\s*(?:kr|:-)",
+    re.IGNORECASE,
+)
+
+LEASING_REGEX = re.compile(
+    r"privatleasing|företagsleasing|leasing",
+    re.IGNORECASE,
+)
+
+PRISBELOPP_REGEX = re.compile(
+    r"(?<!\d)"
+    r"(\d[\d\s]{2,})"
+    r"\s*(?:kr|:-)"
+    r"(?!\s*/?\s*(?:mån|månad))",
+    re.IGNORECASE,
+)
+
 MIL_DETALJ_REGEX = re.compile(
     r"Mätarställning\s+([\d\s]+?)\s+mil",
     re.IGNORECASE,
@@ -289,6 +310,58 @@ def _pris_fran_meta(
     return None
 
 
+def _ar_leasingannons(
+    text: str,
+) -> bool:
+    """
+    Avgör om annonsen sannolikt är en leasingannons.
+
+    Vi tittar endast på de första raderna eftersom
+    vanliga bilannonser kan nämna leasing längre ned
+    i beskrivningen utan att själva bilen är en
+    leasingannons.
+    """
+
+    for rad in text.splitlines()[:20]:
+
+        if LEASING_REGEX.search(rad):
+            return True
+
+    return False
+
+
+def _pris_fran_kontantpris(
+    text: str,
+) -> int | None:
+    """
+    Försöker hitta ett uttryckligt kontantpris.
+
+    Exempel:
+        Kontantpris 319 700 kr
+        Kontant: 369 800 kr
+        Kontant 499 500 kr
+
+    Detta prioriteras framför generella "Pris"-träffar
+    eftersom Bilweb kan visa leasingbelopp som "Pris".
+    """
+
+    match = KONTANTPRIS_REGEX.search(
+        text
+    )
+
+    if not match:
+        return None
+
+    pris = _rensa_tal(
+        match.group(1)
+    )
+
+    if pris < 100_000:
+        return None
+
+    return pris
+
+
 def _pris_fran_synlig_text(
     text: str,
 ) -> int | None:
@@ -299,23 +372,91 @@ def _pris_fran_synlig_text(
         479 800:-
         325 000 kr
         479800:-
+
+    Leasingbelopp per månad ignoreras.
     """
 
-    match = re.search(
-        r"(?<!\d)"
-        r"(\d[\d\s]{2,})"
-        r"\s*(?:kr|:-)"
-        r"(?!\w)",
+    for rad in text.splitlines():
+
+        rad = rad.strip()
+
+        if not rad:
+            continue
+
+        if re.search(
+            r"(?:/|\b)(?:mån|månad)\b",
+            rad,
+            re.IGNORECASE,
+        ):
+            continue
+
+        match = PRISBELOPP_REGEX.search(
+            rad
+        )
+
+        if not match:
+            continue
+
+        pris = _rensa_tal(
+            match.group(1)
+        )
+
+        if pris < 100_000:
+            continue
+
+        return pris
+
+    return None
+
+
+def _pris_fran_prislabel(
+    text: str,
+) -> int | None:
+    """
+    Försöker hitta Bilwebs format:
+
+        Pris
+        319 700 kr
+
+    Ett generellt "Pris"-fält får endast användas
+    om annonsen inte ser ut att vara en leasingannons
+    i rubrik-/inledningsdelen.
+
+    Detta är viktigt eftersom Bilweb för vissa
+    leasingannonser visar exempelvis:
+
+        Pris
+        5 425 kr
+
+    där 5 425 kr egentligen är privatleasing
+    per månad.
+    """
+
+    if _ar_leasingannons(text):
+        return None
+
+    pris_match = re.search(
+        r"(?:^|\n)"
+        r"\s*Pris"
+        r"\s*(?:\([^)]*\))?"
+        r"\s*\n+"
+        r"\s*([\d\s]+)"
+        r"\s*(?:kr|:-)",
         text,
         re.IGNORECASE,
     )
 
-    if match:
-        return _rensa_tal(
-            match.group(1)
-        )
+    if not pris_match:
+        return None
 
-    return None
+    pris = _rensa_tal(
+        pris_match.group(1)
+    )
+
+    if pris < 100_000:
+        return None
+
+    return pris
 
 
 def _mil_fran_html_attribut(
@@ -394,36 +535,43 @@ def hamta_pris_mil_fran_detaljsida(
 
     pris = None
 
-    # 1. Pris i synlig text.
+    # 1. Explicit kontantpris.
     #
-    # Bilweb visar exempelvis:
+    # Exempel:
     #
-    # 479 800:-
-
-    pris = _pris_fran_synlig_text(
+    # Kontantpris 319 700 kr
+    # Kontant: 369 800 kr
+    #
+    # Detta ska alltid prioriteras framför ett
+    # generellt "Pris"-fält.
+    pris = _pris_fran_kontantpris(
         text
     )
 
-    # 2. Klassisk "Pris 479 800 kr".
+    # 2. Pris i synlig text.
+    #
+    # Exempel:
+    #
+    # 479 800:-
+    #
+    # Leasingbelopp per månad ignoreras.
     if pris is None:
 
-        pris_match = re.search(
-            r"(?:^|\n)"
-            r"\s*Pris"
-            r"\s*(?:\([^)]*\))?"
-            r"\s*\n+"
-            r"\s*([\d\s]+)"
-            r"\s*(?:kr|:-)",
-            text,
-            re.IGNORECASE,
+        pris = _pris_fran_synlig_text(
+            text
         )
 
-        if pris_match:
-            pris = _rensa_tal(
-                pris_match.group(1)
-            )
+    # 3. Klassisk "Pris 479 800 kr".
+    #
+    # Används endast om annonsen inte ser ut som
+    # en leasingannons i rubrik-/inledningsdelen.
+    if pris is None:
 
-    # 3. Auktionsformat.
+        pris = _pris_fran_prislabel(
+            text
+        )
+
+    # 4. Auktionsformat.
     if pris is None:
 
         pris_match = re.search(
@@ -437,39 +585,80 @@ def hamta_pris_mil_fran_detaljsida(
         )
 
         if pris_match:
-            pris = _rensa_tal(
+            kandidatpris = _rensa_tal(
                 pris_match.group(1)
             )
 
-    # 4. Prisregex mot hela texten.
-    if pris is None:
+            if kandidatpris >= 100_000:
+                pris = kandidatpris
+
+    # 5. Prisregex mot hela texten.
+    #
+    # Detta är endast en fallback och får inte användas
+    # för leasingannonser eftersom Bilweb kan kalla
+    # månadsbeloppet för "Pris".
+    if pris is None and not _ar_leasingannons(text):
 
         pris_match = PRIS_DETALJ_REGEX.search(
             text.replace("\n", " ")
         )
 
         if pris_match:
-            pris = _rensa_tal(
+
+            kandidatpris = _rensa_tal(
                 pris_match.group(1)
             )
 
-    # 5. Meta description / price-meta.
+            if kandidatpris >= 100_000:
+                pris = kandidatpris
+
+    # 6. Meta description / price-meta.
+    #
+    # Meta används bara om vi inte redan har hittat
+    # ett pris.
     if pris is None:
 
         pris = _pris_fran_meta(
             soup
         )
 
+        if pris is not None and pris < 100_000:
+            pris = None
+
     json_ld = _hamta_json_ld(
         soup
     )
 
-    # 6. JSON-LD.
+    # 7. JSON-LD.
     if pris is None:
 
         pris = _pris_fran_json_ld(
             json_ld
         )
+
+        if pris is not None and pris < 100_000:
+            pris = None
+
+    # Leasingannonser utan explicit kontantpris
+    # ska inte användas som kontantprisobservationer.
+    #
+    # Detta fångar bland annat Bilwebs fall där
+    # annonsen har:
+    #
+    #   PRIVAT FÖRETAGSLEASING
+    #
+    # och:
+    #
+    #   Pris
+    #   5 425 kr
+    #
+    # men inget kontantpris.
+    if (
+        pris is not None
+        and _ar_leasingannons(text)
+        and _pris_fran_kontantpris(text) is None
+    ):
+        pris = None
 
     # ---------------------------------------------------------
     # Miltal
