@@ -11,18 +11,22 @@ Ansvarar för:
 - kandidatdiagnostik
 Själva huvudflödet ligger i main.py.
 """
+
 from app_logging.logger import (
     info,
     always,
 )
+
 from config import (
     DEBUG,
 )
+
 from valuation.market_value import (
     berakna_fynd,
     berakna_miltalsdiagnostik,
     _ar_leasingannons,
 )
+
 from scoring.score import (
     berakna_fyndscore,
     berakna_fyndscore_breakdown,
@@ -30,19 +34,26 @@ from scoring.score import (
     bil_rubrik,
     score_niva,
 )
+
 from notifications.email import (
     skicka_epost,
 )
+
 from history.analysis import (
     spara_marknadsvardesobservation,
 )
+
 from history.state import (
     redan_notifierad,
     markera_notifierad,
 )
+
+
 MIN_SCORE_FOR_NOTIS = 60
 MIN_DIFF_FOR_CANDIDATE = 15000
 MIN_MILTAL_FOR_KANDIDAT = 1000
+
+
 def _annons_namn(
     bil: dict,
 ) -> str:
@@ -55,6 +66,8 @@ def _annons_namn(
             bil.get("modell")
             or "Okänd modell"
         )
+
+
 def _logga_kandidat(
     bil: dict,
     vardering: dict,
@@ -67,11 +80,13 @@ def _logga_kandidat(
             vardering,
         )
     )
+
     mildiag = (
         berakna_miltalsdiagnostik(
             bil
         )
     )
+
     return {
         "score": score,
         "prispoang": breakdown["pris"],
@@ -166,6 +181,8 @@ def _logga_kandidat(
             "historik_marknadsvarde"
         ),
     }
+
+
 def _skicka_kandidat(
     bil: dict,
     vardering: dict,
@@ -175,26 +192,31 @@ def _skicka_kandidat(
         "diff",
         0,
     )
+
     score_text = score_niva(
         score
     )
+
     emoji, etikett = (
         score_text.split(
             " ",
             1,
         )
     )
+
     text = formatera_notis(
         bil,
         vardering,
         score,
     )
+
     diff_formaterad = (
         f"{diff:,}".replace(
             ",",
             " ",
         )
     )
+
     amne = (
         f"{emoji} {etikett}: "
         f"{bil_rubrik(bil)} "
@@ -202,6 +224,7 @@ def _skicka_kandidat(
         f"{diff_formaterad} kr "
         f"under marknad"
     )
+
     url = (
         bil.get("urls")
         or [
@@ -209,9 +232,11 @@ def _skicka_kandidat(
             or ""
         ]
     )[0]
+
     # ------------------------------------------------------------
     # DEBUG
     # ------------------------------------------------------------
+
     if DEBUG:
         always(
             "DEBUG: mejl INTE skickat: "
@@ -219,10 +244,12 @@ def _skicka_kandidat(
             f"URL: {url}"
         )
         return False
+
     skickat = skicka_epost(
         amne,
         text,
     )
+
     if skickat:
         always(
             f"Mejl skickat: "
@@ -236,12 +263,16 @@ def _skicka_kandidat(
             f"{amne} | "
             f"URL: {url}"
         )
+
     return skickat
+
+
 def processa_kandidater(
     bilar: list[dict],
     marknadsunderlag: dict,
     state: dict,
 ) -> tuple[dict, list[dict]]:
+
     statistik = {
         "totalt": len(bilar),
         "leasing_stoppade": 0,
@@ -251,16 +282,21 @@ def processa_kandidater(
         "score_ok": 0,
         "redan_notifierade": 0,
         "mejl_skickade": 0,
+
         # Används av diagnostics.py.
         "min_score": MIN_SCORE_FOR_NOTIS,
         "min_diff": MIN_DIFF_FOR_CANDIDATE,
         "min_miltal": MIN_MILTAL_FOR_KANDIDAT,
     }
+
     kandidater = []
+
     for bil in bilar:
+
         # --------------------------------------------------------
         # LEASING
         # --------------------------------------------------------
+
         if _ar_leasingannons(
             bil
         ):
@@ -268,12 +304,15 @@ def processa_kandidater(
                 "leasing_stoppade"
             ] += 1
             continue
+
         # --------------------------------------------------------
         # MILTAL
         # --------------------------------------------------------
+
         miltal = bil.get(
             "miltal"
         )
+
         if (
             not isinstance(
                 miltal,
@@ -286,9 +325,11 @@ def processa_kandidater(
                 "miltal_stoppade"
             ] += 1
             continue
+
         # --------------------------------------------------------
         # VALUATION
         # --------------------------------------------------------
+
         try:
             vardering = (
                 berakna_fynd(
@@ -296,6 +337,7 @@ def processa_kandidater(
                     marknadsunderlag,
                 )
             )
+
         except Exception as e:
             info(
                 f"[FEL valuation] "
@@ -303,6 +345,7 @@ def processa_kandidater(
                 f"{e}"
             )
             continue
+
         if (
             vardering.get(
                 "niva"
@@ -310,27 +353,34 @@ def processa_kandidater(
             is None
         ):
             continue
+
         statistik[
             "valuation_ok"
         ] += 1
+
         # --------------------------------------------------------
         # PRISDIFF
         # --------------------------------------------------------
+
         diff = vardering.get(
             "diff",
             0,
         )
+
         if (
             diff
             < MIN_DIFF_FOR_CANDIDATE
         ):
             continue
+
         statistik[
             "under_diff"
         ] += 1
+
         # --------------------------------------------------------
         # SCORE
         # --------------------------------------------------------
+
         try:
             score = (
                 berakna_fyndscore(
@@ -338,6 +388,7 @@ def processa_kandidater(
                     vardering,
                 )
             )
+
         except Exception as e:
             info(
                 f"[FEL scoring] "
@@ -345,6 +396,7 @@ def processa_kandidater(
                 f"{e}"
             )
             continue
+
         # --------------------------------------------------------
         # HISTORIK
         # --------------------------------------------------------
@@ -354,17 +406,19 @@ def processa_kandidater(
         # Historiken ska vara komplett även om bilen senare
         # stoppas av score- eller notifieringsregler.
         # --------------------------------------------------------
+
         try:
             spara_marknadsvardesobservation(
                 bil,
                 vardering,
-                score,
             )
+
         except Exception as e:
             info(
                 "[HISTORIK] Kunde inte spara "
                 f"värdeobservation: {e}"
             )
+
         if (
             score
             < MIN_SCORE_FOR_NOTIS
@@ -381,12 +435,15 @@ def processa_kandidater(
                 )
             )
             continue
+
         statistik[
             "score_ok"
         ] += 1
+
         # --------------------------------------------------------
         # DUPLICERAD NOTIFIERING
         # --------------------------------------------------------
+
         if redan_notifierad(
             bil,
             state,
@@ -394,6 +451,7 @@ def processa_kandidater(
             statistik[
                 "redan_notifierade"
             ] += 1
+
             kandidater.append(
                 _logga_kandidat(
                     bil,
@@ -404,9 +462,11 @@ def processa_kandidater(
                 )
             )
             continue
+
         # --------------------------------------------------------
         # SKICKA
         # --------------------------------------------------------
+
         kandidater.append(
             _logga_kandidat(
                 bil,
@@ -415,19 +475,23 @@ def processa_kandidater(
                 "SKICKAS",
             )
         )
+
         skickat = _skicka_kandidat(
             bil,
             vardering,
             score,
         )
+
         if skickat:
             markera_notifierad(
                 bil,
                 state,
             )
+
             statistik[
                 "mejl_skickade"
             ] += 1
+
     return (
         statistik,
         kandidater,
