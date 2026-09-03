@@ -59,6 +59,34 @@ MIN_TREND_STEG = 1
 TREND_FONSTER_DAGAR = 14
 
 
+def _pris_ar_anvandbart_i_trend(
+    pris,
+) -> bool:
+    """
+    Avgör om ett historiskt annonspris är rimligt
+    att använda i trendanalysen.
+
+    Gamla historikposter kan innehålla felaktiga priser,
+    exempelvis gamla parserfel där ett pris med två decimaler
+    lagrats 100 gånger för högt.
+
+    Råhistoriken ändras inte.
+    Felaktiga värden ignoreras endast av trendanalysen.
+    """
+
+    return (
+        isinstance(
+            pris,
+            (int, float),
+        )
+        and not isinstance(
+            pris,
+            bool,
+        )
+        and 100_000 <= pris < 1_000_000
+    )
+
+
 def _trendkategori(
     post: dict,
 ) -> str:
@@ -131,6 +159,9 @@ def _bygg_dagliga_priser(
       - antal observationer
       - lägsta pris
       - högsta pris
+
+    Uppenbart orimliga historiska priser ignoreras.
+    Råhistoriken påverkas inte.
     """
 
     per_dag: dict[
@@ -143,9 +174,8 @@ def _bygg_dagliga_priser(
             "pris"
         )
 
-        if not isinstance(
-            pris,
-            (int, float),
+        if not _pris_ar_anvandbart_i_trend(
+            pris
         ):
             continue
 
