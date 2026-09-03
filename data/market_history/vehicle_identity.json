@@ -2586,7 +2586,17 @@
     "reg:ROU57D": "vehicle:00000730",
     "source:bilweb:362256": "vehicle:00000730",
     "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-harman-kardon-360-k-2026-kombi-362256": "vehicle:00000730",
-    "fp:f44d073b3c93bc42": "vehicle:00000730"
+    "fp:f44d073b3c93bc42": "vehicle:00000730",
+    "url:https://www.wayke.se/objekt/9d16d520-f075-4004-87a6-6e4c893583d3": "vehicle:00000731",
+    "fp:b15d012bcfb1aac5": "vehicle:00000731",
+    "fp:f3687400a84fbdbd": "vehicle:00000593",
+    "url:https://www.wayke.se/objekt/3240be2c-ba03-453b-b78d-ed80c7bfbeab": "vehicle:00000732",
+    "fp:494cace43a7a813e": "vehicle:00000732",
+    "fp:08198b485c31348c": "vehicle:00000552",
+    "url:https://www.wayke.se/objekt/c67467a5-24b0-46f6-b3a6-ae42c3c6cce9": "vehicle:00000733",
+    "fp:cc045fb1716384e8": "vehicle:00000733",
+    "url:https://www.wayke.se/objekt/b9382ad9-d5df-447d-8691-53f67d1b911b": "vehicle:00000734",
+    "fp:1475cce90074b3fd": "vehicle:00000734"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -15725,6 +15735,78 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000731": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/9d16d520-f075-4004-87a6-6e4c893583d3",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000732": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/3240be2c-ba03-453b-b78d-ed80c7bfbeab",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000733": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/c67467a5-24b0-46f6-b3a6-ae42c3c6cce9",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000734": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/b9382ad9-d5df-447d-8691-53f67d1b911b",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
