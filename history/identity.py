@@ -57,6 +57,14 @@ IDENTIFIERINGS_PRIORITET = {
 }
 
 
+# Processlokal cache för identity-store.
+#
+# Identity-store:n laddas en gång per process och återanvänds
+# därefter. Detta undviker att vehicle_identity.json läses och
+# JSON-parsas för varje historikpost.
+_IDENTITY_CACHE: dict | None = None
+
+
 def _tom_store() -> dict:
     return {
         "version": 2,
@@ -317,10 +325,18 @@ def _identifierare(
 
 
 def _ladda() -> dict:
+    global _IDENTITY_CACHE
+
+    # Returnera den processlokala cachen om identity-store:n
+    # redan har laddats.
+    if _IDENTITY_CACHE is not None:
+        return _IDENTITY_CACHE
+
     if not os.path.exists(
         IDENTITY_FIL
     ):
-        return _tom_store()
+        _IDENTITY_CACHE = _tom_store()
+        return _IDENTITY_CACHE
 
     try:
         with open(
@@ -339,13 +355,15 @@ def _ladda() -> dict:
             f"{IDENTITY_FIL}; börjar med tom identity-store."
         )
 
-        return _tom_store()
+        _IDENTITY_CACHE = _tom_store()
+        return _IDENTITY_CACHE
 
     if not isinstance(
         data,
         dict,
     ):
-        return _tom_store()
+        _IDENTITY_CACHE = _tom_store()
+        return _IDENTITY_CACHE
 
     data.setdefault(
         "version",
@@ -367,12 +385,16 @@ def _ladda() -> dict:
         {},
     )
 
-    return data
+    _IDENTITY_CACHE = data
+
+    return _IDENTITY_CACHE
 
 
 def _spara(
     data: dict,
 ) -> None:
+    global _IDENTITY_CACHE
+
     os.makedirs(
         HISTORIK_KATALOG,
         exist_ok=True,
@@ -399,6 +421,10 @@ def _spara(
         temporar,
         IDENTITY_FIL,
     )
+
+    # Identity-store:n som sparades är nu också den aktuella
+    # processlokala cachen.
+    _IDENTITY_CACHE = data
 
 
 def _ny_vehicle_id(
