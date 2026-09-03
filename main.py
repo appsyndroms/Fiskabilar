@@ -18,7 +18,11 @@ Huvudflöde:
 Detaljerad logik ligger i pipeline-modulerna.
 """
 
-from app_logging.logger import info, configure_from_argv
+from app_logging.logger import (
+    info,
+    debug_timer,
+    configure_from_argv,
+)
 
 from config import AKTIVA_KALLOR
 from matching.deduplicate import deduplicera
@@ -123,7 +127,10 @@ def main():
     # Historikindexet byggs före dagens observationer sparas.
     # Det innebär att historik, trend och lifecycle baseras
     # på tidigare körningar.
-    historikindex = bygg_historikindex()
+    with debug_timer(
+        "Bygg historikindex"
+    ):
+        historikindex = bygg_historikindex()
 
     # ------------------------------------------------------------
     # ANNONSENS LIVSCYKEL
@@ -141,10 +148,13 @@ def main():
     #
     # Den påverkar inte score eller valuation.
     try:
-        skriv_livscykel_diagnostik(
-            bilar,
-            historikindex,
-        )
+        with debug_timer(
+            "Annonsens livscykel"
+        ):
+            skriv_livscykel_diagnostik(
+                bilar,
+                historikindex,
+            )
 
     except Exception as e:
         info(
@@ -156,25 +166,28 @@ def main():
     # HISTORIKBERIKNING
     # ------------------------------------------------------------
 
-    for bil in bilar:
-        try:
-            # berika_med_historik() lägger på:
-            #
-            # - långtidshistorik
-            # - marknadstrend
-            # - annonsens livscykel
-            #
-            # Lifecycle påverkar inte score eller valuation.
-            berika_med_historik(
-                bil,
-                historikindex,
-            )
+    with debug_timer(
+        "Historikberikning"
+    ):
+        for bil in bilar:
+            try:
+                # berika_med_historik() lägger på:
+                #
+                # - långtidshistorik
+                # - marknadstrend
+                # - annonsens livscykel
+                #
+                # Lifecycle påverkar inte score eller valuation.
+                berika_med_historik(
+                    bil,
+                    historikindex,
+                )
 
-        except Exception as e:
-            info(
-                "[HISTORIK] Kunde inte läsa "
-                f"historik för annons: {e}"
-            )
+            except Exception as e:
+                info(
+                    "[HISTORIK] Kunde inte läsa "
+                    f"historik för annons: {e}"
+                )
 
     # Dagens observation sparas först efter att historiken
     # har beräknats. Nästa körning kan då se dagens observation.
