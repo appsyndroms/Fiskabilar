@@ -2516,7 +2516,33 @@
     "reg:RAR13G": "vehicle:00000708",
     "source:bilweb:360893": "vehicle:00000708",
     "url:https://bilweb.se/kronobergs-lan/bmw-530-e-xdrive-touring-m-sport-farthallare-b-kam-sensatec-lader-2024-kombi-360893": "vehicle:00000708",
-    "fp:cd4c689c8dc12f3f": "vehicle:00000708"
+    "fp:cd4c689c8dc12f3f": "vehicle:00000708",
+    "reg:LHO978": "vehicle:00000709",
+    "source:bilweb:361883": "vehicle:00000709",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-core-drag-pvarm-blis-bkam-carplay-moms-2024-kombi-361883": "vehicle:00000709",
+    "fp:5635b8efe85f3c28": "vehicle:00000709",
+    "fp:1e53ebc03703dfa5": "vehicle:00000593",
+    "url:https://www.wayke.se/objekt/bb826bed-f2ba-4d1c-b20e-01f42a0df737": "vehicle:00000710",
+    "fp:bf0b2c3fbac5545d": "vehicle:00000710",
+    "reg:EAS61J": "vehicle:00000711",
+    "source:bilweb:359710": "vehicle:00000711",
+    "url:https://bilweb.se/skane-lan/volvo-v60-t6-plus-dark-edition-2025-kombi-359710": "vehicle:00000711",
+    "fp:d39d22be995dccad": "vehicle:00000711",
+    "url:https://www.wayke.se/objekt/87883cdd-fbbd-437e-8de8-e44c6fbdbb71": "vehicle:00000712",
+    "fp:752f43e5ed1f4fa5": "vehicle:00000712",
+    "fp:e67e371bffc4ae87": "vehicle:00000623",
+    "url:https://www.wayke.se/objekt/8c8ab155-4774-43ad-a2b6-c92c5a1e29d9": "vehicle:00000713",
+    "fp:402526af2b507ffd": "vehicle:00000713",
+    "url:https://www.wayke.se/objekt/0471da69-4e9c-4bd3-85fb-162c89042a6b": "vehicle:00000714",
+    "fp:b6f9951aaec2e330": "vehicle:00000714",
+    "url:https://www.wayke.se/objekt/12fe4c88-8848-4efa-90da-10d5a6b77c1a": "vehicle:00000715",
+    "fp:a9228956db3189ef": "vehicle:00000715",
+    "fp:0b226435b6ba7693": "vehicle:00000671",
+    "fp:4feab47d3f671a9e": "vehicle:00000240",
+    "fp:ae01c3111f040ce0": "vehicle:00000708",
+    "reg:QNU217": "vehicle:00000666",
+    "source:bilweb:257246": "vehicle:00000666",
+    "url:https://bilweb.se/varmlands-lan/bmw-330-e-xdrive-touring-m-sport-businesspris-2026-kombi-257246": "vehicle:00000666"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -14495,10 +14521,10 @@
         "modell": "330e-xdrive-touring",
         "variant": "330e xDrive Touring",
         "arsmodell": 2026,
-        "regnr": "QMU341",
+        "regnr": "QNU217",
         "vin": null
       },
-      "last_seen": "257227",
+      "last_seen": "257246",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -15259,6 +15285,132 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000709": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "LHO978",
+        "vin": null
+      },
+      "last_seen": "361883",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000710": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/bb826bed-f2ba-4d1c-b20e-01f42a0df737",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000711": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "EAS61J",
+        "vin": null
+      },
+      "last_seen": "359710",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000712": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/87883cdd-fbbd-437e-8de8-e44c6fbdbb71",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000713": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8c8ab155-4774-43ad-a2b6-c92c5a1e29d9",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000714": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/0471da69-4e9c-4bd3-85fb-162c89042a6b",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000715": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/12fe4c88-8848-4efa-90da-10d5a6b77c1a",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
