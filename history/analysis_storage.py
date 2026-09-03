@@ -468,17 +468,32 @@ def _logga_orimligt_pris(
     post: dict,
     fil: str,
 ) -> None:
+    """
+    Loggar endast extremt höga priser.
+
+    Låga priser, exempelvis gamla leasing-/månadspriser,
+    skrivs inte längre ut i debug-loggen.
+    """
+
     pris = post.get(
         "pris"
     )
 
-    if not _pris_ar_orimligt(
-        pris
+    if not (
+        isinstance(
+            pris,
+            (int, float),
+        )
+        and not isinstance(
+            pris,
+            bool,
+        )
+        and pris >= 1_000_000
     ):
         return
 
     debug(
-        "[DEBUG][ORIMLIGT PRIS] "
+        "[DEBUG][EXTREMT PRIS] "
         f"{pris:,.0f} kr".replace(
             ",",
             " ",
