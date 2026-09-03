@@ -2,7 +2,7 @@ name: Fyndkontroll för bilar (var 15:e minut, 06-22 svensk tid)
 
 on:
   schedule:
-    - cron: "*/15 6-22 * * *"
+    - cron: "*/15 6-21 * * *"
       timezone: "Europe/Stockholm"
 
   workflow_dispatch: {}
