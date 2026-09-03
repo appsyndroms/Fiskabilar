@@ -32,3 +32,6 @@ jobs:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
           DEBUG: "true"
         run: python -u main.py --log-level DEBUG
+
+      - name: Kontrollera dagens historikpriser
+        run: python -u scripts/verifiera_dagens_historik.py
