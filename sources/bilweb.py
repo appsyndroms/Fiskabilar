@@ -42,7 +42,7 @@ from .bilweb_scraper import (
 )
 
 
-SOK_DELAY_SEKUNDER = 1.0
+SOK_DELAY_SEKUNDER = 0.2
 
 SOK_URL_MALL = (
     "https://bilweb.se/sok/{marke}/{modell}/{ar}"
@@ -187,15 +187,6 @@ def _hamta_kandidat_urler(
                 )
 
             continue
-
-        # --------------------------------------------------------
-        # Om BMW-modellen kräver detaljkontroll av kaross
-        # har vi redan konstaterat modell + xDrive från sluggen.
-        #
-        # Varianten hämtas från konfigurationen i stället för
-        # att hårdkodas här. Det gör att samma flöde fungerar
-        # även om fler BMW-modeller läggs till senare.
-        # --------------------------------------------------------
 
         if detalj_karosskontroll:
 
@@ -487,18 +478,6 @@ def hamta_annonser() -> list[dict]:
         f"{len(bilar)} annonser "
         f"matchade grundkraven totalt"
     )
-
-    # ------------------------------------------------------------
-    # PRESTANDA
-    #
-    # Totalt antal unika detaljsidor som behövdes under körningen
-    # är summan av nya hämtningar och cacheträffar.
-    #
-    # Exempel:
-    #   192 hämtades från nätet
-    #   2 återanvändes från cache
-    #   = 194 unika detaljsidor behövdes totalt
-    # ------------------------------------------------------------
 
     detaljsidor_totalt = (
         detaljsidor_hamtade
