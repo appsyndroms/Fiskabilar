@@ -17,7 +17,7 @@ prisintervall inom trendfönstret. Detta gör att historiken kan användas
 som ett faktiskt marknadsunderlag och inte bara som en prisindikator.
 """
 
-from app_logging.logger import info
+from app_logging.logger import debug
 
 from collections import defaultdict
 from datetime import timedelta
@@ -752,7 +752,7 @@ def _logga_trendkategori(
     else:
         status = "OTILLRACKLIGT_UNDERLAG"
 
-    info(
+    debug(
         "[TREND] "
         f"{_kort_kategori(kategori)} | "
         f"{status} | "
@@ -791,7 +791,7 @@ def _logga_trendsammanfattning(
         else:
             antal_otillrackligt += 1
 
-    info(
+    debug(
         "[TREND] Lägesbild: "
         f"UPP={antal_upp} | "
         f"NED={antal_ned} | "
@@ -800,13 +800,13 @@ def _logga_trendsammanfattning(
     )
 
     if antal_ned:
-        info(
+        debug(
             "[TREND] ⚠ Det finns marknadskategorier "
             "med identifierad prisnedgång."
         )
 
     if antal_upp:
-        info(
+        debug(
             "[TREND] Det finns marknadskategorier "
             "med identifierad prisuppgång."
         )
@@ -836,30 +836,30 @@ def bygg_marknadstrender() -> dict[str, dict]:
 
     observationer = _las_observationer()
 
-    info(
+    debug(
         "[TREND] =================================================="
     )
 
-    info(
+    debug(
         "[TREND] Startar trendanalys."
     )
 
-    info(
+    debug(
         "[TREND] Totalt antal historiska poster: "
         f"{len(observationer)}"
     )
 
     if not observationer:
-        info(
+        debug(
             "[TREND] Ingen historik hittades."
         )
 
-        info(
+        debug(
             "[TREND] Trendanalys avslutad: "
             "otillräckligt underlag."
         )
 
-        info(
+        debug(
             "[TREND] =================================================="
         )
 
@@ -879,12 +879,12 @@ def bygg_marknadstrender() -> dict[str, dict]:
         == "marknadsvarde"
     )
 
-    info(
+    debug(
         "[TREND] Annonsobservationer: "
         f"{antal_annonsobservationer}"
     )
 
-    info(
+    debug(
         "[TREND] Marknadsvärdesobservationer: "
         f"{antal_marknadsvardeobservationer}"
     )
@@ -911,17 +911,17 @@ def bygg_marknadstrender() -> dict[str, dict]:
             kategori
         ].append(post)
 
-    info(
+    debug(
         "[TREND] Marknadskategorier: "
         f"{len(per_kategori)}"
     )
 
-    info(
+    debug(
         "[TREND] Rullande trendfönster: "
         f"{TREND_FONSTER_DAGAR} dagar."
     )
 
-    info(
+    debug(
         "[TREND] Premisser: "
         f"minst {MIN_TREND_DAGAR} separata observationsdagar, "
         f"minst {MIN_TREND_STEG} konsekutiva steg, "
@@ -978,12 +978,12 @@ def bygg_marknadstrender() -> dict[str, dict]:
         trender
     )
 
-    info(
+    debug(
         "[TREND] Trendanalys påverkar INTE "
         "100-poängsscore eller valuation."
     )
 
-    info(
+    debug(
         "[TREND] =================================================="
     )
 
