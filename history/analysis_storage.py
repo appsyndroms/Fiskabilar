@@ -526,6 +526,7 @@ def bygg_historikindex() -> dict[str, dict]:
             {
                 "annonser": [],
                 "varderingar": [],
+                "senaste_annons_tid": None,
             },
         )
 
@@ -539,6 +540,23 @@ def bygg_historikindex() -> dict[str, dict]:
             ].append(
                 post
             )
+
+            tid = _parse_tid(
+                post.get("tid")
+            )
+
+            if tid is not None:
+                senaste = data.get(
+                    "senaste_annons_tid"
+                )
+
+                if (
+                    senaste is None
+                    or tid > senaste
+                ):
+                    data[
+                        "senaste_annons_tid"
+                    ] = tid
 
         elif typ == "marknadsvarde":
             data[
