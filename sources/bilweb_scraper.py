@@ -219,14 +219,12 @@ def _pris_fran_json_ld(
         return int(value)
 
     if isinstance(value, str):
-        siffror = re.sub(
-            r"[^\d]",
-            "",
-            value,
+        pris = _rensa_tal(
+            value
         )
 
-        if siffror:
-            return int(siffror)
+        if pris:
+            return pris
 
     return None
 
@@ -308,14 +306,12 @@ def _pris_fran_meta(
         if not value:
             continue
 
-        siffror = re.sub(
-            r"[^\d]",
-            "",
-            value,
+        pris = _rensa_tal(
+            value
         )
 
-        if siffror:
-            return int(siffror)
+        if pris:
+            return pris
 
     meta_description = soup.find(
         "meta",
