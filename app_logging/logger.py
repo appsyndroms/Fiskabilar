@@ -13,7 +13,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+from contextlib import contextmanager
 from enum import IntEnum
+from time import perf_counter
+from typing import Iterator
 
 
 class LogLevel(IntEnum):
@@ -118,6 +121,31 @@ def warning(message: str) -> None:
 def error(message: str) -> None:
     # Fel ska alltid synas även i QUIET.
     _write(message)
+
+
+@contextmanager
+def debug_timer(
+    label: str,
+) -> Iterator[None]:
+    """
+    Mäter tiden för ett kodblock endast vid DEBUG eller TRACE.
+
+    Vid QUIET/INFO startas ingen tidtagning och ingen diagnostik
+    skrivs ut.
+    """
+    if _LEVEL < LogLevel.DEBUG:
+        yield
+        return
+
+    start = perf_counter()
+
+    try:
+        yield
+    finally:
+        elapsed = perf_counter() - start
+        debug(
+            f"[TID] {label}: {elapsed:.2f} s"
+        )
 
 
 def configure_from_argv(
