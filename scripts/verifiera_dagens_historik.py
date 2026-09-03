@@ -2,17 +2,15 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-
 TIDSZON = ZoneInfo("Europe/Stockholm")
 
 idag = datetime.now(TIDSZON).date().isoformat()
 
-fil = "data/market_history/market_history_2026-09.jsonl"
+fil = f"data/market_history/market_history_{idag[:7]}.jsonl"
 
 antal = 0
 extrema = []
 misstankta = []
-
 
 with open(fil, encoding="utf-8") as f:
     for rad in f:
@@ -83,7 +81,6 @@ print(
 
 print()
 
-
 if extrema:
     print("----------------------------------------")
     print("Priser >= 1 000 000 kr")
@@ -101,7 +98,6 @@ if extrema:
 
     print()
 
-
 if misstankta:
     print("----------------------------------------")
     print("MISSTÄNKTA x100-PRISER")
@@ -118,7 +114,6 @@ if misstankta:
         )
 
     print()
-
 
 if not misstankta:
     print(
