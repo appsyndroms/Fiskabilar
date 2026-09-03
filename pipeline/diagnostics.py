@@ -187,6 +187,12 @@ def _parse_tid(
     if not value:
         return None
 
+    if isinstance(
+        value,
+        datetime,
+    ):
+        return value
+
     try:
         dt = datetime.fromisoformat(
             value
@@ -226,6 +232,20 @@ def _senaste_historiska_tid(
     data: dict,
 ) -> datetime | None:
 
+    # bygg_historikindex() beräknar detta redan när
+    # historiken läses in. Använd det direkt för att
+    # undvika att skanna samtliga annonsobservationer.
+    senaste = data.get(
+        "senaste_annons_tid"
+    )
+
+    if senaste is not None:
+        return _parse_tid(
+            senaste
+        )
+
+    # Fallback för äldre indexstrukturer eller
+    # om funktionen används med ett manuellt byggt index.
     observationer = (
         data.get("annonser")
         or []
