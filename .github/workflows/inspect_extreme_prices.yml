@@ -1,0 +1,98 @@
+name: DEBUG - Sök orimliga historiska priser
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inspect-extreme-prices
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hämta repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Installera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sök efter orimliga priser
+        run: |
+          python -u - <<'PY'
+          import json
+          from pathlib import Path
+
+          HISTORIK_DIR = Path("data/market_history")
+
+          print("=" * 100)
+          print("DEBUG - SÖKER EFTER ORIMLIGA HISTORISKA PRISER")
+          print("=" * 100)
+          print()
+          print("Kriterier:")
+          print("  pris < 100 000 kr")
+          print("  pris >= 1 000 000 kr")
+          print()
+          print("=" * 100)
+
+          antal = 0
+
+          filer = sorted(HISTORIK_DIR.glob("market_history_*.jsonl"))
+
+          for fil in filer:
+              print(f"\n--- Läser {fil} ---")
+
+              with fil.open(encoding="utf-8") as f:
+                  for radnummer, rad in enumerate(f, 1):
+                      try:
+                          post = json.loads(rad)
+                      except json.JSONDecodeError:
+                          continue
+
+                      if post.get("typ") != "annons":
+                          continue
+
+                      pris = post.get("pris")
+
+                      if not isinstance(pris, (int, float)) or isinstance(pris, bool):
+                          continue
+
+                      if not (pris < 100_000 or pris >= 1_000_000):
+                          continue
+
+                      antal += 1
+
+                      print()
+                      print(
+                          f"[{antal}] "
+                          f"{pris:,.0f} kr".replace(",", " ")
+                      )
+                      print(f"  fil        : {fil}")
+                      print(f"  rad        : {radnummer}")
+                      print(f"  tid        : {post.get('tid')}")
+                      print(
+                          f"  bil        : "
+                          f"{post.get('modell')} {post.get('variant')}"
+                      )
+                      print(f"  årsmodell  : {post.get('arsmodell')}")
+                      print(f"  miltal     : {post.get('miltal')}")
+                      print(f"  regnr      : {post.get('regnr')}")
+                      print(f"  vehicle_id : {post.get('vehicle_id')}")
+                      print(f"  annons_id  : {post.get('annons_id')}")
+                      print(f"  annonsnyckel: {post.get('annons_nyckel')}")
+                      print(f"  URL        : {post.get('url')}")
+                      print(f"  källor     : {post.get('kallor')}")
+
+          print()
+          print("=" * 100)
+          print(f"TOTALT ANTAL ORIMLIGA PRISOBSERVATIONER: {antal}")
+          print("=" * 100)
+          PY
