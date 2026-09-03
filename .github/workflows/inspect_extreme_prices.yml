@@ -1,4 +1,4 @@
-name: DEBUG - Sök orimliga historiska priser
+name: Sök orimliga historiska priser
 
 on:
   workflow_dispatch:
@@ -25,30 +25,36 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Sök efter orimliga priser
+      - name: Sök efter orimliga historiska priser
         run: |
           python -u - <<'PY'
           import json
+          from collections import Counter
           from pathlib import Path
 
           HISTORIK_DIR = Path("data/market_history")
 
-          print("=" * 100)
-          print("DEBUG - SÖKER EFTER ORIMLIGA HISTORISKA PRISER")
-          print("=" * 100)
-          print()
-          print("Kriterier:")
-          print("  pris < 100 000 kr")
-          print("  pris >= 1 000 000 kr")
-          print()
-          print("=" * 100)
-
-          antal = 0
+          hogpriser = []
+          lagpriser = Counter()
 
           filer = sorted(HISTORIK_DIR.glob("market_history_*.jsonl"))
 
+          print("=" * 110)
+          print("DEBUG - ORIMLIGA HISTORISKA PRISER")
+          print("=" * 110)
+          print()
+          print("Kriterier:")
+          print("  Lågt pris  : 0 < pris < 100 000 kr")
+          print("  Högt pris  : pris >= 1 000 000 kr")
+          print()
+          print("=" * 110)
+
+          # ------------------------------------------------------------------
+          # Läs hela historiken
+          # ------------------------------------------------------------------
+
           for fil in filer:
-              print(f"\n--- Läser {fil} ---")
+              print(f"Läser {fil} ...")
 
               with fil.open(encoding="utf-8") as f:
                   for radnummer, rad in enumerate(f, 1):
@@ -65,34 +71,350 @@ jobs:
                       if not isinstance(pris, (int, float)) or isinstance(pris, bool):
                           continue
 
-                      if not (pris < 100_000 or pris >= 1_000_000):
+                      # Höga priser sparas individuellt.
+                      if pris >= 1_000_000:
+                          hogpriser.append(
+                              (pris, fil, radnummer, post)
+                          )
                           continue
 
-                      antal += 1
+                      # Låga priser grupperas så vi slipper skriva ut
+                      # tusentals identiska leasingobservationer.
+                      if 0 < pris < 100_000:
+                          nyckel = (
+                              pris,
+                              post.get("modell"),
+                              post.get("variant"),
+                              post.get("arsmodell"),
+                              post.get("regnr"),
+                              post.get("annons_id"),
+                              post.get("annons_nyckel"),
+                              post.get("url"),
+                          )
 
-                      print()
-                      print(
-                          f"[{antal}] "
-                          f"{pris:,.0f} kr".replace(",", " ")
-                      )
-                      print(f"  fil        : {fil}")
-                      print(f"  rad        : {radnummer}")
-                      print(f"  tid        : {post.get('tid')}")
-                      print(
-                          f"  bil        : "
-                          f"{post.get('modell')} {post.get('variant')}"
-                      )
-                      print(f"  årsmodell  : {post.get('arsmodell')}")
-                      print(f"  miltal     : {post.get('miltal')}")
-                      print(f"  regnr      : {post.get('regnr')}")
-                      print(f"  vehicle_id : {post.get('vehicle_id')}")
-                      print(f"  annons_id  : {post.get('annons_id')}")
-                      print(f"  annonsnyckel: {post.get('annons_nyckel')}")
-                      print(f"  URL        : {post.get('url')}")
-                      print(f"  källor     : {post.get('kallor')}")
+                          lagpriser[nyckel] += 1
+
+          # ------------------------------------------------------------------
+          # Sortera höga priser
+          # ------------------------------------------------------------------
+
+          hogpriser.sort(
+              key=lambda x: x[0],
+              reverse=True,
+          )
 
           print()
-          print("=" * 100)
-          print(f"TOTALT ANTAL ORIMLIGA PRISOBSERVATIONER: {antal}")
-          print("=" * 100)
+          print("=" * 110)
+          print("SAMMANFATTNING")
+          print("=" * 110)
+          print()
+          print(
+              f"Antal priser >= 1 000 000 kr: "
+              f"{len(hogpriser)}"
+          )
+          print(
+              f"Antal unika låprisgrupper < 100 000 kr: "
+              f"{len(lagpriser)}"
+          )
+
+          # ------------------------------------------------------------------
+          # 1. ALLA HÖGA PRISER
+          # ------------------------------------------------------------------
+
+          print()
+          print("=" * 110)
+          print("1. PRISER >= 1 000 000 KR")
+          print("=" * 110)
+
+          if not hogpriser:
+              print()
+              print("INGA TRÄFFAR.")
+          else:
+              for index, (pris, fil, radnummer, post) in enumerate(
+                  hogpriser,
+                  1,
+              ):
+                  print()
+                  print(
+                      f"[{index}] "
+                      f"{pris:,.0f} kr".replace(",", " ")
+                  )
+                  print(f"  fil         : {fil}")
+                  print(f"  rad         : {radnummer}")
+                  print(f"  tid         : {post.get('tid')}")
+                  print(
+                      f"  bil         : "
+                      f"{post.get('modell')} "
+                      f"{post.get('variant')}"
+                  )
+                  print(
+                      f"  årsmodell   : "
+                      f"{post.get('arsmodell')}"
+                  )
+                  print(
+                      f"  miltal      : "
+                      f"{post.get('miltal')}"
+                  )
+                  print(
+                      f"  regnr       : "
+                      f"{post.get('regnr')}"
+                  )
+                  print(
+                      f"  vehicle_id  : "
+                      f"{post.get('vehicle_id')}"
+                  )
+                  print(
+                      f"  annons_id   : "
+                      f"{post.get('annons_id')}"
+                  )
+                  print(
+                      f"  annonsnyckel: "
+                      f"{post.get('annons_nyckel')}"
+                  )
+                  print(
+                      f"  URL         : "
+                      f"{post.get('url')}"
+                  )
+                  print(
+                      f"  källor      : "
+                      f"{post.get('kallor')}"
+                  )
+
+          # ------------------------------------------------------------------
+          # 2. SPECIFIK KONTROLL AV 530e
+          # ------------------------------------------------------------------
+
+          print()
+          print("=" * 110)
+          print("2. 530e xDRIVE TOURING - HÖGSTA HISTORISKA PRISER")
+          print("=" * 110)
+
+          bmw530e = []
+
+          for pris, fil, radnummer, post in hogpriser:
+              modell = (post.get("modell") or "").lower()
+              variant = (post.get("variant") or "").lower()
+
+              text = f"{modell} {variant}"
+
+              if "530e" in text and "xdrive" in text:
+                  bmw530e.append(
+                      (pris, fil, radnummer, post)
+                  )
+
+          if not bmw530e:
+              print()
+              print("INGA PRISER >= 1 000 000 KR FÖR 530e xDrive.")
+          else:
+              bmw530e.sort(
+                  key=lambda x: x[0],
+                  reverse=True,
+              )
+
+              for index, (pris, fil, radnummer, post) in enumerate(
+                  bmw530e,
+                  1,
+              ):
+                  print()
+                  print(
+                      f"[{index}] "
+                      f"{pris:,.0f} kr".replace(",", " ")
+                  )
+                  print(
+                      f"  tid         : "
+                      f"{post.get('tid')}"
+                  )
+                  print(
+                      f"  bil         : "
+                      f"{post.get('modell')} "
+                      f"{post.get('variant')}"
+                  )
+                  print(
+                      f"  årsmodell   : "
+                      f"{post.get('arsmodell')}"
+                  )
+                  print(
+                      f"  miltal      : "
+                      f"{post.get('miltal')}"
+                  )
+                  print(
+                      f"  regnr       : "
+                      f"{post.get('regnr')}"
+                  )
+                  print(
+                      f"  annons_id   : "
+                      f"{post.get('annons_id')}"
+                  )
+                  print(
+                      f"  annonsnyckel: "
+                      f"{post.get('annons_nyckel')}"
+                  )
+                  print(
+                      f"  fil         : "
+                      f"{fil}"
+                  )
+                  print(
+                      f"  rad         : "
+                      f"{radnummer}"
+                  )
+                  print(
+                      f"  URL         : "
+                      f"{post.get('url')}"
+                  )
+
+          # ------------------------------------------------------------------
+          # 3. SPECIFIK KONTROLL AV V90 T6 AWD
+          # ------------------------------------------------------------------
+
+          print()
+          print("=" * 110)
+          print("3. V90 T6 AWD - HÖGSTA HISTORISKA PRISER")
+          print("=" * 110)
+
+          v90t6 = []
+
+          for pris, fil, radnummer, post in hogpriser:
+              modell = (post.get("modell") or "").lower()
+              variant = (post.get("variant") or "").lower()
+
+              if modell == "v90" and "t6 awd" in variant:
+                  v90t6.append(
+                      (pris, fil, radnummer, post)
+                  )
+
+          if not v90t6:
+              print()
+              print("INGA PRISER >= 1 000 000 KR FÖR V90 T6 AWD.")
+          else:
+              v90t6.sort(
+                  key=lambda x: x[0],
+                  reverse=True,
+              )
+
+              for index, (pris, fil, radnummer, post) in enumerate(
+                  v90t6,
+                  1,
+              ):
+                  print()
+                  print(
+                      f"[{index}] "
+                      f"{pris:,.0f} kr".replace(",", " ")
+                  )
+                  print(
+                      f"  tid         : "
+                      f"{post.get('tid')}"
+                  )
+                  print(
+                      f"  bil         : "
+                      f"{post.get('modell')} "
+                      f"{post.get('variant')}"
+                  )
+                  print(
+                      f"  årsmodell   : "
+                      f"{post.get('arsmodell')}"
+                  )
+                  print(
+                      f"  miltal      : "
+                      f"{post.get('miltal')}"
+                  )
+                  print(
+                      f"  regnr       : "
+                      f"{post.get('regnr')}"
+                  )
+                  print(
+                      f"  annons_id   : "
+                      f"{post.get('annons_id')}"
+                  )
+                  print(
+                      f"  annonsnyckel: "
+                      f"{post.get('annons_nyckel')}"
+                  )
+                  print(
+                      f"  fil         : "
+                      f"{fil}"
+                  )
+                  print(
+                      f"  rad         : "
+                      f"{radnummer}"
+                  )
+                  print(
+                      f"  URL         : "
+                      f"{post.get('url')}"
+                  )
+
+          # ------------------------------------------------------------------
+          # 4. LÅGA PRISER
+          # ------------------------------------------------------------------
+
+          print()
+          print("=" * 110)
+          print("4. LÅGA PRISER < 100 000 KR - GRUPPERADE")
+          print("=" * 110)
+
+          if not lagpriser:
+              print()
+              print("INGA TRÄFFAR.")
+          else:
+              sorterade_lagpriser = sorted(
+                  lagpriser.items(),
+                  key=lambda item: (
+                      -item[1],
+                      item[0][0],
+                  ),
+              )
+
+              for index, (nyckel, antal) in enumerate(
+                  sorterade_lagpriser,
+                  1,
+              ):
+                  (
+                      pris,
+                      modell,
+                      variant,
+                      arsm,
+                      regnr,
+                      annons_id,
+                      annons_nyckel,
+                      url,
+                  ) = nyckel
+
+                  print()
+                  print(
+                      f"[{index}] "
+                      f"{pris:,.0f} kr - "
+                      f"{antal} observationer".replace(",", " ")
+                  )
+                  print(
+                      f"  bil         : "
+                      f"{modell} {variant}"
+                  )
+                  print(
+                      f"  årsmodell   : "
+                      f"{arsm}"
+                  )
+                  print(
+                      f"  regnr       : "
+                      f"{regnr}"
+                  )
+                  print(
+                      f"  annons_id   : "
+                      f"{annons_id}"
+                  )
+                  print(
+                      f"  annonsnyckel: "
+                      f"{annons_nyckel}"
+                  )
+                  print(
+                      f"  URL         : "
+                      f"{url}"
+                  )
+
+          # ------------------------------------------------------------------
+          # 5. SLUT
+          # ------------------------------------------------------------------
+
+          print()
+          print("=" * 110)
+          print("SLUT")
+          print("=" * 110)
           PY
