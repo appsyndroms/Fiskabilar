@@ -86,7 +86,41 @@ AUKTION_REGEX = re.compile(
 
 
 def _rensa_tal(text: str) -> int:
-    siffror = re.sub(r"\D", "", text)
+    """
+    Omvandlar ett svenskt tal/pris till heltal.
+
+    Exempel:
+        "214 299 kr"      -> 214299
+        "214 299,00 kr"   -> 214299
+        "214.299,00 kr"   -> 214299
+        "214299 kr"       -> 214299
+
+    Decimaldelen ignoreras eftersom priserna i historiken
+    lagras som heltal kronor.
+    """
+
+    text = str(text).strip()
+
+    # Svenskt decimalformat:
+    #
+    # 214 299,00
+    # 214.299,00
+    #
+    # Om komma följs av exakt två siffror betraktar vi
+    # det som decimaldel och tar bort den.
+    text = re.sub(
+        r",\d{2}\b",
+        "",
+        text,
+    )
+
+    # Ta bort alla återstående tecken som inte är siffror.
+    siffror = re.sub(
+        r"\D",
+        "",
+        text,
+    )
+
     return int(siffror) if siffror else 0
 
 
