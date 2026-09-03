@@ -16,7 +16,7 @@ Ansvarar för:
 Trendanalysen ligger separat i analysis_trends.py.
 """
 
-from app_logging.logger import info
+from app_logging.logger import debug, info
 
 import glob
 import json
@@ -429,6 +429,74 @@ def spara_marknadsvardesobservation(
     )
 
 
+def _pris_ar_orimligt(
+    pris,
+) -> bool:
+    """
+    Returnerar True för prisnivåer som är misstänkta i
+    bilhistoriken.
+
+    Normala bilpriser ligger här ungefär i spannet
+    100 000–999 999 kr. Vi vill särskilt fånga:
+
+        X XXX kr
+        XX XXX kr
+        X XXX XXX kr
+        XX XXX XXX kr
+
+    Funktionen används endast för DEBUG-diagnostik och
+    ändrar inte historikposten.
+    """
+
+    return (
+        isinstance(
+            pris,
+            (int, float),
+        )
+        and not isinstance(
+            pris,
+            bool,
+        )
+        and (
+            0 < pris < 100_000
+            or pris >= 1_000_000
+        )
+    )
+
+
+def _logga_orimligt_pris(
+    post: dict,
+    fil: str,
+) -> None:
+    pris = post.get(
+        "pris"
+    )
+
+    if not _pris_ar_orimligt(
+        pris
+    ):
+        return
+
+    debug(
+        "[DEBUG][ORIMLIGT PRIS] "
+        f"{pris:,.0f} kr".replace(
+            ",",
+            " ",
+        )
+        + "\n"
+        f"  fil={fil}\n"
+        f"  typ={post.get('typ')}\n"
+        f"  datum={post.get('tid')}\n"
+        f"  bil={post.get('modell')} {post.get('variant')}\n"
+        f"  årsmodell={post.get('arsmodell')}\n"
+        f"  mil={post.get('miltal')}\n"
+        f"  regnr={post.get('regnr')}\n"
+        f"  vehicle_id={post.get('vehicle_id')}\n"
+        f"  annons_id={post.get('annons_id')}\n"
+        f"  url={post.get('url')}"
+    )
+
+
 def _las_observationer() -> list[dict]:
     observationer = []
 
@@ -458,6 +526,11 @@ def _las_observationer() -> list[dict]:
                         post,
                         dict,
                     ):
+                        _logga_orimligt_pris(
+                            post,
+                            fil,
+                        )
+
                         observationer.append(
                             post
                         )
