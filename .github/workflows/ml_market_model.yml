@@ -26,8 +26,8 @@ jobs:
 
       - name: Profile market dataset
         run: |
-          python ml/profile_market_dataset.py data/market_history
+          python -m ml.profile_market_dataset data/market_history
 
       - name: Train market model
         run: |
-          python ml/train_market_model.py
+          python -m ml.train_market_model
