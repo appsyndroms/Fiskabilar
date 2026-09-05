@@ -51,20 +51,23 @@ jobs:
             python -u -m reporting.daily_market_report
           fi
 
-      - name: Spara rapportlogg
+      - name: Träna ML-modell
+        run: python -u -m ml.train_market_model
+
+      - name: Spara rapportlogg och ML-modell
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/daily_reports
+          git add data/daily_reports data/ml
 
           if git diff --cached --quiet; then
-            echo "Ingen förändring i rapportloggen."
+            echo "Ingen förändring i rapportloggen eller ML-modellen."
             exit 0
           fi
 
-          git commit -m "Sparar daglig marknadsrapport"
+          git commit -m "Uppdaterar daglig rapport och ML-modell"
 
           git fetch origin main
           git rebase origin/main
