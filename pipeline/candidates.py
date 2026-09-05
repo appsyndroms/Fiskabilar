@@ -6,6 +6,7 @@ Ansvarar för:
 - valuation
 - historisk värdeobservation
 - fyndscore
+- feedback från faktiska fynd
 - notifieringskontroll
 - mejlutskick
 - kandidatdiagnostik
@@ -41,6 +42,10 @@ from notifications.email import (
 
 from history.analysis import (
     spara_marknadsvardesobservation,
+)
+
+from history.find_feedback import (
+    spara_fyndfeedback,
 )
 
 from history.state import (
@@ -439,6 +444,42 @@ def processa_kandidater(
         statistik[
             "score_ok"
         ] += 1
+
+        # --------------------------------------------------------
+        # FEEDBACK / LÄRANDE
+        # --------------------------------------------------------
+        #
+        # Alla bilar som passerar fyndscore-gränsen registreras
+        # som fynd. Detta görs innan notifieringskontrollen så att
+        # även fynd som redan notifierats kan följas över tid.
+        #
+        # Feedbacklagret sparar bland annat:
+        # - fyndscore
+        # - score-breakdown
+        # - pris
+        # - marknadsvärde
+        # - prisdiff
+        # - miltal
+        # - årsmodell
+        # - modell
+        # - utrustning
+        # - URL / identitet
+        #
+        # Detta påverkar inte score eller valuation.
+        # --------------------------------------------------------
+
+        try:
+            spara_fyndfeedback(
+                bil,
+                vardering,
+                score,
+            )
+
+        except Exception as e:
+            info(
+                "[FEEDBACK] Kunde inte spara "
+                f"fyndfeedback: {e}"
+            )
 
         # --------------------------------------------------------
         # DUPLICERAD NOTIFIERING
