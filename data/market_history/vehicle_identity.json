@@ -2770,7 +2770,13 @@
     "url:https://www.wayke.se/objekt/2622f1a6-9437-4330-8858-fd383ad0958a": "vehicle:00000782",
     "fp:8da56c6438352a88": "vehicle:00000782",
     "url:https://www.wayke.se/objekt/0c61a1f8-db42-4585-b67b-58c0cc963580": "vehicle:00000783",
-    "fp:c80d69c5f883f261": "vehicle:00000783"
+    "fp:c80d69c5f883f261": "vehicle:00000783",
+    "fp:04d36b90cb68d55e": "vehicle:00000718",
+    "url:https://www.wayke.se/objekt/97dfabe0-5eae-4318-8355-f901543b3c11": "vehicle:00000784",
+    "fp:85fae7915a859bdc": "vehicle:00000784",
+    "source:bilweb:365708": "vehicle:00000474",
+    "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-m-sport-pro-wide-live-cockpit-lader-kamera-2025-kombi-365708": "vehicle:00000474",
+    "fp:472a23ef6437f860": "vehicle:00000474"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -11296,7 +11302,7 @@
         "regnr": "PPE36A",
         "vin": null
       },
-      "last_seen": "12854406",
+      "last_seen": "365708",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -16859,6 +16865,24 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/0c61a1f8-db42-4585-b67b-58c0cc963580",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000784": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/97dfabe0-5eae-4318-8355-f901543b3c11",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
