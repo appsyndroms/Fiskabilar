@@ -43,3 +43,15 @@ jobs:
           echo "=================================================="
 
           python -u -m reporting.daily_market_report_debug
+
+      - name: Träna ML-modell
+        run: |
+          echo "=================================================="
+          echo "DEBUG: ML-träning"
+          echo "=================================================="
+          echo "Modellen tränas på befintlig marknadshistorik."
+          echo "Ingen valuation-logik påverkas."
+          echo "Ingen produktionsdata ändras."
+          echo "=================================================="
+
+          python -u -m ml.train_market_model
