@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: fyndkontroll-debug
@@ -38,3 +38,17 @@ jobs:
 
       - name: Analysera faktiska fyndutfall
         run: python -u scripts/analysera_fyndutfall.py
+
+      - name: Spara analysresultat i repot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/find_feedback/find_outcomes_*.jsonl
+
+          if git diff --cached --quiet; then
+            echo "Ingen ändring att committa."
+          else
+            git commit -m "Uppdatera fyndutfall"
+            git push
+          fi
