@@ -13,9 +13,8 @@ Ansvar:
 - metadata coverage
 - historiskt tidsintervall
 
-Modulen skriver inte ut något.
-Den returnerar strukturerad data som kan användas av CLI,
-tester och framtida ML-pipeline.
+Filtren är avsiktligt synkroniserade med den befintliga
+train_market_model.py-pipelinen.
 """
 
 from __future__ import annotations
@@ -31,10 +30,9 @@ MIN_PRICE = 1_000
 MAX_PRICE = 10_000_000
 
 MIN_MILEAGE = 0
-MAX_MILEAGE = 1_000_000
+MAX_MILEAGE = float("inf")
 
 MIN_MODEL_YEAR = 1990
-MAX_MODEL_YEAR = 2035
 
 
 def statistics_for(
@@ -86,52 +84,29 @@ def deduplication_key(
     observation: dict[str, Any],
 ) -> tuple[Any, ...]:
     """
-    Identifierar en observation.
+    Samma dedupliceringsprincip som train_market_model.py.
 
-    Prioritet:
-    vehicle_id → ad_id → URL → fallback.
+    Två observationer betraktas som dubbletter om de har
+    samma:
 
-    Den här funktionen bör senare ersättas med exakt samma
-    dedupliceringsregel som används av ML-pipelinen.
+        Mil
+        ModelYear
+        Variant
+        Price
     """
 
-    timestamp = observation["timestamp"]
-
-    if observation["vehicle_id"] is not None:
-        return (
-            "vehicle_id",
-            str(observation["vehicle_id"]),
-            timestamp,
-        )
-
-    if observation["ad_id"] is not None:
-        return (
-            "ad_id",
-            str(observation["ad_id"]),
-            timestamp,
-        )
-
-    if observation["url"] is not None:
-        return (
-            "url",
-            str(observation["url"]),
-            timestamp,
-        )
-
     return (
-        "fallback",
-        observation["price"],
         observation["mileage"],
         observation["model_year"],
-        observation["variant"],
-        timestamp,
+        observation["variant"] or "Okänd",
+        observation["price"],
     )
 
 
 def deduplicate(
     observations: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], int]:
-    """Deduplicerar observationer."""
+    """Deduplicerar observationer enligt träningspipen."""
 
     seen: set[tuple[Any, ...]] = set()
     result: list[dict[str, Any]] = []
@@ -139,7 +114,9 @@ def deduplicate(
     duplicates = 0
 
     for observation in observations:
-        key = deduplication_key(observation)
+        key = deduplication_key(
+            observation
+        )
 
         if key in seen:
             duplicates += 1
@@ -155,78 +132,56 @@ def profile_dataset(
     observations: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """
-    Profilerar datasetet genom hela ML-pipelinen.
+    Profilerar datasetet genom samma grundsteg som
+    train_market_model.py.
     """
 
     raw_count = len(observations)
 
     # ---------------------------------------------------------------
-    # Steg 1 – giltigt miltal
+    # Steg 1 – motsvarar dropna för Mil, ModelYear och Price
     # ---------------------------------------------------------------
 
-    after_mileage = []
+    after_required_fields = []
 
     missing_mileage = 0
-    invalid_mileage = 0
+    missing_model_year = 0
+    missing_price = 0
 
     for observation in observations:
         mileage = observation["mileage"]
+        model_year = observation["model_year"]
+        price = observation["price"]
 
         if mileage is None:
             missing_mileage += 1
-            continue
 
-        if not (
-            MIN_MILEAGE
-            <= mileage
-            <= MAX_MILEAGE
-        ):
-            invalid_mileage += 1
-            continue
-
-        after_mileage.append(observation)
-
-    # ---------------------------------------------------------------
-    # Steg 2 – giltig årsmodell
-    # ---------------------------------------------------------------
-
-    after_model_year = []
-
-    missing_model_year = 0
-    invalid_model_year = 0
-
-    for observation in after_mileage:
-        year = observation["model_year"]
-
-        if year is None:
+        if model_year is None:
             missing_model_year += 1
-            continue
-
-        if not (
-            MIN_MODEL_YEAR
-            <= year
-            <= MAX_MODEL_YEAR
-        ):
-            invalid_model_year += 1
-            continue
-
-        after_model_year.append(observation)
-
-    # ---------------------------------------------------------------
-    # Steg 3 – giltigt pris
-    # ---------------------------------------------------------------
-
-    after_price = []
-
-    missing_price = 0
-    invalid_price = 0
-
-    for observation in after_model_year:
-        price = observation["price"]
 
         if price is None:
             missing_price += 1
+
+        if (
+            mileage is None
+            or model_year is None
+            or price is None
+        ):
             continue
+
+        after_required_fields.append(
+            observation
+        )
+
+    # ---------------------------------------------------------------
+    # Steg 2 – positivt pris
+    # ---------------------------------------------------------------
+
+    after_price = []
+    invalid_price = 0
+
+    for observation in after_required_fields:
+        price = observation["price"]
 
         if not (
             MIN_PRICE
@@ -236,16 +191,70 @@ def profile_dataset(
             invalid_price += 1
             continue
 
-        after_price.append(observation)
+        after_price.append(
+            observation
+        )
 
     # ---------------------------------------------------------------
-    # Deduplicering
+    # Steg 3 – giltigt miltal
     # ---------------------------------------------------------------
 
-    before_deduplication = len(after_price)
+    after_mileage = []
+    invalid_mileage = 0
+
+    for observation in after_price:
+        mileage = observation["mileage"]
+
+        if mileage < MIN_MILEAGE:
+            invalid_mileage += 1
+            continue
+
+        after_mileage.append(
+            observation
+        )
+
+    # ---------------------------------------------------------------
+    # Steg 4 – giltig årsmodell
+    # ---------------------------------------------------------------
+
+    current_year = datetime.now().year
+
+    after_model_year = []
+    invalid_model_year = 0
+
+    for observation in after_mileage:
+        model_year = observation["model_year"]
+
+        if not (
+            MIN_MODEL_YEAR
+            <= model_year
+            <= current_year + 1
+        ):
+            invalid_model_year += 1
+            continue
+
+        after_model_year.append(
+            observation
+        )
+
+    # ---------------------------------------------------------------
+    # Steg 5 – variant
+    # ---------------------------------------------------------------
+
+    for observation in after_model_year:
+        if observation["variant"] is None:
+            observation["variant"] = "Okänd"
+
+    # ---------------------------------------------------------------
+    # Steg 6 – samma deduplicering som träningsmodellen
+    # ---------------------------------------------------------------
+
+    before_deduplication = len(
+        after_model_year
+    )
 
     after_deduplication, duplicates_removed = deduplicate(
-        after_price
+        after_model_year
     )
 
     # ---------------------------------------------------------------
@@ -275,20 +284,14 @@ def profile_dataset(
     # ---------------------------------------------------------------
 
     variants = Counter(
-        item["variant"]
-        if item["variant"] is not None
-        else "<saknas>"
+        item["variant"] or "Okänd"
         for item in after_deduplication
     )
 
     variant_model_year = Counter(
         (
-            item["variant"]
-            if item["variant"] is not None
-            else "<saknas>",
-            item["model_year"]
-            if item["model_year"] is not None
-            else "<saknas>",
+            item["variant"] or "Okänd",
+            item["model_year"],
         )
         for item in after_deduplication
     )
@@ -298,7 +301,6 @@ def profile_dataset(
     # ---------------------------------------------------------------
 
     observations_by_month = Counter()
-
     timestamps: list[datetime] = []
 
     for item in after_deduplication:
@@ -350,45 +352,91 @@ def profile_dataset(
         "pipeline": {
             "raw": raw_count,
 
-            "after_mileage": len(after_mileage),
-            "removed_missing_mileage": missing_mileage,
-            "removed_invalid_mileage": invalid_mileage,
+            "after_required_fields": len(
+                after_required_fields
+            ),
 
-            "after_model_year": len(after_model_year),
-            "removed_missing_model_year": missing_model_year,
-            "removed_invalid_model_year": invalid_model_year,
+            "removed_missing_mileage": (
+                missing_mileage
+            ),
+
+            "removed_missing_model_year": (
+                missing_model_year
+            ),
+
+            "removed_missing_price": (
+                missing_price
+            ),
 
             "after_price": len(after_price),
-            "removed_missing_price": missing_price,
-            "removed_invalid_price": invalid_price,
 
-            "before_deduplication": before_deduplication,
-            "duplicates_removed": duplicates_removed,
-            "after_deduplication": len(after_deduplication),
+            "removed_invalid_price": (
+                invalid_price
+            ),
+
+            "after_mileage": len(after_mileage),
+
+            "removed_invalid_mileage": (
+                invalid_mileage
+            ),
+
+            "after_model_year": len(
+                after_model_year
+            ),
+
+            "removed_invalid_model_year": (
+                invalid_model_year
+            ),
+
+            "before_deduplication": (
+                before_deduplication
+            ),
+
+            "duplicates_removed": (
+                duplicates_removed
+            ),
+
+            "after_deduplication": len(
+                after_deduplication
+            ),
         },
 
         "statistics": {
             "price": statistics_for(prices),
             "mileage": statistics_for(mileages),
-            "model_year": statistics_for(model_years),
+            "model_year": statistics_for(
+                model_years
+            ),
         },
 
         "variants": variants,
 
-        "variant_model_year": variant_model_year,
+        "variant_model_year": (
+            variant_model_year
+        ),
 
-        "observations_by_month": observations_by_month,
+        "observations_by_month": (
+            observations_by_month
+        ),
 
-        "metadata_coverage": metadata_coverage,
+        "metadata_coverage": (
+            metadata_coverage
+        ),
 
         "history": {
-            "first": min(timestamps)
-            if timestamps
-            else None,
-            "last": max(timestamps)
-            if timestamps
-            else None,
-            "count_with_timestamp": len(timestamps),
+            "first": (
+                min(timestamps)
+                if timestamps
+                else None
+            ),
+            "last": (
+                max(timestamps)
+                if timestamps
+                else None
+            ),
+            "count_with_timestamp": len(
+                timestamps
+            ),
         },
 
         "thresholds": {
@@ -398,11 +446,15 @@ def profile_dataset(
             },
             "mileage": {
                 "min": MIN_MILEAGE,
-                "max": MAX_MILEAGE,
+                "max": (
+                    None
+                    if math.isinf(MAX_MILEAGE)
+                    else MAX_MILEAGE
+                ),
             },
             "model_year": {
                 "min": MIN_MODEL_YEAR,
-                "max": MAX_MODEL_YEAR,
+                "max": current_year + 1,
             },
         },
     }
