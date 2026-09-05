@@ -3,7 +3,11 @@ CLI för profilering av Fiskabilars historiska marknadsdata.
 
 Exempel:
 
-    python ml/profile_market_dataset.py data/market_history.jsonl
+    python ml/profile_market_dataset.py data/market_history
+
+eller:
+
+    python ml/profile_market_dataset.py data/market_history/market_history_2026-08.jsonl
 
 Scriptet läser datasetet, profilerar det och skriver ut en
 reproducerbar rapport.
@@ -16,31 +20,31 @@ import sys
 from pathlib import Path
 from typing import Any
 
-try:
-    # Fungerar när scriptet körs som en del av paketet, exempelvis:
-    # python -m ml.profile_market_dataset ...
-    from ml.market_dataset_loader import (
-        extract_dataset,
-        load_jsonl,
-    )
-    from ml.market_dataset_profiling import profile_dataset
-except ModuleNotFoundError:
-    # Fungerar även vid direkt körning från ml/-katalogen.
-    from market_dataset_loader import (
-        extract_dataset,
-        load_jsonl,
-    )
-    from market_dataset_profiling import profile_dataset
+from ml.market_dataset_loader import (
+    extract_dataset,
+    load_jsonl,
+    load_jsonl_files,
+)
+
+from ml.market_dataset_profiling import (
+    profile_dataset,
+)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Profilerar historiska bilannonser inför ML."
+        description=(
+            "Profilerar historiska bilannonser "
+            "inför ML."
+        )
     )
 
     parser.add_argument(
         "input",
-        help="Sökväg till JSONL-datasetet.",
+        help=(
+            "Sökväg till en JSONL-fil eller "
+            "katalog med JSONL-filer."
+        ),
     )
 
     parser.add_argument(
@@ -62,10 +66,16 @@ def fmt(value: Any) -> str:
         if value.is_integer():
             value = int(value)
         else:
-            return f"{value:,.2f}".replace(",", " ")
+            return (
+                f"{value:,.2f}"
+                .replace(",", " ")
+            )
 
     if isinstance(value, int):
-        return f"{value:,}".replace(",", " ")
+        return (
+            f"{value:,}"
+            .replace(",", " ")
+        )
 
     return str(value)
 
@@ -91,24 +101,86 @@ def print_profile(
     print("1. DATASET-PIPELINE")
     print_separator()
 
-    print(f"Råposter:                    {fmt(pipeline['raw'])}")
-    print(f"Efter giltigt miltal:       {fmt(pipeline['after_mileage'])}")
-    print(f"Efter giltig årsmodell:     {fmt(pipeline['after_model_year'])}")
-    print(f"Efter giltigt pris:         {fmt(pipeline['after_price'])}")
-    print(f"Före deduplicering:         {fmt(pipeline['before_deduplication'])}")
-    print(f"Efter deduplicering:        {fmt(pipeline['after_deduplication'])}")
+    print(
+        f"Råposter:                    "
+        f"{fmt(pipeline['raw'])}"
+    )
+
+    print(
+        f"Saknade obligatoriska fält: "
+        f"{fmt(pipeline['raw'] - pipeline['after_required_fields'])}"
+    )
+
+    print(
+        f"Efter obligatoriska fält:    "
+        f"{fmt(pipeline['after_required_fields'])}"
+    )
+
+    print(
+        f"Efter giltigt pris:          "
+        f"{fmt(pipeline['after_price'])}"
+    )
+
+    print(
+        f"Efter giltigt miltal:        "
+        f"{fmt(pipeline['after_mileage'])}"
+    )
+
+    print(
+        f"Efter giltig årsmodell:      "
+        f"{fmt(pipeline['after_model_year'])}"
+    )
+
+    print(
+        f"Före deduplicering:          "
+        f"{fmt(pipeline['before_deduplication'])}"
+    )
+
+    print(
+        f"Efter deduplicering:         "
+        f"{fmt(pipeline['after_deduplication'])}"
+    )
+
     print()
 
     print("2. BORTFALL")
     print_separator()
 
-    print(f"Saknat miltal:              {fmt(pipeline['removed_missing_mileage'])}")
-    print(f"Orimligt miltal:             {fmt(pipeline['removed_invalid_mileage'])}")
-    print(f"Saknad årsmodell:            {fmt(pipeline['removed_missing_model_year'])}")
-    print(f"Orimlig årsmodell:           {fmt(pipeline['removed_invalid_model_year'])}")
-    print(f"Saknat pris:                 {fmt(pipeline['removed_missing_price'])}")
-    print(f"Orimligt pris:               {fmt(pipeline['removed_invalid_price'])}")
-    print(f"Duplicerade poster:          {fmt(pipeline['duplicates_removed'])}")
+    print(
+        f"Saknat miltal:               "
+        f"{fmt(pipeline['removed_missing_mileage'])}"
+    )
+
+    print(
+        f"Saknad årsmodell:            "
+        f"{fmt(pipeline['removed_missing_model_year'])}"
+    )
+
+    print(
+        f"Saknat pris:                 "
+        f"{fmt(pipeline['removed_missing_price'])}"
+    )
+
+    print(
+        f"Orimligt pris:               "
+        f"{fmt(pipeline['removed_invalid_price'])}"
+    )
+
+    print(
+        f"Orimligt miltal:             "
+        f"{fmt(pipeline['removed_invalid_mileage'])}"
+    )
+
+    print(
+        f"Orimlig årsmodell:           "
+        f"{fmt(pipeline['removed_invalid_model_year'])}"
+    )
+
+    print(
+        f"Duplicerade poster:          "
+        f"{fmt(pipeline['duplicates_removed'])}"
+    )
+
     print()
 
     print("3. PRIS / MILTAL / ÅRSMODELL")
@@ -122,8 +194,13 @@ def print_profile(
         f"{'Max':>15}"
     )
 
-    for field in ("price", "mileage", "model_year"):
+    for field in (
+        "price",
+        "mileage",
+        "model_year",
+    ):
         stats = profile["statistics"][field]
+
         print(
             f"{field:<15}"
             f"{fmt(stats['count']):>10}"
@@ -139,18 +216,30 @@ def print_profile(
 
     for variant, count in sorted(
         profile["variants"].items(),
-        key=lambda item: (-item[1], item[0]),
+        key=lambda item: (
+            -item[1],
+            str(item[0]),
+        ),
     ):
-        print(f"{variant:<40}{fmt(count):>10}")
+        print(
+            f"{str(variant):<40}"
+            f"{fmt(count):>10}"
+        )
 
     print()
 
     print("5. VARIANT × ÅRSMODELL")
     print_separator()
 
-    for (variant, year), count in sorted(
+    for (
+        variant,
+        year,
+    ), count in sorted(
         profile["variant_model_year"].items(),
-        key=lambda item: (str(item[0][0]), str(item[0][1])),
+        key=lambda item: (
+            str(item[0][0]),
+            str(item[0][1]),
+        ),
     ):
         print(
             f"{str(variant):<30}"
@@ -163,15 +252,22 @@ def print_profile(
     print("6. OBSERVATIONER PER MÅNAD")
     print_separator()
 
-    for month, count in sorted(profile["observations_by_month"].items()):
-        print(f"{month:<20}{fmt(count):>15}")
+    for month, count in sorted(
+        profile["observations_by_month"].items()
+    ):
+        print(
+            f"{month:<20}"
+            f"{fmt(count):>15}"
+        )
 
     print()
 
     print("7. METADATA COVERAGE")
     print_separator()
 
-    for field, data in profile["metadata_coverage"].items():
+    for field, data in (
+        profile["metadata_coverage"].items()
+    ):
         print(
             f"{field:<20}"
             f"{fmt(data['count']):>12}"
@@ -184,9 +280,22 @@ def print_profile(
     print_separator()
 
     history = profile["history"]
-    print(f"Första observation: {history['first'] or '-'}")
-    print(f"Sista observation:  {history['last'] or '-'}")
-    print(f"Med tidsstämpel:    {fmt(history['count_with_timestamp'])}")
+
+    print(
+        f"Första observation: "
+        f"{history['first'] or '-'}"
+    )
+
+    print(
+        f"Sista observation:  "
+        f"{history['last'] or '-'}"
+    )
+
+    print(
+        f"Med tidsstämpel:    "
+        f"{fmt(history['count_with_timestamp'])}"
+    )
+
     print()
 
     print("9. SAMMANFATTNING")
@@ -194,33 +303,180 @@ def print_profile(
 
     raw = pipeline["raw"]
     final = pipeline["after_deduplication"]
-    retention = final / raw * 100 if raw else 0
 
-    print(f"{fmt(raw)} råposter")
-    print("    ↓ giltigt miltal")
-    print(f"{fmt(pipeline['after_mileage'])}")
-    print("    ↓ giltig årsmodell")
-    print(f"{fmt(pipeline['after_model_year'])}")
-    print("    ↓ giltigt pris")
-    print(f"{fmt(pipeline['after_price'])}")
-    print("    ↓ deduplicering")
-    print(f"{fmt(final)} ML-observationer")
+    retention = (
+        final / raw * 100
+        if raw
+        else 0
+    )
+
+    print(
+        f"{fmt(raw)} råposter"
+    )
+
+    print(
+        "    ↓ obligatoriska fält"
+    )
+
+    print(
+        f"{fmt(pipeline['after_required_fields'])}"
+    )
+
+    print(
+        "    ↓ giltigt pris"
+    )
+
+    print(
+        f"{fmt(pipeline['after_price'])}"
+    )
+
+    print(
+        "    ↓ giltigt miltal"
+    )
+
+    print(
+        f"{fmt(pipeline['after_mileage'])}"
+    )
+
+    print(
+        "    ↓ giltig årsmodell"
+    )
+
+    print(
+        f"{fmt(pipeline['after_model_year'])}"
+    )
+
+    print(
+        "    ↓ deduplicering"
+    )
+
+    print(
+        f"{fmt(final)} ML-observationer"
+    )
+
     print()
-    print(f"Retention: {retention:.2f} %")
+
+    print(
+        f"Retention: {retention:.2f} %"
+    )
+
     print()
+
     print("=" * 78)
     print("Profilering klar.")
     print("=" * 78)
     print()
 
 
+def resolve_input_files(
+    input_path: Path,
+) -> list[Path]:
+    """
+    Returnerar de JSONL-filer som ska profileras.
+
+    Om input är en fil används endast den filen.
+
+    Om input är en katalog används:
+        *.jsonl
+
+    Filerna sorteras så att körningen blir reproducerbar.
+    """
+
+    if input_path.is_file():
+        if input_path.suffix.lower() != ".jsonl":
+            raise ValueError(
+                f"Filen är inte en JSONL-fil: "
+                f"{input_path}"
+            )
+
+        return [input_path]
+
+    if input_path.is_dir():
+        files = sorted(
+            input_path.glob("*.jsonl")
+        )
+
+        if not files:
+            raise FileNotFoundError(
+                f"Inga JSONL-filer hittades i "
+                f"{input_path}"
+            )
+
+        return files
+
+    raise FileNotFoundError(
+        f"Sökvägen finns inte: {input_path}"
+    )
+
+
 def main() -> int:
     args = parse_args()
+
     input_path = Path(args.input)
 
-    if not input_path.exists():
-        print(f"Filen finns inte: {input_path}", file=sys.stderr)
+    try:
+        files = resolve_input_files(
+            input_path
+        )
+    except (
+        FileNotFoundError,
+        ValueError,
+    ) as exc:
+        print(
+            str(exc),
+            file=sys.stderr,
+        )
         return 1
 
-    if not input_path.is_file():
-        print(f"Sökvägen är inte en fil
+    print()
+
+    print(
+        f"Profilerar {len(files)} JSONL-fil(er):"
+    )
+
+    for file in files:
+        print(
+            f"  - {file}"
+        )
+
+    print()
+
+    if len(files) == 1:
+        raw_records = load_jsonl(
+            files[0],
+            encoding=args.encoding,
+        )
+    else:
+        raw_records = load_jsonl_files(
+            files,
+            encoding=args.encoding,
+        )
+
+    if not raw_records:
+        print(
+            "Datasetet innehåller inga "
+            "giltiga poster.",
+            file=sys.stderr,
+        )
+        return 1
+
+    observations = extract_dataset(
+        raw_records
+    )
+
+    profile = profile_dataset(
+        observations
+    )
+
+    print_profile(
+        profile,
+        input_path,
+    )
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(
+        main()
+    )
