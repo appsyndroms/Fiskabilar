@@ -1,13 +1,14 @@
 """
 Läsning och normalisering av historiska marknadsdata.
 
-Den här modulen ansvarar endast för att:
+Modulen ansvarar endast för att:
 - läsa JSONL
+- läsa flera JSONL-filer
 - hitta relevanta fält
 - normalisera pris, miltal och årsmodell
 - tolka identifierare och tidsstämplar
 
-Den filtrerar inte bort observationer.
+Modulen filtrerar inte bort observationer.
 """
 
 from __future__ import annotations
@@ -22,29 +23,28 @@ from typing import Any, Iterable
 
 FIELD_ALIASES = {
     "price": (
+        "annonspris",
         "price",
         "pris",
         "asking_price",
         "listing_price",
         "advertised_price",
-        "annonspris",
     ),
     "mileage": (
+        "miltal",
         "mileage",
         "milage",
-        "miltal",
-        "miles",
         "mil",
         "odometer",
+        "km",
         "kilometers",
         "kilometres",
-        "km",
     ),
     "model_year": (
-        "model_year",
-        "modelYear",
         "arsmodell",
         "årsmodell",
+        "model_year",
+        "modelYear",
         "year",
         "registration_year",
         "reg_year",
@@ -82,6 +82,7 @@ FIELD_ALIASES = {
         "annonsUrl",
     ),
     "timestamp": (
+        "tid",
         "timestamp",
         "observed_at",
         "observedAt",
@@ -128,7 +129,6 @@ def parse_number(value: Any) -> float | None:
 
     if isinstance(value, (int, float)):
         number = float(value)
-
         return number if math.isfinite(number) else None
 
     if not isinstance(value, str):
@@ -155,19 +155,8 @@ def parse_number(value: Any) -> float | None:
     elif "," in text:
         text = text.replace(",", ".")
 
-    allowed = set("0123456789.-")
-
-    cleaned = "".join(
-        char
-        for char in text
-        if char in allowed
-    )
-
-    if not cleaned:
-        return None
-
     try:
-        number = float(cleaned)
+        number = float(text)
     except ValueError:
         return None
 
@@ -199,6 +188,13 @@ def parse_datetime(value: Any) -> datetime | None:
     if not text:
         return None
 
+    try:
+        return datetime.fromisoformat(
+            text.replace("Z", "+00:00")
+        )
+    except ValueError:
+        pass
+
     formats = (
         "%Y-%m-%dT%H:%M:%S.%f%z",
         "%Y-%m-%dT%H:%M:%S%z",
@@ -211,27 +207,20 @@ def parse_datetime(value: Any) -> datetime | None:
         "%d/%m/%Y",
     )
 
-    for fmt in formats:
+    for date_format in formats:
         try:
-            return datetime.strptime(text, fmt)
+            return datetime.strptime(
+                text,
+                date_format,
+            )
         except ValueError:
-            pass
+            continue
 
-    try:
-        return datetime.fromisoformat(
-            text.replace("Z", "+00:00")
-        )
-    except ValueError:
-        return None
+    return None
 
 
 def normalize_variant(value: Any) -> str | None:
-    """
-    Minimal normalisering av variant.
-
-    Vi behåller det faktiska värdet eftersom profileringen
-    ska kunna visa exakt vilka variantvärden som förekommer.
-    """
+    """Minimal normalisering av variant."""
 
     if value is None:
         return None
@@ -253,8 +242,14 @@ def load_jsonl(
 
     records: list[dict[str, Any]] = []
 
-    with path.open("r", encoding=encoding) as file:
-        for line_number, line in enumerate(file, start=1):
+    with path.open(
+        "r",
+        encoding=encoding,
+    ) as file:
+        for line_number, line in enumerate(
+            file,
+            start=1,
+        ):
             line = line.strip()
 
             if not line:
@@ -279,6 +274,25 @@ def load_jsonl(
                 continue
 
             records.append(record)
+
+    return records
+
+
+def load_jsonl_files(
+    paths: Iterable[Path],
+    encoding: str = "utf-8",
+) -> list[dict[str, Any]]:
+    """Läser flera JSONL-filer i angiven ordning."""
+
+    records: list[dict[str, Any]] = []
+
+    for path in paths:
+        records.extend(
+            load_jsonl(
+                path,
+                encoding=encoding,
+            )
+        )
 
     return records
 
