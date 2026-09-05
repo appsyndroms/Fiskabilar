@@ -39,6 +39,9 @@ jobs:
       - name: Analysera faktiska fyndutfall
         run: python -u scripts/analysera_fyndutfall.py
 
+      - name: Träna ML-modell
+        run: python -u -m ml.train_market_model
+
       - name: Spara historik, identity, state och fyndutfall
         run: |
           git config user.name "github-actions[bot]"
