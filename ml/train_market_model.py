@@ -22,6 +22,18 @@ Testdata hålls tidsmässigt separat från träningsdata för att
 ge en bättre bild av hur modellen kan fungera på framtida
 marknadsobservationer.
 
+Utvärderingen innehåller:
+
+    - MAE
+    - medianfel
+    - genomsnittligt procentfel
+    - RMSE
+    - R²
+    - antal observationer
+    - faktisk vs predikterad prisnivå
+    - resultat per variant
+    - resultat per årsmodell
+
 Resultatet sparas i:
 
     data/ml/market_model.joblib
@@ -346,6 +358,288 @@ def _bygg_modeller() -> dict[str, Pipeline]:
     }
 
 
+def _beräkna_metrics(
+    faktiskt: pd.Series,
+    predikterat,
+) -> dict:
+    """
+    Beräknar detaljerad felstatistik.
+
+    Returnerar både absoluta fel och procentuella fel.
+    """
+
+    faktiskt = pd.Series(
+        faktiskt,
+        dtype="float64",
+    ).reset_index(drop=True)
+
+    predikterat = pd.Series(
+        predikterat,
+        dtype="float64",
+    ).reset_index(drop=True)
+
+    fel = predikterat - faktiskt
+
+    absolut_fel = fel.abs()
+
+    procent_fel = (
+        absolut_fel
+        / faktiskt.replace(0, pd.NA)
+        * 100
+    )
+
+    return {
+        "antal_observationer": int(len(faktiskt)),
+        "mae": round(
+            float(absolut_fel.mean()),
+            2,
+        ),
+        "medianfel": round(
+            float(fel.median()),
+            2,
+        ),
+        "median_absolutfel": round(
+            float(absolut_fel.median()),
+            2,
+        ),
+        "mape_procent": round(
+            float(procent_fel.dropna().mean()),
+            2,
+        ),
+        "rmse": round(
+            float(
+                mean_squared_error(
+                    faktiskt,
+                    predikterat,
+                )
+                ** 0.5
+            ),
+            2,
+        ),
+        "r2": round(
+            float(
+                r2_score(
+                    faktiskt,
+                    predikterat,
+                )
+            ),
+            4,
+        ),
+        "faktiskt_medelpris": round(
+            float(faktiskt.mean()),
+            2,
+        ),
+        "predikterat_medelpris": round(
+            float(predikterat.mean()),
+            2,
+        ),
+        "faktiskt_medianpris": round(
+            float(faktiskt.median()),
+            2,
+        ),
+        "predikterat_medianpris": round(
+            float(predikterat.median()),
+            2,
+        ),
+        "bias": round(
+            float(fel.mean()),
+            2,
+        ),
+    }
+
+
+def _utvärdera_per_grupp(
+    test: pd.DataFrame,
+    prediktioner,
+    kolumn: str,
+) -> dict:
+    """
+    Beräknar resultat uppdelat på en gruppkolumn.
+
+    Exempel:
+
+        Variant
+        ModelYear
+    """
+
+    utvärderingsdata = test[
+        [
+            kolumn,
+            TARGET,
+        ]
+    ].copy()
+
+    utvärderingsdata["_prediktion"] = prediktioner
+
+    resultat = {}
+
+    for grupp, gruppdata in (
+        utvärderingsdata.groupby(
+            kolumn,
+            dropna=False,
+        )
+    ):
+        metrics = _beräkna_metrics(
+            gruppdata[TARGET],
+            gruppdata["_prediktion"],
+        )
+
+        if pd.isna(grupp):
+            gruppnamn = "Okänd"
+        else:
+            gruppnamn = str(grupp)
+
+        resultat[gruppnamn] = metrics
+
+    return resultat
+
+
+def _utvärdera(
+    modell: Pipeline,
+    test: pd.DataFrame,
+) -> dict:
+    """Beräknar modellens fullständiga träffsäkerhet."""
+
+    x_test = test[FEATURES]
+    y_test = test[TARGET]
+
+    prediktioner = modell.predict(
+        x_test
+    )
+
+    totalt = _beräkna_metrics(
+        y_test,
+        prediktioner,
+    )
+
+    per_variant = _utvärdera_per_grupp(
+        test,
+        prediktioner,
+        "Variant",
+    )
+
+    per_årsmodell = _utvärdera_per_grupp(
+        test,
+        prediktioner,
+        "ModelYear",
+    )
+
+    return {
+        "totalt": totalt,
+        "per_variant": per_variant,
+        "per_årsmodell": per_årsmodell,
+    }
+
+
+def _skriv_ut_metrics(
+    namn: str,
+    metrics: dict,
+) -> None:
+    """Skriver en sammanfattning av modellens resultat."""
+
+    totalt = metrics["totalt"]
+
+    print()
+    print(
+        f"=== {namn} ==="
+    )
+
+    print(
+        f"Observationer: "
+        f"{totalt['antal_observationer']}"
+    )
+
+    print(
+        f"MAE: "
+        f"{totalt['mae']:,.0f} kr"
+    )
+
+    print(
+        f"Medianfel: "
+        f"{totalt['medianfel']:,.0f} kr"
+    )
+
+    print(
+        f"Median absolutfel: "
+        f"{totalt['median_absolutfel']:,.0f} kr"
+    )
+
+    print(
+        f"Fel i procent: "
+        f"{totalt['mape_procent']:.2f} %"
+    )
+
+    print(
+        f"RMSE: "
+        f"{totalt['rmse']:,.0f} kr"
+    )
+
+    print(
+        f"R²: "
+        f"{totalt['r2']:.3f}"
+    )
+
+    print(
+        f"Faktiskt medelpris: "
+        f"{totalt['faktiskt_medelpris']:,.0f} kr"
+    )
+
+    print(
+        f"Predikterat medelpris: "
+        f"{totalt['predikterat_medelpris']:,.0f} kr"
+    )
+
+    print(
+        f"Faktiskt medianpris: "
+        f"{totalt['faktiskt_medianpris']:,.0f} kr"
+    )
+
+    print(
+        f"Predikterat medianpris: "
+        f"{totalt['predikterat_medianpris']:,.0f} kr"
+    )
+
+    print(
+        f"Bias: "
+        f"{totalt['bias']:,.0f} kr"
+    )
+
+    print()
+    print(
+        "Resultat per variant:"
+    )
+
+    for variant, variant_metrics in (
+        metrics["per_variant"].items()
+    ):
+        print(
+            f"  {variant}: "
+            f"n={variant_metrics['antal_observationer']}, "
+            f"MAE={variant_metrics['mae']:,.0f} kr, "
+            f"MAPE={variant_metrics['mape_procent']:.2f} %, "
+            f"bias={variant_metrics['bias']:,.0f} kr"
+        )
+
+    print()
+    print(
+        "Resultat per årsmodell:"
+    )
+
+    for årsmodell, årsmodell_metrics in (
+        sorted(
+            metrics["per_årsmodell"].items(),
+            key=lambda item: item[0],
+        )
+    ):
+        print(
+            f"  {årsmodell}: "
+            f"n={årsmodell_metrics['antal_observationer']}, "
+            f"MAE={årsmodell_metrics['mae']:,.0f} kr, "
+            f"MAPE={årsmodell_metrics['mape_procent']:.2f} %, "
+            f"bias={årsmodell_metrics['bias']:,.0f} kr"
+        )
+
+
 def _dela_tidsmässigt(
     df: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -381,39 +675,6 @@ def _dela_tidsmässigt(
     ].copy()
 
     return train, test
-
-
-def _utvärdera(
-    modell: Pipeline,
-    x_test: pd.DataFrame,
-    y_test: pd.Series,
-) -> dict:
-    """Beräknar modellens träffsäkerhet."""
-
-    prediktioner = modell.predict(
-        x_test
-    )
-
-    mae = mean_absolute_error(
-        y_test,
-        prediktioner,
-    )
-
-    rmse = mean_squared_error(
-        y_test,
-        prediktioner,
-    ) ** 0.5
-
-    r2 = r2_score(
-        y_test,
-        prediktioner,
-    )
-
-    return {
-        "mae": round(float(mae), 2),
-        "rmse": round(float(rmse), 2),
-        "r2": round(float(r2), 4),
-    }
 
 
 def träna(
@@ -457,14 +718,6 @@ def träna(
         TARGET
     ]
 
-    x_test = test[
-        FEATURES
-    ]
-
-    y_test = test[
-        TARGET
-    ]
-
     modeller = _bygg_modeller()
 
     resultat = {}
@@ -480,25 +733,22 @@ def träna(
 
         metrics = _utvärdera(
             modell,
-            x_test,
-            y_test,
+            test,
         )
 
         resultat[namn] = metrics
         tränade_modeller[namn] = modell
 
-        print(
-            f"{namn}: "
-            f"MAE={metrics['mae']:,.0f} kr, "
-            f"RMSE={metrics['rmse']:,.0f} kr, "
-            f"R²={metrics['r2']:.3f}"
+        _skriv_ut_metrics(
+            namn,
+            metrics,
         )
 
     # MAE är den primära jämförelsen eftersom den är lätt
     # att tolka som genomsnittligt kronor-fel.
     bästa_namn = min(
         resultat,
-        key=lambda namn: resultat[namn]["mae"],
+        key=lambda namn: resultat[namn]["totalt"]["mae"],
     )
 
     bästa_modell = tränade_modeller[
