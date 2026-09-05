@@ -2750,7 +2750,23 @@
     "source:bilweb:365446": "vehicle:00000773",
     "url:https://bilweb.se/uppsala-lan/volvo-v90-t6-plug-in-awd-plus-dark-s-v-hjul-drag-h-k-skinn-moms-2025-kombi-365446": "vehicle:00000773",
     "fp:981ea476a512e5ac": "vehicle:00000773",
-    "fp:3355555e217e0e42": "vehicle:00000242"
+    "fp:3355555e217e0e42": "vehicle:00000242",
+    "url:https://www.wayke.se/objekt/6911161f-1fbc-4f86-814a-1ebb6b018de9": "vehicle:00000774",
+    "fp:527cdc570cedc06d": "vehicle:00000774",
+    "url:https://www.wayke.se/objekt/468428b7-79fb-4c16-a127-b84de8cd644c": "vehicle:00000775",
+    "fp:e6859b1d54c0d0a3": "vehicle:00000775",
+    "url:https://www.wayke.se/objekt/8b0012c5-bf72-4315-a542-0f448704eeab": "vehicle:00000776",
+    "fp:a196885641236408": "vehicle:00000776",
+    "url:https://www.wayke.se/objekt/bac8cc87-e2a7-4880-ab9c-becf66115d08": "vehicle:00000777",
+    "fp:85be47da2ebe2560": "vehicle:00000777",
+    "url:https://www.wayke.se/objekt/e1ab36f2-afa5-45e8-b43e-f4201b58dfcb": "vehicle:00000778",
+    "fp:e6cef68c91766572": "vehicle:00000778",
+    "url:https://www.wayke.se/objekt/3044b567-f196-426a-b201-a08ad8e488bf": "vehicle:00000779",
+    "fp:be4539a860f7a8fb": "vehicle:00000779",
+    "url:https://www.wayke.se/objekt/8efc4fa6-419f-4b93-b2da-384f6ace4d57": "vehicle:00000780",
+    "fp:f9c90fab2129a40e": "vehicle:00000780",
+    "url:https://www.wayke.se/objekt/7c41ac36-cced-451a-967e-43b0684c9999": "vehicle:00000781",
+    "fp:705ceaba96c2673a": "vehicle:00000781"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -16663,6 +16679,150 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000774": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/6911161f-1fbc-4f86-814a-1ebb6b018de9",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000775": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/468428b7-79fb-4c16-a127-b84de8cd644c",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000776": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8b0012c5-bf72-4315-a542-0f448704eeab",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000777": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/bac8cc87-e2a7-4880-ab9c-becf66115d08",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000778": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/e1ab36f2-afa5-45e8-b43e-f4201b58dfcb",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000779": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/3044b567-f196-426a-b201-a08ad8e488bf",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000780": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8efc4fa6-419f-4b93-b2da-384f6ace4d57",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000781": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/7c41ac36-cced-451a-967e-43b0684c9999",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
