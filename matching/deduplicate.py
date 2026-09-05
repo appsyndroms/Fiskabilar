@@ -36,6 +36,23 @@ Viktiga principer:
 - Diagnostik skrivs till loggen så att matchningskvaliteten kan
   verifieras i GitHub Actions.
 
+VIKTIGT om basannonsen (basbil):
+
+    "Mest komplett" och "mest aktuell" är INTE samma sak.
+
+    Statiska fält (regnr, vin, utrustningsniva, dragkrok, m.fl.)
+    ändras normalt inte mellan omskrapningar av samma annons, så
+    fullständighetspoängen blir ofta lika mellan flera observationer
+    av samma bil. Python's max() väljer då konsekvent den FÖRSTA
+    posten vid oavgjort - i praktiken den kronologiskt äldsta
+    observationen.
+
+    Volatila fält (annonspris, miltal, timestamp) måste därför alltid
+    hämtas från den SENASTE observationen i gruppen, oavsett vilken
+    post som används som bas för de statiska fälten. Annars riskerar
+    både ML-träningsdata och fyndbedömning att jobba med inaktuellt
+    pris efter en prissänkning.
+
 Alla numeriska och textbaserade signaler normaliseras innan matchning.
 """
 
@@ -45,6 +62,7 @@ from app_logging.logger import info
 
 import re
 import unicodedata
+from datetime import datetime
 from difflib import SequenceMatcher
 
 
@@ -66,6 +84,15 @@ MINSTA_STARKA_SIGNALER = 3
 
 # Fingerprint-matchningar under denna nivå loggas som REVIEW.
 REVIEW_SCORE_GRANS = 90
+
+# Fält som förväntas ändras mellan omskrapningar av samma annons.
+# Dessa ska ALLTID hämtas från den senaste observationen i gruppen,
+# oavsett vilken post som i övrigt används som bas (se _senaste_bil).
+VOLATILA_FALT = (
+    "annonspris",
+    "miltal",
+    "timestamp",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +280,36 @@ def _heltal(value):
     return int(
         round(numeriskt)
     )
+
+
+def _parse_tidsstampel(value):
+    """
+    Försöker tolka ett timestamp-fält som datetime.
+
+    Returnerar None om värdet saknas eller inte går att tolka.
+    Hanterar bland annat ISO 8601 med tidszon
+    (t.ex. "2026-08-18 18:15:11+02:00") samt vanlig "Z"-suffix.
+    """
+
+    if value in (
+        None,
+        "",
+    ):
+        return None
+
+    if isinstance(value, datetime):
+        return value
+
+    text = str(value).strip()
+
+    # datetime.fromisoformat i äldre Python-versioner klarar inte "Z".
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
 
 
 def _textlikhet(a, b) -> float:
@@ -1336,7 +1393,8 @@ def _fullstandighetspoang(
     Fler kända fält = mer komplett annons.
 
     Den mest kompletta annonsen används som bas när flera källor
-    identifierats som samma bil.
+    identifierats som samma bil - men OBS: endast för de statiska
+    fälten. Se _senaste_bil() för volatila fält (pris/miltal/tid).
     """
 
     falt = [
@@ -1388,14 +1446,63 @@ def _grupprepresentant(
     """
     Väljer en stabil representant för en dubblettgrupp.
 
+    Används för fingerprint-jämförelser (matchning mot nya annonser).
     Vid lika fullständighet används annonsens ursprungliga ordning
     genom max()-beteendet, vilket gör valet stabilt.
+
+    OBS: detta är INTE samma sak som vilken post vars pris/miltal
+    som hamnar i slutresultatet - se _senaste_bil() och hur basbil
+    byggs i deduplicera().
     """
 
     return max(
         grupp,
         key=_fullstandighetspoang,
     )
+
+
+def _senaste_bil(
+    grupp: list[dict],
+) -> dict:
+    """
+    Väljer den kronologiskt SENASTE observationen i en grupp,
+    baserat på fältet "timestamp".
+
+    Detta används för att hämta aktuella volatila värden
+    (annonspris, miltal) till basbilen, oavsett vilken post som
+    valdes som representant för de statiska fälten.
+
+    Om ingen post har en tolkbar tidsstämpel faller funktionen
+    tillbaka på den sist tillagda posten i listan (ursprunglig
+    ordning), vilket i normalfallet fortfarande är den senast
+    skrapade.
+    """
+
+    senaste = None
+    senaste_tid = None
+
+    for bil in grupp:
+
+        tid = _parse_tidsstampel(
+            bil.get("timestamp")
+        )
+
+        if tid is None:
+            continue
+
+        if (
+            senaste_tid is None
+            or tid >= senaste_tid
+        ):
+            senaste = bil
+            senaste_tid = tid
+
+    if senaste is not None:
+        return senaste
+
+    # Fallback: ingen post hade tolkbar tidsstämpel.
+    # Använd sista posten i ursprunglig ordning.
+    return grupp[-1]
 
 
 # ---------------------------------------------------------------------------
@@ -1739,7 +1846,11 @@ def deduplicera(
 
     För varje grupp:
 
-        - den mest kompletta annonsen används som bas
+        - den mest kompletta annonsen används som bas för
+          statiska fält (regnr, vin, utrustning, m.fl.)
+        - volatila fält (annonspris, miltal, timestamp) hämtas
+          alltid från den SENAST skrapade observationen i gruppen,
+          oavsett hur fullständig just den posten är
         - alla källor sparas
         - alla URL:er sparas
         - fingerprint-score sparas
@@ -1826,13 +1937,44 @@ def deduplicera(
     for grupp in grupper:
 
         # -------------------------------------------------------
-        # Mest kompletta annonsen blir basannons.
+        # Mest kompletta annonsen blir bas för statiska fält.
         # -------------------------------------------------------
 
         basbil = max(
             grupp,
             key=_fullstandighetspoang,
         ).copy()
+
+        # -------------------------------------------------------
+        # Volatila fält (pris, miltal, tidsstämpel) hämtas alltid
+        # från den senaste observationen i gruppen - inte från
+        # den mest kompletta. Annars riskerar t.ex. en
+        # prissänkning att "försvinna" bakom en äldre, lika
+        # komplett post.
+        #
+        # Görs endast när gruppen faktiskt har fler än en post;
+        # med en enda post är basbil redan korrekt.
+        # -------------------------------------------------------
+
+        if len(grupp) > 1:
+
+            senaste = _senaste_bil(
+                grupp
+            )
+
+            for falt_namn in VOLATILA_FALT:
+
+                varde = senaste.get(
+                    falt_namn
+                )
+
+                if varde not in (
+                    None,
+                    "",
+                ):
+                    basbil[
+                        falt_namn
+                    ] = varde
 
         # -------------------------------------------------------
         # Källor
