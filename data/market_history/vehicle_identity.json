@@ -2776,7 +2776,17 @@
     "fp:85fae7915a859bdc": "vehicle:00000784",
     "source:bilweb:365708": "vehicle:00000474",
     "url:https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-m-sport-pro-wide-live-cockpit-lader-kamera-2025-kombi-365708": "vehicle:00000474",
-    "fp:472a23ef6437f860": "vehicle:00000474"
+    "fp:472a23ef6437f860": "vehicle:00000474",
+    "fp:6dfb423210313d7e": "vehicle:00000738",
+    "reg:WFR04P": "vehicle:00000785",
+    "source:bilweb:365925": "vehicle:00000785",
+    "url:https://bilweb.se/jonkopings-lan/volvo-v60-t6-plus-dark-nordic-edition-2026-kombi-365925": "vehicle:00000785",
+    "fp:68c69f0616b8b39b": "vehicle:00000785",
+    "reg:YUZ69J": "vehicle:00000786",
+    "source:bilweb:366078": "vehicle:00000786",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-366078": "vehicle:00000786",
+    "fp:276254d89971bd97": "vehicle:00000786",
+    "fp:65960898e5a4acbf": "vehicle:00000678"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -16887,6 +16897,42 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000785": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "WFR04P",
+        "vin": null
+      },
+      "last_seen": "365925",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000786": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "YUZ69J",
+        "vin": null
+      },
+      "last_seen": "366078",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
