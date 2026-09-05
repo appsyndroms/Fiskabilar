@@ -2766,7 +2766,11 @@
     "url:https://www.wayke.se/objekt/8efc4fa6-419f-4b93-b2da-384f6ace4d57": "vehicle:00000780",
     "fp:f9c90fab2129a40e": "vehicle:00000780",
     "url:https://www.wayke.se/objekt/7c41ac36-cced-451a-967e-43b0684c9999": "vehicle:00000781",
-    "fp:705ceaba96c2673a": "vehicle:00000781"
+    "fp:705ceaba96c2673a": "vehicle:00000781",
+    "url:https://www.wayke.se/objekt/2622f1a6-9437-4330-8858-fd383ad0958a": "vehicle:00000782",
+    "fp:8da56c6438352a88": "vehicle:00000782",
+    "url:https://www.wayke.se/objekt/0c61a1f8-db42-4585-b67b-58c0cc963580": "vehicle:00000783",
+    "fp:c80d69c5f883f261": "vehicle:00000783"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -16819,6 +16823,42 @@
         "vin": null
       },
       "last_seen": "https://www.wayke.se/objekt/7c41ac36-cced-451a-967e-43b0684c9999",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000782": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/2622f1a6-9437-4330-8858-fd383ad0958a",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000783": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/0c61a1f8-db42-4585-b67b-58c0cc963580",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
