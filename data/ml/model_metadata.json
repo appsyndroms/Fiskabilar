@@ -1,0 +1,280 @@
+{
+  "skapad": "2026-09-05T12:41:02.450325+02:00",
+  "modell": "random_forest",
+  "features": [
+    "Mil",
+    "ModelYear",
+    "Variant"
+  ],
+  "target": "Price",
+  "antal_observationer": 607,
+  "antal_traning": 485,
+  "antal_test": 122,
+  "metrics": {
+    "linear_regression": {
+      "totalt": {
+        "antal_observationer": 122,
+        "mae": 23402.04,
+        "medianfel": 8694.57,
+        "median_absolutfel": 19313.17,
+        "mape_procent": 5.59,
+        "rmse": 30439.3,
+        "r2": 0.6824,
+        "faktiskt_medelpris": 442324.34,
+        "predikterat_medelpris": 454842.4,
+        "faktiskt_medianpris": 448750.0,
+        "predikterat_medianpris": 463685.24,
+        "bias": 12518.06
+      },
+      "per_variant": {
+        "330e xDrive Touring": {
+          "antal_observationer": 8,
+          "mae": 42128.63,
+          "medianfel": 40067.65,
+          "median_absolutfel": 40067.65,
+          "mape_procent": 10.96,
+          "rmse": 53890.07,
+          "r2": -0.0224,
+          "faktiskt_medelpris": 430798.75,
+          "predikterat_medelpris": 472831.03,
+          "faktiskt_medianpris": 439500.0,
+          "predikterat_medianpris": 490443.03,
+          "bias": 42032.28
+        },
+        "530e xDrive Touring": {
+          "antal_observationer": 2,
+          "mae": 29212.61,
+          "medianfel": -29212.61,
+          "median_absolutfel": 29212.61,
+          "mape_procent": 6.35,
+          "rmse": 41226.91,
+          "r2": -1.7195,
+          "faktiskt_medelpris": 434800.0,
+          "predikterat_medelpris": 405587.39,
+          "faktiskt_medianpris": 434800.0,
+          "predikterat_medianpris": 405587.39,
+          "bias": -29212.61
+        },
+        "T6 AWD": {
+          "antal_observationer": 107,
+          "mae": 22374.29,
+          "medianfel": 8527.18,
+          "median_absolutfel": 19391.67,
+          "mape_procent": 5.3,
+          "rmse": 28034.54,
+          "r2": 0.7401,
+          "faktiskt_medelpris": 442134.39,
+          "predikterat_medelpris": 453387.38,
+          "faktiskt_medianpris": 448000.0,
+          "predikterat_medianpris": 462852.76,
+          "bias": 11252.99
+        },
+        "T8 AWD": {
+          "antal_observationer": 5,
+          "mae": 13109.18,
+          "medianfel": -1576.53,
+          "median_absolutfel": 5915.21,
+          "mape_procent": 2.84,
+          "rmse": 21502.18,
+          "r2": 0.4122,
+          "faktiskt_medelpris": 467840.0,
+          "predikterat_medelpris": 476899.98,
+          "faktiskt_medianpris": 479800.0,
+          "predikterat_medianpris": 488387.23,
+          "bias": 9059.98
+        }
+      },
+      "per_årsmodell": {
+        "2023": {
+          "antal_observationer": 18,
+          "mae": 18403.18,
+          "medianfel": 3030.73,
+          "median_absolutfel": 11275.98,
+          "mape_procent": 5.26,
+          "rmse": 25558.33,
+          "r2": 0.4688,
+          "faktiskt_medelpris": 370065.56,
+          "predikterat_medelpris": 373257.09,
+          "faktiskt_medianpris": 379450.0,
+          "predikterat_medianpris": 372888.77,
+          "bias": 3191.54
+        },
+        "2024": {
+          "antal_observationer": 27,
+          "mae": 29918.94,
+          "medianfel": 6863.53,
+          "median_absolutfel": 26189.21,
+          "mape_procent": 7.69,
+          "rmse": 37957.25,
+          "r2": 0.3685,
+          "faktiskt_medelpris": 410774.07,
+          "predikterat_medelpris": 417057.69,
+          "faktiskt_medianpris": 409900.0,
+          "predikterat_medianpris": 409678.31,
+          "bias": 6283.62
+        },
+        "2025": {
+          "antal_observationer": 39,
+          "mae": 27579.14,
+          "medianfel": 30562.58,
+          "median_absolutfel": 33583.91,
+          "mape_procent": 6.34,
+          "rmse": 32922.19,
+          "r2": -0.3357,
+          "faktiskt_medelpris": 445935.64,
+          "predikterat_medelpris": 468416.39,
+          "faktiskt_medianpris": 439900.0,
+          "predikterat_medianpris": 463986.57,
+          "bias": 22480.75
+        },
+        "2026": {
+          "antal_observationer": 38,
+          "mae": 16852.47,
+          "medianfel": 7472.54,
+          "median_absolutfel": 8453.13,
+          "mape_procent": 3.47,
+          "rmse": 23004.51,
+          "r2": -0.5826,
+          "faktiskt_medelpris": 495263.16,
+          "predikterat_medelpris": 506403.91,
+          "faktiskt_medianpris": 499900.0,
+          "predikterat_medianpris": 507589.6,
+          "bias": 11140.75
+        }
+      }
+    },
+    "random_forest": {
+      "totalt": {
+        "antal_observationer": 122,
+        "mae": 20866.92,
+        "medianfel": 13954.15,
+        "median_absolutfel": 17139.43,
+        "mape_procent": 4.96,
+        "rmse": 26389.69,
+        "r2": 0.7613,
+        "faktiskt_medelpris": 442324.34,
+        "predikterat_medelpris": 454815.09,
+        "faktiskt_medianpris": 448750.0,
+        "predikterat_medianpris": 459134.54,
+        "bias": 12490.75
+      },
+      "per_variant": {
+        "330e xDrive Touring": {
+          "antal_observationer": 8,
+          "mae": 43368.57,
+          "medianfel": 35410.16,
+          "median_absolutfel": 35410.16,
+          "mape_procent": 10.78,
+          "rmse": 49415.97,
+          "r2": 0.1403,
+          "faktiskt_medelpris": 430798.75,
+          "predikterat_medelpris": 474167.32,
+          "faktiskt_medianpris": 439500.0,
+          "predikterat_medianpris": 501800.54,
+          "bias": 43368.57
+        },
+        "530e xDrive Touring": {
+          "antal_observationer": 2,
+          "mae": 19348.39,
+          "medianfel": -9555.26,
+          "median_absolutfel": 19348.39,
+          "mape_procent": 4.34,
+          "rmse": 21579.23,
+          "r2": 0.2549,
+          "faktiskt_medelpris": 434800.0,
+          "predikterat_medelpris": 425244.74,
+          "faktiskt_medianpris": 434800.0,
+          "predikterat_medianpris": 425244.74,
+          "bias": -9555.26
+        },
+        "T6 AWD": {
+          "antal_observationer": 107,
+          "mae": 19385.69,
+          "medianfel": 11645.83,
+          "median_absolutfel": 16750.52,
+          "mape_procent": 4.6,
+          "rmse": 24180.26,
+          "r2": 0.8067,
+          "faktiskt_medelpris": 442134.39,
+          "predikterat_medelpris": 453293.33,
+          "faktiskt_medianpris": 448000.0,
+          "predikterat_medianpris": 457209.08,
+          "bias": 11158.94
+        },
+        "T8 AWD": {
+          "antal_observationer": 5,
+          "mae": 17169.99,
+          "medianfel": 1832.9,
+          "median_absolutfel": 15598.53,
+          "mape_procent": 3.78,
+          "rmse": 19670.17,
+          "r2": 0.5081,
+          "faktiskt_medelpris": 467840.0,
+          "predikterat_medelpris": 468245.38,
+          "faktiskt_medianpris": 479800.0,
+          "predikterat_medianpris": 486258.43,
+          "bias": 405.38
+        }
+      },
+      "per_årsmodell": {
+        "2023": {
+          "antal_observationer": 18,
+          "mae": 21898.7,
+          "medianfel": -3172.36,
+          "median_absolutfel": 16775.23,
+          "mape_procent": 6.16,
+          "rmse": 28268.07,
+          "r2": 0.3502,
+          "faktiskt_medelpris": 370065.56,
+          "predikterat_medelpris": 374986.23,
+          "faktiskt_medianpris": 379450.0,
+          "predikterat_medianpris": 370505.58,
+          "bias": 4920.68
+        },
+        "2024": {
+          "antal_observationer": 27,
+          "mae": 23515.15,
+          "medianfel": 13211.32,
+          "median_absolutfel": 18299.55,
+          "mape_procent": 6.08,
+          "rmse": 29170.11,
+          "r2": 0.627,
+          "faktiskt_medelpris": 410774.07,
+          "predikterat_medelpris": 420359.1,
+          "faktiskt_medianpris": 409900.0,
+          "predikterat_medianpris": 423111.32,
+          "bias": 9585.02
+        },
+        "2025": {
+          "antal_observationer": 39,
+          "mae": 21798.03,
+          "medianfel": 17718.14,
+          "median_absolutfel": 19231.06,
+          "mape_procent": 4.97,
+          "rmse": 26585.94,
+          "r2": 0.1289,
+          "faktiskt_medelpris": 445935.64,
+          "predikterat_medelpris": 464146.13,
+          "faktiskt_medianpris": 439900.0,
+          "predikterat_medianpris": 459138.02,
+          "bias": 18210.49
+        },
+        "2026": {
+          "antal_observationer": 38,
+          "mae": 17540.92,
+          "medianfel": 11095.9,
+          "median_absolutfel": 11537.89,
+          "mape_procent": 3.6,
+          "rmse": 22964.12,
+          "r2": -0.5771,
+          "faktiskt_medelpris": 495263.16,
+          "predikterat_medelpris": 507534.07,
+          "faktiskt_medianpris": 499900.0,
+          "predikterat_medianpris": 506308.28,
+          "bias": 12270.91
+        }
+      }
+    }
+  },
+  "historik_dir": "data/market_history"
+}
