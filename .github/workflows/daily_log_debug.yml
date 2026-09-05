@@ -35,3 +35,6 @@ jobs:
 
       - name: Kontrollera dagens historikpriser
         run: python -u scripts/verifiera_dagens_historik.py
+
+      - name: Analysera faktiska fyndutfall
+        run: python -u scripts/analysera_fyndutfall.py
