@@ -18,8 +18,14 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from scoring.score import (
+    berakna_fyndscore_breakdown,
+)
 
-TIDSZON = ZoneInfo("Europe/Stockholm")
+
+TIDSZON = ZoneInfo(
+    "Europe/Stockholm"
+)
 
 HISTORIK_DIR = Path(
     "data/find_feedback"
@@ -48,6 +54,10 @@ def spara_fyndfeedback(
     En observation representerar hur Fiskabilar
     såg bilen när den klassades som ett fynd.
 
+    Score-breakdown beräknas här från samma funktion
+    som används av kandidatpipen. På så sätt sparas
+    de faktiska poängen som låg bakom fyndet.
+
     Funktionen är medvetet append-baserad.
     Vi ändrar aldrig tidigare observationer.
     """
@@ -57,11 +67,22 @@ def spara_fyndfeedback(
         exist_ok=True,
     )
 
+    # ------------------------------------------------------------
+    # SCORE-BREAKDOWN
+    # ------------------------------------------------------------
+    #
+    # vardering innehåller inte nödvändigtvis score_breakdown.
+    # Därför beräknar vi breakdown direkt från bil + vardering.
+    #
+    # Detta säkerställer att feedbackhistoriken innehåller
+    # exakt samma komponenter som användes för fyndscore.
+    # ------------------------------------------------------------
+
     breakdown = (
-        vardering.get(
-            "score_breakdown"
+        berakna_fyndscore_breakdown(
+            bil,
+            vardering,
         )
-        or {}
     )
 
     url = (
@@ -74,6 +95,7 @@ def spara_fyndfeedback(
 
     observation = {
         "typ": "fynd",
+
         "tid": datetime.now(
             TIDSZON
         ).isoformat(),
