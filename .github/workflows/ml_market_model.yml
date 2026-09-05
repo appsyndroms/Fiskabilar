@@ -1,0 +1,98 @@
+name: ML - Testa marknadsvärdering
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  train-market-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hämta repository
+        uses: actions/checkout@v4
+
+      - name: Installera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Installera beroenden
+        run: |
+          pip install -r requirements.txt
+
+      - name: Kontrollera historik
+        run: |
+          echo "=== Marknadshistorik ==="
+          find data/market_history -type f -name "*.jsonl" -print
+          echo
+
+          echo "=== Antal historikposter ==="
+          find data/market_history -type f -name "*.jsonl" -print0 \
+            | xargs -0 cat \
+            | grep -cve '^[[:space:]]*$' || true
+
+      - name: Träna och utvärdera modeller
+        run: |
+          python -u -m ml.train_market_model
+
+      - name: Testa prediktion
+        run: |
+          python - <<'PY'
+          from ml.predict_market_value import prediktera_borpris
+
+          testfall = [
+              {
+                  "mil": 8500,
+                  "arsmodell": 2023,
+                  "variant": "T6 AWD",
+              },
+              {
+                  "mil": 8500,
+                  "arsmodell": 2023,
+                  "variant": "T8 AWD",
+              },
+              {
+                  "mil": 8500,
+                  "arsmodell": 2023,
+                  "variant": "530e xDrive Touring",
+              },
+          ]
+
+          print()
+          print("=== ML-PREDIKTIONER ===")
+
+          for bil in testfall:
+              pris = prediktera_borpris(**bil)
+
+              print(
+                  f"{bil['arsmodell']} "
+                  f"{bil['variant']} "
+                  f"{bil['mil']} mil "
+                  f"-> "
+                  f"{pris:,} kr"
+                  if pris is not None
+                  else
+                  f"{bil['arsmodell']} "
+                  f"{bil['variant']} "
+                  f"{bil['mil']} mil "
+                  f"-> ingen prediktion"
+              )
+          PY
+
+      - name: Visa modellmetadata
+        run: |
+          echo "=== MODELLMETADATA ==="
+          cat data/ml/model_metadata.json
+
+      - name: Spara ML-resultat
+        uses: actions/upload-artifact@v4
+        with:
+          name: ml-market-model-resultat
+          path: |
+            data/ml/model_metadata.json
+            data/ml/market_model.joblib
+          if-no-files-found: error
