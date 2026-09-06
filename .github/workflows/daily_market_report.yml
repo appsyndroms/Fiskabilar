@@ -29,18 +29,10 @@ jobs:
 
     steps:
 
-      # --------------------------------------------------
-      # CHECKOUT
-      # --------------------------------------------------
-
       - name: Hämta repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      # --------------------------------------------------
-      # PYTHON
-      # --------------------------------------------------
 
       - name: Installera Python
         uses: actions/setup-python@v5
@@ -49,12 +41,7 @@ jobs:
           cache: "pip"
 
       - name: Installera beroenden
-        run: |
-          pip install -r requirements.txt
-
-      # --------------------------------------------------
-      # DAGLIG MARKNADSRAPPORT
-      # --------------------------------------------------
+        run: pip install -r requirements.txt
 
       - name: Skapa daglig marknadsrapport
         env:
@@ -66,17 +53,78 @@ jobs:
             python -u -m reporting.daily_market_report
           fi
 
-      # --------------------------------------------------
-      # ML
-      # --------------------------------------------------
-
       - name: Träna ML-modell
-        run: |
-          python -u -m ml.train_market_model
+        run: python -u -m ml.train_market_model
 
-      # --------------------------------------------------
-      # SPARA DATA
-      # --------------------------------------------------
+      - name: Bygg statisk webb
+        run: python -u web/build_static.py
+
+      - name: Validera statisk webb
+        run: |
+          test -f web_site/index.html
+          test -f web_site/data.json
+          test -f web_site/.nojekyll
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("web_site/data.json").read_text(encoding="utf-8")
+          )
+
+          required = {
+              "generated_at",
+              "summary",
+              "current_findings",
+              "price_reductions",
+              "find_outcomes",
+              "score_analysis",
+              "market_history",
+              "ml",
+          }
+
+          missing = required - set(data)
+
+          if missing:
+              raise SystemExit(
+                  f"Saknade nycklar i data.json: {sorted(missing)}"
+              )
+
+          html = Path("web_site/index.html").read_text(
+              encoding="utf-8"
+          )
+
+          if "<html" not in html.lower():
+              raise SystemExit(
+                  "index.html verkar inte vara en HTML-fil"
+              )
+
+          print("Webbvalidering OK")
+          print(f"Fynd: {len(data['current_findings'])}")
+          print(f"Prisändringar: {len(data['price_reductions'])}")
+          print(f"Fyndutfall: {len(data['find_outcomes'])}")
+          print(f"Marknadshistorik: {len(data['market_history'])}")
+          PY
+
+      - name: Konfigurera GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Skapa Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: web_site
+
+      - name: Publicera GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Skriv ut webb-URL
+        run: |
+          echo "=========================================="
+          echo "FISKABILAR WEBB"
+          echo "https://appsyndroms.github.io/Fiskabilar/"
+          echo "=========================================="
 
       - name: Spara rapportlogg och ML-modell
         if: always()
@@ -97,95 +145,3 @@ jobs:
           git rebase origin/main
 
           git push origin HEAD:main
-
-      # --------------------------------------------------
-      # BYGG STATISK WEBB
-      # --------------------------------------------------
-
-      - name: Bygg statisk webb
-        run: |
-          echo "=================================================="
-          echo "PRODUKTION: Bygger Fiskabilar Analytics"
-          echo "=================================================="
-
-          python -u web/build_static.py
-
-      # --------------------------------------------------
-      # VALIDERING
-      # --------------------------------------------------
-
-      - name: Validera statisk webb
-        run: |
-          echo "=================================================="
-          echo "PRODUKTION: Validerar web_site"
-          echo "=================================================="
-
-          test -f web_site/index.html
-          test -f web_site/data.json
-          test -f web_site/.nojekyll
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          data_path = Path("web_site/data.json")
-
-          with data_path.open("r", encoding="utf-8") as f:
-              data = json.load(f)
-
-          required = {
-              "generated_at",
-              "summary",
-              "current_findings",
-              "price_reductions",
-              "find_outcomes",
-              "score_analysis",
-              "market_history",
-              "ml",
-          }
-
-          missing = required - set(data)
-
-          if missing:
-              raise SystemExit(
-                  f"Saknade nycklar i data.json: {sorted(missing)}"
-              )
-
-          html = Path(
-              "web_site/index.html"
-          ).read_text(
-              encoding="utf-8"
-          )
-
-          if "<html" not in html:
-              raise SystemExit(
-                  "index.html verkar inte vara en HTML-fil."
-              )
-
-          print("==================================================")
-          print("PRODUKTION: Webbplatsen är korrekt byggd.")
-          print(f"Aktuella fynd: {len(data['current_findings'])}")
-          print(f"Fynd-event: {len(data['find_outcomes'])}")
-          print(f"Prissänkningar: {len(data['price_reductions'])}")
-          print(
-              f"Marknadsobservationer: "
-              f"{len(data['market_history'])}"
-          )
-          print("==================================================")
-          PY
-
-      # --------------------------------------------------
-      # GITHUB PAGES
-      # --------------------------------------------------
-
-      - name: Konfigurera GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Paketera webb för GitHub Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: web_site
-
-      - name: Publicera GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
