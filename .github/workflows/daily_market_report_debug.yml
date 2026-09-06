@@ -13,8 +13,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  daily-market-report-debug:
 
+  build:
+    name: Bygg debugrapport och webb
     runs-on: ubuntu-latest
 
     steps:
@@ -59,7 +60,8 @@ jobs:
           python -u -m ml.train_market_model
 
       - name: Bygg statisk webb
-        run: python -u web/build_static.py
+        run: |
+          python -u web/build_static.py
 
       - name: Validera statisk webb
         run: |
@@ -109,26 +111,36 @@ jobs:
           print(f"Marknadshistorik: {len(data['market_history'])}")
           PY
 
-      - name: Konfigurera GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Spara webb som artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiskabilar-web-debug
+          path: web_site
 
       - name: Skapa Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: web_site
 
+
+  deploy:
+    name: Publicera debugwebb
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
       - name: Publicera GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 
       - name: Skriv ut webb-URL
         run: |
           echo "=========================================="
           echo "FISKABILAR WEBB"
-          echo "https://appsyndroms.github.io/Fiskabilar/"
+          echo "${{ steps.deployment.outputs.page_url }}"
           echo "=========================================="
-
-      - name: Spara webb som artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fiskabilar-web-debug
-          path: web_site
