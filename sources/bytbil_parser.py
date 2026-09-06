@@ -472,8 +472,6 @@ def produkt_till_annons(
         "_bytbil_url"
     )
 
-    # Om dataLayer saknar årsmodell försöker
-    # vi hämta den från den synliga annonsinformationen.
     arsmodell = tolka_arsmodell(
         arsmodell_raw
     )
@@ -483,30 +481,26 @@ def produkt_till_annons(
             metadata_text
         )
 
-    # Om dataLayer innehåller ett numeriskt
-    # eller textbaserat miltal används det först.
     miltal = tolka_miltal(
-    miltal_raw
-)
-
-miltal_fran_html = _hitta_miltal_i_text(
-    metadata_text
-)
-
-if miltal_fran_html is not None:
-    miltal = miltal_fran_html
-
-    match_miltal = re.search(
-        r"(\d[\d\s\xa0.,]*)\s*mil\b",
-        metadata_text,
-        re.IGNORECASE,
+        miltal_raw
     )
 
-    if match_miltal:
-        miltal_raw = match_miltal.group(0)
+    miltal_fran_html = _hitta_miltal_i_text(
+        metadata_text
+    )
 
-    # URL från HTML-listningen är säkrare än
-    # att förlita sig på ett URL-fält i dataLayer.
+    if miltal_fran_html is not None:
+        miltal = miltal_fran_html
+
+        match_miltal = re.search(
+            r"(\d[\d\s\xa0.,]*)\s*mil\b",
+            metadata_text,
+            re.IGNORECASE,
+        )
+
+        if match_miltal:
+            miltal_raw = match_miltal.group(0)
+
     url = normalisera_url(
         hamta_falt(
             produkt,
