@@ -212,7 +212,6 @@ def _hitta_senaste_fil(
 # STATE
 # ------------------------------------------------------------
 
-
 def hamta_state() -> dict:
     """
     Läser Fiskabilars state-fil.
@@ -225,7 +224,6 @@ def hamta_state() -> dict:
 # ------------------------------------------------------------
 # MARKNADSHISTORIK
 # ------------------------------------------------------------
-
 
 def hamta_historik() -> pd.DataFrame:
     """
@@ -332,7 +330,6 @@ def hamta_senaste_marknadsdatum():
 # FYND
 # ------------------------------------------------------------
 
-
 def hamta_senaste_fynd() -> pd.DataFrame:
     """
     Hämtar de senaste aktuella fynden.
@@ -377,7 +374,6 @@ def hamta_senaste_fynd() -> pd.DataFrame:
 # ------------------------------------------------------------
 # FYNDUTFALL
 # ------------------------------------------------------------
-
 
 def hamta_fyndutfall() -> pd.DataFrame:
     """
@@ -434,7 +430,6 @@ def hamta_prissankningar() -> pd.DataFrame:
 # ------------------------------------------------------------
 # SCORE
 # ------------------------------------------------------------
-
 
 def hamta_scoreanalys() -> pd.DataFrame:
     """
@@ -503,7 +498,6 @@ def hamta_scoreanalys() -> pd.DataFrame:
 # ------------------------------------------------------------
 # ML
 # ------------------------------------------------------------
-
 
 def hamta_ml_metrics() -> dict:
     """
@@ -618,7 +612,6 @@ def hamta_ml_predictions() -> pd.DataFrame:
 # ------------------------------------------------------------
 # DASHBOARD
 # ------------------------------------------------------------
-
 
 def hamta_dashboard_data() -> dict:
     """
