@@ -150,13 +150,30 @@ def _hitta_annonsmetadata(
 
     Bytbil visar årsmodell och miltal på
     annonssidan/listkortet, men dessa värden
-    saknas i dataLayer-produktobjektet.
+    saknas ibland i dataLayer-produktobjektet.
 
     Vi kopplar därför ihop annonsens ID med
-    dess länk och den synliga texten i närmaste
-    HTML-behållare.
+    dess länk och den synliga texten i HTML.
+
+    Vi försöker först hitta den minsta
+    HTML-behållaren som innehåller både
+    årsmodell och miltal.
+
+    Om informationen är uppdelad över flera
+    HTML-nivåer fortsätter vi uppåt i DOM-trädet
+    och använder den bästa tillgängliga
+    textbehållaren.
     """
     metadata = {}
+
+    arsmodell_regex = re.compile(
+        r"\b(?:19|20)\d{2}\b"
+    )
+
+    miltal_regex = re.compile(
+        r"\b\d[\d\s\xa0.,]*\s*mil\b",
+        re.IGNORECASE,
+    )
 
     for a in soup.find_all(
         "a",
@@ -183,9 +200,11 @@ def _hitta_annonsmetadata(
             href_text
         )
 
-        textdelar = []
+        kandidater = []
 
-        for parent in a.parents:
+        for depth, parent in enumerate(
+            a.parents
+        ):
             if parent is None:
                 break
 
@@ -199,30 +218,65 @@ def _hitta_annonsmetadata(
             if not text:
                 continue
 
-            textdelar.append(text)
+            har_arsmodell = bool(
+                arsmodell_regex.search(text)
+            )
 
-            # Vi vill ha den minsta rimliga
-            # behållaren som innehåller både
-            # årsmodell och miltal.
-            if (
-                re.search(
-                    r"\b(?:19|20)\d{2}\b",
-                    text,
-                )
-                and re.search(
-                    r"\b\d[\d\s\xa0.,]*\s*mil\b",
-                    text,
-                    re.IGNORECASE,
-                )
-            ):
+            har_miltal = bool(
+                miltal_regex.search(text)
+            )
+
+            kandidater.append(
+                {
+                    "depth": depth,
+                    "text": text,
+                    "har_arsmodell": har_arsmodell,
+                    "har_miltal": har_miltal,
+                }
+            )
+
+            # Den första/minsta behållaren som
+            # innehåller både årsmodell och miltal
+            # är normalt det vi vill använda.
+            if har_arsmodell and har_miltal:
                 break
 
-            if len(textdelar) >= 6:
+            # Vi går längre upp än tidigare för att
+            # hantera kort där informationen ligger
+            # i separata barn-element.
+            if depth >= 12:
                 break
+
+        # Prioritera minsta behållaren som innehåller
+        # både årsmodell och miltal.
+        komplett = [
+            kandidat
+            for kandidat in kandidater
+            if kandidat["har_arsmodell"]
+            and kandidat["har_miltal"]
+        ]
+
+        if komplett:
+            vald = komplett[0]
+            text = vald["text"]
+        else:
+            # Om ingen enskild behållare innehåller
+            # båda värdena använder vi den största
+            # tillgängliga lokala textmängden.
+            #
+            # Detta gör parsern tåligare när Bytbil
+            # placerar årsmodell och miltal i olika
+            # delar av annonskortets DOM.
+            vald = kandidater[-1] if kandidater else None
+            text = (
+                vald["text"]
+                if vald
+                else ""
+            )
 
         metadata[annons_id] = {
             "url": url,
-            "text": " ".join(textdelar),
+            "text": text,
         }
 
     return metadata
@@ -489,6 +543,9 @@ def produkt_till_annons(
         metadata_text
     )
 
+    # HTML-värdet prioriteras eftersom
+    # dataLayer-fältet dimension2 inte nödvändigtvis
+    # representerar verkligt miltal.
     if miltal_fran_html is not None:
         miltal = miltal_fran_html
 
