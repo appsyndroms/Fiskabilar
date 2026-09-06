@@ -77,72 +77,72 @@ def hitta_array_efter_nyckel(
     nyckel: str,
 ) -> str | None:
     monster = re.compile(
-        rf"""
-        ["']?{re.escape(nyckel)}["']?
-        \s*:\s*
-        ($begin:math:display$\)
-        \"\"\"\,
-        re\.IGNORECASE \| re\.VERBOSE\,
-    \)
+        r"""["']?"""
+        + re.escape(nyckel)
+        + r"""["']?\s*:\s*(\[)""",
+        re.IGNORECASE,
+    )
 
-    match \= monster\.search\(text\)
+    match = monster.search(text)
 
-    if not match\:
+    if not match:
         return None
 
-    return balanserad\_del\(
-        text\,
-        match\.start\(1\)\,
-        \"\[\"\,
-        \"\]\"\,
-    \)
+    return balanserad_del(
+        text,
+        match.start(1),
+        "[",
+        "]",
+    )
 
 
-def js\_till\_python\(text\: str\)\:
-    if not text\:
+def js_till_python(text: str):
+    if not text:
         return None
 
-    try\:
-        return json\.loads\(text\)
-    except \(
-        json\.JSONDecodeError\,
-        TypeError\,
-    \)\:
+    try:
+        return json.loads(text)
+
+    except (
+        json.JSONDecodeError,
+        TypeError,
+    ):
         pass
 
-    try\:
-        return literal\_eval\(text\)
-    except \(
-        ValueError\,
-        SyntaxError\,
-    \)\:
+    try:
+        return literal_eval(text)
+
+    except (
+        ValueError,
+        SyntaxError,
+    ):
         pass
 
-    normaliserad \= text
+    normaliserad = text
 
-    normaliserad \= re\.sub\(
-        r\"\\btrue\\b\"\,
-        \"True\"\,
-        normaliserad\,
-        flags\=re\.IGNORECASE\,
-    \)
+    normaliserad = re.sub(
+        r"\btrue\b",
+        "True",
+        normaliserad,
+        flags=re.IGNORECASE,
+    )
 
-    normaliserad \= re\.sub\(
-        r\"\\bfalse\\b\"\,
-        \"False\"\,
-        normaliserad\,
-        flags\=re\.IGNORECASE\,
-    \)
+    normaliserad = re.sub(
+        r"\bfalse\b",
+        "False",
+        normaliserad,
+        flags=re.IGNORECASE,
+    )
 
-    normaliserad \= re\.sub\(
-        r\"\\bnull\\b\"\,
-        \"None\"\,
-        normaliserad\,
-        flags\=re\.IGNORECASE\,
-    \)
+    normaliserad = re.sub(
+        r"\bnull\b",
+        "None",
+        normaliserad,
+        flags=re.IGNORECASE,
+    )
 
-    normaliserad \= re\.sub\(
-        r\"\,\\s\*\(\[\}$end:math:display$])",
+    normaliserad = re.sub(
+        r",\s*([}\]])",
         r"\1",
         normaliserad,
     )
@@ -151,6 +151,7 @@ def js\_till\_python\(text\: str\)\:
         return literal_eval(
             normaliserad
         )
+
     except (
         ValueError,
         SyntaxError,
@@ -207,7 +208,9 @@ def hamta_datalayer_produkter(
                     item,
                     dict,
                 ):
-                    produkter.append(item)
+                    produkter.append(
+                        item
+                    )
 
     return produkter
 
@@ -232,7 +235,9 @@ def hitta_annonslankar(
         if "/bil/" not in href_lower:
             continue
 
-        url = normalisera_url(href)
+        url = normalisera_url(
+            href
+        )
 
         if not url:
             continue
@@ -310,17 +315,28 @@ def produkt_till_annons(
 
     return {
         "namn": namn,
+
         "annonspris": pris,
+
         "pris_raw": pris_raw,
+
         "arsmodell": arsmodell,
-        "arsmodell_raw": arsmodell_raw,
+
+        "arsmodell_raw":
+            arsmodell_raw,
+
         "miltal": miltal,
-        "miltal_raw": miltal_raw,
+
+        "miltal_raw":
+            miltal_raw,
+
         "annons_id": (
             str(annons_id)
             if annons_id is not None
             else None
         ),
+
         "url": url,
+
         "produkt_raw": produkt,
     }
