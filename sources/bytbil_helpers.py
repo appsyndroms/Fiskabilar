@@ -152,7 +152,9 @@ def hamta_falt(data: dict, *namn):
     return None
 
 
-def bygg_sok_url(bilkonfig: dict) -> str | None:
+def bygg_sok_url(
+    bilkonfig: dict,
+) -> str | None:
     marke = (
         bilkonfig.get("marke_slug")
         or ""
@@ -172,9 +174,9 @@ def bygg_sok_url(bilkonfig: dict) -> str | None:
 
     if marke == "bmw":
         if modell.startswith("330e"):
-            return f"{BAS_URL}/bil/bmw/3-serie"
+            return f"{BAS_URL}/bil/bmw/330e"
 
         if modell.startswith("530e"):
-            return f"{BAS_URL}/bil/bmw/5-serie"
+            return f"{BAS_URL}/bil/bmw/530e"
 
     return None
