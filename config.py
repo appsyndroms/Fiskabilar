@@ -105,6 +105,7 @@ SMTP_PORT = 587
 AKTIVA_KALLOR = [
     "wayke",
     "bilweb",
+    "bytbil",
 ]
 
 
