@@ -2786,7 +2786,12 @@
     "source:bilweb:366078": "vehicle:00000786",
     "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-366078": "vehicle:00000786",
     "fp:276254d89971bd97": "vehicle:00000786",
-    "fp:65960898e5a4acbf": "vehicle:00000678"
+    "fp:65960898e5a4acbf": "vehicle:00000678",
+    "source:bilweb:349783": "vehicle:00000353",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-0-ranta-2026-kombi-349783": "vehicle:00000353",
+    "fp:05f6988e452b790b": "vehicle:00000353",
+    "source:bilweb:349784": "vehicle:00000354",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-0-ranta-2026-kombi-349784": "vehicle:00000354"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -9134,7 +9139,7 @@
         "regnr": "PRB00S",
         "vin": null
       },
-      "last_seen": "12848760",
+      "last_seen": "349783",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -9152,7 +9157,7 @@
         "regnr": "LWH27E",
         "vin": null
       },
-      "last_seen": "12848759",
+      "last_seen": "349784",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
