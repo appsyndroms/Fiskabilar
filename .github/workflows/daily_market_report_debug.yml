@@ -18,10 +18,18 @@ jobs:
 
     steps:
 
+      # --------------------------------------------------
+      # CHECKOUT
+      # --------------------------------------------------
+
       - name: Hämta repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # --------------------------------------------------
+      # PYTHON
+      # --------------------------------------------------
 
       - name: Installera Python
         uses: actions/setup-python@v5
@@ -32,6 +40,10 @@ jobs:
       - name: Installera beroenden
         run: |
           pip install -r requirements.txt
+
+      # --------------------------------------------------
+      # DEBUG MARKNADSRAPPORT
+      # --------------------------------------------------
 
       - name: Kör debugrapport
         run: |
@@ -45,6 +57,10 @@ jobs:
 
           python -u -m reporting.daily_market_report_debug
 
+      # --------------------------------------------------
+      # ML
+      # --------------------------------------------------
+
       - name: Träna ML-modell
         run: |
           echo "=================================================="
@@ -57,6 +73,10 @@ jobs:
 
           python -u -m ml.train_market_model
 
+      # --------------------------------------------------
+      # BYGG STATISK WEBB
+      # --------------------------------------------------
+
       - name: Bygg statisk webb
         run: |
           echo "=================================================="
@@ -64,6 +84,10 @@ jobs:
           echo "=================================================="
 
           python -u web/build_static.py
+
+      # --------------------------------------------------
+      # VALIDERING
+      # --------------------------------------------------
 
       - name: Validera statisk webb
         run: |
@@ -83,7 +107,7 @@ jobs:
 
           with data_path.open(
               "r",
-              encoding="utf-8",
+              encoding="utf-8"
           ) as f:
               data = json.load(f)
 
@@ -116,12 +140,8 @@ jobs:
                   "index.html verkar inte vara en HTML-fil."
               )
 
-          print(
-              "=================================================="
-          )
-          print(
-              "DEBUG: Webbplatsen är korrekt byggd."
-          )
+          print("==================================================")
+          print("DEBUG: Webbplatsen är korrekt byggd.")
           print(
               f"Aktuella fynd: "
               f"{len(data['current_findings'])}"
@@ -138,10 +158,12 @@ jobs:
               f"Marknadsobservationer: "
               f"{len(data['market_history'])}"
           )
-          print(
-              "=================================================="
-          )
+          print("==================================================")
           PY
+
+      # --------------------------------------------------
+      # DEBUG ARTIFACT
+      # --------------------------------------------------
 
       - name: Ladda upp debug-webb som artifact
         uses: actions/upload-artifact@v4
