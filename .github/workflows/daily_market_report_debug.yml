@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: fiskabilar-daily-market-report-debug
@@ -106,6 +108,17 @@ jobs:
           print(f"Fyndutfall: {len(data['find_outcomes'])}")
           print(f"Marknadshistorik: {len(data['market_history'])}")
           PY
+
+      - name: Konfigurera GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Skapa Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: web_site
+
+      - name: Publicera GitHub Pages
+        uses: actions/deploy-pages@v4
 
       - name: Skriv ut webb-URL
         run: |
