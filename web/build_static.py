@@ -786,7 +786,7 @@ def render_market_history(
 def render_ml(
     ml: dict[str, Any],
 ) -> str:
-    """Renderar ML-statistik."""
+    """Renderar ML-statistik från model_metadata.json."""
     metadata = ml.get(
         "metadata",
         {},
@@ -799,20 +799,41 @@ def render_ml(
         </div>
         """
 
-    model = (
-        metadata.get("model")
-        or metadata.get("modell")
-        or "Okänd"
+    active_model_key = str(
+        metadata.get(
+            "modell",
+            ""
+        )
+    ).strip()
+
+    model_names = {
+        "random_forest": "Random Forest",
+        "linear_regression": "Linear Regression",
+    }
+
+    active_model_name = model_names.get(
+        active_model_key,
+        active_model_key or "Okänd",
     )
 
-    observations = (
-        metadata.get("observations")
-        or 0
+    observations = metadata.get(
+        "antal_observationer",
+        0,
     )
 
-    trained_at = (
-        metadata.get("trained_at")
-        or "—"
+    training_rows = metadata.get(
+        "antal_traning",
+        0,
+    )
+
+    test_rows = metadata.get(
+        "antal_test",
+        0,
+    )
+
+    trained_at = metadata.get(
+        "skapad",
+        "—",
     )
 
     features = metadata.get(
@@ -820,66 +841,56 @@ def render_ml(
         [],
     )
 
-    all_models = metadata.get(
-        "all_models",
+    metrics = metadata.get(
+        "metrics",
         {},
     )
 
-    totalt = {}
+    active_metrics = {}
 
-    if isinstance(all_models, dict):
-        model_data = all_models.get(
-            model,
+    if (
+        isinstance(metrics, dict)
+        and active_model_key
+    ):
+        model_metrics = metrics.get(
+            active_model_key,
             {},
         )
 
-        if isinstance(model_data, dict):
-            totalt = model_data.get(
+        if isinstance(model_metrics, dict):
+            active_metrics = model_metrics.get(
                 "totalt",
                 {},
             )
 
-    r2 = totalt.get(
-        "r2",
-        metadata.get("r2"),
+    r2 = active_metrics.get(
+        "r2"
     )
 
-    mae = totalt.get(
-        "mae",
-        metadata.get("mae"),
+    mae = active_metrics.get(
+        "mae"
     )
 
-    rmse = totalt.get(
-        "rmse",
-        metadata.get("rmse"),
+    rmse = active_metrics.get(
+        "rmse"
     )
 
-    mape = totalt.get(
-        "mape_procent",
-        metadata.get("mape"),
-    )
-
-    training_rows = (
-        metadata.get(
-            "training_rows"
-        )
-        or 0
-    )
-
-    test_rows = (
-        metadata.get(
-            "test_rows"
-        )
-        or 0
+    mape = active_metrics.get(
+        "mape_procent"
     )
 
     total_rows = (
-        training_rows
-        + test_rows
+        to_number(training_rows) or 0
+    ) + (
+        to_number(test_rows) or 0
+    )
+
+    training_number = (
+        to_number(training_rows) or 0
     )
 
     progress = (
-        training_rows
+        training_number
         / total_rows
         * 100
         if total_rows
@@ -891,16 +902,230 @@ def render_ml(
             str(feature)
             for feature in features
         )
-        if features
+        if isinstance(features, list)
+        and features
         else "—"
     )
+
+    comparison_rows = []
+
+    for model_key in (
+        "linear_regression",
+        "random_forest",
+    ):
+        model_name = model_names.get(
+            model_key,
+            model_key,
+        )
+
+        model_data = {}
+
+        if isinstance(metrics, dict):
+            model_metrics = metrics.get(
+                model_key,
+                {},
+            )
+
+            if isinstance(model_metrics, dict):
+                model_data = model_metrics.get(
+                    "totalt",
+                    {},
+                )
+
+        comparison_rows.append(
+            f"""
+            <tr>
+                <td>
+                    <strong>{safe(model_name)}</strong>
+                    {
+                        " ⭐"
+                        if model_key == active_model_key
+                        else ""
+                    }
+                </td>
+                <td>
+                    {fmt_number(
+                        model_data.get("r2"),
+                        3
+                    )}
+                </td>
+                <td>
+                    {fmt_price(
+                        model_data.get("mae")
+                    )}
+                </td>
+                <td>
+                    {fmt_price(
+                        model_data.get("rmse")
+                    )}
+                </td>
+                <td>
+                    {fmt_number(
+                        model_data.get(
+                            "mape_procent"
+                        ),
+                        2
+                    )} %
+                </td>
+            </tr>
+            """
+        )
+
+    variant_rows = []
+
+    per_variant = active_metrics.get(
+        "per_variant",
+        {},
+    )
+
+    if isinstance(per_variant, dict):
+        for variant, values in sorted(
+            per_variant.items()
+        ):
+            if not isinstance(values, dict):
+                continue
+
+            variant_rows.append(
+                f"""
+                <tr>
+                    <td>
+                        <strong>{safe(variant)}</strong>
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get(
+                                "antal_observationer"
+                            )
+                        )}
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get("r2"),
+                            3
+                        )}
+                    </td>
+                    <td>
+                        {fmt_price(
+                            values.get("mae")
+                        )}
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get(
+                                "mape_procent"
+                            ),
+                            2
+                        )} %
+                    </td>
+                </tr>
+                """
+            )
+
+    year_rows = []
+
+    per_year = active_metrics.get(
+        "per_årsmodell",
+        {},
+    )
+
+    if isinstance(per_year, dict):
+        for year, values in sorted(
+            per_year.items(),
+            key=lambda item: str(item[0]),
+        ):
+            if not isinstance(values, dict):
+                continue
+
+            year_rows.append(
+                f"""
+                <tr>
+                    <td>
+                        <strong>{safe(year)}</strong>
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get(
+                                "antal_observationer"
+                            )
+                        )}
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get("r2"),
+                            3
+                        )}
+                    </td>
+                    <td>
+                        {fmt_price(
+                            values.get("mae")
+                        )}
+                    </td>
+                    <td>
+                        {fmt_number(
+                            values.get(
+                                "mape_procent"
+                            ),
+                            2
+                        )} %
+                    </td>
+                </tr>
+                """
+            )
+
+    variant_section = ""
+
+    if variant_rows:
+        variant_section = f"""
+        <h3>Resultat per bilvariant</h3>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variant</th>
+                        <th>Observationer</th>
+                        <th>R²</th>
+                        <th>MAE</th>
+                        <th>MAPE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(variant_rows)}
+                </tbody>
+            </table>
+        </div>
+        """
+
+    year_section = ""
+
+    if year_rows:
+        year_section = f"""
+        <h3>Resultat per årsmodell</h3>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Årsmodell</th>
+                        <th>Observationer</th>
+                        <th>R²</th>
+                        <th>MAE</th>
+                        <th>MAPE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(year_rows)}
+                </tbody>
+            </table>
+        </div>
+        """
 
     return f"""
     <div class="ml-grid">
 
         <div class="ml-card">
             <span>Aktiv modell</span>
-            <strong>{safe(model)}</strong>
+            <strong>{safe(active_model_name)}</strong>
         </div>
 
         <div class="ml-card">
@@ -965,6 +1190,29 @@ def render_ml(
             {safe(features_text)}
         </p>
     </div>
+
+    <h3>Modelljämförelse</h3>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Modell</th>
+                    <th>R²</th>
+                    <th>MAE</th>
+                    <th>RMSE</th>
+                    <th>MAPE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(comparison_rows)}
+            </tbody>
+        </table>
+    </div>
+
+    {variant_section}
+
+    {year_section}
     """
 
 
