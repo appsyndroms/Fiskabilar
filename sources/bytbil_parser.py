@@ -1,342 +1,227 @@
 from __future__ import annotations
 
-import json
 import re
-from ast import literal_eval
-
-from bs4 import BeautifulSoup
-
-from .bytbil_helpers import (
-    hamta_falt,
-    normalisera_url,
-    rensa_text,
-    tolka_arsmodell,
-    tolka_miltal,
-    tolka_pris,
-)
+from urllib.parse import urljoin
 
 
-def balanserad_del(
-    text: str,
-    start: int,
-    oppning: str,
-    stangning: str,
-) -> str | None:
-    if (
-        start < 0
-        or start >= len(text)
-        or text[start] != oppning
-    ):
+BAS_URL = "https://www.bytbil.com"
+
+
+def rensa_text(value) -> str:
+    if value is None:
+        return ""
+
+    return re.sub(
+        r"\s+",
+        " ",
+        str(value),
+    ).strip()
+
+
+def tolka_pris(value) -> int | None:
+    if value is None:
         return None
 
-    djup = 0
-    i = start
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        pris = int(value)
 
-    in_string = False
-    string_tecken = None
-    escaped = False
+        return (
+            pris
+            if pris >= 10_000
+            else None
+        )
 
-    while i < len(text):
-        tecken = text[i]
+    text = rensa_text(value)
 
-        if in_string:
-            if escaped:
-                escaped = False
+    if not text:
+        return None
 
-            elif tecken == "\\":
-                escaped = True
-
-            elif tecken == string_tecken:
-                in_string = False
-
-            i += 1
-            continue
-
-        if tecken in ('"', "'", "`"):
-            in_string = True
-            string_tecken = tecken
-            i += 1
-            continue
-
-        if tecken == oppning:
-            djup += 1
-
-        elif tecken == stangning:
-            djup -= 1
-
-            if djup == 0:
-                return text[start:i + 1]
-
-        i += 1
-
-    return None
-
-
-def hitta_array_efter_nyckel(
-    text: str,
-    nyckel: str,
-) -> str | None:
-    monster = re.compile(
-        r"""["']?"""
-        + re.escape(nyckel)
-        + r"""["']?\s*:\s*(\[)""",
-        re.IGNORECASE,
+    match = re.search(
+        r"(\d[\d\s.,\xa0]{3,})",
+        text,
     )
-
-    match = monster.search(text)
 
     if not match:
         return None
 
-    return balanserad_del(
+    nummer = (
+        match.group(1)
+        .replace("\xa0", "")
+        .replace(" ", "")
+        .replace(".", "")
+        .replace(",", "")
+    )
+
+    if not nummer.isdigit():
+        return None
+
+    pris = int(nummer)
+
+    if pris < 10_000:
+        return None
+
+    return pris
+
+
+def tolka_arsmodell(
+    value,
+) -> int | None:
+    if value is None:
+        return None
+
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        ar = int(value)
+
+        if 1990 <= ar <= 2030:
+            return ar
+
+        return None
+
+    text = rensa_text(value)
+
+    match = re.search(
+        r"\b(19[9]\d|20\d{2})\b",
         text,
-        match.start(1),
-        "[",
-        "]",
     )
 
-
-def js_till_python(text: str):
-    if not text:
+    if not match:
         return None
 
-    try:
-        return json.loads(text)
-
-    except (
-        json.JSONDecodeError,
-        TypeError,
-    ):
-        pass
-
-    try:
-        return literal_eval(text)
-
-    except (
-        ValueError,
-        SyntaxError,
-    ):
-        pass
-
-    normaliserad = text
-
-    normaliserad = re.sub(
-        r"\btrue\b",
-        "True",
-        normaliserad,
-        flags=re.IGNORECASE,
+    ar = int(
+        match.group(1)
     )
 
-    normaliserad = re.sub(
-        r"\bfalse\b",
-        "False",
-        normaliserad,
-        flags=re.IGNORECASE,
-    )
-
-    normaliserad = re.sub(
-        r"\bnull\b",
-        "None",
-        normaliserad,
-        flags=re.IGNORECASE,
-    )
-
-    normaliserad = re.sub(
-        r",\s*([}\]])",
-        r"\1",
-        normaliserad,
-    )
-
-    try:
-        return literal_eval(
-            normaliserad
-        )
-
-    except (
-        ValueError,
-        SyntaxError,
-    ):
+    if not 1990 <= ar <= 2030:
         return None
 
-
-def hamta_datalayer_produkter(
-    soup: BeautifulSoup,
-) -> list[dict]:
-    produkter = []
-
-    for script in soup.find_all("script"):
-        text = script.string
-
-        if not text:
-            text = script.get_text()
-
-        if not text:
-            continue
-
-        text_lower = text.lower()
-
-        if (
-            "impressions" not in text_lower
-            and "productlist" not in text_lower
-        ):
-            continue
-
-        for nyckel in (
-            "impressions",
-            "productList",
-        ):
-            block = hitta_array_efter_nyckel(
-                text,
-                nyckel,
-            )
-
-            if not block:
-                continue
-
-            data = js_till_python(
-                block
-            )
-
-            if not isinstance(
-                data,
-                list,
-            ):
-                continue
-
-            for item in data:
-                if isinstance(
-                    item,
-                    dict,
-                ):
-                    produkter.append(
-                        item
-                    )
-
-    return produkter
+    return ar
 
 
-def hitta_annonslankar(
-    soup: BeautifulSoup,
-) -> list[str]:
-    urler = []
-    sedda = set()
+def tolka_miltal(
+    value,
+) -> float | None:
+    if value is None:
+        return None
 
-    for a in soup.find_all(
-        "a",
-        href=True,
+    if isinstance(
+        value,
+        (int, float),
     ):
-        href = a.get("href")
+        mil = float(value)
 
-        if not href:
-            continue
-
-        href_lower = href.lower()
-
-        if "/bil/" not in href_lower:
-            continue
-
-        url = normalisera_url(
-            href
-        )
-
-        if not url:
-            continue
-
-        if url in sedda:
-            continue
-
-        sedda.add(url)
-        urler.append(url)
-
-    return urler
-
-
-def produkt_till_annons(
-    produkt: dict,
-) -> dict:
-    namn = rensa_text(
-        hamta_falt(
-            produkt,
-            "name",
-            "title",
-            "model",
-        )
-    )
-
-    pris_raw = hamta_falt(
-        produkt,
-        "price",
-        "annonspris",
-        "listPrice",
-    )
-
-    miltal_raw = hamta_falt(
-        produkt,
-        "mileage",
-        "miltal",
-        "mileageValue",
-        "dimension2",
-    )
-
-    arsmodell_raw = hamta_falt(
-        produkt,
-        "year",
-        "modelYear",
-        "arsmodell",
-    )
-
-    url = normalisera_url(
-        hamta_falt(
-            produkt,
-            "url",
-            "link",
-            "productUrl",
-        )
-    )
-
-    annons_id = hamta_falt(
-        produkt,
-        "id",
-        "annons_id",
-        "productId",
-    )
-
-    pris = tolka_pris(
-        pris_raw
-    )
-
-    arsmodell = tolka_arsmodell(
-        arsmodell_raw
-    )
-
-    miltal = tolka_miltal(
-        miltal_raw
-    )
-
-    return {
-        "namn": namn,
-
-        "annonspris": pris,
-
-        "pris_raw": pris_raw,
-
-        "arsmodell": arsmodell,
-
-        "arsmodell_raw":
-            arsmodell_raw,
-
-        "miltal": miltal,
-
-        "miltal_raw":
-            miltal_raw,
-
-        "annons_id": (
-            str(annons_id)
-            if annons_id is not None
+        return (
+            mil
+            if mil >= 0
             else None
-        ),
+        )
 
-        "url": url,
+    text = rensa_text(value)
 
-        "produkt_raw": produkt,
-    }
+    match = re.search(
+        r"(\d[\d\s\xa0]*(?:[,.]\d+)?)\s*mil\b",
+        text,
+        re.IGNORECASE,
+    )
+
+    if not match:
+        return None
+
+    nummer = (
+        match.group(1)
+        .replace(" ", "")
+        .replace("\xa0", "")
+        .replace(",", ".")
+    )
+
+    try:
+        mil = float(nummer)
+
+    except ValueError:
+        return None
+
+    if mil < 0:
+        return None
+
+    return mil
+
+
+def normalisera_url(
+    url: str | None,
+) -> str | None:
+    if not url:
+        return None
+
+    url = str(url).strip()
+
+    if not url:
+        return None
+
+    return urljoin(
+        BAS_URL,
+        url,
+    )
+
+
+def hamta_falt(
+    data: dict,
+    *namn,
+):
+    for namn_i in namn:
+        if namn_i in data:
+            value = data[namn_i]
+
+            if (
+                value is not None
+                and value != ""
+            ):
+                return value
+
+    return None
+
+
+def bygg_sok_url(
+    bilkonfig: dict,
+) -> str | None:
+    marke = (
+        bilkonfig.get(
+            "marke_slug"
+        )
+        or ""
+    ).lower()
+
+    modell = (
+        bilkonfig.get(
+            "modell_slug"
+        )
+        or ""
+    ).lower()
+
+    if marke == "volvo":
+        if modell == "v60":
+            return (
+                f"{BAS_URL}/bil/volvo/v60"
+            )
+
+        if modell == "v90":
+            return (
+                f"{BAS_URL}/bil/volvo/v90"
+            )
+
+    if marke == "bmw":
+        if modell.startswith("330e"):
+            return (
+                f"{BAS_URL}/bil/bmw/330e"
+            )
+
+        if modell.startswith("530e"):
+            return (
+                f"{BAS_URL}/bil/bmw/530e"
+            )
+
+    return None
