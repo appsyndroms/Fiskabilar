@@ -1063,7 +1063,7 @@ def main():
                 f"{post.get('modell', '')}"
                 .replace(
                     ",",
-                    " ",
+                    " "
                 )
             )
 
