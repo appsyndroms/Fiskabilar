@@ -486,15 +486,24 @@ def produkt_till_annons(
     # Om dataLayer innehåller ett numeriskt
     # eller textbaserat miltal används det först.
     miltal = tolka_miltal(
-        miltal_raw
+    miltal_raw
+)
+
+miltal_fran_html = _hitta_miltal_i_text(
+    metadata_text
+)
+
+if miltal_fran_html is not None:
+    miltal = miltal_fran_html
+
+    match_miltal = re.search(
+        r"(\d[\d\s\xa0.,]*)\s*mil\b",
+        metadata_text,
+        re.IGNORECASE,
     )
 
-    # Om det misslyckas används annonskortets
-    # synliga "xxxx mil".
-    if miltal is None:
-        miltal = _hitta_miltal_i_text(
-            metadata_text
-        )
+    if match_miltal:
+        miltal_raw = match_miltal.group(0)
 
     # URL från HTML-listningen är säkrare än
     # att förlita sig på ett URL-fält i dataLayer.
