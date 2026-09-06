@@ -1,21 +1,32 @@
 """
-Fiskabilar Analytics
+Fiskabilar Analytics.
 
-Huvudapplikation för webbgränssnittet.
+Huvudapplikation och startsida för webbgränssnittet.
+
+Webben är ett presentationslager ovanpå:
+
+    data/
+        ↓
+    web/data.py
+        ↓
+    Streamlit
+        ↓
+    Dashboard
 """
-
-from pathlib import Path
 
 import streamlit as st
 
-from web.styles import apply_styles
+from web.charts import (
+    fyndutfall_diagram,
+)
 from web.data import (
     hamta_dashboard_data,
+    hamta_fyndutfall,
     hamta_senaste_fynd,
 )
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+from web.styles import (
+    apply_styles,
+)
 
 
 st.set_page_config(
@@ -28,9 +39,13 @@ st.set_page_config(
 apply_styles()
 
 
-st.title("Fiskabilar Analytics")
+st.title(
+    "🚗 Fiskabilar Analytics"
+)
+
 st.caption(
-    "Data-driven analys av den svenska begagnatbilsmarknaden"
+    "Data-driven analys av den svenska "
+    "begagnatbilsmarknaden"
 )
 
 
@@ -41,29 +56,48 @@ data = hamta_dashboard_data()
 # KPI
 # ------------------------------------------------------------
 
-col1, col2, col3, col4 = st.columns(4)
+
+st.subheader(
+    "Översikt"
+)
+
+col1, col2, col3, col4 = st.columns(
+    4
+)
 
 with col1:
     st.metric(
         "Annonser senaste körningen",
-        data["annonser_senaste_korning"],
+        f"{data['annonser_senaste_korning']:,}"
+        .replace(
+            ",",
+            " ",
+        ),
     )
 
 with col2:
     st.metric(
         "Unika bilar",
-        data["unika_bilar"],
+        f"{data['unika_bilar']:,}"
+        .replace(
+            ",",
+            " ",
+        ),
     )
 
 with col3:
     st.metric(
         "Historiska annonser",
-        data["historiska_annonser"],
+        f"{data['historiska_annonser']:,}"
+        .replace(
+            ",",
+            " ",
+        ),
     )
 
 with col4:
     st.metric(
-        "Aktiva fynd",
+        "Aktuella fynd",
         data["aktiva_fynd"],
     )
 
@@ -72,30 +106,143 @@ st.divider()
 
 
 # ------------------------------------------------------------
-# Marknad
+# BÄSTA FYND
 # ------------------------------------------------------------
 
-left, right = st.columns([2, 1])
 
-with left:
-    st.subheader("📈 Marknaden just nu")
+st.subheader(
+    "🔥 Bästa fynd just nu"
+)
 
-    st.write(
-        "Välj **Marknad** i sidomenyn för detaljerad analys "
-        "av pris, miltal och utveckling över tid."
+fynd = hamta_senaste_fynd()
+
+if fynd.empty:
+    st.info(
+        "Inga aktuella fynd finns "
+        "tillgängliga ännu."
     )
 
+else:
+    data_fynd = fynd.copy()
+
+    if "score" in data_fynd.columns:
+        data_fynd["score"] = (
+            data_fynd["score"]
+            .astype(float)
+        )
+
+        data_fynd = data_fynd.sort_values(
+            "score",
+            ascending=False,
+        )
+
+    kolumner = [
+        kolumn
+        for kolumn in [
+            "score",
+            "modell",
+            "arsmodell",
+            "miltal",
+            "pris",
+            "diff",
+        ]
+        if kolumn in data_fynd.columns
+    ]
+
+    if kolumner:
+        st.dataframe(
+            data_fynd[
+                kolumner
+            ].head(10),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    else:
+        st.dataframe(
+            data_fynd.head(10),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    st.caption(
+        "Se sidan 🚗 Aktuella fynd "
+        "för komplett lista."
+    )
+
+
+st.divider()
+
+
+# ------------------------------------------------------------
+# FYNDUTFALL
+# ------------------------------------------------------------
+
+
+left, right = st.columns(
+    [2, 1]
+)
+
+with left:
+    st.subheader(
+        "📊 Fyndutfall"
+    )
+
+    utfall = hamta_fyndutfall()
+
+    fig = fyndutfall_diagram(
+        utfall
+    )
+
+    if fig is not None:
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+        )
+
+    else:
+        st.info(
+            "Fyndutfall visas när "
+            "find_outcomes-filen innehåller data."
+        )
+
+
 with right:
-    st.subheader("🤖 ML-status")
+    st.subheader(
+        "🤖 ML-status"
+    )
 
     st.metric(
         "Modell",
         data["ml_modell"],
     )
 
+    if (
+        data["ml_mae"]
+        is not None
+    ):
+        st.metric(
+            "MAE",
+            f"{data['ml_mae']:,.0f} kr"
+            .replace(
+                ",",
+                " ",
+            ),
+        )
+
+    else:
+        st.metric(
+            "MAE",
+            "—",
+        )
+
     st.metric(
-        "MAE",
-        data["ml_mae"],
+        "Observationer",
+        f"{data['ml_observationer']:,}"
+        .replace(
+            ",",
+            " ",
+        ),
     )
 
 
@@ -103,27 +250,63 @@ st.divider()
 
 
 # ------------------------------------------------------------
-# Fynd
+# SYSTEM
 # ------------------------------------------------------------
 
-st.subheader("🔥 Bästa fynd just nu")
 
-fynd = hamta_senaste_fynd()
+st.subheader(
+    "🧠 Så arbetar Fiskabilar"
+)
 
-if fynd.empty:
-    st.info(
-        "Inga aktuella fynd finns tillgängliga."
+col1, col2, col3, col4 = st.columns(
+    4
+)
+
+with col1:
+    st.markdown(
+        """
+        ### 📥 Marknad
+
+        Systemet samlar in annonser och
+        bygger marknadshistorik.
+        """
     )
-else:
-    st.dataframe(
-        fynd,
-        use_container_width=True,
-        hide_index=True,
+
+with col2:
+    st.markdown(
+        """
+        ### 🔎 Fynd
+
+        Intressanta bilar identifieras
+        genom pris och marknadsvärde.
+        """
+    )
+
+with col3:
+    st.markdown(
+        """
+        ### 📊 Feedback
+
+        Fynd följs över tid för att se
+        vad som faktiskt händer.
+        """
+    )
+
+with col4:
+    st.markdown(
+        """
+        ### 🤖 ML
+
+        Historiska data används för att
+        förbättra marknadsvärderingen.
+        """
     )
 
 
 st.divider()
+
 
 st.caption(
-    "Fiskabilar Analytics • Automatisk marknadsanalys"
+    "Fiskabilar Analytics • "
+    "Marknad → Fynd → Utfall → Feedback → ML"
 )
