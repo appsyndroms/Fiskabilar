@@ -1,29 +1,27 @@
 """
 Diagram för Fiskabilar Analytics.
 """
-
 from __future__ import annotations
-
 import pandas as pd
 import plotly.express as px
-
-
 def pris_over_tid(
     df: pd.DataFrame,
 ):
+    """
+    Visar medianpris över tid.
+    """
     if df.empty:
         return None
-
     datumkolumn = _hitta_kolumn(
         df,
         [
+            "tid",
             "datum",
             "date",
             "timestamp",
             "scraped_at",
         ],
     )
-
     priskolumn = _hitta_kolumn(
         df,
         [
@@ -32,32 +30,25 @@ def pris_over_tid(
             "price",
         ],
     )
-
     if not datumkolumn or not priskolumn:
         return None
-
     data = df.copy()
-
     data[datumkolumn] = pd.to_datetime(
         data[datumkolumn],
         errors="coerce",
     )
-
     data[priskolumn] = pd.to_numeric(
         data[priskolumn],
         errors="coerce",
     )
-
     data = data.dropna(
         subset=[
             datumkolumn,
             priskolumn,
         ]
     )
-
     if data.empty:
         return None
-
     grupperad = (
         data
         .groupby(
@@ -66,12 +57,10 @@ def pris_over_tid(
         .median()
         .reset_index()
     )
-
     grupperad.columns = [
         "datum",
         "medianpris",
     ]
-
     return px.line(
         grupperad,
         x="datum",
@@ -83,14 +72,14 @@ def pris_over_tid(
             "medianpris": "Medianpris",
         },
     )
-
-
 def pris_mot_miltal(
     df: pd.DataFrame,
 ):
+    """
+    Visar pris i relation till miltal.
+    """
     if df.empty:
         return None
-
     milkolumn = _hitta_kolumn(
         df,
         [
@@ -99,7 +88,6 @@ def pris_mot_miltal(
             "mileage",
         ],
     )
-
     priskolumn = _hitta_kolumn(
         df,
         [
@@ -108,32 +96,25 @@ def pris_mot_miltal(
             "price",
         ],
     )
-
     if not milkolumn or not priskolumn:
         return None
-
     data = df.copy()
-
     data[milkolumn] = pd.to_numeric(
         data[milkolumn],
         errors="coerce",
     )
-
     data[priskolumn] = pd.to_numeric(
         data[priskolumn],
         errors="coerce",
     )
-
     data = data.dropna(
         subset=[
             milkolumn,
             priskolumn,
         ]
     )
-
     if data.empty:
         return None
-
     return px.scatter(
         data,
         x=milkolumn,
@@ -144,15 +125,11 @@ def pris_mot_miltal(
             priskolumn: "Pris",
         },
     )
-
-
 def _hitta_kolumn(
     df: pd.DataFrame,
     kandidater: list[str],
 ) -> str | None:
-
     for kandidat in kandidater:
         if kandidat in df.columns:
             return kandidat
-
     return None
