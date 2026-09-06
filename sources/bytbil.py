@@ -29,13 +29,9 @@ from sources import (
     identifiera_variant,
 )
 
-from .bytbil_helpers import (
-    bygg_sok_url,
-)
-
+from .bytbil_helpers import bygg_sok_url
 from .bytbil_parser import (
     hamta_datalayer_produkter,
-    hitta_annonslankar,
     produkt_till_annons,
 )
 
@@ -125,9 +121,9 @@ def _text_for_variant(
                 )
 
     return " ".join(
-        str(del)
-        for del in delar
-        if del
+        str(del_text)
+        for del_text in delar
+        if del_text
     )
 
 
@@ -332,7 +328,8 @@ def hamta_annonser() -> list[dict]:
     """
     Hämtar och filtrerar Bytbil-annonser.
 
-    Alla modell-/variant-/årsmodellkrav kommer från config.py.
+    Alla modell-, variant- och årsmodellkrav
+    kommer från config.py.
     """
 
     start = time.monotonic()
@@ -357,6 +354,9 @@ def hamta_annonser() -> list[dict]:
                 bil.get("annons_id")
                 or bil.get("url")
             )
+
+            if not nyckel:
+                continue
 
             if nyckel in sedda:
                 continue
