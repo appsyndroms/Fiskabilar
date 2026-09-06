@@ -11,25 +11,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-
   daily-market-report-debug:
 
     runs-on: ubuntu-latest
 
     steps:
 
-      # --------------------------------------------------
-      # CHECKOUT
-      # --------------------------------------------------
-
       - name: Hämta repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      # --------------------------------------------------
-      # PYTHON
-      # --------------------------------------------------
 
       - name: Installera Python
         uses: actions/setup-python@v5
@@ -40,10 +31,6 @@ jobs:
       - name: Installera beroenden
         run: |
           pip install -r requirements.txt
-
-      # --------------------------------------------------
-      # DEBUG MARKNADSRAPPORT
-      # --------------------------------------------------
 
       - name: Kör debugrapport
         run: |
@@ -57,10 +44,6 @@ jobs:
 
           python -u -m reporting.daily_market_report_debug
 
-      # --------------------------------------------------
-      # ML
-      # --------------------------------------------------
-
       - name: Träna ML-modell
         run: |
           echo "=================================================="
@@ -73,28 +56,11 @@ jobs:
 
           python -u -m ml.train_market_model
 
-      # --------------------------------------------------
-      # BYGG STATISK WEBB
-      # --------------------------------------------------
-
       - name: Bygg statisk webb
-        run: |
-          echo "=================================================="
-          echo "DEBUG: Bygger Fiskabilar Analytics"
-          echo "=================================================="
-
-          python -u web/build_static.py
-
-      # --------------------------------------------------
-      # VALIDERING
-      # --------------------------------------------------
+        run: python -u web/build_static.py
 
       - name: Validera statisk webb
         run: |
-          echo "=================================================="
-          echo "DEBUG: Validerar web_site"
-          echo "=================================================="
-
           test -f web_site/index.html
           test -f web_site/data.json
           test -f web_site/.nojekyll
@@ -103,13 +69,9 @@ jobs:
           import json
           from pathlib import Path
 
-          data_path = Path("web_site/data.json")
-
-          with data_path.open(
-              "r",
-              encoding="utf-8"
-          ) as f:
-              data = json.load(f)
+          data = json.loads(
+              Path("web_site/data.json").read_text(encoding="utf-8")
+          )
 
           required = {
               "generated_at",
@@ -129,45 +91,31 @@ jobs:
                   f"Saknade nycklar i data.json: {sorted(missing)}"
               )
 
-          html = Path(
-              "web_site/index.html"
-          ).read_text(
+          html = Path("web_site/index.html").read_text(
               encoding="utf-8"
           )
 
-          if "<html" not in html:
+          if "<html" not in html.lower():
               raise SystemExit(
-                  "index.html verkar inte vara en HTML-fil."
+                  "index.html verkar inte vara en HTML-fil"
               )
 
-          print("==================================================")
-          print("DEBUG: Webbplatsen är korrekt byggd.")
-          print(
-              f"Aktuella fynd: "
-              f"{len(data['current_findings'])}"
-          )
-          print(
-              f"Fynd-event: "
-              f"{len(data['find_outcomes'])}"
-          )
-          print(
-              f"Prissänkningar: "
-              f"{len(data['price_reductions'])}"
-          )
-          print(
-              f"Marknadsobservationer: "
-              f"{len(data['market_history'])}"
-          )
-          print("==================================================")
+          print("Webbvalidering OK")
+          print(f"Fynd: {len(data['current_findings'])}")
+          print(f"Prisändringar: {len(data['price_reductions'])}")
+          print(f"Fyndutfall: {len(data['find_outcomes'])}")
+          print(f"Marknadshistorik: {len(data['market_history'])}")
           PY
 
-      # --------------------------------------------------
-      # DEBUG ARTIFACT
-      # --------------------------------------------------
+      - name: Skriv ut webb-URL
+        run: |
+          echo "=========================================="
+          echo "FISKABILAR WEBB"
+          echo "https://appsyndroms.github.io/Fiskabilar/"
+          echo "=========================================="
 
-      - name: Ladda upp debug-webb som artifact
+      - name: Spara webb som artifact
         uses: actions/upload-artifact@v4
         with:
           name: fiskabilar-web-debug
           path: web_site
-          if-no-files-found: error
