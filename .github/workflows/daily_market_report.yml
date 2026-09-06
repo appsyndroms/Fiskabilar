@@ -1,6 +1,7 @@
 name: Daglig marknadsrapport Fiskabilar
 
 on:
+
   schedule:
     - cron: "0 21 * * *"
       timezone: "Europe/Stockholm"
@@ -13,18 +14,22 @@ on:
         default: false
         type: boolean
 
+
 permissions:
   contents: write
   pages: write
   id-token: write
 
+
 concurrency:
   group: fiskabilar-data-write
   cancel-in-progress: false
 
-jobs:
-  daily-market-report:
 
+jobs:
+
+  build:
+    name: Bygg daglig rapport och webb
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +46,8 @@ jobs:
           cache: "pip"
 
       - name: Installera beroenden
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       - name: Skapa daglig marknadsrapport
         env:
@@ -54,10 +60,12 @@ jobs:
           fi
 
       - name: Träna ML-modell
-        run: python -u -m ml.train_market_model
+        run: |
+          python -u -m ml.train_market_model
 
       - name: Bygg statisk webb
-        run: python -u web/build_static.py
+        run: |
+          python -u web/build_static.py
 
       - name: Validera statisk webb
         run: |
@@ -107,24 +115,10 @@ jobs:
           print(f"Marknadshistorik: {len(data['market_history'])}")
           PY
 
-      - name: Konfigurera GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Skapa Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: web_site
-
-      - name: Publicera GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Skriv ut webb-URL
-        run: |
-          echo "=========================================="
-          echo "FISKABILAR WEBB"
-          echo "https://appsyndroms.github.io/Fiskabilar/"
-          echo "=========================================="
 
       - name: Spara rapportlogg och ML-modell
         if: always()
@@ -145,3 +139,26 @@ jobs:
           git rebase origin/main
 
           git push origin HEAD:main
+
+
+  deploy:
+    name: Publicera produktionswebb
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      - name: Publicera GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Skriv ut webb-URL
+        run: |
+          echo "=========================================="
+          echo "FISKABILAR WEBB"
+          echo "${{ steps.deployment.outputs.page_url }}"
+          echo "=========================================="
