@@ -1,24 +1,21 @@
 """
 Scraper för Bytbil.
 
-Hämtar Volvo V60-annonser från Bytbil och försöker extrahera:
+Bytbil-scrapern ska endast hämta och normalisera rådata.
+Vilka modeller, varianter och årsmodeller som är intressanta
+styrs av config.py.
 
-    - titel
-    - pris
-    - årsmodell
-    - miltal
-    - variant
-    - URL
+Aktuella modeller hämtas från BILAR i config.py.
 
-Scrapern använder flera strategier eftersom Bytbils HTML-struktur
-kan förändras:
+Scrapern använder Bytbils dataLayer/ecommerce.impressions som
+primär källa eftersom annonserna inte ligger som vanliga statiska
+annonskort i HTML.
 
-    1. JSON-LD / strukturerad data
-    2. Annonslänkar i HTML
-    3. Annonsdata i länkarnas omgivande HTML
+Därefter används annonslänkar och vid behov annonsens detaljsida
+för att komplettera data som årsmodell och miltal.
 
-Första versionen fokuserar på att få fram stabil grunddata.
-Detaljerad berikning kan byggas ut senare.
+Resultatet skickas genom samma gemensamma grundkravslogik som
+övriga källor.
 """
 
 from __future__ import annotations
@@ -26,6 +23,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from ast import literal_eval
 from urllib.parse import urljoin
 
 import requests
@@ -33,19 +31,18 @@ from bs4 import BeautifulSoup
 
 from app_logging.logger import info
 
+from config import BILAR
+
 from sources import (
     berika_fran_fritext,
-    matchar_grundkrav,
+    grundkrav_fel,
+    identifiera_variant,
 )
 
 
-DELAY_SEKUNDER = 3.0
+DELAY_SEKUNDER = 0.5
 
 BAS_URL = "https://www.bytbil.com"
-
-SOK_URLER = [
-    "https://www.bytbil.com/bil/volvo/v60",
-]
 
 
 HEADERS = {
@@ -57,16 +54,81 @@ HEADERS = {
         "Chrome/131.0.0.0 "
         "Safari/537.36"
     ),
-    "Accept-Language": (
-        "sv-SE,sv;q=0.9,en;q=0.8"
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/xml;q=0.9,image/avif,image/webp,"
+        "image/apng,*/*;q=0.8"
     ),
+    "Accept-Language": (
+        "sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7"
+    ),
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
 }
 
+
+# ----------------------------------------------------------------------
+# Bytbil URL-struktur
+# ----------------------------------------------------------------------
+
+def _bygg_sok_url(
+    bilkonfig: dict,
+) -> str | None:
+    """
+    Bygger Bytbils sök-URL från bilkonfigurationen.
+
+    Detta är endast en mappning till Bytbils URL-struktur.
+    Själva urvalet av modeller/varianter/årsmodeller ligger i config.py.
+    """
+
+    marke = (
+        bilkonfig.get("marke_slug")
+        or ""
+    ).lower()
+
+    modell = (
+        bilkonfig.get("modell_slug")
+        or ""
+    ).lower()
+
+    if marke == "volvo":
+        if modell == "v60":
+            return (
+                f"{BAS_URL}/bil/volvo/v60"
+            )
+
+        if modell == "v90":
+            return (
+                f"{BAS_URL}/bil/volvo/v90"
+            )
+
+    if marke == "bmw":
+        if modell.startswith("330e"):
+            return (
+                f"{BAS_URL}/bil/bmw/3-serie"
+            )
+
+        if modell.startswith("530e"):
+            return (
+                f"{BAS_URL}/bil/bmw/5-serie"
+            )
+
+    info(
+        "[bytbil] VARNING: kunde inte bygga sök-URL "
+        f"för {bilkonfig.get('modell_visning')}"
+    )
+
+    return None
+
+
+# ----------------------------------------------------------------------
+# Text / numeriska värden
+# ----------------------------------------------------------------------
 
 def _rensa_text(
     value,
 ) -> str:
-    """Rensar text från extra whitespace."""
+    """Rensar text från överflödiga whitespace-tecken."""
 
     if value is None:
         return ""
@@ -79,43 +141,46 @@ def _rensa_text(
 
 
 def _tolka_pris(
-    text: str,
+    value,
 ) -> int | None:
     """
-    Extraherar pris från text.
+    Tolkar ett pris.
 
     Exempel:
-
-        289 900 kr
-        394000 kr
-        Pris: 489 000
+        279 000
+        279000
+        279 000 kr
+        279.000 kr
     """
+
+    if value is None:
+        return None
+
+    text = _rensa_text(value)
 
     if not text:
         return None
 
     match = re.search(
-        r"(\d[\d\s\xa0]{3,})\s*(?:kr)?",
+        r"(\d[\d\s.,\xa0]{3,})",
         text,
-        re.IGNORECASE,
     )
 
     if not match:
         return None
 
-    siffror = re.sub(
-        r"\D",
-        "",
-        match.group(1),
+    nummer = (
+        match.group(1)
+        .replace("\xa0", "")
+        .replace(" ", "")
+        .replace(".", "")
+        .replace(",", "")
     )
 
-    if not siffror:
+    if not nummer.isdigit():
         return None
 
-    try:
-        pris = int(siffror)
-    except ValueError:
-        return None
+    pris = int(nummer)
 
     if pris < 10_000:
         return None
@@ -124,20 +189,14 @@ def _tolka_pris(
 
 
 def _tolka_arsmodell(
-    text: str,
+    value,
 ) -> int | None:
-    """
-    Extraherar årsmodell.
+    """Försöker hitta årsmodell i text."""
 
-    Exempel:
-
-        2024
-        2024 | 5 922 mil
-        Årsmodell 2024
-    """
-
-    if not text:
+    if value is None:
         return None
+
+    text = _rensa_text(value)
 
     match = re.search(
         r"\b(19[9]\d|20\d{2})\b",
@@ -147,12 +206,9 @@ def _tolka_arsmodell(
     if not match:
         return None
 
-    try:
-        arsmodell = int(
-            match.group(1)
-        )
-    except ValueError:
-        return None
+    arsmodell = int(
+        match.group(1)
+    )
 
     if not 1990 <= arsmodell <= 2030:
         return None
@@ -161,20 +217,21 @@ def _tolka_arsmodell(
 
 
 def _tolka_miltal(
-    text: str,
+    value,
 ) -> float | None:
     """
-    Extraherar miltal.
+    Försöker hitta miltal.
 
     Exempel:
-
         5 922 mil
-        9020 mil
-        12,5 mil
+        5922 mil
+        9 020 mil
     """
 
-    if not text:
+    if value is None:
         return None
+
+    text = _rensa_text(value)
 
     match = re.search(
         r"(\d[\d\s\xa0]*(?:[,.]\d+)?)\s*mil\b",
@@ -193,7 +250,9 @@ def _tolka_miltal(
     )
 
     try:
-        miltal = float(nummer)
+        miltal = float(
+            nummer
+        )
     except ValueError:
         return None
 
@@ -203,99 +262,355 @@ def _tolka_miltal(
     return miltal
 
 
-def _bestam_variant(
+# ----------------------------------------------------------------------
+# Konfigurationsmatchning
+# ----------------------------------------------------------------------
+
+def _matcha_bilkonfig(
+    sok_bilkonfig: dict,
     text: str,
 ) -> str | None:
     """
-    Bestämmer bilvariant från titel och annonstext.
+    Identifierar variant enligt config.py.
+
+    Ingen variant är hårdkodad här.
     """
 
-    text_lower = text.lower()
+    return identifiera_variant(
+        sok_bilkonfig,
+        text,
+    )
 
-    if "t8" in text_lower:
-        return "T8 AWD"
 
-    if "t6" in text_lower:
-        return "T6 AWD"
+# ----------------------------------------------------------------------
+# JavaScript/dataLayer
+# ----------------------------------------------------------------------
 
-    if "530e" in text_lower:
-        return "530e"
+def _balanserad_del(
+    text: str,
+    start: int,
+    oppning: str,
+    stangning: str,
+) -> str | None:
+    """
+    Hämtar en balanserad JS/JSON-del från en given position.
+
+    Används för att plocka ut exempelvis:
+
+        impressions: [ ... ]
+
+    även när innehållet inte är strikt JSON.
+    """
+
+    if (
+        start < 0
+        or start >= len(text)
+        or text[start] != oppning
+    ):
+        return None
+
+    djup = 0
+    i = start
+
+    in_string = False
+    string_tecken = None
+    escaped = False
+
+    while i < len(text):
+
+        tecken = text[i]
+
+        if in_string:
+
+            if escaped:
+                escaped = False
+
+            elif tecken == "\\":
+                escaped = True
+
+            elif tecken == string_tecken:
+                in_string = False
+
+            i += 1
+            continue
+
+        if tecken in (
+            '"',
+            "'",
+            "`",
+        ):
+            in_string = True
+            string_tecken = tecken
+            i += 1
+            continue
+
+        if tecken == oppning:
+            djup += 1
+
+        elif tecken == stangning:
+            djup -= 1
+
+            if djup == 0:
+                return text[
+                    start:i + 1
+                ]
+
+        i += 1
 
     return None
 
 
-def _ar_relevant_lank(
-    href: str,
-) -> bool:
+def _hamta_impressions_block(
+    script_text: str,
+) -> str | None:
     """
-    Filtrerar fram länkar som sannolikt är bilannonser.
+    Letar efter ecommerce.impressions/productList/impressions
+    i ett JavaScript-script.
     """
 
-    if not href:
-        return False
+    monster = re.compile(
+        r"""
+        (?:
+            ecommerce
+            |
+            productList
+            |
+            impressions
+        )
+        \s*
+        :
+        \s*
+        ($begin:math:display$\)
+        \"\"\"\,
+        re\.IGNORECASE \| re\.VERBOSE\,
+    \)
 
-    href_lower = href.lower()
+    for match in monster\.finditer\(
+        script\_text
+    \)\:
+        start \= match\.start\(1\)
 
-    if "/bil/" not in href_lower:
-        return False
+        block \= \_balanserad\_del\(
+            script\_text\,
+            start\,
+            \"\[\"\,
+            \"\]\"\,
+        \)
 
-    if href_lower.rstrip("/") in {
-        "/bil",
-        "/bil/volvo",
-        "/bil/volvo/v60",
-    }:
-        return False
+        if block\:
+            return block
 
-    return True
+    return None
 
 
-def _hamta_json_ld(
+def \_js\_till\_python\(
+    text\: str\,
+\)\:
+    \"\"\"
+    Försöker konvertera ett JavaScript\-liknande objekt
+    till Python\-data\.
+
+    Först testas strikt JSON\.
+    Därefter literal\_eval för JS\-objekt som råkar vara
+    kompatibla med Python\-literals\.
+    \"\"\"
+
+    if not text\:
+        return None
+
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+    \# Strikt JSON
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+
+    try\:
+        return json\.loads\(text\)
+
+    except \(
+        json\.JSONDecodeError\,
+        TypeError\,
+    \)\:
+        pass
+
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+    \# Python\-liknande objekt
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+
+    try\:
+        return literal\_eval\(
+            text
+        \)
+
+    except \(
+        ValueError\,
+        SyntaxError\,
+    \)\:
+        pass
+
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+    \# Försök normalisera vanliga JS\-varianter
+    \# \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+
+    normaliserad \= text
+
+    normaliserad \= re\.sub\(
+        r\"\\btrue\\b\"\,
+        \"True\"\,
+        normaliserad\,
+        flags\=re\.IGNORECASE\,
+    \)
+
+    normaliserad \= re\.sub\(
+        r\"\\bfalse\\b\"\,
+        \"False\"\,
+        normaliserad\,
+        flags\=re\.IGNORECASE\,
+    \)
+
+    normaliserad \= re\.sub\(
+        r\"\\bnull\\b\"\,
+        \"None\"\,
+        normaliserad\,
+        flags\=re\.IGNORECASE\,
+    \)
+
+    \# JS trailing commas
+    normaliserad \= re\.sub\(
+        r\"\,\\s\*\(\[\}$end:math:display$])",
+        r"\1",
+        normaliserad,
+    )
+
+    # Ofta förekommer enkla citattecken.
+    try:
+        return literal_eval(
+            normaliserad
+        )
+
+    except (
+        ValueError,
+        SyntaxError,
+    ):
+        return None
+
+
+def _hamta_datalayer_produkter(
     soup: BeautifulSoup,
 ) -> list[dict]:
     """
-    Hämtar objekt från JSON-LD-script.
+    Hämtar produkt/impression-objekt från Bytbils dataLayer.
+
+    Bytbil renderar annonserna i JavaScript och därför är
+    dataLayer betydligt mer användbar än att försöka gissa
+    CSS-klasser.
     """
 
-    objekt = []
+    produkter = []
 
     for script in soup.find_all(
-        "script",
-        type="application/ld+json",
+        "script"
     ):
+
         text = script.string
+
+        if not text:
+            text = script.get_text()
 
         if not text:
             continue
 
-        try:
-            data = json.loads(text)
-        except (
-            json.JSONDecodeError,
-            TypeError,
+        if (
+            "impressions" not in text.lower()
+            and "productlist" not in text.lower()
         ):
             continue
 
-        if isinstance(data, list):
-            objekt.extend(data)
+        block = _hamta_impressions_block(
+            text
+        )
 
-        elif isinstance(data, dict):
+        if not block:
+            continue
 
-            graf = data.get("@graph")
+        data = _js_till_python(
+            block
+        )
 
-            if isinstance(graf, list):
-                objekt.extend(graf)
+        if isinstance(
+            data,
+            list,
+        ):
+            for item in data:
 
-            else:
-                objekt.append(data)
+                if isinstance(
+                    item,
+                    dict,
+                ):
+                    produkter.append(
+                        item
+                    )
 
-    return objekt
+        if produkter:
+            continue
+
+        # ----------------------------------------------------------
+        # Fallback:
+        # plocka ut objekt ett och ett om arrayen inte gick att
+        # tolka som helhet.
+        # ----------------------------------------------------------
+
+        objekt_start = 0
+
+        while True:
+
+            objekt_start = block.find(
+                "{",
+                objekt_start,
+            )
+
+            if objekt_start < 0:
+                break
+
+            objekt = _balanserad_del(
+                block,
+                objekt_start,
+                "{",
+                "}",
+            )
+
+            if not objekt:
+                break
+
+            data = _js_till_python(
+                objekt
+            )
+
+            if isinstance(
+                data,
+                dict,
+            ):
+                produkter.append(
+                    data
+                )
+
+            objekt_start += len(
+                objekt
+            )
+
+    return produkter
 
 
-def _bil_fran_json_ld(
+# ----------------------------------------------------------------------
+# Generisk fältåtkomst
+# ----------------------------------------------------------------------
+
+def _hamta_falt(
     objekt: dict,
-) -> dict | None:
+    *namn,
+):
     """
-    Försöker skapa en bil från JSON-LD-data.
+    Hämtar första existerande fältet.
+
+    Tillåter även nästlade dictionaries.
     """
 
     if not isinstance(
@@ -304,300 +619,552 @@ def _bil_fran_json_ld(
     ):
         return None
 
-    namn = _rensa_text(
-        objekt.get("name")
-        or objekt.get("headline")
-        or objekt.get("description")
-    )
+    for namnvariant in namn:
 
-    if not namn:
-        return None
-
-    typ = objekt.get("@type")
-
-    if isinstance(typ, list):
-        typ_text = " ".join(
-            str(value)
-            for value in typ
-        )
-    else:
-        typ_text = str(typ or "")
-
-    combined = (
-        f"{namn} "
-        f"{typ_text}"
-    )
-
-    if "v60" not in combined.lower():
-        return None
-
-    offers = objekt.get("offers")
-
-    pris = None
-
-    if isinstance(offers, dict):
-        pris = _tolka_pris(
-            str(
-                offers.get("price")
-                or ""
+        if namnvariant in objekt:
+            value = objekt.get(
+                namnvariant
             )
+
+            if value not in (
+                None,
+                "",
+            ):
+                return value
+
+        # Stöd för punktnotation.
+        delar = namnvariant.split(
+            "."
         )
 
-    if pris is None:
-        pris = _tolka_pris(
-            _rensa_text(
-                objekt.get("price")
-            )
-        )
+        aktuell = objekt
 
-    url = (
-        objekt.get("url")
-        or (
-            offers.get("url")
-            if isinstance(offers, dict)
-            else None
-        )
-    )
+        lyckades = True
 
-    if url:
-        url = urljoin(
-            BAS_URL,
-            url,
-        )
+        for delnamn in delar:
 
-    text = combined
+            if not isinstance(
+                aktuell,
+                dict,
+            ):
+                lyckades = False
+                break
 
-    bil = {
-        "kalla": "bytbil",
-        "url": url,
-        "regnr": None,
-        "annonspris": pris,
-        "variant": _bestam_variant(text),
-        "arsmodell": _tolka_arsmodell(text),
-        "miltal": _tolka_miltal(text),
-        "vaxellada": "Automat",
-        "skadad": False,
-        "utrustningsniva": None,
-        "antal_agare": None,
-        "import": None,
-        "hyrbil": None,
-        "servicehistorik": None,
-        "senaste_service": None,
-        "nasta_service": None,
-        "forsta_registrering": None,
-        "dragkrok": None,
-        "varmare": None,
-        "volvo_selekt": None,
-        "stor_batteri": None,
-    }
+            if delnamn not in aktuell:
+                lyckades = False
+                break
 
-    return berika_fran_fritext(
-        bil,
-        text,
-    )
+            aktuell = aktuell[
+                delnamn
+            ]
 
+        if lyckades and aktuell not in (
+            None,
+            "",
+        ):
+            return aktuell
+
+    return None
+
+
+# ----------------------------------------------------------------------
+# Annonslänkar
+# ----------------------------------------------------------------------
 
 def _hamta_annonslankar(
     soup: BeautifulSoup,
-) -> list:
+) -> list[dict]:
     """
-    Hämtar sannolika annonslänkar från sidan.
+    Hämtar alla Bytbil-länkar som ser ut som riktiga annonser.
     """
 
-    lankar = []
+    resultat = []
+    sedda = set()
 
-    sedda_urler = set()
-
-    for lank in soup.find_all(
+    for a in soup.find_all(
         "a",
         href=True,
     ):
-        href = lank.get("href")
 
-        if not _ar_relevant_lank(href):
+        href = a.get(
+            "href"
+        )
+
+        if not href:
             continue
 
-        url = urljoin(
+        href_lower = href.lower()
+
+        if "/bil/" not in href_lower:
+            continue
+
+        full_url = urljoin(
             BAS_URL,
             href,
         )
 
-        if url in sedda_urler:
+        # Hoppa över generella kategorisidor.
+        path = full_url.lower().split(
+            "?",
+            1,
+        )[0].rstrip("/")
+
+        if path in {
+            "/bil",
+            "/bil/volvo",
+            "/bil/volvo/v60",
+            "/bil/volvo/v90",
+            "/bil/bmw",
+            "/bil/bmw/3-serie",
+            "/bil/bmw/5-serie",
+        }:
             continue
 
-        sedda_urler.add(url)
+        if full_url in sedda:
+            continue
 
-        lankar.append(lank)
-
-    return lankar
-
-
-def _tolka_annonslank(
-    lank,
-) -> dict | None:
-    """
-    Försöker tolka en annons från en länk och dess
-    närmaste omgivande HTML.
-    """
-
-    href = lank.get("href")
-
-    if not href:
-        return None
-
-    url = urljoin(
-        BAS_URL,
-        href,
-    )
-
-    titel = _rensa_text(
-        lank.get_text(
-            " ",
-            strip=True,
+        sedda.add(
+            full_url
         )
-    )
-
-    container = lank
-
-    for _ in range(5):
-
-        parent = container.parent
-
-        if parent is None:
-            break
-
-        container = parent
 
         text = _rensa_text(
-            container.get_text(
+            a.get_text(
                 " ",
                 strip=True,
             )
         )
 
-        if (
-            _tolka_pris(text)
-            and _tolka_arsmodell(text)
-            and _tolka_miltal(text)
-        ):
-            break
+        resultat.append(
+            {
+                "url": full_url,
+                "text": text,
+            }
+        )
+
+    return resultat
+
+
+# ----------------------------------------------------------------------
+# Detaljsida
+# ----------------------------------------------------------------------
+
+def _hamta_detaljdata(
+    url: str,
+) -> dict:
+    """
+    Hämtar kompletterande data från annonsens detaljsida.
+
+    Detta används framför allt när årsmodell eller miltal
+    saknas i sökresultatets dataLayer.
+    """
+
+    try:
+
+        resp = requests.get(
+            url,
+            headers=HEADERS,
+            timeout=20,
+        )
+
+        resp.raise_for_status()
+
+    except Exception as e:
+
+        info(
+            "[bytbil] FEL vid detaljsida "
+            f"{url}: {e}"
+        )
+
+        return {}
+
+    soup = BeautifulSoup(
+        resp.text,
+        "html.parser",
+    )
 
     text = _rensa_text(
-        container.get_text(
+        soup.get_text(
             " ",
             strip=True,
         )
     )
 
-    combined_text = (
-        f"{titel} {text}"
+    return {
+        "text": text,
+        "arsmodell": _tolka_arsmodell(
+            text
+        ),
+        "miltal": _tolka_miltal(
+            text
+        ),
+        "pris": _tolka_pris(
+            text
+        ),
+    }
+
+
+# ----------------------------------------------------------------------
+# Skapa intern bilrepresentation
+# ----------------------------------------------------------------------
+
+def _skapa_bil(
+    bilkonfig: dict,
+    produkt: dict,
+    annons_url: str | None,
+    extra_text: str = "",
+) -> dict | None:
+    """
+    Skapar Fiskabilars interna bilrepresentation.
+
+    All modell-/variantmatchning utgår från config.py.
+    """
+
+    namn = _rensa_text(
+        _hamta_falt(
+            produkt,
+            "name",
+            "title",
+            "headline",
+            "productName",
+        )
     )
 
-    if "v60" not in combined_text.lower():
-        return None
+    brand = _rensa_text(
+        _hamta_falt(
+            produkt,
+            "brand",
+            "make",
+            "manufacturer",
+        )
+    )
+
+    model = _rensa_text(
+        _hamta_falt(
+            produkt,
+            "model",
+            "modell",
+        )
+    )
+
+    pris_raw = _hamta_falt(
+        produkt,
+        "price",
+        "annonspris",
+        "pris",
+        "offers.price",
+    )
+
+    arsmodell_raw = _hamta_falt(
+        produkt,
+        "year",
+        "modelYear",
+        "model_year",
+        "arsmodell",
+        "årsmodell",
+    )
+
+    miltal_raw = _hamta_falt(
+        produkt,
+        "mileage",
+        "miltal",
+        "mileageValue",
+    )
+
+    annons_id = _hamta_falt(
+        produkt,
+        "id",
+        "productId",
+        "product_id",
+        "annonsId",
+        "annons_id",
+    )
+
+    produkt_url = _hamta_falt(
+        produkt,
+        "url",
+        "link",
+        "productUrl",
+        "product_url",
+    )
+
+    if not annons_url and produkt_url:
+        annons_url = urljoin(
+            BAS_URL,
+            str(
+                produkt_url
+            ),
+        )
+
+    combined_text = _rensa_text(
+        " ".join(
+            [
+                namn,
+                brand,
+                model,
+                extra_text,
+            ]
+        )
+    )
+
+    # --------------------------------------------------------------
+    # Pris
+    # --------------------------------------------------------------
 
     pris = _tolka_pris(
-        combined_text
+        pris_raw
     )
+
+    if pris is None:
+        pris = _tolka_pris(
+            combined_text
+        )
+
+    # --------------------------------------------------------------
+    # Årsmodell
+    # --------------------------------------------------------------
 
     arsmodell = _tolka_arsmodell(
-        combined_text
+        arsmodell_raw
     )
 
+    if arsmodell is None:
+        arsmodell = _tolka_arsmodell(
+            combined_text
+        )
+
+    # --------------------------------------------------------------
+    # Miltal
+    # --------------------------------------------------------------
+
     miltal = _tolka_miltal(
-        combined_text
+        miltal_raw
+    )
+
+    if miltal is None:
+        miltal = _tolka_miltal(
+            combined_text
+        )
+
+    # --------------------------------------------------------------
+    # Variant enligt config
+    # --------------------------------------------------------------
+
+    variant = _matcha_bilkonfig(
+        bilkonfig,
+        combined_text,
     )
 
     bil = {
         "kalla": "bytbil",
-        "url": url,
-        "regnr": None,
-        "annonspris": pris,
-        "variant": _bestam_variant(
-            combined_text
+
+        "url": annons_url,
+
+        "annons_id": (
+            str(annons_id)
+            if annons_id is not None
+            else None
         ),
-        "arsmodell": arsmodell,
-        "miltal": miltal,
-        "vaxellada": "Automat",
-        "skadad": False,
-        "utrustningsniva": None,
-        "antal_agare": None,
-        "import": None,
-        "hyrbil": None,
-        "servicehistorik": None,
-        "senaste_service": None,
-        "nasta_service": None,
-        "forsta_registrering": None,
-        "dragkrok": None,
-        "varmare": None,
-        "volvo_selekt": None,
-        "stor_batteri": None,
+
+        "regnr": None,
+
+        "marke_slug":
+            bilkonfig["marke_slug"],
+
+        "modell_slug":
+            bilkonfig["modell_slug"],
+
+        "modell":
+            bilkonfig["modell_slug"],
+
+        "annonspris":
+            pris,
+
+        "variant":
+            variant,
+
+        "arsmodell":
+            arsmodell,
+
+        "miltal":
+            miltal,
+
+        "vaxellada":
+            "Automat",
+
+        "skadad":
+            False,
+
+        "utrustningsniva":
+            namn or model or None,
+
+        "antal_agare":
+            None,
+
+        "auktion":
+            False,
+
+        "import":
+            None,
+
+        "hyrbil":
+            None,
+
+        "servicehistorik":
+            None,
+
+        "senaste_service":
+            None,
+
+        "nasta_service":
+            None,
+
+        "forsta_registrering":
+            None,
+
+        "dragkrok":
+            None,
+
+        "varmare":
+            None,
+
+        "volvo_selekt":
+            None,
+
+        "stor_batteri":
+            None,
     }
 
-    return berika_fran_fritext(
+    bil = berika_fran_fritext(
         bil,
         combined_text,
     )
 
+    return bil
 
-def _ar_komplett_bil(
-    bil: dict,
-) -> bool:
+
+# ----------------------------------------------------------------------
+# Matchning mellan dataLayer-produkt och annonslänk
+# ----------------------------------------------------------------------
+
+def _matcha_annonslank(
+    produkt: dict,
+    lankar: list[dict],
+    anvanda_urler: set[str],
+) -> tuple[str | None, str]:
     """
-    Kontrollerar att grundläggande data finns innan
-    bilen skickas vidare.
+    Försöker koppla ett dataLayer-objekt till rätt annons-URL.
+
+    Först används eventuell URL/id från dataLayer.
+    Därefter titelmatchning.
     """
 
-    krav = [
-        "annonspris",
-        "arsmodell",
-        "miltal",
-    ]
+    produkt_url = _hamta_falt(
+        produkt,
+        "url",
+        "link",
+        "productUrl",
+        "product_url",
+    )
 
-    return all(
-        bil.get(falt) is not None
-        for falt in krav
+    if produkt_url:
+
+        produkt_url = urljoin(
+            BAS_URL,
+            str(
+                produkt_url
+            ),
+        )
+
+        for lank in lankar:
+
+            if (
+                lank["url"]
+                == produkt_url
+            ):
+                return (
+                    produkt_url,
+                    lank["text"],
+                )
+
+    namn = _rensa_text(
+        _hamta_falt(
+            produkt,
+            "name",
+            "title",
+            "headline",
+            "productName",
+        )
+    ).lower()
+
+    if namn:
+
+        namn_ord = [
+            ordet
+            for ordet in re.findall(
+                r"[a-zåäö0-9]+",
+                namn,
+            )
+            if len(ordet) >= 3
+        ]
+
+        if namn_ord:
+
+            bast = None
+            bast_poang = 0
+
+            for lank in lankar:
+
+                if lank["url"] in (
+                    anvanda_urler
+                ):
+                    continue
+
+                lank_text = (
+                    lank["text"]
+                    .lower()
+                )
+
+                poang = sum(
+                    1
+                    for ordet in namn_ord
+                    if ordet in lank_text
+                )
+
+                if poang > bast_poang:
+
+                    bast_poang = poang
+                    bast = lank
+
+            if bast is not None:
+                return (
+                    bast["url"],
+                    bast["text"],
+                )
+
+    # Ingen säker URL hittad.
+    return (
+        None,
+        "",
     )
 
 
-def _deduplicera(
-    bilar: list[dict],
-) -> list[dict]:
-    """
-    Tar bort dubbletter baserat på URL.
-    """
-
-    resultat = []
-
-    sedda = set()
-
-    for bil in bilar:
-
-        nyckel = (
-            bil.get("url")
-            or (
-                bil.get("annonspris"),
-                bil.get("arsmodell"),
-                bil.get("miltal"),
-            )
-        )
-
-        if nyckel in sedda:
-            continue
-
-        sedda.add(nyckel)
-
-        resultat.append(bil)
-
-    return resultat
-
+# ----------------------------------------------------------------------
+# Hämta annonser
+# ----------------------------------------------------------------------
 
 def hamta_annonser() -> list[dict]:
     """
-    Hämtar annonser från Bytbil.
+    Hämtar annonser från Bytbil för samtliga modeller i BILAR.
 
-    Flera strategier används för att göra scrapern mindre
-    känslig för förändringar i HTML-strukturen.
+    Configen styr:
+        - vilka modeller som bevakas
+        - vilka varianter som är giltiga
+        - årsmodellintervall
+
+    Bytbil-scrapern styr endast:
+        - hämtning
+        - parsing
+        - normalisering
     """
 
     info(
@@ -606,10 +1173,30 @@ def hamta_annonser() -> list[dict]:
 
     alla_bilar = []
 
-    for sok_url in SOK_URLER:
+    for bilkonfig in BILAR:
+
+        sok_url = _bygg_sok_url(
+            bilkonfig
+        )
+
+        if not sok_url:
+            continue
+
+        modellnamn = bilkonfig.get(
+            "modell_visning",
+            bilkonfig.get(
+                "modell_slug"
+            ),
+        )
 
         info(
-            f"[bytbil] hämtar: {sok_url}"
+            "[bytbil] söker: "
+            f"{modellnamn}"
+        )
+
+        info(
+            "[bytbil] URL: "
+            f"{sok_url}"
         )
 
         try:
@@ -621,7 +1208,8 @@ def hamta_annonser() -> list[dict]:
             )
 
             info(
-                f"[bytbil] HTTP-status: "
+                "[bytbil] HTTP-status "
+                f"{modellnamn}: "
                 f"{resp.status_code}"
             )
 
@@ -630,15 +1218,11 @@ def hamta_annonser() -> list[dict]:
         except Exception as e:
 
             info(
-                f"[bytbil] FEL vid hämtning: "
-                f"{e}"
+                "[bytbil] FEL vid hämtning av "
+                f"{modellnamn}: {e}"
             )
 
             continue
-
-        time.sleep(
-            DELAY_SEKUNDER
-        )
 
         soup = BeautifulSoup(
             resp.text,
@@ -646,120 +1230,424 @@ def hamta_annonser() -> list[dict]:
         )
 
         info(
-            f"[bytbil] HTML-storlek: "
+            "[bytbil] HTML-storlek "
+            f"{modellnamn}: "
             f"{len(resp.text):,} bytes"
         )
 
-        # --------------------------------
-        # Strategi 1:
-        # JSON-LD / strukturerad data
-        # --------------------------------
+        # ----------------------------------------------------------
+        # DataLayer
+        # ----------------------------------------------------------
 
-        json_ld_objekt = (
-            _hamta_json_ld(soup)
+        produkter = (
+            _hamta_datalayer_produkter(
+                soup
+            )
         )
 
         info(
-            f"[bytbil] JSON-LD objekt: "
-            f"{len(json_ld_objekt)}"
+            "[bytbil] dataLayer-produkter "
+            f"{modellnamn}: "
+            f"{len(produkter)}"
         )
 
-        for objekt in json_ld_objekt:
+        # ----------------------------------------------------------
+        # Annonslänkar
+        # ----------------------------------------------------------
 
-            bil = _bil_fran_json_ld(
-                objekt
-            )
-
-            if bil:
-                alla_bilar.append(
-                    bil
-                )
-
-        # --------------------------------
-        # Strategi 2:
-        # Annonslänkar i HTML
-        # --------------------------------
-
-        annonslankar = (
+        lankar = (
             _hamta_annonslankar(
                 soup
             )
         )
 
         info(
-            f"[bytbil] möjliga "
-            f"annonslänkar: "
-            f"{len(annonslankar)}"
+            "[bytbil] annonslänkar "
+            f"{modellnamn}: "
+            f"{len(lankar)}"
         )
 
-        for lank in annonslankar:
+        anvanda_urler = set()
 
-            bil = _tolka_annonslank(
-                lank
+        lokala_bilar = []
+
+        # ----------------------------------------------------------
+        # Primär väg: dataLayer
+        # ----------------------------------------------------------
+
+        for produkt in produkter:
+
+            preliminar_text = _rensa_text(
+                " ".join(
+                    [
+                        str(
+                            _hamta_falt(
+                                produkt,
+                                "name",
+                                "title",
+                                "headline",
+                                "productName",
+                            )
+                            or ""
+                        ),
+                        str(
+                            _hamta_falt(
+                                produkt,
+                                "brand",
+                                "make",
+                                "manufacturer",
+                            )
+                            or ""
+                        ),
+                        str(
+                            _hamta_falt(
+                                produkt,
+                                "model",
+                                "modell",
+                            )
+                            or ""
+                        ),
+                    ]
+                )
             )
 
-            if bil:
-                alla_bilar.append(
-                    bil
+            # ------------------------------------------------------
+            # Kontrollera om produkten tillhör aktuell modell
+            # ------------------------------------------------------
+
+            variant = identifiera_variant(
+                bilkonfig,
+                preliminar_text,
+            )
+
+            if variant is None:
+                continue
+
+            annons_url, lank_text = (
+                _matcha_annonslank(
+                    produkt,
+                    lankar,
+                    anvanda_urler,
+                )
+            )
+
+            if annons_url:
+                anvanda_urler.add(
+                    annons_url
                 )
 
-    # --------------------------------
-    # Deduplicering
-    # --------------------------------
+            bil = _skapa_bil(
+                bilkonfig,
+                produkt,
+                annons_url,
+                lank_text,
+            )
 
-    alla_bilar = _deduplicera(
-        alla_bilar
-    )
+            if bil is None:
+                continue
 
-    info(
-        f"[bytbil] totalt tolkade "
-        f"annonser: "
-        f"{len(alla_bilar)}"
-    )
+            # ------------------------------------------------------
+            # Om årsmodell eller miltal saknas:
+            # hämta detaljsidan.
+            # ------------------------------------------------------
 
-    # --------------------------------
-    # Kontrollera datakvalitet
-    # --------------------------------
+            if (
+                (
+                    bil.get(
+                        "arsmodell"
+                    )
+                    is None
+                )
+                or (
+                    bil.get(
+                        "miltal"
+                    )
+                    is None
+                )
+            ) and annons_url:
 
-    kompletta_bilar = [
-        bil
-        for bil in alla_bilar
-        if _ar_komplett_bil(bil)
-    ]
-
-    info(
-        f"[bytbil] kompletta annonser: "
-        f"{len(kompletta_bilar)}"
-    )
-
-    # --------------------------------
-    # Grundkrav Fiskabilar
-    # --------------------------------
-
-    matchande_bilar = []
-
-    for bil in kompletta_bilar:
-
-        try:
-
-            if matchar_grundkrav(bil):
-
-                matchande_bilar.append(
-                    bil
+                detalj = (
+                    _hamta_detaljdata(
+                        annons_url
+                    )
                 )
 
-        except Exception as e:
+                if (
+                    bil.get(
+                        "arsmodell"
+                    )
+                    is None
+                ):
+                    bil["arsmodell"] = (
+                        detalj.get(
+                            "arsmodell"
+                        )
+                    )
+
+                if (
+                    bil.get(
+                        "miltal"
+                    )
+                    is None
+                ):
+                    bil["miltal"] = (
+                        detalj.get(
+                            "miltal"
+                        )
+                    )
+
+                if (
+                    bil.get(
+                        "annonspris"
+                    )
+                    is None
+                ):
+                    bil["annonspris"] = (
+                        detalj.get(
+                            "pris"
+                        )
+                    )
+
+            # ------------------------------------------------------
+            # Gemensam grundkravsfiltrering
+            # ------------------------------------------------------
+
+            fel = grundkrav_fel(
+                bil
+            )
+
+            if fel:
+
+                info(
+                    "[bytbil] avvisad "
+                    f"{modellnamn}: "
+                    f"{fel}"
+                )
+
+                continue
+
+            lokala_bilar.append(
+                bil
+            )
+
+        # ----------------------------------------------------------
+        # Fallback:
+        # Bytbil kan ändra dataLayer. Då använder vi annonslänkarna
+        # som rådata och låter configen avgöra variant/årsmodell.
+        # ----------------------------------------------------------
+
+        if not lokala_bilar:
 
             info(
-                f"[bytbil] kunde inte "
-                f"kontrollera grundkrav: "
-                f"{e}"
+                "[bytbil] dataLayer gav inga "
+                f"färdiga annonser för {modellnamn}; "
+                "försöker med annonslänkar som fallback."
             )
 
+            for lank in lankar:
+
+                text = lank.get(
+                    "text",
+                    "",
+                )
+
+                variant = identifiera_variant(
+                    bilkonfig,
+                    text,
+                )
+
+                if variant is None:
+                    continue
+
+                produkt = {
+                    "name": text,
+                }
+
+                bil = _skapa_bil(
+                    bilkonfig,
+                    produkt,
+                    lank["url"],
+                    text,
+                )
+
+                if bil is None:
+                    continue
+
+                if (
+                    bil.get(
+                        "arsmodell"
+                    )
+                    is None
+                    or bil.get(
+                        "miltal"
+                    )
+                    is None
+                ):
+
+                    detalj = (
+                        _hamta_detaljdata(
+                            lank["url"]
+                        )
+                    )
+
+                    if (
+                        bil.get(
+                            "arsmodell"
+                        )
+                        is None
+                    ):
+                        bil["arsmodell"] = (
+                            detalj.get(
+                                "arsmodell"
+                            )
+                        )
+
+                    if (
+                        bil.get(
+                            "miltal"
+                        )
+                        is None
+                    ):
+                        bil["miltal"] = (
+                            detalj.get(
+                                "miltal"
+                            )
+                        )
+
+                    if (
+                        bil.get(
+                            "annonspris"
+                        )
+                        is None
+                    ):
+                        bil["annonspris"] = (
+                            detalj.get(
+                                "pris"
+                            )
+                        )
+
+                fel = grundkrav_fel(
+                    bil
+                )
+
+                if fel:
+                    continue
+
+                lokala_bilar.append(
+                    bil
+                )
+
+        # ----------------------------------------------------------
+        # Deduplicera inom modell
+        # ----------------------------------------------------------
+
+        sedda = set()
+        unika = []
+
+        for bil in lokala_bilar:
+
+            nyckel = (
+                bil.get(
+                    "annons_id"
+                )
+                or bil.get(
+                    "url"
+                )
+                or (
+                    bil.get(
+                        "annonspris"
+                    ),
+                    bil.get(
+                        "arsmodell"
+                    ),
+                    bil.get(
+                        "miltal"
+                    ),
+                    bil.get(
+                        "variant"
+                    ),
+                )
+            )
+
+            if nyckel in sedda:
+                continue
+
+            sedda.add(
+                nyckel
+            )
+
+            unika.append(
+                bil
+            )
+
+        info(
+            "[bytbil] "
+            f"{modellnamn}: "
+            f"{len(unika)} annonser matchade "
+            "grundkraven"
+        )
+
+        alla_bilar.extend(
+            unika
+        )
+
+        time.sleep(
+            DELAY_SEKUNDER
+        )
+
+    # ------------------------------------------------------------------
+    # Slutlig deduplicering
+    # ------------------------------------------------------------------
+
+    resultat = []
+    sedda = set()
+
+    for bil in alla_bilar:
+
+        nyckel = (
+            bil.get(
+                "annons_id"
+            )
+            or bil.get(
+                "url"
+            )
+            or (
+                bil.get(
+                    "marke_slug"
+                ),
+                bil.get(
+                    "modell_slug"
+                ),
+                bil.get(
+                    "variant"
+                ),
+                bil.get(
+                    "annonspris"
+                ),
+                bil.get(
+                    "arsmodell"
+                ),
+                bil.get(
+                    "miltal"
+                ),
+            )
+        )
+
+        if nyckel in sedda:
+            continue
+
+        sedda.add(
+            nyckel
+        )
+
+        resultat.append(
+            bil
+        )
+
     info(
-        f"[bytbil] "
-        f"{len(matchande_bilar)} annonser "
-        f"matchade grundkraven"
+        "[bytbil] TOTALT: "
+        f"{len(resultat)} annonser "
+        "matchade grundkraven"
     )
 
-    return matchande_bilar
+    return resultat
