@@ -19,7 +19,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from app_logging.logger import info
+from app_logging.logger import always, info
 
 from config import BILAR
 
@@ -63,11 +63,20 @@ HEADERS = {
 def _hamta_sida(
     url: str,
 ) -> BeautifulSoup | None:
+    always(
+        f"[bytbil] HÄMTAR URL: {url}"
+    )
+
     try:
         response = requests.get(
             url,
             headers=HEADERS,
             timeout=20,
+        )
+
+        always(
+            "[bytbil] HTTP-status: "
+            f"{response.status_code}"
         )
 
         response.raise_for_status()
@@ -78,6 +87,11 @@ def _hamta_sida(
             f"av {url}: {exc}"
         )
         return None
+
+    always(
+        "[bytbil] HTML-storlek: "
+        f"{len(response.text)} tecken"
+    )
 
     time.sleep(
         DELAY_SEKUNDER
@@ -255,19 +269,39 @@ def _hamta_for_konfiguration(
         bilkonfig
     )
 
+    modell = bilkonfig.get(
+        "modell_visning",
+        "okänd modell",
+    )
+
+    always(
+        ""
+    )
+
+    always(
+        "=" * 70
+    )
+
+    always(
+        "[bytbil] KONFIGURATION: "
+        f"{modell}"
+    )
+
+    always(
+        "=" * 70
+    )
+
     if not url:
         info(
             "[bytbil] Kunde inte bygga "
             "sök-URL för "
-            f"{bilkonfig.get('modell_visning')}"
+            f"{modell}"
         )
         return []
 
-    info(
-        "[bytbil] Hämtar "
-        f"{bilkonfig['marke_visning']} "
-        f"{bilkonfig['modell_visning']} "
-        f"från {url}"
+    always(
+        "[bytbil] Sök-URL: "
+        f"{url}"
     )
 
     soup = _hamta_sida(
@@ -275,6 +309,9 @@ def _hamta_for_konfiguration(
     )
 
     if soup is None:
+        always(
+            "[bytbil] Ingen sida kunde hämtas."
+        )
         return []
 
     produkter = (
@@ -283,12 +320,84 @@ def _hamta_for_konfiguration(
         )
     )
 
-    info(
-        "[bytbil] "
-        f"{bilkonfig['modell_visning']}: "
-        f"{len(produkter)} produkter "
-        "hittade i dataLayer"
+    always(
+        "[bytbil] Produkter hittade "
+        f"i dataLayer: {len(produkter)}"
     )
+
+    if not produkter:
+        always(
+            "[bytbil] VARNING: "
+            "inga produkter hittades "
+            "i dataLayer."
+        )
+        return []
+
+    alltid_fel = 0
+    variantmatchningar = 0
+    med_arsmodell = 0
+    med_miltal = 0
+    med_pris = 0
+    godkanda = 0
+
+    for index, produkt in enumerate(
+        produkter[:3],
+        1,
+    ):
+        always(
+            ""
+        )
+
+        always(
+            "[bytbil] EXEMPELPRODUKT "
+            f"{index}:"
+        )
+
+        if isinstance(
+            produkt,
+            dict,
+        ):
+            always(
+                f"  id: {produkt.get('id')}"
+            )
+
+            always(
+                f"  name: {produkt.get('name')}"
+            )
+
+            always(
+                f"  price: {produkt.get('price')}"
+            )
+
+            always(
+                "  dimension2: "
+                f"{produkt.get('dimension2')}"
+            )
+
+            always(
+                "  year: "
+                f"{produkt.get('year')}"
+            )
+
+            always(
+                "  modelYear: "
+                f"{produkt.get('modelYear')}"
+            )
+
+            always(
+                "  arsmodell: "
+                f"{produkt.get('arsmodell')}"
+            )
+
+            always(
+                "  mileage: "
+                f"{produkt.get('mileage')}"
+            )
+
+            always(
+                "  miltal: "
+                f"{produkt.get('miltal')}"
+            )
 
     annonser = []
 
@@ -298,6 +407,33 @@ def _hamta_for_konfiguration(
         annons = produkt_till_annons(
             produkt
         )
+
+        if annons.get(
+            "arsmodell"
+        ) is not None:
+            med_arsmodell += 1
+
+        if annons.get(
+            "miltal"
+        ) is not None:
+            med_miltal += 1
+
+        if annons.get(
+            "annonspris"
+        ) is not None:
+            med_pris += 1
+
+        text = _text_for_variant(
+            annons
+        )
+
+        variant = identifiera_variant(
+            bilkonfig,
+            text,
+        )
+
+        if variant is not None:
+            variantmatchningar += 1
 
         annons_id = annons.get(
             "annons_id"
@@ -311,6 +447,10 @@ def _hamta_for_konfiguration(
                 annons_id
             )
 
+        if variant is None:
+            alltid_fel += 1
+            continue
+
         bil = _skapa_bil(
             bilkonfig,
             annons,
@@ -320,6 +460,50 @@ def _hamta_for_konfiguration(
             annonser.append(
                 bil
             )
+            godkanda += 1
+
+    always(
+        ""
+    )
+
+    always(
+        "[bytbil] DIAGNOSTIK:"
+    )
+
+    always(
+        "  Totalt antal produkter: "
+        f"{len(produkter)}"
+    )
+
+    always(
+        "  Med årsmodell: "
+        f"{med_arsmodell}"
+    )
+
+    always(
+        "  Med miltal: "
+        f"{med_miltal}"
+    )
+
+    always(
+        "  Med pris: "
+        f"{med_pris}"
+    )
+
+    always(
+        "  Variantmatchningar: "
+        f"{variantmatchningar}"
+    )
+
+    always(
+        "  Ej variantmatchning: "
+        f"{alltid_fel}"
+    )
+
+    always(
+        "  Godkända annonser: "
+        f"{godkanda}"
+    )
 
     return annonser
 
@@ -334,8 +518,20 @@ def hamta_annonser() -> list[dict]:
 
     start = time.monotonic()
 
-    info(
-        "[bytbil] hämtar annonser..."
+    always(
+        ""
+    )
+
+    always(
+        "=" * 70
+    )
+
+    always(
+        "[bytbil] STARTAR SCRAPER"
+    )
+
+    always(
+        "=" * 70
     )
 
     resultat = []
@@ -374,13 +570,29 @@ def hamta_annonser() -> list[dict]:
         - start
     )
 
-    info(
+    always(
+        ""
+    )
+
+    always(
+        "=" * 70
+    )
+
+    always(
+        "[bytbil] SLUTRESULTAT"
+    )
+
+    always(
+        "=" * 70
+    )
+
+    always(
         "[bytbil] "
         f"{len(resultat)} annonser "
         "klarade grundkraven"
     )
 
-    info(
+    always(
         "[bytbil] KÖRTID: "
         f"{sekunder:.1f} sekunder"
     )
