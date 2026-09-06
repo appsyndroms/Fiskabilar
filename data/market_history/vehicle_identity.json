@@ -2847,7 +2847,15 @@
     "reg:CPM23L": "vehicle:00000800",
     "source:bilweb:366150": "vehicle:00000800",
     "url:https://bilweb.se/vasternorrlands-lan/volvo-v90-t8-456hk-awd-plus-dark-varm-moms-drag-360o-skinn-2025-kombi-366150": "vehicle:00000800",
-    "fp:717aa4815cc7c3bc": "vehicle:00000800"
+    "fp:717aa4815cc7c3bc": "vehicle:00000800",
+    "reg:NKW013": "vehicle:00000801",
+    "source:bilweb:366286": "vehicle:00000801",
+    "url:https://bilweb.se/gavleborgs-lan/volvo-v60-recharge-t6-awd-aut-kamera-cockpit-pano-h-k-moms-s-v-2024-kombi-366286": "vehicle:00000801",
+    "fp:4aa23fb1f55f97fa": "vehicle:00000801",
+    "fp:e8aebe64de17de12": "vehicle:00000370",
+    "source:bilweb:349180": "vehicle:00000323",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-0-ranta-fri-service-2026-kombi-349180": "vehicle:00000323",
+    "fp:6783f3eda41e2982": "vehicle:00000323"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -8655,7 +8663,7 @@
         "regnr": "TCL88M",
         "vin": null
       },
-      "last_seen": "12847721",
+      "last_seen": "349180",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -17242,6 +17250,24 @@
         "vin": null
       },
       "last_seen": "366150",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000801": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "NKW013",
+        "vin": null
+      },
+      "last_seen": "366286",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
