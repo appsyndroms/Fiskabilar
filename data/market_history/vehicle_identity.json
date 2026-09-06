@@ -2842,7 +2842,12 @@
     "fp:9313fd9531d8c426": "vehicle:00000798",
     "source:bytbil:19357421": "vehicle:00000799",
     "url:https://www.bytbil.com/skane-lan/personbil-330e-xdrive-m-sport-pro-drag-adptfarth-h-k-comfort-19-1103-19357421": "vehicle:00000799",
-    "fp:cfca4edaa99e04ac": "vehicle:00000799"
+    "fp:cfca4edaa99e04ac": "vehicle:00000799",
+    "fp:51eae3605a359ad2": "vehicle:00000750",
+    "reg:CPM23L": "vehicle:00000800",
+    "source:bilweb:366150": "vehicle:00000800",
+    "url:https://bilweb.se/vasternorrlands-lan/volvo-v90-t8-456hk-awd-plus-dark-varm-moms-drag-360o-skinn-2025-kombi-366150": "vehicle:00000800",
+    "fp:717aa4815cc7c3bc": "vehicle:00000800"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -17223,6 +17228,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000800": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T8 AWD",
+        "arsmodell": 2025,
+        "regnr": "CPM23L",
+        "vin": null
+      },
+      "last_seen": "366150",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
