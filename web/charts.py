@@ -1,421 +1,344 @@
 """
 Diagram för Fiskabilar Analytics.
+
+Diagrammen genereras som inline SVG så att webbplatsen
+inte behöver Chart.js eller andra externa JavaScript-bibliotek.
 """
 
 from __future__ import annotations
 
-import pandas as pd
-import plotly.express as px
+from typing import Any
+
+from data_loader import (
+    fmt_price,
+    safe,
+)
 
 
-def _hitta_kolumn(
-    df: pd.DataFrame,
-    kandidater: list[str],
-) -> str | None:
-    """
-    Hittar första existerande kolumnen
-    från en lista av möjliga namn.
-    """
-    for kandidat in kandidater:
-        if kandidat in df.columns:
-            return kandidat
-
-    return None
+COLORS = [
+    "#72a7ff",
+    "#68d391",
+    "#ecc94b",
+    "#fc8181",
+    "#b794f4",
+    "#63b3ed",
+    "#f6ad55",
+    "#ed64a6",
+]
 
 
-def pris_over_tid(
-    df: pd.DataFrame,
-):
-    """
-    Visar medianpris över tid.
-    """
-    if df.empty:
-        return None
-
-    datumkolumn = _hitta_kolumn(
-        df,
-        [
-            "tid",
-            "datum",
-            "date",
-            "timestamp",
-            "scraped_at",
+def market_chart(
+    model: str,
+    year_series: dict[
+        str,
+        list[
+            dict[str, Any]
         ],
-    )
-
-    priskolumn = _hitta_kolumn(
-        df,
-        [
-            "annonspris",
-            "pris",
-            "price",
-        ],
-    )
-
-    if (
-        not datumkolumn
-        or not priskolumn
-    ):
-        return None
-
-    data = df.copy()
-
-    data[datumkolumn] = pd.to_datetime(
-        data[datumkolumn],
-        errors="coerce",
-    )
-
-    data[priskolumn] = pd.to_numeric(
-        data[priskolumn],
-        errors="coerce",
-    )
-
-    data = data.dropna(
-        subset=[
-            datumkolumn,
-            priskolumn,
-        ]
-    )
-
-    if data.empty:
-        return None
-
-    grupperad = (
-        data
-        .groupby(
-            data[
-                datumkolumn
-            ].dt.date
-        )[priskolumn]
-        .median()
-        .reset_index()
-    )
-
-    grupperad.columns = [
-        "datum",
-        "medianpris",
-    ]
-
-    return px.line(
-        grupperad,
-        x="datum",
-        y="medianpris",
-        markers=True,
-        title="Medianpris över tid",
-        labels={
-            "datum": "Datum",
-            "medianpris": "Medianpris",
-        },
-    )
-
-
-def pris_mot_miltal(
-    df: pd.DataFrame,
-):
+    ],
+) -> str:
     """
-    Visar pris i relation till miltal.
+    Skapar ett prisdiagram för en modell.
+
+    Varje årsmodell visas som en separat linje.
     """
-    if df.empty:
-        return None
 
-    milkolumn = _hitta_kolumn(
-        df,
-        [
-            "miltal",
-            "mil",
-            "mileage",
-        ],
-    )
-
-    priskolumn = _hitta_kolumn(
-        df,
-        [
-            "annonspris",
-            "pris",
-            "price",
-        ],
-    )
-
-    if (
-        not milkolumn
-        or not priskolumn
-    ):
-        return None
-
-    data = df.copy()
-
-    data[milkolumn] = pd.to_numeric(
-        data[milkolumn],
-        errors="coerce",
-    )
-
-    data[priskolumn] = pd.to_numeric(
-        data[priskolumn],
-        errors="coerce",
-    )
-
-    data = data.dropna(
-        subset=[
-            milkolumn,
-            priskolumn,
-        ]
-    )
-
-    if data.empty:
-        return None
-
-    return px.scatter(
-        data,
-        x=milkolumn,
-        y=priskolumn,
-        title="Pris mot miltal",
-        labels={
-            milkolumn: "Miltal",
-            priskolumn: "Pris",
-        },
-        hover_data=[
-            kolumn
-            for kolumn in [
-                "modell",
-                "variant",
-                "arsmodell",
-            ]
-            if kolumn in data.columns
-        ],
-    )
-
-
-def annonser_over_tid(
-    df: pd.DataFrame,
-):
-    """
-    Visar antal observationer per dag.
-    """
-    if (
-        df.empty
-        or "tid" not in df.columns
-    ):
-        return None
-
-    data = df.copy()
-
-    data["tid"] = pd.to_datetime(
-        data["tid"],
-        errors="coerce",
-    )
-
-    data = data.dropna(
-        subset=["tid"]
-    )
-
-    if data.empty:
-        return None
-
-    grupperad = (
-        data
-        .groupby(
-            data["tid"].dt.date
-        )
-        .size()
-        .reset_index(
-            name="annonser"
-        )
-    )
-
-    grupperad.columns = [
-        "datum",
-        "annonser",
-    ]
-
-    return px.bar(
-        grupperad,
-        x="datum",
-        y="annonser",
-        title="Antal annonser över tid",
-        labels={
-            "datum": "Datum",
-            "annonser": "Antal annonser",
-        },
-    )
-
-
-def prisfordelning(
-    df: pd.DataFrame,
-):
-    """
-    Visar prisfördelning.
-    """
-    if df.empty:
-        return None
-
-    priskolumn = _hitta_kolumn(
-        df,
-        [
-            "annonspris",
-            "pris",
-            "price",
-        ],
-    )
-
-    if not priskolumn:
-        return None
-
-    data = df.copy()
-
-    data[priskolumn] = pd.to_numeric(
-        data[priskolumn],
-        errors="coerce",
-    )
-
-    data = data.dropna(
-        subset=[priskolumn]
-    )
-
-    if data.empty:
-        return None
-
-    return px.histogram(
-        data,
-        x=priskolumn,
-        nbins=30,
-        title="Prisfördelning",
-        labels={
-            priskolumn: "Pris",
-        },
-    )
-
-
-def fyndutfall_diagram(
-    df: pd.DataFrame,
-):
-    """
-    Visar fördelningen mellan olika fyndutfall.
-    """
-    if (
-        df.empty
-        or "utfall" not in df.columns
-    ):
-        return None
-
-    grupperad = (
-        df["utfall"]
-        .value_counts()
-        .reset_index()
-    )
-
-    grupperad.columns = [
-        "utfall",
-        "antal",
-    ]
-
-    return px.bar(
-        grupperad,
-        x="utfall",
-        y="antal",
-        title="Fyndutfall",
-        labels={
-            "utfall": "Utfall",
-            "antal": "Antal fynd-event",
-        },
-    )
-
-
-def score_utfall_diagram(
-    df: pd.DataFrame,
-):
-    """
-    Visar scoreintervall mot faktiskt utfall.
-    """
-    if df.empty:
-        return None
-
-    krav = {
-        "scoreintervall",
-        "utfall",
-        "antal",
+    usable = {
+        year: points
+        for year, points
+        in year_series.items()
+        if points
     }
 
-    if not krav.issubset(
-        df.columns
-    ):
-        return None
+    if not usable:
+        return """
+        <div class="empty">
+            Ingen tillräcklig historik.
+        </div>
+        """
 
-    return px.bar(
-        df,
-        x="scoreintervall",
-        y="antal",
-        color="utfall",
-        barmode="group",
-        title="Score mot faktiskt utfall",
-        labels={
-            "scoreintervall": "Score",
-            "antal": "Antal",
-            "utfall": "Utfall",
-        },
+    width = 900
+    height = 360
+
+    left = 90
+    right = 70
+    top = 50
+    bottom = 60
+
+    plot_width = (
+        width
+        - left
+        - right
     )
 
+    plot_height = (
+        height
+        - top
+        - bottom
+    )
 
-def prissankningar_diagram(
-    df: pd.DataFrame,
-):
-    """
-    Visar observerade prissänkningar.
-    """
-    if df.empty:
-        return None
+    all_points = [
+        point
+        for points
+        in usable.values()
+        for point in points
+    ]
 
-    if "total_prissankning" not in df.columns:
-        return None
+    dates = sorted(
+        {
+            point["date"]
+            for point in all_points
+        }
+    )
 
-    data = df.copy()
-
-    data["total_prissankning"] = (
-        pd.to_numeric(
-            data[
-                "total_prissankning"
-            ],
-            errors="coerce",
+    prices = [
+        float(
+            point["price"]
         )
+        for point
+        in all_points
+    ]
+
+    min_price = min(
+        prices
     )
 
-    data = data.dropna(
-        subset=[
-            "total_prissankning"
+    max_price = max(
+        prices
+    )
+
+    if min_price == max_price:
+        min_price -= 1
+        max_price += 1
+
+    date_index = {
+        date: index
+        for index, date
+        in enumerate(dates)
+    }
+
+    def x_position(
+        date: str,
+    ) -> float:
+
+        index = date_index[
+            date
         ]
+
+        if len(dates) <= 1:
+            return (
+                left
+                + plot_width
+                / 2
+            )
+
+        return (
+            left
+            + (
+                index
+                / (
+                    len(dates)
+                    - 1
+                )
+            )
+            * plot_width
+        )
+
+    def y_position(
+        price: float,
+    ) -> float:
+
+        return (
+            top
+            + (
+                (
+                    max_price
+                    - price
+                )
+                / (
+                    max_price
+                    - min_price
+                )
+            )
+            * plot_height
+        )
+
+    parts = [
+        (
+            '<svg '
+            'class="market-chart" '
+            f'viewBox="0 0 {width} {height}" '
+            'preserveAspectRatio="xMidYMid meet" '
+            'role="img" '
+            f'aria-label="{safe(model)} '
+            'prisutveckling">'
+        )
+    ]
+
+    parts.append(
+        f"""
+        <text
+            x="{left}"
+            y="28"
+            class="chart-title"
+        >
+            {safe(model)}
+        </text>
+        """
     )
 
-    if data.empty:
-        return None
+    # Y-axel
+    for tick in range(5):
 
-    namn = []
+        fraction = (
+            tick / 4
+        )
 
-    for index, row in data.iterrows():
-        modell = str(
-            row.get(
-                "modell",
-                "Okänd",
+        value = (
+            min_price
+            + (
+                max_price
+                - min_price
+            )
+            * fraction
+        )
+
+        y = y_position(
+            value
+        )
+
+        parts.append(
+            f"""
+            <line
+                x1="{left}"
+                y1="{y:.1f}"
+                x2="{width-right}"
+                y2="{y:.1f}"
+                class="gridline"
+            />
+
+            <text
+                x="5"
+                y="{y + 4:.1f}"
+                class="axis"
+            >
+                {safe(
+                    fmt_price(value)
+                )}
+            </text>
+            """
+        )
+
+    # X-axel
+    if dates:
+
+        x_dates = [
+            dates[0],
+            dates[-1],
+        ]
+
+        if len(dates) > 2:
+
+            middle = dates[
+                len(dates) // 2
+            ]
+
+            if middle not in x_dates:
+                x_dates.insert(
+                    1,
+                    middle,
+                )
+
+        for date in x_dates:
+
+            x = x_position(
+                date
+            )
+
+            parts.append(
+                f"""
+                <text
+                    x="{x:.1f}"
+                    y="{height - 20}"
+                    class="axis"
+                    text-anchor="middle"
+                >
+                    {safe(date[:7])}
+                </text>
+                """
+            )
+
+    # Linjer
+    for index, (
+        year,
+        points,
+    ) in enumerate(
+        sorted(
+            usable.items(),
+            key=lambda item:
+                str(item[0]),
+        )
+    ):
+
+        stroke = COLORS[
+            index
+            % len(COLORS)
+        ]
+
+        coordinates = " ".join(
+            (
+                f"{x_position(point['date']):.1f},"
+                f"{y_position(float(point['price'])):.1f}"
+            )
+            for point in points
+        )
+
+        parts.append(
+            f"""
+            <polyline
+                points="{coordinates}"
+                fill="none"
+                stroke="{stroke}"
+                stroke-width="2.5"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+            />
+            """
+        )
+
+        # Sista datapunkten
+        last = points[-1]
+
+        x = x_position(
+            last["date"]
+        )
+
+        y = y_position(
+            float(
+                last["price"]
             )
         )
 
-        namn.append(
-            f"{modell} #{index}"
+        parts.append(
+            f"""
+            <circle
+                cx="{x:.1f}"
+                cy="{y:.1f}"
+                r="4"
+                fill="{stroke}"
+            />
+
+            <text
+                x="{x + 9:.1f}"
+                y="{y + 4:.1f}"
+                class="legend-label"
+            >
+                {safe(year)}
+            </text>
+            """
         )
 
-    data["namn"] = namn
-
-    data = data.sort_values(
-        "total_prissankning",
-        ascending=False,
+    parts.append(
+        "</svg>"
     )
 
-    return px.bar(
-        data,
-        x="namn",
-        y="total_prissankning",
-        title="Största observerade prissänkningar",
-        labels={
-            "namn": "Fynd",
-            "total_prissankning":
-                "Prissänkning",
-        },
-    )
+    return "".join(parts)
