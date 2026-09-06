@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+
   daily-market-report-debug:
 
     runs-on: ubuntu-latest
@@ -55,3 +56,96 @@ jobs:
           echo "=================================================="
 
           python -u -m ml.train_market_model
+
+      - name: Bygg statisk webb
+        run: |
+          echo "=================================================="
+          echo "DEBUG: Bygger Fiskabilar Analytics"
+          echo "=================================================="
+
+          python -u web/build_static.py
+
+      - name: Validera statisk webb
+        run: |
+          echo "=================================================="
+          echo "DEBUG: Validerar web_site"
+          echo "=================================================="
+
+          test -f web_site/index.html
+          test -f web_site/data.json
+          test -f web_site/.nojekyll
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data_path = Path("web_site/data.json")
+
+          with data_path.open(
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          required = {
+              "generated_at",
+              "summary",
+              "current_findings",
+              "price_reductions",
+              "find_outcomes",
+              "score_analysis",
+              "market_history",
+              "ml",
+          }
+
+          missing = required - set(data)
+
+          if missing:
+              raise SystemExit(
+                  f"Saknade nycklar i data.json: {sorted(missing)}"
+              )
+
+          html = Path(
+              "web_site/index.html"
+          ).read_text(
+              encoding="utf-8"
+          )
+
+          if "<html" not in html:
+              raise SystemExit(
+                  "index.html verkar inte vara en HTML-fil."
+              )
+
+          print(
+              "=================================================="
+          )
+          print(
+              "DEBUG: Webbplatsen är korrekt byggd."
+          )
+          print(
+              f"Aktuella fynd: "
+              f"{len(data['current_findings'])}"
+          )
+          print(
+              f"Fynd-event: "
+              f"{len(data['find_outcomes'])}"
+          )
+          print(
+              f"Prissänkningar: "
+              f"{len(data['price_reductions'])}"
+          )
+          print(
+              f"Marknadsobservationer: "
+              f"{len(data['market_history'])}"
+          )
+          print(
+              "=================================================="
+          )
+          PY
+
+      - name: Ladda upp debug-webb som artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiskabilar-web-debug
+          path: web_site
+          if-no-files-found: error
