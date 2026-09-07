@@ -1,5 +1,5 @@
 """
-Huvudrendering av Fiskabilars statiska HTML-sida.
+Huvudlayout för Fiskabilars statiska webbplats.
 """
 
 from __future__ import annotations
@@ -11,6 +11,10 @@ from data_loader import safe
 from .findings import (
     render_findings,
     render_price_reductions,
+)
+
+from .global_filter import (
+    render_global_filter,
 )
 
 from .history import (
@@ -28,6 +32,7 @@ from .outcomes import (
 
 from .styles import (
     render_styles,
+    render_global_filter_styles,
 )
 
 
@@ -39,51 +44,38 @@ def build_html(
         "summary"
     ]
 
-    current_findings = (
-        payload[
-            "current_findings"
-        ]
-    )
+    current_findings = payload[
+        "current_findings"
+    ]
 
-    reductions = (
-        payload[
-            "price_reductions"
-        ]
-    )
+    reductions = payload[
+        "price_reductions"
+    ]
 
-    outcomes = (
-        payload[
-            "find_outcomes"
-        ]
-    )
+    outcomes = payload[
+        "find_outcomes"
+    ]
 
-    score = (
-        payload[
-            "score_analysis"
-        ]
-    )
+    score = payload[
+        "score_analysis"
+    ]
 
-    history_table = (
-        payload[
-            "history_table"
-        ]
-    )
+    history_table = payload[
+        "history_table"
+    ]
 
-    history_series = (
-        payload[
-            "history_series"
-        ]
-    )
+    history_series = payload[
+        "history_series"
+    ]
 
     ml = payload[
         "ml"
     ]
 
-    generated_at = (
-        payload[
-            "generated_at"
-        ]
-    )
+    generated_at = payload[
+        "generated_at"
+    ]
+
 
     return f"""<!DOCTYPE html>
 
@@ -104,9 +96,13 @@ def build_html(
 
 {render_styles()}
 
+{render_global_filter_styles()}
+
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -129,9 +125,14 @@ def build_html(
 
 </header>
 
+
 <nav>
 
     <div class="nav-inner">
+
+        <a href="#global-filter">
+            🔎 Filter
+        </a>
 
         <a href="#oversikt">
             Översikt
@@ -165,7 +166,12 @@ def build_html(
 
 </nav>
 
+
 <main>
+
+
+{render_global_filter()}
+
 
 <section id="oversikt">
 
@@ -187,6 +193,7 @@ def build_html(
 
         </div>
 
+
         <div class="kpi">
 
             <span>
@@ -198,6 +205,7 @@ def build_html(
             </strong>
 
         </div>
+
 
         <div class="kpi">
 
@@ -211,6 +219,7 @@ def build_html(
 
         </div>
 
+
         <div class="kpi">
 
             <span>
@@ -222,6 +231,7 @@ def build_html(
             </strong>
 
         </div>
+
 
         <div class="kpi">
 
@@ -239,6 +249,7 @@ def build_html(
 
 </section>
 
+
 <section id="fynd">
 
     <h2>
@@ -254,6 +265,7 @@ def build_html(
     </div>
 
 </section>
+
 
 <section id="score">
 
@@ -271,6 +283,7 @@ def build_html(
 
 </section>
 
+
 <section id="sankningar">
 
     <h2>
@@ -287,6 +300,7 @@ def build_html(
 
 </section>
 
+
 <section id="utfall">
 
     <h2>
@@ -302,6 +316,7 @@ def build_html(
     </div>
 
 </section>
+
 
 <section id="historik">
 
@@ -320,6 +335,7 @@ def build_html(
 
 </section>
 
+
 <section id="ml">
 
     <h2>
@@ -336,7 +352,9 @@ def build_html(
 
 </section>
 
+
 </main>
+
 
 <footer>
 
@@ -344,6 +362,7 @@ def build_html(
     Statisk vy byggd automatiskt från data/
 
 </footer>
+
 
 </body>
 
