@@ -289,11 +289,25 @@ def render_styles() -> str:
         font-size: 1.2rem;
     }
 
+    /*
+     * Globalt filter.
+     *
+     * Vi ger både sektionen och själva kortet
+     * explicit topputrymme så att filterrutan
+     * inte upplevs ligga direkt mot innehållet
+     * ovanför och så att rubriken inte ligger
+     * kloss mot kortets överkant.
+     */
+
+    #global-filter {
+        padding-top: 20px;
+    }
+
     .global-filter-card {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 14px;
-        padding: 20px;
+        padding: 24px 20px 20px;
     }
 
     .global-filter-header {
