@@ -6,6 +6,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from analysis import (
+    model_label,
+)
+
 from data_loader import (
     fmt_number,
     fmt_price,
@@ -17,22 +21,9 @@ def _model(
     row: dict[str, Any],
 ) -> str:
 
-    modell = (
-        row.get("modell")
-        or "Okänd bil"
+    return model_label(
+        row
     )
-
-    variant = (
-        row.get("variant")
-        or ""
-    )
-
-    if variant:
-        modell = (
-            f"{modell} {variant}"
-        )
-
-    return modell
 
 
 def _year(
@@ -101,7 +92,6 @@ def render_findings(
         else:
 
             link = "—"
-
 
         html_rows.append(
             f"""
@@ -211,7 +201,6 @@ def render_price_reductions(
         percentage = row.get(
             "_display_percentage"
         )
-
 
         html_rows.append(
             f"""
