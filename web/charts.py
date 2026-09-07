@@ -40,6 +40,9 @@ def market_chart(
     Skapar ett prisdiagram för en modell.
 
     Varje årsmodell visas som en separat linje.
+    Varje linje, datapunkt och årslabel får ett
+    data-chart-year-attribut så att det globala
+    årsmodellfiltret kan styra diagrammet.
     """
 
     usable = {
@@ -301,6 +304,7 @@ def market_chart(
                 stroke-width="2.5"
                 stroke-linejoin="round"
                 stroke-linecap="round"
+                data-chart-year="{safe(year)}"
             />
             """
         )
@@ -325,12 +329,14 @@ def market_chart(
                 cy="{y:.1f}"
                 r="4"
                 fill="{stroke}"
+                data-chart-year="{safe(year)}"
             />
 
             <text
                 x="{x + 9:.1f}"
                 y="{y + 4:.1f}"
                 class="legend-label"
+                data-chart-year="{safe(year)}"
             >
                 {safe(year)}
             </text>
