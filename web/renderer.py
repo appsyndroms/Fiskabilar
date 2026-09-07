@@ -1,8 +1,8 @@
 """
 HTML-rendering för Fiskabilar Analytics.
 
-Den här filen fungerar som ett tunt API-lager.
-Den faktiska renderingen ligger i web/renderers/.
+Den här filen är endast ett publikt API för renderingen.
+Den faktiska implementationen ligger i web/renderers/.
 """
 
 from renderers import (
