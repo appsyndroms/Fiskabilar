@@ -50,5 +50,11 @@ jobs:
             echo "Ingen ändring att committa."
           else
             git commit -m "Uppdatera fyndutfall"
-            git push
+
+            # main kan ha fått nya commits medan jobbet körde.
+            # Hämta senaste main och lägg vår genererade commit ovanpå den.
+            git fetch origin main
+            git rebase origin/main
+
+            git push origin HEAD:main
           fi
