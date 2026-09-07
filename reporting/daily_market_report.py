@@ -10,6 +10,7 @@ Rapporten sammanfattar:
 - försvunna annonser
 - aktuella fynd
 - marknadstrender
+- Fiskabilar Analytics
 
 Rapporten sparas alltid innan mejl försöks skickas.
 Ett mejlfel får därför aldrig innebära att dagens rapport förloras.
@@ -37,6 +38,11 @@ from notifications.email import skicka_epost
 
 
 TIDSZON = ZoneInfo("Europe/Stockholm")
+
+WEBB_URL = (
+    "https://appsyndroms.github.io/"
+    "Fiskabilar/#oversikt"
+)
 
 
 def _nu() -> datetime:
@@ -240,10 +246,6 @@ def _forandringar(
         if dag == igar
     }
 
-    # ---------------------------------------------------------
-    # FÖRSTA OBSERVATION
-    # ---------------------------------------------------------
-
     forsta = {}
 
     for post in observationer:
@@ -273,10 +275,6 @@ def _forandringar(
                 post,
             )
 
-    # ---------------------------------------------------------
-    # NYA
-    # ---------------------------------------------------------
-
     nya = [
         post
         for vehicle_id, post
@@ -289,10 +287,6 @@ def _forandringar(
             == datum
         )
     ]
-
-    # ---------------------------------------------------------
-    # PRISÄNDRINGAR
-    # ---------------------------------------------------------
 
     prisandringar = []
 
@@ -365,10 +359,6 @@ def _forandringar(
         ),
         reverse=True,
     )
-
-    # ---------------------------------------------------------
-    # FÖRSVUNNA
-    # ---------------------------------------------------------
 
     forsvunna = [
         post
@@ -833,6 +823,14 @@ def _bygg_rapport(
 
     rader += [
         "",
+        "------------------------------------------------------------",
+        "🌐 FISKABILAR ANALYTICS",
+        "------------------------------------------------------------",
+        "Öppna den aktuella webben med marknadsdata,",
+        "fynd, utfall och ML-statistik:",
+        "",
+        WEBB_URL,
+        "",
         "============================================================",
     ]
 
@@ -1025,6 +1023,8 @@ def skapa_och_skicka_rapport(
                 now.isoformat(
                     timespec="seconds"
                 ),
+            "webb_url":
+                WEBB_URL,
             "nya":
                 len(
                     forandringar[
@@ -1062,11 +1062,6 @@ def skapa_och_skicka_rapport(
                 ),
         }
 
-        # -----------------------------------------------------
-        # VIKTIGT:
-        # LOGGA FÖRST.
-        # -----------------------------------------------------
-
         _spara_logg(
             post
         )
@@ -1080,7 +1075,11 @@ def skapa_och_skicka_rapport(
             f"{_rapportfil()}"
         )
 
-        # Undvik dubbla mejl vid exempelvis manuell rerun.
+        always(
+            "[RAPPORT] Fiskabilar Analytics: "
+            f"{WEBB_URL}"
+        )
+
         if (
             post["email_skickat"]
             and not force_email
@@ -1137,15 +1136,14 @@ def skapa_och_skicka_rapport(
 
     except Exception as exc:
 
-        # Även ett oväntat fel ska lämna ett
-        # beständigt spår i rapportloggen.
-
         fallback = {
             "datum": datum,
             "skapad":
                 now.isoformat(
                     timespec="seconds"
                 ),
+            "webb_url":
+                WEBB_URL,
             "status": "FEL",
             "fel": str(exc),
             "rapport": (
@@ -1153,7 +1151,9 @@ def skapa_och_skicka_rapport(
                 f"MARKNADSRAPPORT {datum}\n\n"
                 "Rapporten kunde inte "
                 "byggas komplett.\n\n"
-                f"Fel: {exc}"
+                f"Fel: {exc}\n\n"
+                "Fiskabilar Analytics:\n"
+                f"{WEBB_URL}"
             ),
             "email_skickat": False,
         }
@@ -1173,9 +1173,6 @@ def skapa_och_skicka_rapport(
             f"rapportgenerering: {exc}"
         )
 
-        # Rapportjobbet ska inte förlora loggen
-        # eller skapa en tom historik bara för att
-        # mejlet/rapporten hade ett fel.
         return 0
 
 
