@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 from charts import market_chart
+
 from data_loader import (
     fmt_number,
     fmt_price,
@@ -38,20 +39,30 @@ def render_market_history(
 
     for row in table:
 
+        model = row[
+            "modell"
+        ]
+
+        year = row[
+            "arsmodell"
+        ]
+
         rows.append(
             f"""
-            <tr>
+            <tr
+                data-history-row
+                data-filter-model="{safe(model)}"
+                data-filter-year="{safe(year)}"
+            >
 
                 <td>
                     <strong>
-                        {safe(
-                            row["modell"]
-                        )}
+                        {safe(model)}
                     </strong>
                 </td>
 
                 <td>
-                    {row["arsmodell"]}
+                    {safe(year)}
                 </td>
 
                 <td>
@@ -82,15 +93,29 @@ def render_market_history(
             """
         )
 
+
     charts = []
+
 
     for model, years in sorted(
         series.items()
     ):
 
+        year_names = ",".join(
+            str(year)
+            for year in sorted(
+                years.keys()
+            )
+        )
+
+
         charts.append(
             f"""
-            <div class="chart-card">
+            <div
+                class="chart-card"
+                data-chart-model="{safe(model)}"
+                data-chart-years="{safe(year_names)}"
+            >
 
                 {market_chart(
                     model,
@@ -101,7 +126,9 @@ def render_market_history(
             """
         )
 
+
     return f"""
+
     <h3>
         Marknadsöversikt
     </h3>
@@ -117,6 +144,7 @@ def render_market_history(
         <table>
 
             <thead>
+
                 <tr>
                     <th>Modell</th>
                     <th>År</th>
@@ -125,21 +153,29 @@ def render_market_history(
                     <th>Snittpris</th>
                     <th>Medianmiltal</th>
                 </tr>
+
             </thead>
 
             <tbody>
+
                 {"".join(rows)}
+
             </tbody>
 
         </table>
 
     </div>
 
+
     <h3>
         Pris över tid
     </h3>
 
+
     <div class="charts">
+
         {"".join(charts)}
+
     </div>
+
     """
