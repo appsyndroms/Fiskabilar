@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import datetime
+import re
 from statistics import median
 from typing import Any
 
@@ -13,6 +14,189 @@ from typing import Any
 from data_loader import (
     to_number,
 )
+
+
+# ---------------------------------------------------------------------------
+# Modellnormalisering
+# ---------------------------------------------------------------------------
+
+MODEL_DISPLAY_NAMES = {
+    "330e xdrive touring":
+        "330e xDrive Touring",
+
+    "530e xdrive touring":
+        "530e xDrive Touring",
+
+    "v60 t6 awd":
+        "V60 T6 AWD",
+
+    "v60 t8 awd":
+        "V60 T8 AWD",
+
+    "v90 t6 awd":
+        "V90 T6 AWD",
+
+    "v90 t8 awd":
+        "V90 T8 AWD",
+}
+
+
+def model_key(
+    value: Any,
+) -> str:
+    """
+    Skapar en stabil jämförelsenyckel för modellnamn.
+
+    Bindestreck och understreck behandlas som mellanslag.
+    Flera mellanslag reduceras till ett.
+    Jämförelsen är skiftlägesokänslig.
+
+    Exempel:
+
+        330E XDRIVE TOURING
+        330E-XDRIVE-TOURING
+        330e_xDrive_Touring
+
+    blir samma nyckel:
+
+        330e xdrive touring
+    """
+
+    value = str(
+        value
+        or ""
+    ).strip()
+
+    value = re.sub(
+        r"[-_]+",
+        " ",
+        value,
+    )
+
+    value = re.sub(
+        r"\s+",
+        " ",
+        value,
+    )
+
+    return value.strip().lower()
+
+
+def model_display_name(
+    value: Any,
+) -> str:
+    """
+    Returnerar ett canonicaliserat visningsnamn.
+    """
+
+    value = str(
+        value
+        or ""
+    ).strip()
+
+    if not value:
+        return ""
+
+    key = model_key(
+        value
+    )
+
+    known = MODEL_DISPLAY_NAMES.get(
+        key
+    )
+
+    if known:
+        return known
+
+    return value
+
+
+def model_label_from_values(
+    modell: Any,
+    variant: Any,
+) -> str:
+    """
+    Bygger ett canonicaliserat modellnamn från modell + variant.
+
+    Viktigt:
+
+    Om modell och variant egentligen innehåller samma modellnamn
+    ska de INTE läggas ihop två gånger.
+
+    Exempel:
+
+        modell:
+            330E-XDRIVE-TOURING
+
+        variant:
+            330E XDRIVE TOURING
+
+    blir:
+
+        330e xDrive Touring
+    """
+
+    modell_text = str(
+        modell
+        or ""
+    ).strip()
+
+    variant_text = str(
+        variant
+        or ""
+    ).strip()
+
+    modell_key = model_key(
+        modell_text
+    )
+
+    variant_key = model_key(
+        variant_text
+    )
+
+    if not modell_key:
+        return (
+            model_display_name(
+                variant_text
+            )
+            or "Okänd modell"
+        )
+
+    if not variant_key:
+        return model_display_name(
+            modell_text
+        )
+
+    # Modell och variant är egentligen samma sak.
+    if modell_key == variant_key:
+        return model_display_name(
+            modell_text
+        )
+
+    combined_key = (
+        modell_key
+        + " "
+        + variant_key
+    )
+
+    combined_display = (
+        MODEL_DISPLAY_NAMES.get(
+            combined_key
+        )
+    )
+
+    if combined_display:
+        return combined_display
+
+    return (
+        model_display_name(
+            modell_text
+        )
+        + " "
+        + model_display_name(
+            variant_text
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -61,38 +245,22 @@ def model_label(
     row: dict[str, Any],
 ) -> str:
     """
-    Bygger modellnamn.
+    Bygger ett canonicaliserat modellnamn.
 
     Exempel:
 
-        v60 + T6 AWD
-        -> V60 T6 AWD
+        modell = v60
+        variant = T6 AWD
+
+    blir:
+
+        V60 T6 AWD
     """
 
-    modell = str(
-        row.get("modell")
-        or ""
-    ).strip()
-
-    variant = str(
-        row.get("variant")
-        or ""
-    ).strip()
-
-    if not modell:
-        return (
-            variant
-            or "Okänd modell"
-        )
-
-    if variant:
-        return (
-            modell.upper()
-            + " "
-            + variant.upper()
-        )
-
-    return modell.upper()
+    return model_label_from_values(
+        row.get("modell"),
+        row.get("variant"),
+    )
 
 
 def latest_by_vehicle(
@@ -165,8 +333,6 @@ def get_current_findings(
     """
     Hämtar aktuella fynd.
 
-    Viktigt:
-
     Den aktuella feedback-datan använder `utfall=AKTIV`
     medan äldre struktur använder `livscykelstatus`.
 
@@ -229,9 +395,6 @@ def has_price_reduction(
 ) -> bool:
     """
     Avgör om en bil faktiskt har haft en prissänkning.
-
-    Vi använder flera fält eftersom olika generationer
-    av feedback-data kan lagra informationen på olika sätt.
     """
 
     first = to_number(
@@ -631,9 +794,14 @@ def get_market_history_analysis(
     """
     Bygger en översiktlig marknadshistorik.
 
-    Grupp:
+    Modellnamnet canonicaliseras FÖRE gruppering.
 
-        modell + variant + årsmodell
+    Det betyder att exempelvis:
+
+        330E XDRIVE TOURING
+        330E-XDRIVE-TOURING
+
+    hamnar i samma grupp.
 
     Sammanfattning:
 
@@ -658,30 +826,9 @@ def get_market_history_analysis(
 
     for row in rows:
 
-        modell = str(
-            row.get("modell")
-            or ""
-        ).strip()
-
-        variant = str(
-            row.get("variant")
-            or ""
-        ).strip()
-
-        if modell:
-            if variant:
-                label = (
-                    modell.upper()
-                    + " "
-                    + variant.upper()
-                )
-            else:
-                label = modell.upper()
-        else:
-            label = (
-                variant.upper()
-                or "OKÄND MODELL"
-            )
+        label = model_label(
+            row
+        )
 
         year = (
             to_number(
