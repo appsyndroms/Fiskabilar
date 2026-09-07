@@ -1,5 +1,5 @@
 """
-Rendering av fyndutfall och scoreanalys.
+Rendering av fyndutfall och score.
 """
 
 from __future__ import annotations
@@ -51,7 +51,10 @@ def render_outcomes(
 
         bars.append(
             f"""
-            <div class="bar-row">
+            <div
+                class="bar-row"
+                data-outcome-row
+            >
 
                 <div class="bar-label">
 
@@ -77,7 +80,11 @@ def render_outcomes(
             """
         )
 
-    return "".join(bars)
+    return (
+        '<div data-outcomes-container>'
+        + "".join(bars)
+        + "</div>"
+    )
 
 
 def render_score_analysis(
@@ -108,14 +115,17 @@ def render_score_analysis(
         ]
 
         parts = [
+
             (
                 f"{safe(name)}: "
                 f"{value}"
             )
+
             for name, value
             in sorted(
                 outcomes.items()
             )
+
         ]
 
         output.append(
@@ -123,6 +133,7 @@ def render_score_analysis(
             <div class="score-row">
 
                 <div>
+
                     <strong>
                         {safe(bucket)}
                     </strong>
@@ -130,6 +141,7 @@ def render_score_analysis(
                     <span>
                         {count} event
                     </span>
+
                 </div>
 
                 <div>
@@ -144,4 +156,8 @@ def render_score_analysis(
             """
         )
 
-    return "".join(output)
+    return (
+        '<div data-score-container>'
+        + "".join(output)
+        + "</div>"
+    )
