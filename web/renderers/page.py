@@ -104,9 +104,6 @@ def build_html(
         <a href="#historik">
             🕒 Marknadshistorik
         </a>
-        <a href="#utfall">
-            📊 Fyndutfall
-        </a>
         <a href="#score-utfall">
             ⭐ Score mot faktiskt utfall
         </a>
@@ -192,16 +189,6 @@ def build_html(
         {render_market_history(
             history_table,
             history_series,
-        )}
-    </div>
-</section>
-<section id="utfall">
-    <h2>
-        📊 Fyndutfall
-    </h2>
-    <div class="card">
-        {render_outcomes(
-            outcomes
         )}
     </div>
 </section>
