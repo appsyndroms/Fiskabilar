@@ -44,17 +44,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/find_feedback/find_outcomes_*.jsonl
+          git add -A
 
           if git diff --cached --quiet; then
             echo "Ingen ändring att committa."
-          else
-            git commit -m "Uppdatera fyndutfall"
-
-            # main kan ha fått nya commits medan jobbet körde.
-            # Hämta senaste main och lägg vår genererade commit ovanpå den.
-            git fetch origin main
-            git rebase origin/main
-
-            git push origin HEAD:main
+            exit 0
           fi
+
+          git commit -m "Uppdatera fyndutfall"
+
+          git fetch origin main
+          git rebase origin/main
+
+          git push origin HEAD:main
