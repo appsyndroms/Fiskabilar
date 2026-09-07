@@ -1,5 +1,5 @@
 """
-Renderingsmoduler för Fiskabilars statiska webbplats.
+Renderingspaket för Fiskabilars statiska webbplats.
 """
 
 from .findings import (
