@@ -167,6 +167,28 @@ def render_global_filter() -> str:
         row
     ) {
 
+        /*
+         * Modellfiltret ska ligga på modellnivå.
+         *
+         * Variant ska INTE ingå här.
+         *
+         * Exempel:
+         *
+         *   modell = V60
+         *   variant = T6 AWD
+         *
+         * ska ge:
+         *
+         *   V60
+         *
+         * och inte:
+         *
+         *   V60 T6 AWD
+         *
+         * På så sätt blir flera drivlinevarianter
+         * av samma modell ett enda modellalternativ.
+         */
+
         const model = first(
             row,
             [
@@ -175,21 +197,12 @@ def render_global_filter() -> str:
             ]
         );
 
-        const variant = first(
-            row,
-            [
-                "variant",
-                "version",
-            ]
-        );
-
-        return [
-            model,
-            variant,
-        ]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
+        return model
+            .replace(
+                /\s+/g,
+                " "
+            )
+            .trim();
 
     }
 
@@ -450,6 +463,13 @@ def render_global_filter() -> str:
                     === state.make
             );
 
+
+        /*
+         * Modellalternativen bygger enbart på
+         * grundmodellen och dedupliceras via Set.
+         *
+         * Variant används alltså inte här.
+         */
 
         const models =
             unique(
