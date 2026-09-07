@@ -1,61 +1,62 @@
-"""
+“””
 Huvudlayout för Fiskabilars statiska webbplats.
-"""
-from __future__ import annotations
+“””
+from future import annotations
 from typing import Any
 from data_loader import safe
 from .findings import (
-    render_findings,
-    render_price_reductions,
+render_findings,
+render_price_reductions,
 )
 from .global_filter import (
-    render_global_filter,
+render_global_filter,
 )
 from .history import (
-    render_market_history,
+render_market_history,
 )
 from .ml import (
-    render_ml,
+render_ml,
 )
 from .outcomes import (
-    render_outcomes,
-    render_score_analysis,
+render_outcomes,
+render_score_analysis,
 )
 from .styles import (
-    render_styles,
-    render_global_filter_styles,
+render_styles,
+render_global_filter_styles,
 )
 def build_html(
-    payload: dict[str, Any],
+payload: dict[str, Any],
 ) -> str:
-    summary = payload[
-        "summary"
-    ]
-    current_findings = payload[
-        "current_findings"
-    ]
-    reductions = payload[
-        "price_reductions"
-    ]
-    outcomes = payload[
-        "find_outcomes"
-    ]
-    score = payload[
-        "score_analysis"
-    ]
-    history_table = payload[
-        "history_table"
-    ]
-    history_series = payload[
-        "history_series"
-    ]
-    ml = payload[
-        "ml"
-    ]
-    generated_at = payload[
-        "generated_at"
-    ]
-    return f"""<!DOCTYPE html>
+summary = payload[
+“summary”
+]
+current_findings = payload[
+“current_findings”
+]
+reductions = payload[
+“price_reductions”
+]
+outcomes = payload[
+“find_outcomes”
+]
+score = payload[
+“score_analysis”
+]
+history_table = payload[
+“history_table”
+]
+history_series = payload[
+“history_series”
+]
+ml = payload[
+“ml”
+]
+generated_at = payload[
+“generated_at”
+]
+return f”””
+
 <html lang="sv">
 <head>
 <meta charset="utf-8">
@@ -94,9 +95,6 @@ def build_html(
         </a>
         <a href="#fynd">
             🚗 Aktuella fynd
-        </a>
-        <a href="#score">
-            ⭐ Score
         </a>
         <a href="#sankningar">
             📉 Prissänkningar
