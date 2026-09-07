@@ -1,5 +1,5 @@
 """
-Rendering av fynd och prissänkningar.
+Rendering av aktuella fynd och prissänkningar.
 """
 
 from __future__ import annotations
@@ -11,6 +11,39 @@ from data_loader import (
     fmt_price,
     safe,
 )
+
+
+def _model(
+    row: dict[str, Any],
+) -> str:
+
+    modell = (
+        row.get("modell")
+        or "Okänd bil"
+    )
+
+    variant = (
+        row.get("variant")
+        or ""
+    )
+
+    if variant:
+        modell = (
+            f"{modell} {variant}"
+        )
+
+    return modell
+
+
+def _year(
+    row: dict[str, Any],
+) -> Any:
+
+    return (
+        row.get("arsmodell")
+        or row.get("modell_ar")
+        or "—"
+    )
 
 
 def render_findings(
@@ -26,28 +59,10 @@ def render_findings(
 
     html_rows = []
 
-    for row in rows:
+    for index, row in enumerate(rows):
 
-        modell = (
-            row.get("modell")
-            or "Okänd bil"
-        )
-
-        variant = (
-            row.get("variant")
-            or ""
-        )
-
-        if variant:
-            modell = (
-                f"{modell} {variant}"
-            )
-
-        year = (
-            row.get("arsmodell")
-            or row.get("modell_ar")
-            or "—"
-        )
+        model = _model(row)
+        year = _year(row)
 
         mileage = (
             row.get("miltal")
@@ -65,7 +80,9 @@ def render_findings(
             or row.get("prisdiff")
         )
 
-        score = row.get("score")
+        score = row.get(
+            "score"
+        )
 
         url = (
             row.get("url")
@@ -73,21 +90,30 @@ def render_findings(
         )
 
         if url:
+
             link = (
                 f'<a href="{safe(url)}" '
                 f'target="_blank" '
                 f'rel="noopener">'
                 f'Öppna annons</a>'
             )
+
         else:
+
             link = "—"
+
 
         html_rows.append(
             f"""
-            <tr>
+            <tr
+                data-current-finding
+                data-filter-model="{safe(model)}"
+                data-filter-year="{safe(year)}"
+            >
+
                 <td>
                     <strong>
-                        {safe(modell)}
+                        {safe(model)}
                     </strong>
                 </td>
 
@@ -116,6 +142,7 @@ def render_findings(
                 <td>
                     {link}
                 </td>
+
             </tr>
             """
         )
@@ -126,6 +153,7 @@ def render_findings(
         <table>
 
             <thead>
+
                 <tr>
                     <th>Bil</th>
                     <th>Årsmodell</th>
@@ -135,10 +163,13 @@ def render_findings(
                     <th>Score</th>
                     <th>Annons</th>
                 </tr>
+
             </thead>
 
             <tbody>
+
                 {"".join(html_rows)}
+
             </tbody>
 
         </table>
@@ -162,20 +193,8 @@ def render_price_reductions(
 
     for row in rows[:100]:
 
-        modell = (
-            row.get("modell")
-            or "Okänd bil"
-        )
-
-        variant = (
-            row.get("variant")
-            or ""
-        )
-
-        if variant:
-            modell = (
-                f"{modell} {variant}"
-            )
+        model = _model(row)
+        year = _year(row)
 
         initial = row.get(
             "_display_initialpris"
@@ -193,18 +212,18 @@ def render_price_reductions(
             "_display_percentage"
         )
 
-        year = (
-            row.get("arsmodell")
-            or "—"
-        )
 
         html_rows.append(
             f"""
-            <tr>
+            <tr
+                data-price-reduction
+                data-filter-model="{safe(model)}"
+                data-filter-year="{safe(year)}"
+            >
 
                 <td>
                     <strong>
-                        {safe(modell)}
+                        {safe(model)}
                     </strong>
                 </td>
 
@@ -243,6 +262,7 @@ def render_price_reductions(
         <table>
 
             <thead>
+
                 <tr>
                     <th>Bil</th>
                     <th>År</th>
@@ -251,10 +271,13 @@ def render_price_reductions(
                     <th>Sänkning</th>
                     <th>%</th>
                 </tr>
+
             </thead>
 
             <tbody>
+
                 {"".join(html_rows)}
+
             </tbody>
 
         </table>
