@@ -7,7 +7,25 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-from data_loader import safe
+from data_loader import (
+    fmt_number,
+    safe,
+)
+
+
+def _percentage(
+    value: int,
+    total: int,
+) -> float:
+
+    if not total:
+        return 0.0
+
+    return (
+        value
+        / total
+        * 100
+    )
 
 
 def render_outcomes(
@@ -27,12 +45,19 @@ def render_outcomes(
                 "utfall",
                 "OKÄNT",
             )
-        )
+        ).strip()
+        or "OKÄNT"
         for row in rows
     )
 
     total = sum(
         counts.values()
+    )
+
+    top_outcome = (
+        counts.most_common(1)[0]
+        if counts
+        else ("—", 0)
     )
 
     bars = []
@@ -41,12 +66,9 @@ def render_outcomes(
         counts.most_common()
     ):
 
-        share = (
-            count
-            / total
-            * 100
-            if total
-            else 0
+        share = _percentage(
+            count,
+            total,
         )
 
         bars.append(
@@ -63,7 +85,10 @@ def render_outcomes(
                     </span>
 
                     <strong>
-                        {count}
+                        {fmt_number(count)}
+                        <span class="muted">
+                            ({share:.1f} %)
+                        </span>
                     </strong>
 
                 </div>
@@ -80,11 +105,77 @@ def render_outcomes(
             """
         )
 
-    return (
-        '<div data-outcomes-container>'
-        + "".join(bars)
-        + "</div>"
-    )
+    return f"""
+    <div data-outcomes-container>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Totalt antal fyndevent
+                </span>
+
+                <strong class="stat-value">
+                    {fmt_number(total)}
+                </strong>
+
+            </div>
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Vanligaste utfall
+                </span>
+
+                <strong class="stat-value">
+                    {safe(top_outcome[0])}
+                </strong>
+
+                <span class="muted">
+                    {fmt_number(top_outcome[1])}
+                    ({_percentage(
+                        top_outcome[1],
+                        total,
+                    ):.1f} %)
+                </span>
+
+            </div>
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Antal olika utfall
+                </span>
+
+                <strong class="stat-value">
+                    {fmt_number(
+                        len(counts)
+                    )}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <h3>
+            Utfall
+        </h3>
+
+        <p class="muted">
+            Fördelningen visar vad som hänt med de
+            observerade fyndeventen.
+        </p>
+
+        <div class="outcome-bars">
+
+            {"".join(bars)}
+
+        </div>
+
+    </div>
+    """
 
 
 def render_score_analysis(
@@ -98,6 +189,38 @@ def render_score_analysis(
         </div>
         """
 
+    total = sum(
+        int(
+            row.get(
+                "antal",
+                0,
+            )
+            or 0
+        )
+        for row in rows
+    )
+
+    high_score_count = sum(
+        int(
+            row.get(
+                "antal",
+                0,
+            )
+            or 0
+        )
+        for row in rows
+        if str(
+            row.get(
+                "scoreintervall",
+                "",
+            )
+        ).strip()
+        in {
+            "80–89",
+            "90–100",
+        }
+    )
+
     output = []
 
     for row in rows:
@@ -106,58 +229,196 @@ def render_score_analysis(
             "scoreintervall"
         ]
 
-        count = row[
-            "antal"
-        ]
+        count = int(
+            row.get(
+                "antal",
+                0,
+            )
+            or 0
+        )
 
-        outcomes = row[
-            "utfall"
-        ]
+        outcomes = row.get(
+            "utfall",
+            {},
+        )
 
-        parts = [
+        bucket_share = _percentage(
+            count,
+            total,
+        )
 
-            (
-                f"{safe(name)}: "
-                f"{value}"
+        outcome_parts = []
+
+        for name, value in sorted(
+            outcomes.items()
+        ):
+
+            value = int(
+                value
+                or 0
             )
 
-            for name, value
-            in sorted(
-                outcomes.items()
+            outcome_share = _percentage(
+                value,
+                count,
             )
 
-        ]
+            outcome_parts.append(
+                f"""
+                <span class="score-outcome">
+                    <strong>
+                        {safe(name)}
+                    </strong>
+                    {fmt_number(value)}
+                    ({outcome_share:.1f} %)
+                </span>
+                """
+            )
 
         output.append(
             f"""
-            <div class="score-row">
+            <tr class="score-row">
 
-                <div>
-
+                <td>
                     <strong>
                         {safe(bucket)}
                     </strong>
+                </td>
 
-                    <span>
-                        {count} event
-                    </span>
+                <td>
+                    {fmt_number(count)}
+                </td>
 
-                </div>
+                <td>
+                    {bucket_share:.1f} %
+                </td>
 
-                <div>
+                <td>
                     {
-                        " · ".join(parts)
-                        if parts
+                        " · ".join(
+                            outcome_parts
+                        )
+                        if outcome_parts
                         else "—"
                     }
-                </div>
+                </td>
 
-            </div>
+            </tr>
             """
         )
 
-    return (
-        '<div data-score-container>'
-        + "".join(output)
-        + "</div>"
+    high_score_share = _percentage(
+        high_score_count,
+        total,
     )
+
+    return f"""
+    <div data-score-container>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Fynd med score ≥ 80
+                </span>
+
+                <strong class="stat-value">
+                    {fmt_number(
+                        high_score_count
+                    )}
+                </strong>
+
+                <span class="muted">
+                    {high_score_share:.1f} %
+                    av alla fyndevent
+                </span>
+
+            </div>
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Fynd med score 90–100
+                </span>
+
+                <strong class="stat-value">
+                    {
+                        fmt_number(
+                            next(
+                                (
+                                    int(
+                                        row.get(
+                                            "antal",
+                                            0,
+                                        )
+                                        or 0
+                                    )
+                                    for row in rows
+                                    if row.get(
+                                        "scoreintervall"
+                                    )
+                                    == "90–100"
+                                ),
+                                0,
+                            )
+                        )
+                    }
+                </strong>
+
+            </div>
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Totalt analyserade event
+                </span>
+
+                <strong class="stat-value">
+                    {fmt_number(total)}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <h3>
+            Utfall per scoreintervall
+        </h3>
+
+        <p class="muted">
+            Här ser vi om högre score faktiskt
+            sammanfaller med ett annat utfall.
+            Procenten inom varje intervall räknas
+            separat.
+        </p>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Score</th>
+                        <th>Fyndevent</th>
+                        <th>Andel</th>
+                        <th>Utfall</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {"".join(output)}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+    """
