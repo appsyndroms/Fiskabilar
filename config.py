@@ -2,23 +2,16 @@
 Konfiguration för bilfyndfiltret.
 Justera fritt utan att röra övrig kod.
 """
-
+import json
 import os
-
-
 # --- Grundkrav (gäller alla bilar nedan) ---
-
 ARSMODELL_MIN = 2022
 ARSMODELL_MAX = 2026
-
 MIN_MIL = 1000
 MAX_MIL = 12000
 VAXELLADA = "Automat"
 UTESLUT_SKADAD = True
-
-
 # --- Bilar att bevaka ---
-
 BILAR = [
     {
         "marke_slug": "volvo",
@@ -87,28 +80,69 @@ BILAR = [
         },
     },
 ]
-
-
+# --- ML-baserad värdering ---
+ML_VARDERING_FIL = (
+    "data/ml_valuation.jsonl"
+)
+def load_ml_priser(
+    path: str,
+) -> list[dict]:
+    """
+    Läser ML-baserade värden från JSONL.
+    Varje rad ska innehålla exempelvis:
+        {
+            "modell": "V60 T6 AWD",
+            "arsmodell": 2024,
+            "mil": 5000,
+            "borpris": 360000
+        }
+    Filen kan senare skrivas automatiskt
+    av ML-träningsprocessen.
+    """
+    priser = []
+    if not os.path.exists(path):
+        return priser
+    with open(
+        path,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(
+                    line
+                )
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(
+                row,
+                dict,
+            ):
+                continue
+            priser.append(
+                row
+            )
+    return priser
+ML_PRISER = load_ml_priser(
+    ML_VARDERING_FIL
+)
 FYND_TROSKEL = 20000
 EXTREMT_FYND_TROSKEL = 35000
-
 MIN_DAGAR_FOR_SANKNING_RELEVANT = 14
 STOR_SANKNING_KR = 15000
-
 NOTIS_METOD = "epost"
 EPOST_TILL = "ronnie.engstrand@gmail.com"
 EPOST_FRAN = "ronnie.engstrand@gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-
-
 AKTIVA_KALLOR = [
     "wayke",
     "bilweb",
     "bytbil",
 ]
-
-
 HYRBIL_NYCKELORD = [
     "hyrbil",
     "bilpool",
@@ -116,19 +150,12 @@ HYRBIL_NYCKELORD = [
     "tjänstebil",
     "flikbil",
 ]
-
-
 SELEKT_NYCKELORD = [
     "volvo selekt",
     "selekt",
 ]
-
-
 STATE_FIL = "data/state.json"
-
-
 # --- Historik ---
-
 # Katalog för den nya månadsvis roterade historiken.
 #
 # Exempel:
@@ -137,18 +164,13 @@ STATE_FIL = "data/state.json"
 # analysis_storage.py använder denna katalog för både
 # skrivning och läsning av historiken.
 HISTORIK_KATALOG = "data/market_history"
-
 # Äldre historikfil som används vid migrering till den
 # månadsvis roterade strukturen.
 #
 # Denna fil ska inte längre användas som aktiv skrivfil.
 HISTORIK_FIL = "data/market_history/market_history.jsonl"
-
 HISTORIK_SPARA_VARJE_KORNING = True
-
-
 # --- Daglig marknadsrapport ---
-
 # Katalog där de dagliga rapporterna sparas.
 #
 # Rapporterna ska sparas oavsett om körningen sker via
@@ -157,19 +179,13 @@ HISTORIK_SPARA_VARJE_KORNING = True
 # Exempel:
 #   data/daily_reports/daily_report_2026-08-30.json
 DAILY_REPORT_KATALOG = "data/daily_reports"
-
-
 # --- Notifiering ---
-
 # En redan notifierad bil får en ny notis först när priset är minst
 # 10 000 kr lägre än den prisnivå som låg till grund för senaste notisen.
 MIN_PRISSANKNING_FOR_NY_NOTIS = 10000
-
-
 # ------------------------------------------------------------
 # DEBUG
 # ------------------------------------------------------------
-
 # DEBUG styrs via miljövariabeln DEBUG.
 #
 # Vanlig körning:
