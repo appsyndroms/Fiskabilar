@@ -130,7 +130,7 @@ def render_market_history(
     return f"""
 
     <h3>
-        Marknadsöversikt
+        Pris över tid
     </h3>
 
     <p class="muted">
@@ -139,43 +139,46 @@ def render_market_history(
         Priset är daglig median av observerade annonser.
     </p>
 
-    <div class="table-wrap">
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Modell</th>
-                    <th>År</th>
-                    <th>Observationer</th>
-                    <th>Medianpris</th>
-                    <th>Snittpris</th>
-                    <th>Medianmiltal</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {"".join(rows)}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <h3>
-        Pris över tid
-    </h3>
-
-
     <div class="charts">
 
         {"".join(charts)}
 
     </div>
+
+
+    <details class="market-overview">
+
+        <summary>
+            Marknadsöversikt
+        </summary>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Modell</th>
+                        <th>År</th>
+                        <th>Observationer</th>
+                        <th>Medianpris</th>
+                        <th>Snittpris</th>
+                        <th>Medianmiltal</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {"".join(rows)}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </details>
 
     """
