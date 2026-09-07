@@ -53,11 +53,16 @@ def hamta_alla_annonser(
 ) -> list[dict]:
     """
     Hämtar annonser från alla aktiva källor.
+
+    Varje källa loggas både före och efter hämtning så att
+    GitHub Actions tydligt visar att scrapern faktiskt körts,
+    även när resultatet är 0 annonser.
     """
 
     alla = []
 
     for kalla in aktiva_kallor:
+
         modul = KALLA_TILL_MODUL.get(
             kalla
         )
@@ -68,14 +73,27 @@ def hamta_alla_annonser(
             )
             continue
 
+        # --------------------------------------------------------
+        # STARTA SCRAPER
+        # --------------------------------------------------------
+
+        info(
+            f"[{kalla}] hämtar annonser..."
+        )
+
         try:
+
             annonser = (
                 modul.hamta_annonser()
             )
 
+            # ----------------------------------------------------
+            # RESULTAT FRÅN KÄLLAN
+            # ----------------------------------------------------
+
             info(
                 f"[KÄLLA] {kalla}: "
-                f"{len(annonser)} annonser"
+                f"{len(annonser)} annonser hämtade"
             )
 
             alla.extend(
@@ -83,9 +101,19 @@ def hamta_alla_annonser(
             )
 
         except Exception as e:
+
             info(
-                f"FEL i källa "
-                f"'{kalla}': {e}"
+                f"[KÄLLA] {kalla}: "
+                f"FEL vid hämtning: {e}"
             )
+
+    # ------------------------------------------------------------
+    # TOTALT FÖRE DEDUPLICERING
+    # ------------------------------------------------------------
+
+    info(
+        f"[KÄLLA] Totalt före dedup: "
+        f"{len(alla)} annonser"
+    )
 
     return alla
