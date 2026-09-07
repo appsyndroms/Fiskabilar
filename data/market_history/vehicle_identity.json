@@ -2875,7 +2875,11 @@
     "fp:a4dbd6d99711126b": "vehicle:00000807",
     "source:bytbil:19377952": "vehicle:00000808",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v60-recharge-t6-ii-awd-drag-backkamera-moms-7926-19377952": "vehicle:00000808",
-    "fp:d1f2827a6f280103": "vehicle:00000808"
+    "fp:d1f2827a6f280103": "vehicle:00000808",
+    "source:bytbil:19378236": "vehicle:00000809",
+    "url:https://www.bytbil.com/kalmar-lan/personbil-v60-t6-plus-dark-nordic-edition-1411-19378236": "vehicle:00000809",
+    "fp:7fda40b2a9f15098": "vehicle:00000809",
+    "fp:2ba9dc10c6f80dd9": "vehicle:00000169"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -17414,6 +17418,24 @@
         "vin": null
       },
       "last_seen": "19377952",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000809": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19378236",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
