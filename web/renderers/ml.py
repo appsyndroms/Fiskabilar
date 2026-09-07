@@ -14,11 +14,13 @@ from data_loader import (
 
 
 MODEL_NAMES = {
+
     "random_forest":
         "Random Forest",
 
     "linear_regression":
         "Linear Regression",
+
 }
 
 
@@ -32,11 +34,13 @@ def render_ml(
     )
 
     if not metadata:
+
         return """
         <div class="empty">
             Ingen tränad ML-modell hittades ännu.
         </div>
         """
+
 
     model_key = str(
         metadata.get(
@@ -45,63 +49,79 @@ def render_ml(
         )
     )
 
-    model_name = MODEL_NAMES.get(
-        model_key,
-        model_key or "Okänd",
+
+    model_name = (
+        MODEL_NAMES.get(
+            model_key,
+            model_key
+            or "Okänd",
+        )
     )
+
 
     observations = metadata.get(
         "antal_observationer",
         0,
     )
 
+
     training = metadata.get(
         "antal_traning",
         0,
     )
+
 
     test = metadata.get(
         "antal_test",
         0,
     )
 
+
     created = metadata.get(
         "skapad",
         "—",
     )
+
 
     features = metadata.get(
         "features",
         [],
     )
 
+
     metrics = metadata.get(
         "metrics",
         {},
     )
 
+
     active_metrics = {}
+
 
     if isinstance(
         metrics,
         dict,
     ):
 
-        model_metrics = metrics.get(
-            model_key,
-            {},
+        model_metrics = (
+            metrics.get(
+                model_key,
+                {},
+            )
         )
 
         if isinstance(
             model_metrics,
             dict,
         ):
+
             active_metrics = (
                 model_metrics.get(
                     "totalt",
                     {},
                 )
             )
+
 
     r2 = active_metrics.get(
         "r2"
@@ -119,40 +139,45 @@ def render_ml(
         "mape_procent"
     )
 
-    training_number = float(
-        training or 0
-    )
-
-    test_number = float(
-        test or 0
-    )
 
     total = (
-        training_number
-        + test_number
+        float(training or 0)
+        + float(test or 0)
     )
+
 
     progress = (
-        training_number
+
+        float(training or 0)
         / total
         * 100
+
         if total
         else 0
+
     )
 
+
     features_text = (
+
         ", ".join(
             str(feature)
-            for feature in features
+            for feature
+            in features
         )
+
         if isinstance(
             features,
             list,
         )
+
         else str(features)
+
     )
 
+
     comparison = []
+
 
     for key in (
         "linear_regression",
@@ -161,24 +186,31 @@ def render_ml(
 
         data = {}
 
+
         if isinstance(
             metrics,
             dict,
         ):
 
-            model_data = metrics.get(
-                key,
-                {},
+            model_data = (
+                metrics.get(
+                    key,
+                    {},
+                )
             )
 
             if isinstance(
                 model_data,
                 dict,
             ):
-                data = model_data.get(
-                    "totalt",
-                    {},
+
+                data = (
+                    model_data.get(
+                        "totalt",
+                        {},
+                    )
                 )
+
 
         comparison.append(
             f"""
@@ -186,6 +218,7 @@ def render_ml(
 
                 <td>
                     <strong>
+
                         {safe(
                             MODEL_NAMES.get(
                                 key,
@@ -198,6 +231,7 @@ def render_ml(
                             if key == model_key
                             else ""
                         }
+
                     </strong>
                 </td>
 
@@ -233,162 +267,209 @@ def render_ml(
             """
         )
 
+
     return f"""
-    <div class="ml-grid">
 
-        <div class="ml-card">
-            <span>
-                Aktiv modell
-            </span>
+    <div
+        data-ml-section
+    >
 
-            <strong>
-                {safe(model_name)}
-            </strong>
+        <div
+            class="ml-filter-status"
+            data-ml-filter-status
+        ></div>
+
+
+        <div class="ml-grid">
+
+            <div class="ml-card">
+
+                <span>
+                    Aktiv modell
+                </span>
+
+                <strong>
+                    {safe(model_name)}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
+                    Observationer
+                </span>
+
+                <strong>
+                    {fmt_number(
+                        observations
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
+                    R²
+                </span>
+
+                <strong>
+                    {fmt_number(
+                        r2,
+                        3,
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
+                    MAE
+                </span>
+
+                <strong>
+                    {fmt_price(mae)}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
+                    RMSE
+                </span>
+
+                <strong>
+                    {fmt_price(rmse)}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
+                    MAPE
+                </span>
+
+                <strong>
+                    {fmt_number(
+                        mape,
+                        2,
+                    )} %
+                </strong>
+
+            </div>
+
         </div>
 
-        <div class="ml-card">
-            <span>
-                Observationer
-            </span>
 
-            <strong>
-                {fmt_number(
-                    observations
-                )}
-            </strong>
+        <div class="progress-card">
+
+            <div class="progress-header">
+
+                <strong>
+                    ML-progress
+                </strong>
+
+                <span>
+                    {fmt_number(training)}
+                    träningsrader /
+                    {fmt_number(total)} totalt
+                </span>
+
+            </div>
+
+
+            <div class="progress">
+
+                <div
+                    style="width:{progress:.1f}%"
+                ></div>
+
+            </div>
+
+
+            <div class="progress-meta">
+
+                <span>
+                    Träning:
+                    {fmt_number(training)}
+                </span>
+
+                <span>
+                    Test:
+                    {fmt_number(test)}
+                </span>
+
+            </div>
+
         </div>
 
-        <div class="ml-card">
-            <span>
-                R²
-            </span>
 
-            <strong>
-                {fmt_number(
-                    r2,
-                    3,
-                )}
-            </strong>
+        <div class="ml-info">
+
+            <p>
+
+                <strong>
+                    Senast tränad:
+                </strong>
+
+                {safe(created)}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Features:
+                </strong>
+
+                {safe(features_text)}
+
+            </p>
+
         </div>
 
-        <div class="ml-card">
-            <span>
-                MAE
-            </span>
 
-            <strong>
-                {fmt_price(mae)}
-            </strong>
-        </div>
+        <h3>
+            Modelljämförelse
+        </h3>
 
-        <div class="ml-card">
-            <span>
-                RMSE
-            </span>
 
-            <strong>
-                {fmt_price(rmse)}
-            </strong>
-        </div>
+        <div class="table-wrap">
 
-        <div class="ml-card">
-            <span>
-                MAPE
-            </span>
+            <table>
 
-            <strong>
-                {fmt_number(
-                    mape,
-                    2,
-                )} %
-            </strong>
+                <thead>
+
+                    <tr>
+                        <th>Modell</th>
+                        <th>R²</th>
+                        <th>MAE</th>
+                        <th>RMSE</th>
+                        <th>MAPE</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {"".join(comparison)}
+
+                </tbody>
+
+            </table>
+
         </div>
 
     </div>
 
-    <div class="progress-card">
-
-        <div class="progress-header">
-
-            <strong>
-                ML-progress
-            </strong>
-
-            <span>
-                {fmt_number(training)}
-                träningsrader /
-                {fmt_number(total)} totalt
-            </span>
-
-        </div>
-
-        <div class="progress">
-
-            <div
-                style="width:{progress:.1f}%"
-            ></div>
-
-        </div>
-
-        <div class="progress-meta">
-
-            <span>
-                Träning:
-                {fmt_number(training)}
-            </span>
-
-            <span>
-                Test:
-                {fmt_number(test)}
-            </span>
-
-        </div>
-
-    </div>
-
-    <div class="ml-info">
-
-        <p>
-            <strong>
-                Senast tränad:
-            </strong>
-
-            {safe(created)}
-        </p>
-
-        <p>
-            <strong>
-                Features:
-            </strong>
-
-            {safe(features_text)}
-        </p>
-
-    </div>
-
-    <h3>
-        Modelljämförelse
-    </h3>
-
-    <div class="table-wrap">
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Modell</th>
-                    <th>R²</th>
-                    <th>MAE</th>
-                    <th>RMSE</th>
-                    <th>MAPE</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {"".join(comparison)}
-            </tbody>
-
-        </table>
-
-    </div>
     """
