@@ -4,6 +4,8 @@ Filtret körs helt i webbläsaren eftersom GitHub Pages är statiskt.
 Data hämtas från data.json som build_static.py redan genererar.
 """
 from __future__ import annotations
+
+
 def render_global_filter() -> str:
     return r"""
 <section id="global-filter">
@@ -70,9 +72,11 @@ def render_global_filter() -> str:
         model: "",
         year: "",
     };
+
     const $ = (
         id
     ) => document.getElementById(id);
+
     function text(
         value
     ) {
@@ -80,6 +84,7 @@ def render_global_filter() -> str:
             value ?? ""
         ).trim();
     }
+
     function first(
         row,
         keys
@@ -99,8 +104,10 @@ def render_global_filter() -> str:
                 );
             }
         }
+
         return "";
     }
+
     function normalize(
         value
     ) {
@@ -113,6 +120,87 @@ def render_global_filter() -> str:
         )
         .trim();
     }
+
+    /*
+     * Canonical modellnyckel.
+     *
+     * Gör exempelvis:
+     *
+     *   330E XDRIVE TOURING
+     *   330E-XDRIVE-TOURING
+     *   330e-xDrive-Touring
+     *   330e xDrive Touring
+     *
+     * till samma nyckel:
+     *
+     *   330e xdrive touring
+     *
+     * Den används både för deduplicering och
+     * faktisk filtrering.
+     */
+    function modelKey(
+        value
+    ) {
+        return normalize(
+            value
+        )
+        .replace(
+            /[-_]+/g,
+            " "
+        )
+        .replace(
+            /\s+/g,
+            " "
+        )
+        .trim()
+        .toLocaleLowerCase(
+            "sv-SE"
+        );
+    }
+
+    /*
+     * Snyggt visningsnamn för modeller.
+     *
+     * Själva modelKey() avgör om två värden är
+     * samma modell. modelDisplay() bestämmer bara
+     * hur modellen ska visas i dropdownen.
+     */
+    function modelDisplay(
+        value
+    ) {
+        const key = modelKey(
+            value
+        );
+
+        if (
+            key === "330e xdrive touring"
+        ) {
+            return "330e xDrive Touring";
+        }
+
+        if (
+            key === "530e xdrive touring"
+        ) {
+            return "530e xDrive Touring";
+        }
+
+        if (
+            key === "v60"
+        ) {
+            return "V60";
+        }
+
+        if (
+            key === "v90"
+        ) {
+            return "V90";
+        }
+
+        return normalize(
+            value
+        );
+    }
+
     function modelName(
         row
     ) {
@@ -137,6 +225,7 @@ def render_global_filter() -> str:
          * På så sätt blir flera drivlinevarianter
          * av samma modell ett enda modellalternativ.
          */
+
         const model = first(
             row,
             [
@@ -144,10 +233,12 @@ def render_global_filter() -> str:
                 "model",
             ]
         );
+
         return normalize(
             model
         );
     }
+
     function yearName(
         row
     ) {
@@ -161,6 +252,7 @@ def render_global_filter() -> str:
             ]
         );
     }
+
     function makeName(
         row
     ) {
@@ -172,6 +264,7 @@ def render_global_filter() -> str:
                 "make",
             ]
         );
+
         if (
             explicit
         ) {
@@ -179,15 +272,18 @@ def render_global_filter() -> str:
                 explicit
             );
         }
-        const model = modelName(
-            row
-        ).toLowerCase();
+
+        const model = modelKey(
+            modelName(row)
+        );
+
         /*
          * Fallback för den nuvarande datamodellen.
          *
          * Om tillverkare senare finns som explicit
          * fält används det automatiskt.
          */
+
         if (
             model.startsWith(
                 "v60"
@@ -201,6 +297,7 @@ def render_global_filter() -> str:
         ) {
             return "Volvo";
         }
+
         if (
             model.startsWith(
                 "330e"
@@ -220,6 +317,7 @@ def render_global_filter() -> str:
         ) {
             return "BMW";
         }
+
         if (
             model.startsWith(
                 "audi"
@@ -227,6 +325,7 @@ def render_global_filter() -> str:
         ) {
             return "Audi";
         }
+
         if (
             model.startsWith(
                 "mercedes"
@@ -234,6 +333,7 @@ def render_global_filter() -> str:
         ) {
             return "Mercedes-Benz";
         }
+
         if (
             model.startsWith(
                 "tesla"
@@ -241,24 +341,29 @@ def render_global_filter() -> str:
         ) {
             return "Tesla";
         }
+
         return (
             model
             .split(/\s+/)[0]
             || "Okänd"
         );
     }
+
     function matches(
         row
     ) {
         const make = makeName(
             row
         );
+
         const model = modelName(
             row
         );
+
         const year = yearName(
             row
         );
+
         return (
             (
                 !state.make
@@ -267,7 +372,8 @@ def render_global_filter() -> str:
             &&
             (
                 !state.model
-                || model === state.model
+                || modelKey(model)
+                === modelKey(state.model)
             )
             &&
             (
@@ -276,9 +382,11 @@ def render_global_filter() -> str:
             )
         );
     }
+
     function allRows() {
         const data =
             state.data || {};
+
         return [
             ...(data.current_findings || []),
             ...(data.price_reductions || []),
@@ -286,12 +394,20 @@ def render_global_filter() -> str:
             ...(data.market_history || []),
         ];
     }
+
     function unique(
         rows,
-        mapper
+        mapper,
+        keyMapper = value =>
+            normalize(
+                value
+            ).toLocaleLowerCase(
+                "sv-SE"
+            )
     ) {
         const values =
             new Map();
+
         rows
             .map(mapper)
             .filter(Boolean)
@@ -301,10 +417,12 @@ def render_global_filter() -> str:
                         normalize(
                             value
                         );
+
                     const key =
-                        display.toLocaleLowerCase(
-                            "sv-SE"
+                        keyMapper(
+                            display
                         );
+
                     if (
                         !values.has(
                             key
@@ -317,6 +435,7 @@ def render_global_filter() -> str:
                     }
                 }
             );
+
         return [
             ...values.values(),
         ].sort(
@@ -332,20 +451,26 @@ def render_global_filter() -> str:
             )
         );
     }
+
     function populateFilters() {
         const rows =
             allRows();
+
         const makeSelect =
             $("filter-make");
+
         const modelSelect =
             $("filter-model");
+
         const yearSelect =
             $("filter-year");
+
         const makes =
             unique(
                 rows,
                 makeName
             );
+
         const modelRows =
             rows.filter(
                 row =>
@@ -353,11 +478,17 @@ def render_global_filter() -> str:
                     || makeName(row)
                     === state.make
             );
+
         const models =
             unique(
                 modelRows,
-                modelName
+                row =>
+                    modelDisplay(
+                        modelName(row)
+                    ),
+                modelKey
             );
+
         const yearRows =
             rows.filter(
                 row =>
@@ -369,17 +500,24 @@ def render_global_filter() -> str:
                     &&
                     (
                         !state.model
-                        || modelName(row)
-                        === state.model
+                        || modelKey(
+                            modelName(row)
+                        )
+                        === modelKey(
+                            state.model
+                        )
                     )
             );
+
         const years =
             unique(
                 yearRows,
                 yearName
             );
+
         makeSelect.innerHTML =
             '<option value="">Alla tillverkare</option>';
+
         makes.forEach(
             value =>
                 makeSelect.add(
@@ -389,10 +527,13 @@ def render_global_filter() -> str:
                     )
                 )
         );
+
         makeSelect.value =
             state.make;
+
         modelSelect.innerHTML =
             '<option value="">Alla modeller</option>';
+
         models.forEach(
             value =>
                 modelSelect.add(
@@ -402,18 +543,30 @@ def render_global_filter() -> str:
                     )
                 )
         );
+
         if (
-            models.includes(
-                state.model
+            models.some(
+                value =>
+                    modelKey(value)
+                    === modelKey(
+                        state.model
+                    )
             )
         ) {
+            state.model =
+                modelDisplay(
+                    state.model
+                );
+
             modelSelect.value =
                 state.model;
         } else {
             state.model = "";
         }
+
         yearSelect.innerHTML =
             '<option value="">Alla årsmodeller</option>';
+
         years.forEach(
             value =>
                 yearSelect.add(
@@ -423,6 +576,7 @@ def render_global_filter() -> str:
                     )
                 )
         );
+
         if (
             years.includes(
                 state.year
@@ -434,6 +588,7 @@ def render_global_filter() -> str:
             state.year = "";
         }
     }
+
     function filterIndexedRows(
         selector,
         rows
@@ -449,6 +604,7 @@ def render_global_filter() -> str:
                 ) => {
                     const row =
                         rows[index];
+
                     if (
                         !row
                     ) {
@@ -456,6 +612,7 @@ def render_global_filter() -> str:
                             true;
                         return;
                     }
+
                     element.hidden =
                         !matches(
                             row
@@ -463,11 +620,13 @@ def render_global_filter() -> str:
                 }
             );
     }
+
     function scoreBucket(
         score
     ) {
         const value =
             Number(score);
+
         if (
             !Number.isFinite(
                 value
@@ -475,43 +634,52 @@ def render_global_filter() -> str:
         ) {
             return null;
         }
+
         if (
             value < 40
         ) {
             return "0–39";
         }
+
         if (
             value < 60
         ) {
             return "40–59";
         }
+
         if (
             value < 70
         ) {
             return "60–69";
         }
+
         if (
             value < 80
         ) {
             return "70–79";
         }
+
         if (
             value < 90
         ) {
             return "80–89";
         }
+
         return "90–100";
     }
+
     function renderScore() {
         const container =
             document.querySelector(
                 "[data-score-container]"
             );
+
         if (
             !container
         ) {
             return;
         }
+
         const buckets = {
             "0–39": [],
             "40–59": [],
@@ -520,9 +688,11 @@ def render_global_filter() -> str:
             "80–89": [],
             "90–100": [],
         };
+
         const outcomes =
             state.data
             .find_outcomes || [];
+
         outcomes
             .filter(matches)
             .forEach(
@@ -531,6 +701,7 @@ def render_global_filter() -> str:
                         scoreBucket(
                             row.score
                         );
+
                     if (
                         bucket
                     ) {
@@ -542,6 +713,7 @@ def render_global_filter() -> str:
                     }
                 }
             );
+
         container.innerHTML =
             Object.entries(
                 buckets
@@ -554,6 +726,7 @@ def render_global_filter() -> str:
                     ]
                 ) => {
                     const counts = {};
+
                     rows.forEach(
                         row => {
                             const outcome =
@@ -565,6 +738,7 @@ def render_global_filter() -> str:
                                     ]
                                 )
                                 || "OKÄNT";
+
                             counts[
                                 outcome
                             ] =
@@ -577,6 +751,7 @@ def render_global_filter() -> str:
                                 + 1;
                         }
                     );
+
                     const parts =
                         Object.entries(
                             counts
@@ -593,6 +768,7 @@ def render_global_filter() -> str:
                         .join(
                             " · "
                         );
+
                     return `
                     <div class="score-row">
                         <div>
@@ -612,20 +788,25 @@ def render_global_filter() -> str:
             )
             .join("");
     }
+
     function renderOutcomes() {
         const container =
             document.querySelector(
                 "[data-outcomes-container]"
             );
+
         if (
             !container
         ) {
             return;
         }
+
         const counts = {};
+
         const outcomes =
             state.data
             .find_outcomes || [];
+
         outcomes
             .filter(matches)
             .forEach(
@@ -639,6 +820,7 @@ def render_global_filter() -> str:
                             ]
                         )
                         || "OKÄNT";
+
                     counts[
                         outcome
                     ] =
@@ -651,6 +833,7 @@ def render_global_filter() -> str:
                         + 1;
                 }
             );
+
         const total =
             Object.values(
                 counts
@@ -663,6 +846,7 @@ def render_global_filter() -> str:
                     sum + value,
                 0
             );
+
         if (
             !total
         ) {
@@ -672,8 +856,10 @@ def render_global_filter() -> str:
                     Ingen fyndutfallsdata för valt filter.
                 </div>
                 `;
+
             return;
         }
+
         container.innerHTML =
             Object.entries(
                 counts
@@ -696,6 +882,7 @@ def render_global_filter() -> str:
                         count
                         / total
                         * 100;
+
                     return `
                     <div class="bar-row">
                         <div class="bar-label">
@@ -717,33 +904,39 @@ def render_global_filter() -> str:
             )
             .join("");
     }
+
     function updateKpis() {
         const data =
             state.data || {};
+
         const findings =
             (
                 data.current_findings
                 || []
             )
             .filter(matches);
+
         const reductions =
             (
                 data.price_reductions
                 || []
             )
             .filter(matches);
+
         const outcomes =
             (
                 data.find_outcomes
                 || []
             )
             .filter(matches);
+
         const history =
             (
                 data.market_history
                 || []
             )
             .filter(matches);
+
         const groups =
             new Set(
                 history.map(
@@ -751,6 +944,7 @@ def render_global_filter() -> str:
                         `${modelName(row)}|${yearName(row)}`
                 )
             );
+
         const values = [
             findings.length,
             outcomes.length,
@@ -758,6 +952,7 @@ def render_global_filter() -> str:
             history.length,
             groups.size,
         ];
+
         document
             .querySelectorAll(
                 ".kpi strong"
@@ -780,6 +975,7 @@ def render_global_filter() -> str:
                 }
             );
     }
+
     function updateHistory() {
         document
             .querySelectorAll(
@@ -795,12 +991,14 @@ def render_global_filter() -> str:
                         arssmodell:
                             element.dataset.filterYear,
                     };
+
                     element.hidden =
                         !matches(
                             row
                         );
                 }
             );
+
         document
             .querySelectorAll(
                 "[data-chart-model]"
@@ -812,6 +1010,7 @@ def render_global_filter() -> str:
                             chart.dataset.chartModel
                             || ""
                         );
+
                     const years =
                         (
                             chart.dataset.chartYears
@@ -819,29 +1018,34 @@ def render_global_filter() -> str:
                         )
                         .split(",")
                         .filter(Boolean);
+
                     const modelOk =
                         !state.model
-                        || model
-                        === normalize(
+                        || modelKey(model)
+                        === modelKey(
                             state.model
                         );
+
                     const makeOk =
                         !state.make
                         || makeName({
                             modell: model,
                         })
                         === state.make;
+
                     const yearOk =
                         !state.year
                         || years.includes(
                             state.year
                         );
+
                     chart.hidden =
                         !(
                             modelOk
                             && makeOk
                             && yearOk
                         );
+
                     chart
                         .querySelectorAll(
                             "[data-chart-year]"
@@ -861,16 +1065,19 @@ def render_global_filter() -> str:
                 }
             );
     }
+
     function updateMlStatus() {
         const section =
             document.querySelector(
                 "[data-ml-section]"
             );
+
         if (
             !section
         ) {
             return;
         }
+
         /*
          * ML-modellen är tränad på hela historiken.
          *
@@ -880,15 +1087,18 @@ def render_global_filter() -> str:
          *
          * I stället visar vi tydligt detta i sektionen.
          */
+
         const message =
             section.querySelector(
                 "[data-ml-filter-status]"
             );
+
         if (
             !message
         ) {
             return;
         }
+
         const active =
             [
                 state.make,
@@ -897,14 +1107,17 @@ def render_global_filter() -> str:
             ]
             .filter(Boolean)
             .length;
+
         message.textContent =
             active
             ? "ML-måtten visar modellens totala träningskvalitet. Övriga sektioner är filtrerade."
             : "";
     }
+
     function updateUrl() {
         const params =
             new URLSearchParams();
+
         if (
             state.make
         ) {
@@ -913,6 +1126,7 @@ def render_global_filter() -> str:
                 state.make
             );
         }
+
         if (
             state.model
         ) {
@@ -921,6 +1135,7 @@ def render_global_filter() -> str:
                 state.model
             );
         }
+
         if (
             state.year
         ) {
@@ -929,8 +1144,10 @@ def render_global_filter() -> str:
                 state.year
             );
         }
+
         const query =
             params.toString();
+
         history.replaceState(
             null,
             "",
@@ -939,23 +1156,28 @@ def render_global_filter() -> str:
             : location.pathname
         );
     }
+
     function update() {
         const data =
             state.data || {};
+
         filterIndexedRows(
             "[data-current-finding]",
             data.current_findings || []
         );
+
         filterIndexedRows(
             "[data-price-reduction]",
             data.price_reductions || []
         );
+
         renderScore();
         renderOutcomes();
         updateKpis();
         updateHistory();
         updateMlStatus();
         updateUrl();
+
         const visible =
             [
                 ...(data.current_findings || []),
@@ -965,6 +1187,7 @@ def render_global_filter() -> str:
             ]
             .filter(matches)
             .length;
+
         const active =
             [
                 state.make,
@@ -973,33 +1196,41 @@ def render_global_filter() -> str:
             ]
             .filter(Boolean)
             .length;
+
         $("global-filter-status")
             .textContent =
                 active
                 ? `${visible.toLocaleString("sv-SE")} relevanta observationer · filter aktivt`
                 : "Visar hela datasetet";
     }
+
     function restoreUrl() {
         const params =
             new URLSearchParams(
                 location.search
             );
+
         state.make =
             params.get(
                 "tillverkare"
             )
             || "";
+
         state.model =
-            params.get(
-                "modell"
-            )
-            || "";
+            modelDisplay(
+                params.get(
+                    "modell"
+                )
+                || ""
+            );
+
         state.year =
             params.get(
                 "år"
             )
             || "";
     }
+
     async function init() {
         try {
             const response =
@@ -1010,6 +1241,7 @@ def render_global_filter() -> str:
                             "no-store",
                     }
                 );
+
             if (
                 !response.ok
             ) {
@@ -1017,54 +1249,67 @@ def render_global_filter() -> str:
                     "data.json kunde inte läsas"
                 );
             }
+
             state.data =
                 await response.json();
+
             restoreUrl();
             populateFilters();
             update();
+
         } catch (
             error
         ) {
             console.error(
                 error
             );
+
             $("global-filter-status")
                 .textContent =
                     "Filtret kunde inte läsa data.json.";
         }
     }
+
     $("filter-make")
         .addEventListener(
             "change",
             event => {
                 state.make =
                     event.target.value;
+
                 state.model = "";
                 state.year = "";
+
                 populateFilters();
                 update();
             }
         );
+
     $("filter-model")
         .addEventListener(
             "change",
             event => {
                 state.model =
                     event.target.value;
+
                 state.year = "";
+
                 populateFilters();
                 update();
             }
         );
+
     $("filter-year")
         .addEventListener(
             "change",
             event => {
                 state.year =
                     event.target.value;
+
                 update();
             }
         );
+
     $("global-filter-reset")
         .addEventListener(
             "click",
@@ -1072,10 +1317,12 @@ def render_global_filter() -> str:
                 state.make = "";
                 state.model = "";
                 state.year = "";
+
                 populateFilters();
                 update();
             }
         );
+
     init();
 })();
 </script>
