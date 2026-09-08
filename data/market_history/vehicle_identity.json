@@ -2992,7 +2992,41 @@
     "source:bilweb:368071": "vehicle:00000840",
     "url:https://bilweb.se/uppsala-lan/volvo-v60-t6-plug-in-hybrid-awd-plusdark-edit-s-v-backkamera-moms-2025-kombi-368071": "vehicle:00000840",
     "fp:ff5b11efd3059daf": "vehicle:00000840",
-    "fp:e516a165dcd1f852": "vehicle:00000654"
+    "fp:e516a165dcd1f852": "vehicle:00000654",
+    "source:bytbil:19380518": "vehicle:00000841",
+    "url:https://www.bytbil.com/hallands-lan/personbil-v60-recharge-t6-ii-core-edition-1197-19380518": "vehicle:00000841",
+    "fp:f03a431c6011481c": "vehicle:00000841",
+    "fp:13cae2c74c01d8a3": "vehicle:00000369",
+    "url:https://www.wayke.se/objekt/9770f953-ebb9-4e63-b87c-d5cb0163256a": "vehicle:00000842",
+    "fp:fba660817ebb61e5": "vehicle:00000842",
+    "source:bytbil:19380528": "vehicle:00000843",
+    "url:https://www.bytbil.com/varmlands-lan/personbil-v60-t6-plus-dark-nordic-edition-1380-19380528": "vehicle:00000843",
+    "fp:0e03f24372b42e7c": "vehicle:00000843",
+    "url:https://www.wayke.se/objekt/29c6bd01-7c95-4171-acc8-bab454951f75": "vehicle:00000844",
+    "fp:87ad222de6f24753": "vehicle:00000844",
+    "source:bytbil:19380564": "vehicle:00000845",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v60-t6-plus-dark-nordic-edition-11439-19380564": "vehicle:00000845",
+    "fp:a43048be99cc217b": "vehicle:00000845",
+    "source:bytbil:19380561": "vehicle:00000846",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v60-t6-plus-dark-nordic-edition-11439-19380561": "vehicle:00000846",
+    "fp:c427077de5bc23b7": "vehicle:00000846",
+    "url:https://www.wayke.se/objekt/3b6bff88-2743-49b1-a58a-10efa26aade0": "vehicle:00000847",
+    "fp:2ba2685da89bcfff": "vehicle:00000847",
+    "fp:d80c90644c8654a3": "vehicle:00000814",
+    "url:https://www.wayke.se/objekt/42f43870-487b-4b88-acef-b5d5958d19b9": "vehicle:00000848",
+    "fp:db39a0aaa0552004": "vehicle:00000848",
+    "fp:14d70b03a384975d": "vehicle:00000819",
+    "url:https://www.wayke.se/objekt/14d275c7-d063-47e9-b138-0c57fe82c3b8": "vehicle:00000849",
+    "fp:1bbc6bbc16f7a39e": "vehicle:00000849",
+    "fp:c59410ee9caba028": "vehicle:00000835",
+    "reg:SBR09N": "vehicle:00000850",
+    "source:bilweb:368205": "vehicle:00000850",
+    "url:https://bilweb.se/vastmanlands-lan/volvo-v90-t6-plus-dark-nordic-edition-2026-kombi-368205": "vehicle:00000850",
+    "fp:17f3c83e2edef2d8": "vehicle:00000850",
+    "fp:b7ddd728af80a664": "vehicle:00000840",
+    "source:bytbil:19380682": "vehicle:00000851",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v90-t6-awd-core-edition-varmare-kamera-drag-carplay-104075-19380682": "vehicle:00000851",
+    "fp:9dfc77ac5733452b": "vehicle:00000851"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -18111,6 +18145,204 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000841": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19380518",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000842": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/9770f953-ebb9-4e63-b87c-d5cb0163256a",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000843": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19380528",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000844": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/29c6bd01-7c95-4171-acc8-bab454951f75",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000845": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19380564",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000846": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19380561",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000847": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/3b6bff88-2743-49b1-a58a-10efa26aade0",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000848": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/42f43870-487b-4b88-acef-b5d5958d19b9",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000849": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/14d275c7-d063-47e9-b138-0c57fe82c3b8",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000850": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "SBR09N",
+        "vin": null
+      },
+      "last_seen": "368205",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000851": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19380682",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
