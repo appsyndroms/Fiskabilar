@@ -3244,7 +3244,13 @@
     "fp:da2d4ebe129fcf06": "vehicle:00000906",
     "source:bytbil:19384925": "vehicle:00000907",
     "url:https://www.bytbil.com/stockholms-lan/personbil-530e-m-sport-pro-moms-innovation-dap-h-k-kolfiber-drag-20-8595-19384925": "vehicle:00000907",
-    "fp:d37dd4058741d1f1": "vehicle:00000907"
+    "fp:d37dd4058741d1f1": "vehicle:00000907",
+    "url:https://www.wayke.se/objekt/2d88ed09-e6e6-43e0-9298-a1810175dec6": "vehicle:00000908",
+    "fp:0d5d9c5d7b5177e5": "vehicle:00000908",
+    "url:https://www.wayke.se/objekt/c1df5dd8-2d5a-4fab-af79-13f11454bbdf": "vehicle:00000909",
+    "fp:c97ae3617612276c": "vehicle:00000909",
+    "url:https://www.wayke.se/objekt/c2f7d237-d43c-4ca2-a605-5d89c57284ab": "vehicle:00000855",
+    "fp:a6309091939d4fbe": "vehicle:00000549"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -18628,7 +18634,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/2d21b58e-2f4e-49f8-beaf-8c6810d576b0",
+      "last_seen": "https://www.wayke.se/objekt/c2f7d237-d43c-4ca2-a605-5d89c57284ab",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -19569,6 +19575,42 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000908": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/2d88ed09-e6e6-43e0-9298-a1810175dec6",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000909": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/c1df5dd8-2d5a-4fab-af79-13f11454bbdf",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
