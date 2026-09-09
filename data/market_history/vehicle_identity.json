@@ -3250,7 +3250,44 @@
     "url:https://www.wayke.se/objekt/c1df5dd8-2d5a-4fab-af79-13f11454bbdf": "vehicle:00000909",
     "fp:c97ae3617612276c": "vehicle:00000909",
     "url:https://www.wayke.se/objekt/c2f7d237-d43c-4ca2-a605-5d89c57284ab": "vehicle:00000855",
-    "fp:a6309091939d4fbe": "vehicle:00000549"
+    "fp:a6309091939d4fbe": "vehicle:00000549",
+    "reg:JAD26H": "vehicle:00000910",
+    "source:bilweb:370903": "vehicle:00000910",
+    "url:https://bilweb.se/gavleborgs-lan/volvo-v60-recharge-t6-awd-geartronic-core-edition-2-99-2023-kombi-370903": "vehicle:00000910",
+    "fp:3190ae30c09f32f4": "vehicle:00000910",
+    "reg:EPK45A": "vehicle:00000911",
+    "source:bilweb:370869": "vehicle:00000911",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v60-recharge-t6-ii-plus-bright-2024-kombi-370869": "vehicle:00000911",
+    "fp:cec621c32c03c098": "vehicle:00000911",
+    "reg:CAR04K": "vehicle:00000912",
+    "source:bilweb:371034": "vehicle:00000912",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v60-t6-plus-dark-nordic-edt-2026-kombi-371034": "vehicle:00000912",
+    "fp:d035c951e81572b9": "vehicle:00000912",
+    "fp:9951c3e97a80b1cf": "vehicle:00000785",
+    "fp:cb041dff6d056e41": "vehicle:00000458",
+    "reg:CEC39M": "vehicle:00000913",
+    "source:bilweb:370898": "vehicle:00000913",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v90-recharge-t8-456hk-backkamera-rattvarme-2024-kombi-370898": "vehicle:00000913",
+    "fp:b3bc48850bb1560f": "vehicle:00000913",
+    "reg:GJU66Y": "vehicle:00000914",
+    "source:bilweb:368989": "vehicle:00000914",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v90-recharge-t6-plus-dark-2024-kombi-368989": "vehicle:00000914",
+    "fp:718e3dc475ac2d1c": "vehicle:00000914",
+    "fp:06168cb2adb65961": "vehicle:00000834",
+    "fp:39439c3467f368f0": "vehicle:00000886",
+    "fp:8d1736a882b538e4": "vehicle:00000887",
+    "reg:PUS71Z": "vehicle:00000915",
+    "source:bilweb:362701": "vehicle:00000915",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-2026-kombi-362701": "vehicle:00000915",
+    "fp:ab79f043ed5576c0": "vehicle:00000915",
+    "reg:RAZ91H": "vehicle:00000916",
+    "source:bilweb:371570": "vehicle:00000916",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-530-e-xdrive-touring-steptronic-292hp-2024-2024-kombi-371570": "vehicle:00000916",
+    "fp:b0149d101150608a": "vehicle:00000916",
+    "reg:OOF60X": "vehicle:00000917",
+    "source:bilweb:257250": "vehicle:00000917",
+    "url:https://bilweb.se/varmlands-lan/bmw-330-e-xdrive-touring-m-sport-businesspris-2026-kombi-257250": "vehicle:00000917",
+    "fp:80fc15829e9c5e40": "vehicle:00000917"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -19611,6 +19648,150 @@
       "resolution": {
         "matchningstyp": "url",
         "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000910": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "JAD26H",
+        "vin": null
+      },
+      "last_seen": "370903",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000911": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "EPK45A",
+        "vin": null
+      },
+      "last_seen": "370869",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000912": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "CAR04K",
+        "vin": null
+      },
+      "last_seen": "371034",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000913": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": "CEC39M",
+        "vin": null
+      },
+      "last_seen": "370898",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000914": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "GJU66Y",
+        "vin": null
+      },
+      "last_seen": "368989",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000915": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "PUS71Z",
+        "vin": null
+      },
+      "last_seen": "362701",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000916": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "RAZ91H",
+        "vin": null
+      },
+      "last_seen": "371570",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000917": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": "OOF60X",
+        "vin": null
+      },
+      "last_seen": "257250",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
