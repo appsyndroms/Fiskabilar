@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -52,12 +52,55 @@ jobs:
           echo "=================================================="
           echo "DEBUG: ML-träning"
           echo "=================================================="
-          echo "Modellen tränas på befintlig marknadshistorik."
-          echo "Ingen valuation-logik påverkas."
-          echo "Ingen produktionsdata ändras."
+          echo "Modellen tränas på marknadshistoriken."
+          echo "Modellen använder:"
+          echo "  - Mil"
+          echo "  - ModelYear"
+          echo "  - Model"
+          echo "  - Variant"
           echo "=================================================="
 
           python -u -m ml.train_market_model
+
+      - name: Generera ML-värdering
+        run: |
+          echo "=================================================="
+          echo "DEBUG: Genererar ML-värdering"
+          echo "=================================================="
+
+          python -u -m ml.generate_ml_valuation
+
+          echo "=================================================="
+          echo "Kontrollerar genererad ML-värdering"
+          echo "=================================================="
+
+          test -s data/ml_valuation.jsonl
+
+          echo "Antal rader:"
+          wc -l data/ml_valuation.jsonl
+
+          echo
+          echo "Första raderna:"
+          head -n 10 data/ml_valuation.jsonl
+
+      - name: Spara ML-värdering i repo
+        run: |
+          echo "=================================================="
+          echo "DEBUG: Uppdaterar data/ml_valuation.jsonl"
+          echo "=================================================="
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/ml_valuation.jsonl
+
+          if git diff --cached --quiet; then
+            echo "Ingen förändring i ml_valuation.jsonl."
+          else
+            git commit -m "Uppdatera ML-värdering"
+            git push
+            echo "ML-värderingen har sparats i repot."
+          fi
 
       - name: Bygg statisk webb
         run: |
@@ -74,7 +117,11 @@ jobs:
           from pathlib import Path
 
           data = json.loads(
-              Path("web_site/data.json").read_text(encoding="utf-8")
+              Path(
+                  "web_site/data.json"
+              ).read_text(
+                  encoding="utf-8"
+              )
           )
 
           required = {
@@ -88,27 +135,55 @@ jobs:
               "ml",
           }
 
-          missing = required - set(data)
+          missing = (
+              required
+              - set(data)
+          )
 
           if missing:
               raise SystemExit(
-                  f"Saknade nycklar i data.json: {sorted(missing)}"
+                  "Saknade nycklar i data.json: "
+                  f"{sorted(missing)}"
               )
 
-          html = Path("web_site/index.html").read_text(
-              encoding="utf-8"
+          html = (
+              Path(
+                  "web_site/index.html"
+              )
+              .read_text(
+                  encoding="utf-8"
+              )
           )
 
           if "<html" not in html.lower():
               raise SystemExit(
-                  "index.html verkar inte vara en HTML-fil"
+                  "index.html verkar inte vara "
+                  "en HTML-fil"
               )
 
-          print("Webbvalidering OK")
-          print(f"Fynd: {len(data['current_findings'])}")
-          print(f"Prisändringar: {len(data['price_reductions'])}")
-          print(f"Fyndutfall: {len(data['find_outcomes'])}")
-          print(f"Marknadshistorik: {len(data['market_history'])}")
+          print(
+              "Webbvalidering OK"
+          )
+
+          print(
+              f"Fynd: "
+              f"{len(data['current_findings'])}"
+          )
+
+          print(
+              f"Prisändringar: "
+              f"{len(data['price_reductions'])}"
+          )
+
+          print(
+              f"Fyndutfall: "
+              f"{len(data['find_outcomes'])}"
+          )
+
+          print(
+              f"Marknadshistorik: "
+              f"{len(data['market_history'])}"
+          )
           PY
 
       - name: Spara webb som artifact
