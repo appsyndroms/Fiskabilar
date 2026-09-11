@@ -3458,7 +3458,12 @@
     "reg:WBB645": "vehicle:00000967",
     "source:bilweb:373064": "vehicle:00000967",
     "url:https://bilweb.se/uppsala-lan/bmw-530-e-xdrive-touring-steptronic-m-sport-s-v-drag-kamera-h-k-2024-kombi-373064": "vehicle:00000967",
-    "fp:c63869cef1c098ae": "vehicle:00000967"
+    "fp:c63869cef1c098ae": "vehicle:00000967",
+    "url:https://www.wayke.se/objekt/2c13a08c-12fc-4454-804c-6d5a771f7d91": "vehicle:00000968",
+    "fp:dbdf77480ec4eb37": "vehicle:00000968",
+    "source:bytbil:19389459": "vehicle:00000969",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-1460-19389459": "vehicle:00000969",
+    "fp:ee92e9171f6efb70": "vehicle:00000969"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -20863,6 +20868,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000968": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/2c13a08c-12fc-4454-804c-6d5a771f7d91",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00000969": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19389459",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
