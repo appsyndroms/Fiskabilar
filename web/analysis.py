@@ -479,14 +479,44 @@ def get_price_reductions(
     feedback: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """
-    Hämtar faktiska prissänkningar.
+    Hämtar prissänkningar för aktuella fynd.
+
+    Endast den senaste observationen per bil används och bilen måste
+    fortfarande ha en aktiv status. Därmed visas inte historiska
+    prissänkningar för annonser som har försvunnit eller blivit inaktiva.
     """
+
+    fynd = [
+        row
+        for row in feedback
+        if row.get("typ")
+        == "fynd"
+    ]
+
+    latest = latest_by_vehicle(
+        fynd
+    )
+
+    active_statuses = {
+        "AKTIV",
+        "NY",
+        "ÅTERKOMMEN",
+        "PRISSÄNKT",
+    }
 
     result = []
 
-    for row in feedback:
+    for row in latest:
 
-        if row.get("typ") != "fynd":
+        status = str(
+            row.get("utfall")
+            or row.get(
+                "livscykelstatus"
+            )
+            or ""
+        ).strip().upper()
+
+        if status not in active_statuses:
             continue
 
         if not has_price_reduction(
@@ -503,22 +533,18 @@ def get_price_reductions(
                 )
             )
             or to_number(
-                row.get(
-                    "initialpris"
-                )
+                row.get("initialpris")
             )
         )
 
-        latest = (
+        latest_price = (
             to_number(
                 row.get(
                     "historik_senaste_pris"
                 )
             )
             or to_number(
-                row.get(
-                    "lagsta_pris"
-                )
+                row.get("lagsta_pris")
             )
         )
 
@@ -548,10 +574,10 @@ def get_price_reductions(
                 or reduction <= 0
             )
             and first is not None
-            and latest is not None
+            and latest_price is not None
         ):
             reduction = (
-                first - latest
+                first - latest_price
             )
 
         if reduction is None:
@@ -563,7 +589,7 @@ def get_price_reductions(
 
         copy[
             "_display_latestpris"
-        ] = latest
+        ] = latest_price
 
         copy[
             "_display_reduction"
