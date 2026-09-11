@@ -1,16 +1,460 @@
-{"modell":"v60","variant":"T6 AWD","arsmodell":2023,"mil":5000,"borpris":330000}
-{"modell":"v60","variant":"T6 AWD","arsmodell":2024,"mil":5000,"borpris":360000}
-{"modell":"v60","variant":"T6 AWD","arsmodell":2025,"mil":5000,"borpris":390000}
-{"modell":"v60","variant":"T8 AWD","arsmodell":2023,"mil":5000,"borpris":370000}
-{"modell":"v60","variant":"T8 AWD","arsmodell":2024,"mil":5000,"borpris":400000}
-{"modell":"v60","variant":"T8 AWD","arsmodell":2025,"mil":5000,"borpris":430000}
-{"modell":"v90","variant":"T6 AWD","arsmodell":2023,"mil":5000,"borpris":380000}
-{"modell":"v90","variant":"T6 AWD","arsmodell":2024,"mil":5000,"borpris":410000}
-{"modell":"v90","variant":"T6 AWD","arsmodell":2025,"mil":5000,"borpris":440000}
-{"modell":"v90","variant":"T8 AWD","arsmodell":2023,"mil":5000,"borpris":420000}
-{"modell":"v90","variant":"T8 AWD","arsmodell":2024,"mil":5000,"borpris":450000}
-{"modell":"v90","variant":"T8 AWD","arsmodell":2025,"mil":5000,"borpris":480000}
-{"modell":"330e-xdrive-touring","variant":"330e xDrive Touring","arsmodell":2024,"mil":5000,"borpris":390000}
-{"modell":"330e-xdrive-touring","variant":"330e xDrive Touring","arsmodell":2025,"mil":5000,"borpris":430000}
-{"modell":"330e-xdrive-touring","variant":"330e xDrive Touring","arsmodell":2026,"mil":5000,"borpris":470000}
-{"modell":"530e-xdrive-touring","variant":"530e xDrive Touring","arsmodell":2024,"mil":5000,"borpris":500000}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 1000, "borpris": 483055}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 1500, "borpris": 461386}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 2000, "borpris": 441369}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 2500, "borpris": 449543}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 3000, "borpris": 428306}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 3500, "borpris": 421731}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 4000, "borpris": 418635}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 4500, "borpris": 426393}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 5000, "borpris": 420622}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 5500, "borpris": 415110}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 6000, "borpris": 390186}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 6500, "borpris": 408460}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 7000, "borpris": 383976}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 7500, "borpris": 366228}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 8000, "borpris": 374166}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 8500, "borpris": 361215}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 9000, "borpris": 373052}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 9500, "borpris": 350034}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 10000, "borpris": 371702}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 10500, "borpris": 366316}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 11000, "borpris": 327135}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 11500, "borpris": 331833}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2023, "mil": 12000, "borpris": 319273}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 1000, "borpris": 535987}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 1500, "borpris": 519205}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 2000, "borpris": 511647}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 2500, "borpris": 518836}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 3000, "borpris": 504292}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 3500, "borpris": 500163}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 4000, "borpris": 475478}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 4500, "borpris": 461958}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 5000, "borpris": 459903}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 5500, "borpris": 457646}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 6000, "borpris": 455311}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 6500, "borpris": 458894}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 7000, "borpris": 447111}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 7500, "borpris": 439790}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 8000, "borpris": 435805}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 8500, "borpris": 435759}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 9000, "borpris": 422856}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 9500, "borpris": 412960}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 10000, "borpris": 418135}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 10500, "borpris": 412931}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 11000, "borpris": 364234}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 11500, "borpris": 365418}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2023, "mil": 12000, "borpris": 358106}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 1000, "borpris": 484755}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 1500, "borpris": 463542}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 2000, "borpris": 443310}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 2500, "borpris": 451752}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 3000, "borpris": 434095}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 3500, "borpris": 428268}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 4000, "borpris": 423979}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 4500, "borpris": 449714}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 5000, "borpris": 425943}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 5500, "borpris": 430404}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 6000, "borpris": 397110}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 6500, "borpris": 409219}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 7000, "borpris": 412049}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 7500, "borpris": 395341}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 8000, "borpris": 420925}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 8500, "borpris": 416004}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 9000, "borpris": 379475}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 9500, "borpris": 365688}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 10000, "borpris": 375505}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 10500, "borpris": 381899}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 11000, "borpris": 334025}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 11500, "borpris": 344249}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2024, "mil": 12000, "borpris": 330918}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 1000, "borpris": 537629}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 1500, "borpris": 521082}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 2000, "borpris": 513400}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 2500, "borpris": 520730}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 3000, "borpris": 510077}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 3500, "borpris": 508382}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 4000, "borpris": 495276}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 4500, "borpris": 481983}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 5000, "borpris": 479778}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 5500, "borpris": 480260}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 6000, "borpris": 486030}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 6500, "borpris": 494326}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 7000, "borpris": 490586}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 7500, "borpris": 483979}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 8000, "borpris": 470613}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 8500, "borpris": 474612}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 9000, "borpris": 438239}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 9500, "borpris": 428977}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 10000, "borpris": 430076}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 10500, "borpris": 428022}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 11000, "borpris": 377374}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 11500, "borpris": 380405}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2024, "mil": 12000, "borpris": 372749}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 1000, "borpris": 496997}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 1500, "borpris": 500348}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 2000, "borpris": 462722}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 2500, "borpris": 487190}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 3000, "borpris": 444985}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 3500, "borpris": 459791}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 4000, "borpris": 457283}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 4500, "borpris": 446807}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 5000, "borpris": 455032}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 5500, "borpris": 461882}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 6000, "borpris": 422488}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 6500, "borpris": 420480}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 7000, "borpris": 415361}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 7500, "borpris": 404453}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 8000, "borpris": 419274}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 8500, "borpris": 415328}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 9000, "borpris": 382861}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 9500, "borpris": 374471}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 10000, "borpris": 384279}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 10500, "borpris": 388782}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 11000, "borpris": 344450}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 11500, "borpris": 352263}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2025, "mil": 12000, "borpris": 339973}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 1000, "borpris": 530278}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 1500, "borpris": 522353}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 2000, "borpris": 507347}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 2500, "borpris": 523059}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 3000, "borpris": 491686}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 3500, "borpris": 495008}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 4000, "borpris": 482962}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 4500, "borpris": 473271}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 5000, "borpris": 476609}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 5500, "borpris": 482023}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 6000, "borpris": 484190}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 6500, "borpris": 489536}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 7000, "borpris": 487389}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 7500, "borpris": 484035}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 8000, "borpris": 474260}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 8500, "borpris": 478624}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 9000, "borpris": 443269}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 9500, "borpris": 432563}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 10000, "borpris": 433075}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 10500, "borpris": 431158}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 11000, "borpris": 383152}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 11500, "borpris": 385551}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2025, "mil": 12000, "borpris": 378144}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 1000, "borpris": 561546}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 1500, "borpris": 510150}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 2000, "borpris": 507815}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 2500, "borpris": 504005}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 3000, "borpris": 501257}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 3500, "borpris": 510840}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 4000, "borpris": 489785}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 4500, "borpris": 487776}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 5000, "borpris": 487239}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 5500, "borpris": 482917}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 6000, "borpris": 432660}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 6500, "borpris": 431029}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 7000, "borpris": 426032}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 7500, "borpris": 413560}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 8000, "borpris": 428569}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 8500, "borpris": 425478}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 9000, "borpris": 391468}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 9500, "borpris": 382954}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 10000, "borpris": 392457}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 10500, "borpris": 397046}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 11000, "borpris": 352713}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 11500, "borpris": 360533}
+{"modell": "V60", "variant": "T6 AWD", "arsmodell": 2026, "mil": 12000, "borpris": 348243}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 1000, "borpris": 626058}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 1500, "borpris": 567747}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 2000, "borpris": 574218}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 2500, "borpris": 571812}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 3000, "borpris": 563065}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 3500, "borpris": 562470}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 4000, "borpris": 531156}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 4500, "borpris": 529563}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 5000, "borpris": 526002}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 5500, "borpris": 513566}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 6000, "borpris": 493120}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 6500, "borpris": 498328}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 7000, "borpris": 495568}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 7500, "borpris": 491895}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 8000, "borpris": 482732}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 8500, "borpris": 487345}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 9000, "borpris": 453285}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 9500, "borpris": 444314}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 10000, "borpris": 444628}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 10500, "borpris": 442720}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 11000, "borpris": 394713}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 11500, "borpris": 397119}
+{"modell": "V60", "variant": "T8 AWD", "arsmodell": 2026, "mil": 12000, "borpris": 389713}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 1000, "borpris": 483055}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 1500, "borpris": 461386}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 2000, "borpris": 441369}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 2500, "borpris": 449543}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 3000, "borpris": 428306}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 3500, "borpris": 421731}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 4000, "borpris": 418635}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 4500, "borpris": 426393}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 5000, "borpris": 420622}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 5500, "borpris": 415110}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 6000, "borpris": 390186}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 6500, "borpris": 408460}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 7000, "borpris": 383976}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 7500, "borpris": 366228}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 8000, "borpris": 374166}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 8500, "borpris": 361215}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 9000, "borpris": 373052}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 9500, "borpris": 350034}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 10000, "borpris": 371702}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 10500, "borpris": 366316}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 11000, "borpris": 327135}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 11500, "borpris": 331833}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2023, "mil": 12000, "borpris": 319273}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 1000, "borpris": 535987}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 1500, "borpris": 519205}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 2000, "borpris": 511647}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 2500, "borpris": 518836}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 3000, "borpris": 504292}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 3500, "borpris": 500163}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 4000, "borpris": 475478}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 4500, "borpris": 461958}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 5000, "borpris": 459903}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 5500, "borpris": 457646}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 6000, "borpris": 455311}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 6500, "borpris": 458894}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 7000, "borpris": 447111}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 7500, "borpris": 439790}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 8000, "borpris": 435805}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 8500, "borpris": 435759}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 9000, "borpris": 422856}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 9500, "borpris": 412960}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 10000, "borpris": 418135}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 10500, "borpris": 412931}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 11000, "borpris": 364234}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 11500, "borpris": 365418}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2023, "mil": 12000, "borpris": 358106}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 1000, "borpris": 484755}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 1500, "borpris": 463542}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 2000, "borpris": 443310}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 2500, "borpris": 451752}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 3000, "borpris": 434095}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 3500, "borpris": 428268}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 4000, "borpris": 423979}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 4500, "borpris": 449714}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 5000, "borpris": 425943}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 5500, "borpris": 430404}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 6000, "borpris": 397110}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 6500, "borpris": 409219}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 7000, "borpris": 412049}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 7500, "borpris": 395341}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 8000, "borpris": 420925}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 8500, "borpris": 416004}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 9000, "borpris": 379475}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 9500, "borpris": 365688}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 10000, "borpris": 375505}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 10500, "borpris": 381899}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 11000, "borpris": 334025}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 11500, "borpris": 344249}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2024, "mil": 12000, "borpris": 330918}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 1000, "borpris": 537629}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 1500, "borpris": 521082}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 2000, "borpris": 513400}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 2500, "borpris": 520730}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 3000, "borpris": 510077}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 3500, "borpris": 508382}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 4000, "borpris": 495276}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 4500, "borpris": 481983}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 5000, "borpris": 479778}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 5500, "borpris": 480260}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 6000, "borpris": 486030}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 6500, "borpris": 494326}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 7000, "borpris": 490586}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 7500, "borpris": 483979}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 8000, "borpris": 470613}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 8500, "borpris": 474612}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 9000, "borpris": 438239}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 9500, "borpris": 428977}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 10000, "borpris": 430076}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 10500, "borpris": 428022}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 11000, "borpris": 377374}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 11500, "borpris": 380405}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2024, "mil": 12000, "borpris": 372749}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 1000, "borpris": 496997}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 1500, "borpris": 500295}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 2000, "borpris": 462707}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 2500, "borpris": 487174}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 3000, "borpris": 444985}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 3500, "borpris": 459791}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 4000, "borpris": 457283}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 4500, "borpris": 446807}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 5000, "borpris": 455032}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 5500, "borpris": 461882}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 6000, "borpris": 422488}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 6500, "borpris": 420480}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 7000, "borpris": 415361}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 7500, "borpris": 404453}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 8000, "borpris": 419274}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 8500, "borpris": 415328}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 9000, "borpris": 382861}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 9500, "borpris": 374471}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 10000, "borpris": 384279}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 10500, "borpris": 388782}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 11000, "borpris": 344450}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 11500, "borpris": 352263}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2025, "mil": 12000, "borpris": 339973}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 1000, "borpris": 530278}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 1500, "borpris": 522305}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 2000, "borpris": 507337}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 2500, "borpris": 523049}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 3000, "borpris": 491686}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 3500, "borpris": 495008}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 4000, "borpris": 482962}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 4500, "borpris": 473271}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 5000, "borpris": 476609}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 5500, "borpris": 482023}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 6000, "borpris": 484190}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 6500, "borpris": 489536}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 7000, "borpris": 487389}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 7500, "borpris": 484035}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 8000, "borpris": 474260}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 8500, "borpris": 478624}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 9000, "borpris": 443269}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 9500, "borpris": 432563}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 10000, "borpris": 433075}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 10500, "borpris": 431158}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 11000, "borpris": 383152}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 11500, "borpris": 385551}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2025, "mil": 12000, "borpris": 378144}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 1000, "borpris": 553985}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 1500, "borpris": 499202}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 2000, "borpris": 496794}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 2500, "borpris": 494334}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 3000, "borpris": 494553}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 3500, "borpris": 500906}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 4000, "borpris": 486229}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 4500, "borpris": 484305}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 5000, "borpris": 483884}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 5500, "borpris": 480449}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 6000, "borpris": 432091}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 6500, "borpris": 430601}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 7000, "borpris": 425603}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 7500, "borpris": 413132}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 8000, "borpris": 428141}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 8500, "borpris": 425049}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 9000, "borpris": 391039}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 9500, "borpris": 382526}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 10000, "borpris": 392029}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 10500, "borpris": 396617}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 11000, "borpris": 352285}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 11500, "borpris": 360104}
+{"modell": "V90", "variant": "T6 AWD", "arsmodell": 2026, "mil": 12000, "borpris": 347815}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 1000, "borpris": 625799}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 1500, "borpris": 566191}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 2000, "borpris": 572616}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 2500, "borpris": 570572}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 3000, "borpris": 562273}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 3500, "borpris": 561414}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 4000, "borpris": 530837}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 4500, "borpris": 529244}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 5000, "borpris": 525684}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 5500, "borpris": 513248}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 6000, "borpris": 492905}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 6500, "borpris": 498184}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 7000, "borpris": 495423}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 7500, "borpris": 491750}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 8000, "borpris": 482588}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 8500, "borpris": 487201}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 9000, "borpris": 453140}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 9500, "borpris": 444170}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 10000, "borpris": 444484}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 10500, "borpris": 442575}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 11000, "borpris": 394569}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 11500, "borpris": 396975}
+{"modell": "V90", "variant": "T8 AWD", "arsmodell": 2026, "mil": 12000, "borpris": 389568}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 1000, "borpris": 487530}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 1500, "borpris": 466672}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 2000, "borpris": 447871}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 2500, "borpris": 459398}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 3000, "borpris": 436648}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 3500, "borpris": 432491}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 4000, "borpris": 431191}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 4500, "borpris": 444942}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 5000, "borpris": 428724}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 5500, "borpris": 434286}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 6000, "borpris": 430998}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 6500, "borpris": 440972}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 7000, "borpris": 446295}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 7500, "borpris": 426650}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 8000, "borpris": 437062}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 8500, "borpris": 433380}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 9000, "borpris": 381772}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 9500, "borpris": 366620}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 10000, "borpris": 378252}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 10500, "borpris": 383824}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 11000, "borpris": 338546}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 11500, "borpris": 345581}
+{"modell": "530e xDrive Touring", "variant": "530e xDrive Touring", "arsmodell": 2024, "mil": 12000, "borpris": 329826}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 1000, "borpris": 486517}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 1500, "borpris": 465093}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 2000, "borpris": 446477}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 2500, "borpris": 458449}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 3000, "borpris": 435740}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 3500, "borpris": 431742}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 4000, "borpris": 428403}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 4500, "borpris": 444711}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 5000, "borpris": 424817}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 5500, "borpris": 429023}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 6000, "borpris": 388062}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 6500, "borpris": 399972}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 7000, "borpris": 400511}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 7500, "borpris": 384640}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 8000, "borpris": 415740}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 8500, "borpris": 411281}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 9000, "borpris": 372608}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 9500, "borpris": 357369}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 10000, "borpris": 372024}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 10500, "borpris": 378358}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 11000, "borpris": 334169}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 11500, "borpris": 343486}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2024, "mil": 12000, "borpris": 327966}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 1000, "borpris": 502225}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 1500, "borpris": 502563}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 2000, "borpris": 468897}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 2500, "borpris": 499620}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 3000, "borpris": 453189}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 3500, "borpris": 463678}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 4000, "borpris": 463424}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 4500, "borpris": 455934}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 5000, "borpris": 464652}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 5500, "borpris": 470723}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 6000, "borpris": 420454}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 6500, "borpris": 421177}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 7000, "borpris": 417912}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 7500, "borpris": 405162}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 8000, "borpris": 423785}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 8500, "borpris": 420449}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 9000, "borpris": 382862}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 9500, "borpris": 371515}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 10000, "borpris": 385022}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 10500, "borpris": 389916}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 11000, "borpris": 346960}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 11500, "borpris": 354669}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2025, "mil": 12000, "borpris": 340855}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 1000, "borpris": 618055}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 1500, "borpris": 558152}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 2000, "borpris": 563976}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 2500, "borpris": 563364}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 3000, "borpris": 558279}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 3500, "borpris": 557446}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 4000, "borpris": 524576}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 4500, "borpris": 523022}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 5000, "borpris": 519496}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 5500, "borpris": 504396}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 6000, "borpris": 431841}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 6500, "borpris": 432241}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 7000, "borpris": 428712}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 7500, "borpris": 414455}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 8000, "borpris": 433415}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 8500, "borpris": 430497}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 9000, "borpris": 392580}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 9500, "borpris": 382266}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 10000, "borpris": 395575}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 10500, "borpris": 400437}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 11000, "borpris": 357481}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 11500, "borpris": 365196}
+{"modell": "330e xDrive Touring", "variant": "330e xDrive Touring", "arsmodell": 2026, "mil": 12000, "borpris": 351382}
