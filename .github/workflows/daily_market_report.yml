@@ -1,8 +1,10 @@
 name: Daglig marknadsrapport Fiskabilar
+
 on:
   schedule:
     - cron: "0 21 * * *"
       timezone: "Europe/Stockholm"
+
   workflow_dispatch:
     inputs:
       force_email:
@@ -10,30 +12,42 @@ on:
         required: false
         default: false
         type: boolean
+
+
 permissions:
   contents: write
   pages: write
   id-token: write
+
+
 concurrency:
   group: fiskabilar-data-write
   cancel-in-progress: false
+
+
 jobs:
+
   build:
     name: Bygg daglig rapport och webb
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Hämta repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Installera Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
+
       - name: Installera beroenden
         run: |
           pip install -r requirements.txt
+
       - name: Skapa daglig marknadsrapport
         env:
           EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
@@ -43,26 +57,62 @@ jobs:
           else
             python -u -m reporting.daily_market_report
           fi
+
+      - name: Arkivera föregående månads ML-värderingar
+        run: |
+          if [ "$(TZ=Europe/Stockholm date +%d)" != "01" ]; then
+            echo "Inte första dagen i månaden - ingen arkivering behövs."
+            exit 0
+          fi
+
+          CURRENT_FILE="data/ml_valuation.jsonl"
+          ARCHIVE_DIR="data/ml_valuation_archive"
+          PREVIOUS_MONTH="$(TZ=Europe/Stockholm date -d 'last month' +%Y-%m)"
+          ARCHIVE_FILE="${ARCHIVE_DIR}/${PREVIOUS_MONTH}.jsonl"
+
+          if [ ! -f "$CURRENT_FILE" ]; then
+            echo "Ingen aktuell ML-värderingsfil finns att arkivera."
+            exit 0
+          fi
+
+          mkdir -p "$ARCHIVE_DIR"
+
+          if [ -f "$ARCHIVE_FILE" ]; then
+            echo "Arkivfilen finns redan: $ARCHIVE_FILE"
+            echo "Ingen arkivering görs för att undvika överskrivning."
+            exit 0
+          fi
+
+          mv "$CURRENT_FILE" "$ARCHIVE_FILE"
+
+          echo "Arkiverade $CURRENT_FILE till $ARCHIVE_FILE"
+
       - name: Träna ML-modell
         run: |
           python -u -m ml.train_market_model
+
       - name: Generera ML-värderingar
         run: |
           python -u -m ml.generate_ml_valuation
+
       - name: Bygg statisk webb
         run: |
           python -u web/build_static.py
+
       - name: Validera statisk webb
         run: |
           test -f web_site/index.html
           test -f web_site/data.json
           test -f web_site/.nojekyll
+
           python - <<'PY'
           import json
           from pathlib import Path
+
           data = json.loads(
               Path("web_site/data.json").read_text(encoding="utf-8")
           )
+
           required = {
               "generated_at",
               "summary",
@@ -73,64 +123,84 @@ jobs:
               "market_history",
               "ml",
           }
+
           missing = required - set(data)
+
           if missing:
               raise SystemExit(
                   f"Saknade nycklar i data.json: {sorted(missing)}"
               )
+
           html = Path("web_site/index.html").read_text(
               encoding="utf-8"
           )
+
           if "<html" not in html.lower():
               raise SystemExit(
                   "index.html verkar inte vara en HTML-fil"
               )
+
           print("Webbvalidering OK")
           print(f"Fynd: {len(data['current_findings'])}")
           print(f"Prisändringar: {len(data['price_reductions'])}")
           print(f"Fyndutfall: {len(data['find_outcomes'])}")
           print(f"Marknadshistorik: {len(data['market_history'])}")
+
           valuation_file = Path(
               "data/ml_valuation.jsonl"
           )
+
           if not valuation_file.exists():
               raise SystemExit(
                   "data/ml_valuation.jsonl saknas"
               )
+
           print(
               "ML-värderingsfil OK: "
               f"{valuation_file}"
           )
           PY
+
       - name: Skapa Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: web_site
+
       - name: Spara rapportlogg, ML-modell och ML-värderingar
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/daily_reports data/ml data/ml_valuation.jsonl
+
+          git add data/daily_reports data/ml data/ml_valuation.jsonl data/ml_valuation_archive
+
           if git diff --cached --quiet; then
             echo "Ingen förändring i rapportloggen, ML-modellen eller ML-värderingarna."
             exit 0
           fi
+
           git commit -m "Uppdaterar daglig rapport och ML-värdering"
+
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
+
+
   deploy:
     name: Publicera produktionswebb
     needs: build
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
+
       - name: Publicera GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
       - name: Skriv ut webb-URL
         run: |
           echo "=========================================="
