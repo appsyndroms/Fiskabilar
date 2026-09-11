@@ -11,6 +11,7 @@ Målvariabel:
 Features:
     - Mil
     - ModelYear
+    - Model
     - Variant
 
 Två modeller testas:
@@ -18,28 +19,13 @@ Två modeller testas:
     1. Linjär regression
     2. Random Forest
 
-Testdata hålls tidsmässigt separat från träningsdata för att
-ge en bättre bild av hur modellen kan fungera på framtida
-marknadsobservationer.
-
-Utvärderingen innehåller:
-
-    - MAE
-    - medianfel
-    - genomsnittligt procentfel
-    - RMSE
-    - R²
-    - antal observationer
-    - faktisk vs predikterad prisnivå
-    - resultat per variant
-    - resultat per årsmodell
+Random Forest används som slutlig modell om den ger bättre
+R² än linjär regression.
 
 Resultatet sparas i:
 
     data/ml/market_model.joblib
     data/ml/model_metadata.json
-
-Modulen påverkar inte den befintliga valuation-logiken ännu.
 """
 
 from __future__ import annotations
@@ -57,7 +43,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+)
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
@@ -78,31 +68,20 @@ FEATURES_NUMERIC = [
 ]
 
 FEATURES_KATEGORISK = [
+    "Model",
     "Variant",
 ]
 
-FEATURES = FEATURES_NUMERIC + FEATURES_KATEGORISK
+FEATURES = (
+    FEATURES_NUMERIC
+    + FEATURES_KATEGORISK
+)
 
 TARGET = "Price"
 
 
-def _numeriskt(value):
-    """Försöker konvertera ett värde till float."""
-
-    if value is None:
-        return None
-
-    if isinstance(value, bool):
-        return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _normalisera_variant(value) -> str | None:
-    """Normaliserar modellvariant."""
+def _normalisera_text(value) -> str | None:
+    """Normaliserar ett textfält."""
 
     if value is None:
         return None
@@ -122,14 +101,18 @@ def _ladda_jsonl() -> pd.DataFrame:
         HISTORIK_DIR.glob("market_history_*.jsonl")
     )
 
-    legacy = HISTORIK_DIR / "market_history.jsonl"
+    legacy = (
+        HISTORIK_DIR
+        / "market_history.jsonl"
+    )
 
     if legacy.exists():
         filer.append(legacy)
 
     if not filer:
         raise FileNotFoundError(
-            f"Ingen marknadshistorik hittades i {HISTORIK_DIR}"
+            f"Ingen marknadshistorik hittades i "
+            f"{HISTORIK_DIR}"
         )
 
     poster = []
@@ -139,7 +122,10 @@ def _ladda_jsonl() -> pd.DataFrame:
             "r",
             encoding="utf-8",
         ) as f:
-            for radnummer, rad in enumerate(f, start=1):
+            for radnummer, rad in enumerate(
+                f,
+                start=1,
+            ):
                 rad = rad.strip()
 
                 if not rad:
@@ -160,23 +146,26 @@ def _ladda_jsonl() -> pd.DataFrame:
 
     if not poster:
         raise ValueError(
-            "Historikfilerna innehåller inga giltiga JSONL-poster."
+            "Historikfilerna innehåller inga "
+            "giltiga JSONL-poster."
         )
 
     return pd.DataFrame(poster)
 
 
-def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
+def _bygg_dataset(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Bygger träningsdataset från rå historik.
 
-    Vi använder de faktiska fältnamnen från Fiskabilars
-    marknadshistorik:
+    Marknadshistoriken använder:
 
-        annonspris
-        miltal
-        arsmodell
+        modell
         variant
+        arsmodell
+        miltal
+        annonspris
         tid
     """
 
@@ -192,9 +181,14 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         errors="coerce",
     )
 
+    resultat["Model"] = (
+        df.get("modell")
+        .apply(_normalisera_text)
+    )
+
     resultat["Variant"] = (
         df.get("variant")
-        .apply(_normalisera_variant)
+        .apply(_normalisera_text)
     )
 
     resultat["Price"] = pd.to_numeric(
@@ -208,7 +202,6 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         utc=True,
     )
 
-    # Pris, miltal och årsmodell krävs.
     resultat = resultat.dropna(
         subset=[
             "Mil",
@@ -217,17 +210,14 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         ]
     )
 
-    # Priset måste vara positivt.
     resultat = resultat[
         resultat["Price"] > 0
     ]
 
-    # Miltal måste vara rimligt.
     resultat = resultat[
         resultat["Mil"] >= 0
     ]
 
-    # Årsmodell måste vara rimlig.
     resultat = resultat[
         resultat["ModelYear"].between(
             1990,
@@ -235,13 +225,16 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         )
     ]
 
-    # En saknad variant får behålla observationen.
+    resultat["Model"] = (
+        resultat["Model"]
+        .fillna("Okänd")
+    )
+
     resultat["Variant"] = (
         resultat["Variant"]
         .fillna("Okänd")
     )
 
-    # Sortera tidsmässigt.
     resultat = resultat.sort_values(
         "Tid",
         na_position="last",
@@ -254,28 +247,30 @@ def _deduplicera_dataset(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
-    Minskar risken att samma bil observerad många gånger
-    får oproportionerligt stor påverkan på modellen.
+    Tar bort exakta dubbletter.
 
-    Om vehicle_id finns kan framtida versioner använda detta
-    ännu bättre. Den första modellen håller sig medvetet till
-    de features som roadmapen definierar.
+    Samma bil kan finnas i flera observationer.
+    Vi tar bara bort identiska observationer här.
     """
 
     nycklar = [
         "Mil",
         "ModelYear",
+        "Model",
         "Variant",
         "Price",
     ]
 
-    return df.drop_duplicates(
-        subset=nycklar
-    ).reset_index(drop=True)
+    return (
+        df.drop_duplicates(
+            subset=nycklar
+        )
+        .reset_index(drop=True)
+    )
 
 
 def _skapa_preprocessor() -> ColumnTransformer:
-    """Skapar gemensam preprocessing för modellerna."""
+    """Skapar preprocessing för modellerna."""
 
     numeric_pipeline = Pipeline(
         steps=[
@@ -362,11 +357,7 @@ def _beräkna_metrics(
     faktiskt: pd.Series,
     predikterat,
 ) -> dict:
-    """
-    Beräknar detaljerad felstatistik.
-
-    Returnerar både absoluta fel och procentuella fel.
-    """
+    """Beräknar modellens felstatistik."""
 
     faktiskt = pd.Series(
         faktiskt,
@@ -378,7 +369,10 @@ def _beräkna_metrics(
         dtype="float64",
     ).reset_index(drop=True)
 
-    fel = predikterat - faktiskt
+    fel = (
+        predikterat
+        - faktiskt
+    )
 
     absolut_fel = fel.abs()
 
@@ -389,21 +383,36 @@ def _beräkna_metrics(
     )
 
     return {
-        "antal_observationer": int(len(faktiskt)),
+        "antal_observationer": int(
+            len(faktiskt)
+        ),
         "mae": round(
-            float(absolut_fel.mean()),
+            float(
+                mean_absolute_error(
+                    faktiskt,
+                    predikterat,
+                )
+            ),
             2,
         ),
         "medianfel": round(
-            float(fel.median()),
+            float(
+                fel.median()
+            ),
             2,
         ),
         "median_absolutfel": round(
-            float(absolut_fel.median()),
+            float(
+                absolut_fel.median()
+            ),
             2,
         ),
         "mape_procent": round(
-            float(procent_fel.dropna().mean()),
+            float(
+                procent_fel
+                .dropna()
+                .mean()
+            ),
             2,
         ),
         "rmse": round(
@@ -426,23 +435,21 @@ def _beräkna_metrics(
             4,
         ),
         "faktiskt_medelpris": round(
-            float(faktiskt.mean()),
+            float(
+                faktiskt.mean()
+            ),
             2,
         ),
         "predikterat_medelpris": round(
-            float(predikterat.mean()),
-            2,
-        ),
-        "faktiskt_medianpris": round(
-            float(faktiskt.median()),
-            2,
-        ),
-        "predikterat_medianpris": round(
-            float(predikterat.median()),
+            float(
+                predikterat.mean()
+            ),
             2,
         ),
         "bias": round(
-            float(fel.mean()),
+            float(
+                fel.mean()
+            ),
             2,
         ),
     }
@@ -453,43 +460,36 @@ def _utvärdera_per_grupp(
     prediktioner,
     kolumn: str,
 ) -> dict:
-    """
-    Beräknar resultat uppdelat på en gruppkolumn.
+    """Beräknar resultat per modellgrupp."""
 
-    Exempel:
-
-        Variant
-        ModelYear
-    """
-
-    utvärderingsdata = test[
+    data = test[
         [
             kolumn,
             TARGET,
         ]
     ].copy()
 
-    utvärderingsdata["_prediktion"] = prediktioner
+    data["_prediktion"] = prediktioner
 
     resultat = {}
 
     for grupp, gruppdata in (
-        utvärderingsdata.groupby(
+        data.groupby(
             kolumn,
             dropna=False,
         )
     ):
-        metrics = _beräkna_metrics(
-            gruppdata[TARGET],
-            gruppdata["_prediktion"],
-        )
-
         if pd.isna(grupp):
             gruppnamn = "Okänd"
         else:
             gruppnamn = str(grupp)
 
-        resultat[gruppnamn] = metrics
+        resultat[gruppnamn] = (
+            _beräkna_metrics(
+                gruppdata[TARGET],
+                gruppdata["_prediktion"],
+            )
+        )
 
     return resultat
 
@@ -498,7 +498,7 @@ def _utvärdera(
     modell: Pipeline,
     test: pd.DataFrame,
 ) -> dict:
-    """Beräknar modellens fullständiga träffsäkerhet."""
+    """Beräknar fullständig modellstatistik."""
 
     x_test = test[FEATURES]
     y_test = test[TARGET]
@@ -507,27 +507,26 @@ def _utvärdera(
         x_test
     )
 
-    totalt = _beräkna_metrics(
-        y_test,
-        prediktioner,
-    )
-
-    per_variant = _utvärdera_per_grupp(
-        test,
-        prediktioner,
-        "Variant",
-    )
-
-    per_årsmodell = _utvärdera_per_grupp(
-        test,
-        prediktioner,
-        "ModelYear",
-    )
-
     return {
-        "totalt": totalt,
-        "per_variant": per_variant,
-        "per_årsmodell": per_årsmodell,
+        "totalt": _beräkna_metrics(
+            y_test,
+            prediktioner,
+        ),
+        "per_modell": _utvärdera_per_grupp(
+            test,
+            prediktioner,
+            "Model",
+        ),
+        "per_variant": _utvärdera_per_grupp(
+            test,
+            prediktioner,
+            "Variant",
+        ),
+        "per_årsmodell": _utvärdera_per_grupp(
+            test,
+            prediktioner,
+            "ModelYear",
+        ),
     }
 
 
@@ -535,7 +534,7 @@ def _skriv_ut_metrics(
     namn: str,
     metrics: dict,
 ) -> None:
-    """Skriver en sammanfattning av modellens resultat."""
+    """Skriver modellresultat."""
 
     totalt = metrics["totalt"]
 
@@ -560,12 +559,7 @@ def _skriv_ut_metrics(
     )
 
     print(
-        f"Median absolutfel: "
-        f"{totalt['median_absolutfel']:,.0f} kr"
-    )
-
-    print(
-        f"Fel i procent: "
+        f"MAPE: "
         f"{totalt['mape_procent']:.2f} %"
     )
 
@@ -576,7 +570,7 @@ def _skriv_ut_metrics(
 
     print(
         f"R²: "
-        f"{totalt['r2']:.3f}"
+        f"{totalt['r2']:.4f}"
     )
 
     print(
@@ -590,97 +584,101 @@ def _skriv_ut_metrics(
     )
 
     print(
-        f"Faktiskt medianpris: "
-        f"{totalt['faktiskt_medianpris']:,.0f} kr"
-    )
-
-    print(
-        f"Predikterat medianpris: "
-        f"{totalt['predikterat_medianpris']:,.0f} kr"
-    )
-
-    print(
         f"Bias: "
         f"{totalt['bias']:,.0f} kr"
     )
 
-    print()
-    print(
-        "Resultat per variant:"
-    )
 
-    for variant, variant_metrics in (
-        metrics["per_variant"].items()
-    ):
-        print(
-            f"  {variant}: "
-            f"n={variant_metrics['antal_observationer']}, "
-            f"MAE={variant_metrics['mae']:,.0f} kr, "
-            f"MAPE={variant_metrics['mape_procent']:.2f} %, "
-            f"bias={variant_metrics['bias']:,.0f} kr"
-        )
-
-    print()
-    print(
-        "Resultat per årsmodell:"
-    )
-
-    for årsmodell, årsmodell_metrics in (
-        sorted(
-            metrics["per_årsmodell"].items(),
-            key=lambda item: item[0],
-        )
-    ):
-        print(
-            f"  {årsmodell}: "
-            f"n={årsmodell_metrics['antal_observationer']}, "
-            f"MAE={årsmodell_metrics['mae']:,.0f} kr, "
-            f"MAPE={årsmodell_metrics['mape_procent']:.2f} %, "
-            f"bias={årsmodell_metrics['bias']:,.0f} kr"
-        )
-
-
-def _dela_tidsmässigt(
+def _tidsmässig_split(
     df: pd.DataFrame,
+    test_andel: float = 0.20,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Delar historiken tidsmässigt.
+    Delar datasetet tidsmässigt.
 
-    Äldre observationer används för träning och nyare
-    observationer används för test.
-
-    Detta är mer relevant för marknadsvärdering än en
-    helt slumpmässig train/test-split.
+    De äldsta observationerna används för träning.
+    De nyaste används för test.
     """
 
-    sorterad = df.sort_values(
+    df = df.sort_values(
         "Tid",
         na_position="first",
     ).reset_index(drop=True)
 
-    split_index = max(
+    antal = len(df)
+
+    test_antal = max(
         1,
-        int(len(sorterad) * 0.8),
+        int(
+            round(
+                antal * test_andel
+            )
+        ),
     )
 
-    if split_index >= len(sorterad):
-        split_index = len(sorterad) - 1
+    train_antal = (
+        antal - test_antal
+    )
 
-    train = sorterad.iloc[
-        :split_index
+    if train_antal < MIN_TRAINING_OBSERVATIONER:
+        raise ValueError(
+            "För få träningsobservationer. "
+            f"Minst {MIN_TRAINING_OBSERVATIONER} "
+            f"krävs."
+        )
+
+    train = df.iloc[
+        :train_antal
     ].copy()
 
-    test = sorterad.iloc[
-        split_index:
+    test = df.iloc[
+        train_antal:
     ].copy()
+
+    if test.empty:
+        raise ValueError(
+            "Testdatasetet blev tomt."
+        )
 
     return train, test
 
 
-def träna(
-    spara: bool = True,
+def _metadata(
+    vald_modell: str,
+    dataset: pd.DataFrame,
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    metrics: dict,
 ) -> dict:
-    """Tränar, jämför och eventuellt sparar bästa modell."""
+    """Bygger metadatafilen."""
+
+    return {
+        "skapad": datetime.now(
+            TIDSZON
+        ).isoformat(),
+        "modell": vald_modell,
+        "features": FEATURES,
+        "target": TARGET,
+        "antal_observationer": int(
+            len(dataset)
+        ),
+        "antal_traning": int(
+            len(train)
+        ),
+        "antal_test": int(
+            len(test)
+        ),
+        "metrics": metrics,
+        "historik_dir": str(
+            HISTORIK_DIR
+        ),
+    }
+
+
+def träna(
+    verbose: bool = True,
+) -> dict:
+    """Tränar, utvärderar och sparar modellen."""
 
     rådata = _ladda_jsonl()
 
@@ -692,150 +690,119 @@ def träna(
         dataset
     )
 
-    antal = len(dataset)
-
-    if antal < MIN_TRAINING_OBSERVATIONER:
+    if len(dataset) < MIN_TRAINING_OBSERVATIONER:
         raise ValueError(
-            "För lite historiskt underlag: "
-            f"{antal} observationer. "
+            "För få användbara observationer: "
+            f"{len(dataset)}. "
             f"Minst {MIN_TRAINING_OBSERVATIONER} krävs."
         )
 
-    train, test = _dela_tidsmässigt(
+    train, test = _tidsmässig_split(
         dataset
     )
 
-    if len(test) == 0:
-        raise ValueError(
-            "Testdataset blev tomt."
-        )
-
-    x_train = train[
-        FEATURES
-    ]
-
-    y_train = train[
-        TARGET
-    ]
+    x_train = train[FEATURES]
+    y_train = train[TARGET]
 
     modeller = _bygg_modeller()
 
-    resultat = {}
-
-    tränade_modeller = {}
+    metrics = {}
 
     for namn, modell in modeller.items():
-
         modell.fit(
             x_train,
             y_train,
         )
 
-        metrics = _utvärdera(
+        metrics[namn] = _utvärdera(
             modell,
             test,
         )
 
-        resultat[namn] = metrics
-        tränade_modeller[namn] = modell
-
-        _skriv_ut_metrics(
-            namn,
-            metrics,
-        )
-
-    # MAE är den primära jämförelsen eftersom den är lätt
-    # att tolka som genomsnittligt kronor-fel.
-    bästa_namn = min(
-        resultat,
-        key=lambda namn: resultat[namn]["totalt"]["mae"],
-    )
-
-    bästa_modell = tränade_modeller[
-        bästa_namn
-    ]
-
-    metadata = {
-        "skapad": datetime.now(
-            TIDSZON
-        ).isoformat(),
-
-        "modell": bästa_namn,
-
-        "features": FEATURES,
-
-        "target": TARGET,
-
-        "antal_observationer": antal,
-
-        "antal_traning": len(train),
-
-        "antal_test": len(test),
-
-        "metrics": resultat,
-
-        "historik_dir": str(
-            HISTORIK_DIR
-        ),
-    }
-
-    if spara:
-
-        OUTPUT_DIR.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        joblib.dump(
-            bästa_modell,
-            MODEL_FIL,
-        )
-
-        with METADATA_FIL.open(
-            "w",
-            encoding="utf-8",
-        ) as f:
-            json.dump(
-                metadata,
-                f,
-                ensure_ascii=False,
-                indent=2,
+        if verbose:
+            _skriv_ut_metrics(
+                namn,
+                metrics[namn],
             )
 
-        print()
-        print(
-            f"Bästa modell: {bästa_namn}"
-        )
+    vald_modell = max(
+        metrics,
+        key=lambda namn: (
+            metrics[namn]["totalt"]["r2"]
+        ),
+    )
 
-        print(
-            f"Modell sparad i: {MODEL_FIL}"
-        )
+    slutlig_modell = modeller[
+        vald_modell
+    ]
 
-        print(
-            f"Metadata sparad i: {METADATA_FIL}"
-        )
+    slutlig_modell.fit(
+        dataset[FEATURES],
+        dataset[TARGET],
+    )
+
+    OUTPUT_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    joblib.dump(
+        slutlig_modell,
+        MODEL_FIL,
+    )
+
+    metadata = _metadata(
+        vald_modell,
+        dataset,
+        train,
+        test,
+        metrics,
+    )
+
+    METADATA_FIL.write_text(
+        json.dumps(
+            metadata,
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    print()
+    print(
+        "=========================================="
+    )
+    print(
+        f"Vald modell: {vald_modell}"
+    )
+    print(
+        f"Modell sparad: {MODEL_FIL}"
+    )
+    print(
+        f"Metadata sparad: {METADATA_FIL}"
+    )
+    print(
+        "=========================================="
+    )
 
     return metadata
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Tränar och utvärderar ML-modeller "
-            "för marknadsvärdering."
-        )
-    )
+    """CLI-entrypoint."""
+
+    parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--no-save",
+        "--quiet",
         action="store_true",
-        help="Träna och utvärdera utan att spara modellen.",
+        help="Minska utskriften.",
     )
 
     args = parser.parse_args()
 
     träna(
-        spara=not args.no_save
+        verbose=not args.quiet
     )
 
 
