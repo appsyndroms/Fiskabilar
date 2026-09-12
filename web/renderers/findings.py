@@ -75,6 +75,11 @@ def render_findings(
             "score"
         )
 
+        dagar_ute = row.get(
+            "dagar_ute",
+            0,
+        )
+
         url = (
             row.get("url")
             or row.get("annons_url")
@@ -130,6 +135,10 @@ def render_findings(
                 </td>
 
                 <td>
+                    {fmt_number(dagar_ute)}
+                </td>
+
+                <td>
                     {link}
                 </td>
 
@@ -151,6 +160,7 @@ def render_findings(
                     <th>Pris</th>
                     <th>Under marknad</th>
                     <th>Score</th>
+                    <th>Dagar ute</th>
                     <th>Annons</th>
                 </tr>
 
