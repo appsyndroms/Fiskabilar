@@ -78,6 +78,10 @@ def get_ml_data() -> dict:
 def build_payload() -> dict:
     """
     Läser all data och bygger webbplatsens payload.
+
+    `current_findings` betyder aktiva fynd just nu.
+    Det är medvetet inte samma sak som dagens nya fynd i
+    den dagliga e-postrapporten.
     """
 
     state = read_json(
@@ -237,7 +241,7 @@ def main() -> None:
     )
 
     print(
-        f"Aktuella fynd: "
+        f"Aktiva fynd just nu: "
         f"{len(payload['current_findings'])}"
     )
 
