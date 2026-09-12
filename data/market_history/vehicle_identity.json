@@ -3716,7 +3716,18 @@
     "reg:UTJ08R": "vehicle:00001041",
     "source:bilweb:375727": "vehicle:00001041",
     "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-recharge-plus-dark-nordic-edition-plug-in-awd-350hk-2026-kombi-375727": "vehicle:00001041",
-    "fp:e3bbc7e4b4cdf045": "vehicle:00001041"
+    "fp:e3bbc7e4b4cdf045": "vehicle:00001041",
+    "fp:5aa704b3a8563a9e": "vehicle:00001030",
+    "fp:9253e360b3a3de78": "vehicle:00001031",
+    "source:bytbil:19392932": "vehicle:00001042",
+    "url:https://www.bytbil.com/vasternorrlands-lan/personbil-v90-recharge-t6-plus-dark-1426-19392932": "vehicle:00001042",
+    "fp:c715a1afbc178e63": "vehicle:00001042",
+    "source:bytbil:19392934": "vehicle:00001043",
+    "url:https://www.bytbil.com/vasternorrlands-lan/personbil-v90-recharge-t6-core-edition-1426-19392934": "vehicle:00001043",
+    "fp:12ae1d26e0521b0c": "vehicle:00001043",
+    "source:bytbil:19392923": "vehicle:00001044",
+    "url:https://www.bytbil.com/vasternorrlands-lan/personbil-v90-t6-ultra-dark-1426-19392923": "vehicle:00001044",
+    "fp:502f06dbf79b0801": "vehicle:00001044"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -22453,6 +22464,60 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001042": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19392932",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001043": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19392934",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001044": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19392923",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
