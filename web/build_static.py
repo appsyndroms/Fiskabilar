@@ -28,6 +28,8 @@ from analysis import (
     get_market_history_analysis,
     get_price_reductions,
     get_score_analysis,
+    parse_time,
+    vehicle_key,
 )
 
 from renderer import build_html
@@ -75,6 +77,80 @@ def get_ml_data() -> dict:
     }
 
 
+def add_find_age(
+    current_findings: list[dict],
+    find_events: list[dict],
+) -> list[dict]:
+    """
+    Lägger till antal dagar som det aktuella fynd-eventet har varit ute.
+
+    Dagarna räknas från fynd-eventets ursprungliga `tid`, inte från
+    senaste observationen av bilen. På så sätt återställs inte åldern
+    varje gång annonsen observeras igen.
+    """
+
+    event_by_vehicle: dict[str, list[datetime]] = {}
+
+    for event in find_events:
+        key = vehicle_key(event)
+        event_time = parse_time(event.get("tid"))
+
+        if not key or event_time is None:
+            continue
+
+        event_by_vehicle.setdefault(
+            key,
+            [],
+        ).append(event_time)
+
+    today = datetime.now().astimezone().date()
+
+    result = []
+
+    for row in current_findings:
+        copy = dict(row)
+
+        key = vehicle_key(row)
+        observation_time = parse_time(
+            row.get("tid")
+        )
+
+        candidates = event_by_vehicle.get(
+            key,
+            [],
+        )
+
+        if (
+            candidates
+            and observation_time is not None
+        ):
+            candidates = [
+                event_time
+                for event_time in candidates
+                if event_time <= observation_time
+            ]
+
+        if candidates:
+            event_date = max(
+                candidates
+            ).date()
+
+            copy["dagar_ute"] = max(
+                0,
+                (
+                    today
+                    - event_date
+                ).days,
+            )
+
+        else:
+            copy["dagar_ute"] = 0
+
+        result.append(copy)
+
+    return result
+
+
 def build_payload() -> dict:
     """
     Läser all data och bygger webbplatsens payload.
@@ -113,6 +189,11 @@ def build_payload() -> dict:
         get_find_outcomes(
             feedback
         )
+    )
+
+    current_findings = add_find_age(
+        current_findings,
+        outcomes,
     )
 
     score_analysis = (
@@ -241,7 +322,7 @@ def main() -> None:
     )
 
     print(
-        f"Aktiva fynd just nu: "
+        f"Aktuella fynd: "
         f"{len(payload['current_findings'])}"
     )
 
