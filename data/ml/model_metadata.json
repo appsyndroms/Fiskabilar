@@ -1,346 +1,60 @@
 {
-  "skapad": "2026-09-13T09:51:26.721841+02:00",
-  "modell": "random_forest",
-  "urvalsprincip": "lägst_mae",
+  "model": "random_forest",
+  "selection_metric": "mae",
   "features": [
     "Mil",
     "ModelYear",
+    "VehicleAge",
+    "MileagePerYear",
+    "LogMil",
+    "ObservationDays",
+    "MileageAgeInteraction",
     "Model",
-    "Variant"
+    "Variant",
+    "ModelVariant",
+    "ObservationMonth"
   ],
-  "target": "Price",
-  "antal_observationer": 642,
-  "antal_traning": 514,
-  "antal_test": 128,
+  "numeric_features": [
+    "Mil",
+    "ModelYear",
+    "VehicleAge",
+    "MileagePerYear",
+    "LogMil",
+    "ObservationDays",
+    "MileageAgeInteraction"
+  ],
+  "categorical_features": [
+    "Model",
+    "Variant",
+    "ModelVariant",
+    "ObservationMonth"
+  ],
+  "dataset_observations": 642,
+  "train_observations": 514,
+  "test_observations": 128,
   "metrics": {
     "linear_regression": {
-      "totalt": {
-        "antal_observationer": 128,
-        "mae": 23574.69,
-        "medianfel": 14051.42,
-        "median_absolutfel": 18334.67,
-        "mape_procent": 5.61,
-        "rmse": 29866.66,
-        "r2": 0.6616,
-        "faktiskt_medelpris": 433306.02,
-        "predikterat_medelpris": 448289.04,
-        "bias": 14983.02
-      },
-      "per_modell": {
-        "330e xdrive touring": {
-          "antal_observationer": 10,
-          "mae": 37267.73,
-          "medianfel": 26817.1,
-          "median_absolutfel": 26817.1,
-          "mape_procent": 9.53,
-          "rmse": 48791.03,
-          "r2": 0.0617,
-          "faktiskt_medelpris": 438748.0,
-          "predikterat_medelpris": 475967.83,
-          "bias": 37219.83
-        },
-        "530e xdrive touring": {
-          "antal_observationer": 8,
-          "mae": 10082.26,
-          "medianfel": -511.3,
-          "median_absolutfel": 9677.63,
-          "mape_procent": 2.32,
-          "rmse": 12744.09,
-          "r2": 0.0148,
-          "faktiskt_medelpris": 431975.0,
-          "predikterat_medelpris": 429842.15,
-          "bias": -2132.85
-        },
-        "v60": {
-          "antal_observationer": 67,
-          "mae": 22512.22,
-          "medianfel": 16624.78,
-          "median_absolutfel": 22187.0,
-          "mape_procent": 5.42,
-          "rmse": 26823.99,
-          "r2": 0.7867,
-          "faktiskt_medelpris": 430235.82,
-          "predikterat_medelpris": 444026.11,
-          "bias": 13790.29
-        },
-        "v90": {
-          "antal_observationer": 43,
-          "mae": 24555.96,
-          "medianfel": 11257.5,
-          "median_absolutfel": 16917.88,
-          "mape_procent": 5.59,
-          "rmse": 30827.75,
-          "r2": 0.5087,
-          "faktiskt_medelpris": 437071.86,
-          "predikterat_medelpris": 451926.33,
-          "bias": 14854.47
-        }
-      },
-      "per_variant": {
-        "330e xdrive touring": {
-          "antal_observationer": 10,
-          "mae": 37267.73,
-          "medianfel": 26817.1,
-          "median_absolutfel": 26817.1,
-          "mape_procent": 9.53,
-          "rmse": 48791.03,
-          "r2": 0.0617,
-          "faktiskt_medelpris": 438748.0,
-          "predikterat_medelpris": 475967.83,
-          "bias": 37219.83
-        },
-        "530e xdrive touring": {
-          "antal_observationer": 8,
-          "mae": 10082.26,
-          "medianfel": -511.3,
-          "median_absolutfel": 9677.63,
-          "mape_procent": 2.32,
-          "rmse": 12744.09,
-          "r2": 0.0148,
-          "faktiskt_medelpris": 431975.0,
-          "predikterat_medelpris": 429842.15,
-          "bias": -2132.85
-        },
-        "t6 awd": {
-          "antal_observationer": 103,
-          "mae": 22806.65,
-          "medianfel": 14470.37,
-          "median_absolutfel": 18426.32,
-          "mape_procent": 5.39,
-          "rmse": 28088.5,
-          "r2": 0.7295,
-          "faktiskt_medelpris": 431378.54,
-          "predikterat_medelpris": 444920.07,
-          "bias": 13541.52
-        },
-        "t8 awd": {
-          "antal_observationer": 7,
-          "mae": 30734.35,
-          "medianfel": 35006.55,
-          "median_absolutfel": 35006.55,
-          "mape_procent": 6.95,
-          "rmse": 33402.4,
-          "r2": -0.277,
-          "faktiskt_medelpris": 455414.29,
-          "predikterat_medelpris": 479402.04,
-          "bias": 23987.76
-        }
-      },
-      "per_årsmodell": {
-        "2023": {
-          "antal_observationer": 18,
-          "mae": 19294.89,
-          "medianfel": 11369.47,
-          "median_absolutfel": 15687.47,
-          "mape_procent": 5.33,
-          "rmse": 25590.15,
-          "r2": 0.5137,
-          "faktiskt_medelpris": 366599.44,
-          "predikterat_medelpris": 374849.34,
-          "bias": 8249.89
-        },
-        "2024": {
-          "antal_observationer": 41,
-          "mae": 23415.89,
-          "medianfel": 10835.81,
-          "median_absolutfel": 17152.6,
-          "mape_procent": 5.94,
-          "rmse": 30326.25,
-          "r2": 0.4495,
-          "faktiskt_medelpris": 409700.0,
-          "predikterat_medelpris": 418319.97,
-          "bias": 8619.97
-        },
-        "2025": {
-          "antal_observationer": 41,
-          "mae": 26808.33,
-          "medianfel": 26559.73,
-          "median_absolutfel": 27009.76,
-          "mape_procent": 6.14,
-          "rmse": 32358.21,
-          "r2": -0.3239,
-          "faktiskt_medelpris": 447306.83,
-          "predikterat_medelpris": 470921.86,
-          "bias": 23615.03
-        },
-        "2026": {
-          "antal_observationer": 28,
-          "mae": 21823.55,
-          "medianfel": 13472.07,
-          "median_absolutfel": 14661.91,
-          "mape_procent": 4.51,
-          "rmse": 27873.88,
-          "r2": -1.0859,
-          "faktiskt_medelpris": 490253.57,
-          "predikterat_medelpris": 506242.63,
-          "bias": 15989.06
-        }
-      }
+      "antal_observationer": 128,
+      "mae": 19911.43,
+      "median_absolutfel": 14919.44,
+      "mape_procent": 4.7,
+      "rmse": 26062.83,
+      "r2": 0.7423,
+      "bias": -3265.99,
+      "faktiskt_medelpris": 433306.02,
+      "predikterat_medelpris": 430040.02
     },
     "random_forest": {
-      "totalt": {
-        "antal_observationer": 128,
-        "mae": 22592.56,
-        "medianfel": 18559.09,
-        "median_absolutfel": 20673.47,
-        "mape_procent": 5.37,
-        "rmse": 27210.89,
-        "r2": 0.7191,
-        "faktiskt_medelpris": 433306.02,
-        "predikterat_medelpris": 449600.62,
-        "bias": 16294.6
-      },
-      "per_modell": {
-        "330e xdrive touring": {
-          "antal_observationer": 10,
-          "mae": 41548.64,
-          "medianfel": 31511.01,
-          "median_absolutfel": 31511.01,
-          "mape_procent": 10.12,
-          "rmse": 46938.85,
-          "r2": 0.1316,
-          "faktiskt_medelpris": 438748.0,
-          "predikterat_medelpris": 478006.53,
-          "bias": 39258.53
-        },
-        "530e xdrive touring": {
-          "antal_observationer": 8,
-          "mae": 12703.42,
-          "medianfel": 4088.37,
-          "median_absolutfel": 10943.9,
-          "mape_procent": 2.99,
-          "rmse": 15989.0,
-          "r2": -0.5508,
-          "faktiskt_medelpris": 431975.0,
-          "predikterat_medelpris": 438755.42,
-          "bias": 6780.42
-        },
-        "v60": {
-          "antal_observationer": 67,
-          "mae": 21752.08,
-          "medianfel": 18671.45,
-          "median_absolutfel": 19749.83,
-          "mape_procent": 5.21,
-          "rmse": 25455.28,
-          "r2": 0.8079,
-          "faktiskt_medelpris": 430235.82,
-          "predikterat_medelpris": 445263.14,
-          "bias": 15027.32
-        },
-        "v90": {
-          "antal_observationer": 43,
-          "mae": 21333.6,
-          "medianfel": 17067.98,
-          "median_absolutfel": 19840.7,
-          "mape_procent": 4.97,
-          "rmse": 25189.3,
-          "r2": 0.672,
-          "faktiskt_medelpris": 437071.86,
-          "predikterat_medelpris": 451770.69,
-          "bias": 14698.83
-        }
-      },
-      "per_variant": {
-        "330e xdrive touring": {
-          "antal_observationer": 10,
-          "mae": 41548.64,
-          "medianfel": 31511.01,
-          "median_absolutfel": 31511.01,
-          "mape_procent": 10.12,
-          "rmse": 46938.85,
-          "r2": 0.1316,
-          "faktiskt_medelpris": 438748.0,
-          "predikterat_medelpris": 478006.53,
-          "bias": 39258.53
-        },
-        "530e xdrive touring": {
-          "antal_observationer": 8,
-          "mae": 12703.42,
-          "medianfel": 4088.37,
-          "median_absolutfel": 10943.9,
-          "mape_procent": 2.99,
-          "rmse": 15989.0,
-          "r2": -0.5508,
-          "faktiskt_medelpris": 431975.0,
-          "predikterat_medelpris": 438755.42,
-          "bias": 6780.42
-        },
-        "t6 awd": {
-          "antal_observationer": 103,
-          "mae": 21494.51,
-          "medianfel": 17992.27,
-          "median_absolutfel": 19081.33,
-          "mape_procent": 5.11,
-          "rmse": 25445.49,
-          "r2": 0.778,
-          "faktiskt_medelpris": 431378.54,
-          "predikterat_medelpris": 446418.05,
-          "bias": 15039.5
-        },
-        "t8 awd": {
-          "antal_observationer": 7,
-          "mae": 22971.39,
-          "medianfel": 24958.28,
-          "median_absolutfel": 25260.17,
-          "mape_procent": 5.12,
-          "rmse": 23928.15,
-          "r2": 0.3447,
-          "faktiskt_medelpris": 455414.29,
-          "predikterat_medelpris": 468244.51,
-          "bias": 12830.22
-        }
-      },
-      "per_årsmodell": {
-        "2023": {
-          "antal_observationer": 18,
-          "mae": 24167.72,
-          "medianfel": 20226.48,
-          "median_absolutfel": 21662.75,
-          "mape_procent": 6.74,
-          "rmse": 28679.9,
-          "r2": 0.3892,
-          "faktiskt_medelpris": 366599.44,
-          "predikterat_medelpris": 382820.64,
-          "bias": 16221.2
-        },
-        "2024": {
-          "antal_observationer": 41,
-          "mae": 20929.95,
-          "medianfel": 15275.53,
-          "median_absolutfel": 21699.77,
-          "mape_procent": 5.28,
-          "rmse": 25941.58,
-          "r2": 0.5972,
-          "faktiskt_medelpris": 409700.0,
-          "predikterat_medelpris": 422326.74,
-          "bias": 12626.74
-        },
-        "2025": {
-          "antal_observationer": 41,
-          "mae": 23384.48,
-          "medianfel": 19925.77,
-          "median_absolutfel": 22866.91,
-          "mape_procent": 5.3,
-          "rmse": 27583.13,
-          "r2": 0.038,
-          "faktiskt_medelpris": 447306.83,
-          "predikterat_medelpris": 466395.81,
-          "bias": 19088.98
-        },
-        "2026": {
-          "antal_observationer": 28,
-          "mae": 22854.9,
-          "medianfel": 18485.21,
-          "median_absolutfel": 18720.0,
-          "mape_procent": 4.72,
-          "rmse": 27505.91,
-          "r2": -1.0312,
-          "faktiskt_medelpris": 490253.57,
-          "predikterat_medelpris": 507874.39,
-          "bias": 17620.81
-        }
-      }
+      "antal_observationer": 128,
+      "mae": 18537.79,
+      "median_absolutfel": 15324.82,
+      "mape_procent": 4.42,
+      "rmse": 23621.03,
+      "r2": 0.7883,
+      "bias": 6630.84,
+      "faktiskt_medelpris": 433306.02,
+      "predikterat_medelpris": 439936.86
     }
   },
-  "historik_dir": "data/market_history"
+  "trained_at": "2026-09-13T09:58:38.634242+02:00"
 }
