@@ -29,32 +29,44 @@
     "ModelVariant",
     "ObservationMonth"
   ],
-  "dataset_observations": 642,
-  "train_observations": 514,
-  "test_observations": 128,
+  "dataset_observations": 1005,
+  "train_observations": 772,
+  "test_observations": 233,
+  "unique_identified_vehicles": 539,
   "metrics": {
     "linear_regression": {
-      "antal_observationer": 128,
-      "mae": 19911.43,
-      "median_absolutfel": 14919.44,
-      "mape_procent": 4.7,
-      "rmse": 26062.83,
-      "r2": 0.7423,
-      "bias": -3265.99,
-      "faktiskt_medelpris": 433306.02,
-      "predikterat_medelpris": 430040.02
+      "antal_observationer": 233,
+      "mae": 25546.3,
+      "median_absolutfel": 21502.3,
+      "mape_procent": 5.98,
+      "rmse": 32566.86,
+      "r2": 0.6869,
+      "bias": 12483.54,
+      "faktiskt_medelpris": 442463.52,
+      "predikterat_medelpris": 454947.06
     },
     "random_forest": {
-      "antal_observationer": 128,
-      "mae": 18537.79,
-      "median_absolutfel": 15324.82,
-      "mape_procent": 4.42,
-      "rmse": 23621.03,
-      "r2": 0.7883,
-      "bias": 6630.84,
-      "faktiskt_medelpris": 433306.02,
-      "predikterat_medelpris": 439936.86
+      "antal_observationer": 233,
+      "mae": 19482.13,
+      "median_absolutfel": 16022.59,
+      "mape_procent": 4.56,
+      "rmse": 24983.16,
+      "r2": 0.8157,
+      "bias": 8155.08,
+      "faktiskt_medelpris": 442463.52,
+      "predikterat_medelpris": 450618.59
     }
   },
-  "trained_at": "2026-09-13T09:58:38.634242+02:00"
+  "deduplication": {
+    "uses_vehicle_identity": true,
+    "fallback_without_identity": [
+      "Mil",
+      "ModelYear",
+      "Model",
+      "Variant",
+      "Price"
+    ],
+    "grouped_vehicle_split": true
+  },
+  "trained_at": "2026-09-13T10:04:43.901876+02:00"
 }
