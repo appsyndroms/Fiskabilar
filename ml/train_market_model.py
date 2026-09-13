@@ -92,6 +92,7 @@ def _första_identitet(row: pd.Series) -> str | None:
         "ad_id",
         "adId",
         "url",
+        "URL",
     ):
         value = row.get(field)
 
@@ -106,6 +107,7 @@ def _första_url(row: pd.Series) -> str | None:
 
     for field in (
         "url",
+        "URL",
         "ad_url",
         "adUrl",
         "listing_url",
