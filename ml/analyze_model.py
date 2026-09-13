@@ -363,6 +363,143 @@ def _modell_variant_diagnostik(
         )
 
 
+def _största_felen(
+    test,
+    prediction,
+    antal=20,
+):
+    """
+    Visar de testobservationer där Random Forest
+    har störst absoluta fel.
+
+    Detta är en ren diagnostik och påverkar inte
+    modellträningen eller vilken modell som väljs.
+    """
+
+    kolumner = [
+        "Model",
+        "Variant",
+        "ModelYear",
+        "Mil",
+        "Price",
+    ]
+
+    extra_kolumner = [
+        "Identity",
+        "vehicle_id",
+        "annons_id",
+        "url",
+    ]
+
+    diagnostik = test.copy().reset_index(
+        drop=True
+    )
+
+    diagnostik["Prediction"] = (
+        pd.Series(prediction)
+        .reset_index(drop=True)
+    )
+
+    diagnostik["Error"] = (
+        diagnostik["Prediction"]
+        - diagnostik["Price"]
+    )
+
+    diagnostik["AbsoluteError"] = (
+        diagnostik["Error"].abs()
+    )
+
+    diagnostik = diagnostik.sort_values(
+        "AbsoluteError",
+        ascending=False,
+    )
+
+    tillgängliga = [
+        kolumn
+        for kolumn in kolumner + extra_kolumner
+        if kolumn in diagnostik.columns
+    ]
+
+    tillgängliga += [
+        "Prediction",
+        "Error",
+    ]
+
+    resultat = diagnostik[
+        tillgängliga
+    ].head(antal)
+
+    print()
+    print(
+        f"--- TOPP {antal} STÖRSTA FEL ---"
+    )
+
+    for _, row in resultat.iterrows():
+        model = row.get(
+            "Model",
+            "?",
+        )
+
+        variant = row.get(
+            "Variant",
+            "?",
+        )
+
+        model_year = row.get(
+            "ModelYear",
+            "?",
+        )
+
+        mil = row.get(
+            "Mil",
+            "?",
+        )
+
+        price = row.get(
+            "Price",
+            float("nan"),
+        )
+
+        prediction_value = row.get(
+            "Prediction",
+            float("nan"),
+        )
+
+        error = row.get(
+            "Error",
+            float("nan"),
+        )
+
+        identity = row.get(
+            "Identity",
+            "",
+        )
+
+        url = row.get(
+            "url",
+            "",
+        )
+
+        print(
+            f"  {model} / {variant} | "
+            f"år={model_year} | "
+            f"mil={mil} | "
+            f"pris={price:,.0f} kr | "
+            f"prognos={prediction_value:,.0f} kr | "
+            f"fel={error:+,.0f} kr"
+        )
+
+        if identity:
+            print(
+                f"    Identity: {identity}"
+            )
+
+        if url:
+            print(
+                f"    URL: {url}"
+            )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -551,6 +688,11 @@ def main():
             )
 
             _modell_variant_diagnostik(
+                test,
+                prediction,
+            )
+
+            _största_felen(
                 test,
                 prediction,
             )
