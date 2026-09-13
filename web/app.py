@@ -14,6 +14,7 @@ Webben är ett presentationslager ovanpå:
     Dashboard
 """
 
+import pandas as pd
 import streamlit as st
 
 from web.charts import (
