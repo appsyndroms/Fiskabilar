@@ -33,6 +33,9 @@ from ml.model_diagnostics import (
 from ml.comparable_market import (
     _diagnostik_jämförbar_marknad,
 )
+from ml.fynddetektor import (
+    detektera_fynd,
+)
 
 
 MODEL_FIL = Path("data/ml/market_model.joblib")
@@ -48,8 +51,18 @@ def _skapa_preprocessor() -> ColumnTransformer:
 
     categorical_pipeline = Pipeline(
         steps=[
-            ("imputer", SimpleImputer(strategy="most_frequent")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore")),
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy="most_frequent"
+                ),
+            ),
+            (
+                "onehot",
+                OneHotEncoder(
+                    handle_unknown="ignore"
+                ),
+            ),
         ]
     )
 
@@ -242,6 +255,12 @@ def main():
     )
 
     _diagnostik_jämförbar_marknad(
+        dataset,
+        test,
+        rf["prediction"],
+    )
+
+    detektera_fynd(
         dataset,
         test,
         rf["prediction"],
