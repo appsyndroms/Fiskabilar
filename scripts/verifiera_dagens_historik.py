@@ -1,129 +1,420 @@
-import json
-from datetime import datetime
-from zoneinfo import ZoneInfo
+"""
+Rendering av aktuella fynd.
+"""
+from __future__ import annotations
 
-TIDSZON = ZoneInfo("Europe/Stockholm")
+from typing import Any
 
-idag = datetime.now(TIDSZON).date().isoformat()
-
-fil = f"data/market_history/market_history_{idag[:7]}.jsonl"
-
-antal = 0
-extrema = []
-misstankta = []
-
-with open(fil, encoding="utf-8") as f:
-    for rad in f:
-        rad = rad.strip()
-
-        if not rad:
-            continue
-
-        post = json.loads(rad)
-
-        if post.get("typ") != "annons":
-            continue
-
-        tid = post.get("tid", "")
-
-        if not tid.startswith(idag):
-            continue
-
-        antal += 1
-
-        pris = post.get("pris")
-
-        if not isinstance(pris, (int, float)):
-            continue
-
-        if isinstance(pris, bool):
-            continue
-
-        if pris >= 1_000_000:
-            extrema.append(post)
-
-        # Letar efter typiska x100-fel.
-        #
-        # Exempel:
-        # 21429900 istället för 214299
-        # 17419900 istället för 174199
-        if (
-            pris >= 10_000_000
-            and pris % 100 == 0
-        ):
-            misstankta.append(post)
+from analysis import model_label_from_values
 
 
-print()
-print("========================================")
-print(" VERIFIERING AV DAGENS HISTORIK")
-print("========================================")
-print()
+def _safe(
+    value: Any,
+) -> str:
+    if value is None:
+        return "—"
 
-print(f"Datum: {idag}")
-print(f"Fil: {fil}")
-print()
-
-print(
-    "[VERIFIERING] "
-    f"Dagens annonsobservationer: {antal}"
-)
-
-print(
-    "[VERIFIERING] "
-    f"Priser >= 1 000 000 kr: {len(extrema)}"
-)
-
-print(
-    "[VERIFIERING] "
-    f"Misstänkta x100-priser: {len(misstankta)}"
-)
-
-print()
-
-if extrema:
-    print("----------------------------------------")
-    print("Priser >= 1 000 000 kr")
-    print("----------------------------------------")
-
-    for post in extrema:
-        print(
-            f"annons_id={post.get('annons_id')} "
-            f"modell={post.get('modell')} "
-            f"variant={post.get('variant')} "
-            f"pris={post.get('pris')} "
-            f"miltal={post.get('miltal')} "
-            f"vehicle_id={post.get('vehicle_id')}"
-        )
-
-    print()
-
-if misstankta:
-    print("----------------------------------------")
-    print("MISSTÄNKTA x100-PRISER")
-    print("----------------------------------------")
-
-    for post in misstankta:
-        print(
-            f"annons_id={post.get('annons_id')} "
-            f"modell={post.get('modell')} "
-            f"variant={post.get('variant')} "
-            f"pris={post.get('pris')} "
-            f"miltal={post.get('miltal')} "
-            f"vehicle_id={post.get('vehicle_id')}"
-        )
-
-    print()
-
-if not misstankta:
-    print(
-        "[RESULTAT] "
-        "Inga misstänkta x100-priser hittades idag."
-    )
-else:
-    print(
-        "[RESULTAT] "
-        "MISSTÄNKTA x100-PRISER HITTADES!"
+    return (
+        str(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
     )
 
-print()
+
+def _fmt_number(
+    value: Any,
+    decimals: int = 0,
+) -> str:
+    if value is None:
+        return "—"
+
+    try:
+        number = float(value)
+
+        if decimals == 0:
+            return (
+                f"{number:,.0f}"
+                .replace(",", " ")
+            )
+
+        return (
+            f"{number:,.{decimals}f}"
+            .replace(",", " ")
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return _safe(value)
+
+
+def _fmt_price(
+    value: Any,
+) -> str:
+    if value is None:
+        return "—"
+
+    try:
+        return (
+            f"{float(value):,.0f} kr"
+            .replace(",", " ")
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return _safe(value)
+
+
+def _get_ad_url(
+    row: dict[str, Any],
+) -> Any:
+    """
+    Hämtar annons-URL oavsett vilket av projektets URL-fältnamn
+    som används i underlaget.
+    """
+    for key in (
+        "url",
+        "URL",
+        "ad_url",
+        "adUrl",
+        "annons_url",
+        "annonsUrl",
+        "listing_url",
+        "listingUrl",
+    ):
+        value = row.get(key)
+
+        if value:
+            return value
+
+    return None
+
+
+def render_findings(
+    rows: list[dict[str, Any]],
+) -> str:
+    if not rows:
+        return """
+        <div class="empty">
+            Inga aktuella fynd hittades.
+        </div>
+        """
+
+    html_rows = []
+
+    for row in rows:
+        model = (
+            row.get("Model")
+            or row.get("modell")
+            or "Okänd bil"
+        )
+
+        variant = (
+            row.get("Variant")
+            or row.get("variant")
+            or ""
+        )
+
+        year = (
+            row.get("ModelYear")
+            or row.get("arsmodell")
+            or "—"
+        )
+
+        mileage = (
+            row.get("Mil")
+            or row.get("miltal")
+            or "—"
+        )
+
+        price = row.get(
+            "Price"
+        )
+
+        prediction = row.get(
+            "Prediction"
+        )
+
+        model_gap = row.get(
+            "ModelVsActualPct"
+        )
+
+        market_value = row.get(
+            "ComparableWeightedMedian"
+        )
+
+        market_gap = row.get(
+            "ComparableDeviationPct"
+        )
+
+        comparable_n = row.get(
+            "ComparableN"
+        )
+
+        evidence = row.get(
+            "EvidenceConfidence"
+        )
+
+        combined = row.get(
+            "CombinedScore"
+        )
+
+        fynd_score = row.get(
+            "FyndScore"
+        )
+
+        fyndklass = row.get(
+            "Fyndklass"
+        )
+
+        identity = row.get(
+            "Identity"
+        )
+
+        url = _get_ad_url(
+            row
+        )
+
+        title = _safe(
+            model_label_from_values(
+                model,
+                variant,
+            )
+        )
+
+        if url:
+            link = (
+                f'<a href="{_safe(url)}" '
+                f'target="_blank" '
+                f'rel="noopener">'
+                f'Öppna annons</a>'
+            )
+        else:
+            link = "—"
+
+        html_rows.append(
+            f"""
+            <tr
+                data-current-finding
+                data-filter-model="{_safe(model)}"
+                data-filter-year="{_safe(year)}"
+            >
+                <td>
+                    <strong>
+                        {title}
+                    </strong>
+                </td>
+
+                <td>
+                    {_safe(year)}
+                </td>
+
+                <td>
+                    {_fmt_number(mileage)}
+                </td>
+
+                <td>
+                    {_fmt_price(price)}
+                </td>
+
+                <td>
+                    {_fmt_price(prediction)}
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        model_gap,
+                        1,
+                    )} %
+                </td>
+
+                <td>
+                    {_fmt_price(
+                        market_value
+                    )}
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        market_gap,
+                        1,
+                    )} %
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        comparable_n
+                    )}
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        evidence,
+                        2,
+                    )}
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        combined,
+                        1,
+                    )}
+                </td>
+
+                <td>
+                    <strong>
+                        {_fmt_number(
+                            fynd_score,
+                            1,
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    {_safe(fyndklass)}
+                </td>
+
+                <td>
+                    {link}
+                </td>
+            </tr>
+            """
+        )
+
+    return f"""
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bil</th>
+                    <th>År</th>
+                    <th>Miltal</th>
+                    <th>Pris</th>
+                    <th>ML-värdering</th>
+                    <th>ML-gap</th>
+                    <th>Marknadsvärde</th>
+                    <th>Marknadsgap</th>
+                    <th>Jämförelser</th>
+                    <th>Evidens</th>
+                    <th>Combined</th>
+                    <th>FyndScore</th>
+                    <th>Klass</th>
+                    <th>Annons</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {"".join(html_rows)}
+            </tbody>
+        </table>
+    </div>
+    """
+
+
+def render_price_reductions(
+    rows: list[dict[str, Any]],
+) -> str:
+    if not rows:
+        return """
+        <div class="empty">
+            Inga observerade prissänkningar ännu.
+        </div>
+        """
+
+    html_rows = []
+
+    for row in rows[:100]:
+        model = (
+            row.get("Model")
+            or row.get("modell")
+            or "Okänd bil"
+        )
+
+        year = (
+            row.get("ModelYear")
+            or row.get("arsmodell")
+            or "—"
+        )
+
+        initial = row.get(
+            "_display_initialpris"
+        )
+
+        latest = row.get(
+            "_display_latestpris"
+        )
+
+        reduction = row.get(
+            "_display_reduction"
+        )
+
+        percentage = row.get(
+            "_display_percentage"
+        )
+
+        html_rows.append(
+            f"""
+            <tr
+                data-price-reduction
+                data-filter-model="{_safe(model)}"
+                data-filter-year="{_safe(year)}"
+            >
+                <td>
+                    <strong>
+                        {_safe(model)}
+                    </strong>
+                </td>
+
+                <td>
+                    {_safe(year)}
+                </td>
+
+                <td>
+                    {_fmt_price(initial)}
+                </td>
+
+                <td>
+                    {_fmt_price(latest)}
+                </td>
+
+                <td>
+                    <strong>
+                        {_fmt_price(reduction)}
+                    </strong>
+                </td>
+
+                <td>
+                    {_fmt_number(
+                        percentage,
+                        1,
+                    )} %
+                </td>
+            </tr>
+            """
+        )
+
+    return f"""
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bil</th>
+                    <th>År</th>
+                    <th>Första pris</th>
+                    <th>Senaste pris</th>
+                    <th>Sänkning</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {"".join(html_rows)}
+            </tbody>
+        </table>
+    </div>
+    """
