@@ -115,48 +115,92 @@ st.subheader(
 fynd = hamta_senaste_fynd()
 
 if fynd.empty:
+
     st.info(
         "Inga aktuella fynd finns "
         "tillgängliga ännu."
     )
 
 else:
+
     data_fynd = fynd.copy()
 
-    if "score" in data_fynd.columns:
-        data_fynd["score"] = (
-            data_fynd["score"]
-            .astype(float)
+    # --------------------------------------------------------
+    # Den nya ML-modellen använder FyndScore.
+    # --------------------------------------------------------
+
+    if "FyndScore" in data_fynd.columns:
+
+        data_fynd["FyndScore"] = pd.to_numeric(
+            data_fynd["FyndScore"],
+            errors="coerce",
         )
 
         data_fynd = data_fynd.sort_values(
-            "score",
+            "FyndScore",
             ascending=False,
         )
 
     kolumner = [
         kolumn
         for kolumn in [
-            "score",
-            "modell",
-            "arsmodell",
-            "miltal",
-            "pris",
-            "diff",
+            "FyndScore",
+            "Fyndklass",
+            "Model",
+            "Variant",
+            "ModelYear",
+            "Mil",
+            "Price",
+            "Prediction",
+            "ModelVsActualPct",
+            "ComparableWeightedMedian",
+            "ComparableDeviationPct",
+            "ComparableN",
+            "EvidenceConfidence",
+            "CombinedScore",
         ]
         if kolumn in data_fynd.columns
     ]
 
     if kolumner:
+
+        visning = data_fynd[
+            kolumner
+        ].head(10).copy()
+
+        namn = {
+            "FyndScore": "FyndScore",
+            "Fyndklass": "Klass",
+            "Model": "Bil",
+            "Variant": "Variant",
+            "ModelYear": "År",
+            "Mil": "Miltal",
+            "Price": "Pris",
+            "Prediction": "ML-värdering",
+            "ModelVsActualPct": "ML-gap %",
+            "ComparableWeightedMedian": (
+                "Marknadsvärde"
+            ),
+            "ComparableDeviationPct": (
+                "Marknadsgap %"
+            ),
+            "ComparableN": "Jämförelser",
+            "EvidenceConfidence": "Evidens",
+            "CombinedScore": "Combined",
+        }
+
+        visning = visning.rename(
+            columns=namn
+        )
+
         st.dataframe(
-            data_fynd[
-                kolumner
-            ].head(10),
+            visning,
             use_container_width=True,
             hide_index=True,
         )
 
     else:
+
         st.dataframe(
             data_fynd.head(10),
             use_container_width=True,
@@ -181,6 +225,7 @@ left, right = st.columns(
 )
 
 with left:
+
     st.subheader(
         "📊 Fyndutfall"
     )
@@ -192,12 +237,14 @@ with left:
     )
 
     if fig is not None:
+
         st.plotly_chart(
             fig,
             use_container_width=True,
         )
 
     else:
+
         st.info(
             "Fyndutfall visas när "
             "find_outcomes-filen innehåller data."
@@ -205,6 +252,7 @@ with left:
 
 
 with right:
+
     st.subheader(
         "🤖 ML-status"
     )
@@ -218,6 +266,7 @@ with right:
         data["ml_mae"]
         is not None
     ):
+
         st.metric(
             "MAE",
             f"{data['ml_mae']:,.0f} kr"
@@ -228,6 +277,7 @@ with right:
         )
 
     else:
+
         st.metric(
             "MAE",
             "—",
@@ -259,6 +309,7 @@ col1, col2, col3, col4 = st.columns(
 )
 
 with col1:
+
     st.markdown(
         """
         ### 📥 Marknad
@@ -269,6 +320,7 @@ with col1:
     )
 
 with col2:
+
     st.markdown(
         """
         ### 🔎 Fynd
@@ -279,6 +331,7 @@ with col2:
     )
 
 with col3:
+
     st.markdown(
         """
         ### 📊 Feedback
@@ -289,6 +342,7 @@ with col3:
     )
 
 with col4:
+
     st.markdown(
         """
         ### 🤖 ML
