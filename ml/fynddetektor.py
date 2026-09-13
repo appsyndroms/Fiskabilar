@@ -23,9 +23,6 @@ def _evidensvikt(jämförbara):
     Därför vägs två saker ihop:
       1. antal oberoende jämförelseobjekt
       2. hur samlade deras priser är
-
-    Prisets spridning mäts med MAD (Median Absolute Deviation),
-    vilket är robust mot enstaka extrema annonser.
     """
 
     antal = len(jämförbara)
@@ -101,6 +98,7 @@ def _bygg_fyndkandidater(
     resultat = []
 
     for _, row in diagnostik.iterrows():
+
         jämförbara = _jämförbara_observationer(
             dataset,
             row,
@@ -254,7 +252,7 @@ def _bygg_fyndkandidater(
     if not resultat:
         return pd.DataFrame()
 
-    return (
+    fynd = (
         pd.DataFrame(resultat)
         .sort_values(
             [
@@ -270,10 +268,16 @@ def _bygg_fyndkandidater(
                 False,
             ],
         )
-        .reset_index(
-            drop=True
-        )
+        .reset_index(drop=True)
     )
+
+    fynd["Fyndklass"] = fynd[
+        "FyndScore"
+    ].map(
+        _fyndklass
+    )
+
+    return fynd
 
 
 def _fyndklass(score):
@@ -296,10 +300,11 @@ def detektera_fynd(
     max_results=MAX_RESULTS,
 ):
     """
-    Kör den faktiska fynddetektorn och skriver en rankad shortlist.
+    Kör fynddetektorn.
 
-    Resultatet returneras som DataFrame så att det senare kan
-    användas för JSONL-export, notifieringar eller annan automation.
+    Returnerar en rankad DataFrame med fynd.
+
+    Funktionen skriver inte ut något och har inga sidoeffekter.
     """
 
     fynd = _bygg_fyndkandidater(
@@ -308,135 +313,11 @@ def detektera_fynd(
         prediction,
     )
 
-    print(
-        "\n"
-        + "=" * 70
-    )
-
-    print(
-        "FYNDPOSITION – AKTIV FYNDETEKTOR"
-    )
-
-    print(
-        "=" * 70
-    )
-
     if fynd.empty:
-        print(
-            "\nInga bilar uppfyller både ML- "
-            "och jämförelsemarknadens "
-            "fyndkriterier."
-        )
-
         return fynd
 
-    fynd["Fyndklass"] = fynd[
-        "FyndScore"
-    ].map(
-        _fyndklass
+    return fynd.head(
+        max_results
+    ).reset_index(
+        drop=True
     )
-
-    print(
-        f"\nFyndkandidater: "
-        f"{len(fynd)}"
-    )
-
-    print(
-        f"Tröskel ML: "
-        f"+{MODEL_THRESHOLD_PCT:.0f} %"
-    )
-
-    print(
-        f"Tröskel marknad: "
-        f"{MARKET_THRESHOLD_PCT:+.0f} %"
-    )
-
-    utskrift = (
-        fynd
-        .head(max_results)
-        .copy()
-    )
-
-    for column in [
-        "Price",
-        "Prediction",
-        "ComparableWeightedMedian",
-    ]:
-        utskrift[column] = utskrift[
-            column
-        ].map(
-            lambda x:
-            f"{x:,.0f} kr"
-        )
-
-    for column in [
-        "ModelVsActualPct",
-        "ComparableDeviationPct",
-        "ComparableRobustSpreadPct",
-    ]:
-        utskrift[column] = utskrift[
-            column
-        ].map(
-            lambda x:
-            f"{x:+.2f} %"
-        )
-
-    utskrift["CombinedScore"] = (
-        utskrift[
-            "CombinedScore"
-        ].map(
-            lambda x:
-            f"{x:.2f}"
-        )
-    )
-
-    utskrift[
-        "EvidenceConfidence"
-    ] = utskrift[
-        "EvidenceConfidence"
-    ].map(
-        lambda x:
-        f"{x:.2f}"
-    )
-
-    utskrift["FyndScore"] = (
-        utskrift[
-            "FyndScore"
-        ].map(
-            lambda x:
-            f"{x:.2f}"
-        )
-    )
-
-    columns = [
-        "Fyndklass",
-        "FyndScore",
-        "Model",
-        "Variant",
-        "ModelYear",
-        "Mil",
-        "Price",
-        "Prediction",
-        "ModelVsActualPct",
-        "ComparableWeightedMedian",
-        "ComparableDeviationPct",
-        "ComparableN",
-        "ComparableRobustSpreadPct",
-        "EvidenceConfidence",
-        "CombinedScore",
-        "Identity",
-    ]
-
-    print(
-        "\nRankad fyndlista:"
-    )
-
-    print(
-        utskrift[
-            columns
-        ].to_string(
-            index=False
-        )
-    )
-
-    return fynd
