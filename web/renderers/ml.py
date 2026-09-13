@@ -24,6 +24,29 @@ MODEL_NAMES = {
 }
 
 
+def _get_metric(
+    metrics: dict[str, Any],
+    name: str,
+) -> Any:
+    """
+    Hämtar ett metric-värde.
+
+    Stödjer både stora och små nycklar för
+    bakåtkompatibilitet.
+    """
+
+    for key in (
+        name,
+        name.upper(),
+        name.lower(),
+    ):
+
+        if key in metrics:
+            return metrics[key]
+
+    return None
+
+
 def render_ml(
     ml: dict[str, Any],
 ) -> str:
@@ -44,8 +67,11 @@ def render_ml(
 
     model_key = str(
         metadata.get(
-            "modell",
-            "",
+            "model_type",
+            metadata.get(
+                "modell",
+                "",
+            ),
         )
     )
 
@@ -56,30 +82,6 @@ def render_ml(
             model_key
             or "Okänd",
         )
-    )
-
-
-    observations = metadata.get(
-        "antal_observationer",
-        0,
-    )
-
-
-    training = metadata.get(
-        "antal_traning",
-        0,
-    )
-
-
-    test = metadata.get(
-        "antal_test",
-        0,
-    )
-
-
-    created = metadata.get(
-        "skapad",
-        "—",
     )
 
 
@@ -94,67 +96,52 @@ def render_ml(
         {},
     )
 
-
-    active_metrics = {}
-
-
-    if isinstance(
+    if not isinstance(
         metrics,
         dict,
     ):
 
-        model_metrics = (
-            metrics.get(
-                model_key,
-                {},
-            )
-        )
+        metrics = {}
 
+
+    r2 = _get_metric(
+        metrics,
+        "R2",
+    )
+
+    mae = _get_metric(
+        metrics,
+        "MAE",
+    )
+
+    rmse = _get_metric(
+        metrics,
+        "RMSE",
+    )
+
+    bias = _get_metric(
+        metrics,
+        "Bias",
+    )
+
+    mape = _get_metric(
+        metrics,
+        "MAPE",
+    )
+
+
+    predictions = ml.get(
+        "predictions",
+        [],
+    )
+
+    observations = (
+        len(predictions)
         if isinstance(
-            model_metrics,
-            dict,
-        ):
-
-            active_metrics = (
-                model_metrics.get(
-                    "totalt",
-                    {},
-                )
-            )
-
-
-    r2 = active_metrics.get(
-        "r2"
-    )
-
-    mae = active_metrics.get(
-        "mae"
-    )
-
-    rmse = active_metrics.get(
-        "rmse"
-    )
-
-    mape = active_metrics.get(
-        "mape_procent"
-    )
-
-
-    total = (
-        float(training or 0)
-        + float(test or 0)
-    )
-
-
-    progress = (
-
-        float(training or 0)
-        / total
-        * 100
-
-        if total
+            predictions,
+            list,
+        )
         else 0
-
     )
 
 
@@ -174,98 +161,6 @@ def render_ml(
         else str(features)
 
     )
-
-
-    comparison = []
-
-
-    for key in (
-        "linear_regression",
-        "random_forest",
-    ):
-
-        data = {}
-
-
-        if isinstance(
-            metrics,
-            dict,
-        ):
-
-            model_data = (
-                metrics.get(
-                    key,
-                    {},
-                )
-            )
-
-            if isinstance(
-                model_data,
-                dict,
-            ):
-
-                data = (
-                    model_data.get(
-                        "totalt",
-                        {},
-                    )
-                )
-
-
-        comparison.append(
-            f"""
-            <tr>
-
-                <td>
-                    <strong>
-
-                        {safe(
-                            MODEL_NAMES.get(
-                                key,
-                                key,
-                            )
-                        )}
-
-                        {
-                            " ⭐"
-                            if key == model_key
-                            else ""
-                        }
-
-                    </strong>
-                </td>
-
-                <td>
-                    {fmt_number(
-                        data.get("r2"),
-                        3,
-                    )}
-                </td>
-
-                <td>
-                    {fmt_price(
-                        data.get("mae")
-                    )}
-                </td>
-
-                <td>
-                    {fmt_price(
-                        data.get("rmse")
-                    )}
-                </td>
-
-                <td>
-                    {fmt_number(
-                        data.get(
-                            "mape_procent"
-                        ),
-                        2,
-                    )} %
-                </td>
-
-            </tr>
-            """
-        )
 
 
     return f"""
@@ -290,21 +185,6 @@ def render_ml(
 
                 <strong>
                     {safe(model_name)}
-                </strong>
-
-            </div>
-
-
-            <div class="ml-card">
-
-                <span>
-                    Observationer
-                </span>
-
-                <strong>
-                    {fmt_number(
-                        observations
-                    )}
                 </strong>
 
             </div>
@@ -355,6 +235,19 @@ def render_ml(
             <div class="ml-card">
 
                 <span>
+                    Bias
+                </span>
+
+                <strong>
+                    {fmt_price(bias)}
+                </strong>
+
+            </div>
+
+
+            <div class="ml-card">
+
+                <span>
                     MAPE
                 </span>
 
@@ -370,58 +263,15 @@ def render_ml(
         </div>
 
 
-        <div class="progress-card">
-
-            <div class="progress-header">
-
-                <strong>
-                    ML-progress
-                </strong>
-
-                <span>
-                    {fmt_number(training)}
-                    träningsrader /
-                    {fmt_number(total)} totalt
-                </span>
-
-            </div>
-
-
-            <div class="progress">
-
-                <div
-                    style="width:{progress:.1f}%"
-                ></div>
-
-            </div>
-
-
-            <div class="progress-meta">
-
-                <span>
-                    Träning:
-                    {fmt_number(training)}
-                </span>
-
-                <span>
-                    Test:
-                    {fmt_number(test)}
-                </span>
-
-            </div>
-
-        </div>
-
-
         <div class="ml-info">
 
             <p>
 
                 <strong>
-                    Senast tränad:
+                    Modell:
                 </strong>
 
-                {safe(created)}
+                {safe(model_name)}
 
             </p>
 
@@ -436,12 +286,20 @@ def render_ml(
 
             </p>
 
+
+            <p>
+
+                <strong>
+                    Värderingsobservationer:
+                </strong>
+
+                {fmt_number(
+                    observations
+                )}
+
+            </p>
+
         </div>
-
-
-        <h3>
-            Modelljämförelse
-        </h3>
 
 
         <div class="table-wrap">
@@ -451,18 +309,54 @@ def render_ml(
                 <thead>
 
                     <tr>
-                        <th>Modell</th>
-                        <th>R²</th>
-                        <th>MAE</th>
-                        <th>RMSE</th>
-                        <th>MAPE</th>
+                        <th>Metric</th>
+                        <th>Resultat</th>
                     </tr>
 
                 </thead>
 
                 <tbody>
 
-                    {"".join(comparison)}
+                    <tr>
+                        <td>R²</td>
+                        <td>
+                            {fmt_number(
+                                r2,
+                                3,
+                            )}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>MAE</td>
+                        <td>
+                            {fmt_price(mae)}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>RMSE</td>
+                        <td>
+                            {fmt_price(rmse)}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Bias</td>
+                        <td>
+                            {fmt_price(bias)}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>MAPE</td>
+                        <td>
+                            {fmt_number(
+                                mape,
+                                2,
+                            )} %
+                        </td>
+                    </tr>
 
                 </tbody>
 
