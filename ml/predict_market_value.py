@@ -1,18 +1,5 @@
 """
 Prediktion av marknadsvärde med tränad ML-modell.
-
-Modellen använder:
-
-    Mil
-    ModelYear
-    Model
-    Variant
-
-Modell och variant normaliseras alltid på
-samma sätt som träningsdatan.
-
-Om modellen saknas eller indata är ogiltig
-returneras None.
 """
 
 from __future__ import annotations
@@ -20,11 +7,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import joblib
-import pandas as pd
 
-from ml.normalization import (
-    normalisera_modell,
-    normalisera_variant,
+from ml.features import (
+    build_features,
+    make_prediction_row,
 )
 
 
@@ -34,7 +20,7 @@ MODEL_FIL = Path(
 
 
 def modell_finns() -> bool:
-    """Returnerar True om en tränad ML-modell finns."""
+    """Returnerar True om tränad modell finns."""
 
     return MODEL_FIL.exists()
 
@@ -43,7 +29,6 @@ def ladda_modell():
     """Laddar den senast tränade modellen."""
 
     if not modell_finns():
-
         raise FileNotFoundError(
             f"Ingen tränad ML-modell finns i "
             f"{MODEL_FIL}"
@@ -63,9 +48,8 @@ def prediktera_borpris(
     """
     Predikterar bör-pris.
 
-    Modell och variant normaliseras före
-    prediktionen så att samma bil alltid
-    använder samma ML-kategorier.
+    Samma feature engineering används som
+    under träningen.
     """
 
     if not modell_finns():
@@ -78,7 +62,6 @@ def prediktera_borpris(
         return None
 
     try:
-
         mil = float(
             mil
         )
@@ -91,7 +74,6 @@ def prediktera_borpris(
         TypeError,
         ValueError,
     ):
-
         return None
 
     if mil < 0:
@@ -100,62 +82,36 @@ def prediktera_borpris(
     if arsmodell < 1990:
         return None
 
-    modellnamn = (
-        normalisera_modell(
-            modell
-        )
-    )
-
-    variantnamn = (
-        normalisera_variant(
-            variant
-        )
-    )
-
-    if not modellnamn:
-        return None
-
-    if not variantnamn:
-        return None
-
-    data = pd.DataFrame(
-        [
-            {
-                "Mil": mil,
-
-                "ModelYear":
-                    arsmodell,
-
-                "Model":
-                    modellnamn,
-
-                "Variant":
-                    variantnamn,
-            }
-        ]
-    )
-
     try:
+        rådata = make_prediction_row(
+            modell=modell,
+            mil=mil,
+            arsmodell=arsmodell,
+            variant=variant,
+        )
+
+        features = build_features(
+            rådata
+        )
 
         tränad_modell = (
             ladda_modell()
         )
 
-        prediktion = (
+        prediction = (
             tränad_modell.predict(
-                data
+                features
             )
         )
 
     except Exception:
-
         return None
 
-    if len(prediktion) != 1:
+    if len(prediction) != 1:
         return None
 
     pris = float(
-        prediktion[0]
+        prediction[0]
     )
 
     if pris <= 0:
