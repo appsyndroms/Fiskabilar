@@ -372,6 +372,9 @@ def _största_felen(
     Visar de testobservationer där Random Forest
     har störst absoluta fel.
 
+    Även relativt fel i procent visas för att
+    göra stora och små bilaffärer jämförbara.
+
     Detta är en ren diagnostik och påverkar inte
     modellträningen eller vilken modell som väljs.
     """
@@ -409,6 +412,14 @@ def _största_felen(
         diagnostik["Error"].abs()
     )
 
+    diagnostik["AbsolutePercentageError"] = (
+        (
+            diagnostik["AbsoluteError"]
+            / diagnostik["Price"].abs()
+        )
+        * 100
+    )
+
     diagnostik = diagnostik.sort_values(
         "AbsoluteError",
         ascending=False,
@@ -423,6 +434,7 @@ def _största_felen(
     tillgängliga += [
         "Prediction",
         "Error",
+        "AbsolutePercentageError",
     ]
 
     resultat = diagnostik[
@@ -470,6 +482,11 @@ def _största_felen(
             float("nan"),
         )
 
+        absolute_percentage_error = row.get(
+            "AbsolutePercentageError",
+            float("nan"),
+        )
+
         identity = row.get(
             "Identity",
             "",
@@ -486,7 +503,8 @@ def _största_felen(
             f"mil={mil} | "
             f"pris={price:,.0f} kr | "
             f"prognos={prediction_value:,.0f} kr | "
-            f"fel={error:+,.0f} kr"
+            f"fel={error:+,.0f} kr | "
+            f"fel%={absolute_percentage_error:.2f}%"
         )
 
         if identity:
