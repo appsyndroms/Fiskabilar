@@ -47,6 +47,22 @@ def _normalisera_vehicle_id(value) -> str:
     if text.startswith("vehicle_id:"):
         return text[len("vehicle_id:"):]
     return text
+def _get_vehicle_id(row: dict) -> str:
+    """
+    Hämtar vehicle_id från ett record.
+    Stödjer både Identity och vehicle_id eftersom
+    historikdata och ML-data använder olika fältnamn.
+    """
+    identity = (
+        row.get("Identity")
+        or row.get("identity")
+        or row.get("vehicle_id")
+        or row.get("VehicleId")
+        or row.get("VehicleID")
+    )
+    return _normalisera_vehicle_id(
+        identity
+    )
 def _get_url(row: dict):
     """Hämtar annons-URL från ett record."""
     for key in (
@@ -72,8 +88,9 @@ def _load_vehicle_identity_urls() -> dict[str, str]:
     """
     Läser den permanenta fordonsidentitetsdatabasen och bygger:
         vehicle:00000255 -> https://...
-    vehicle_identity.json är den auktoritativa kopplingen mellan
-    ett fordons permanenta identitet och dess annons-URL.
+    vehicle_identity.json används som fallback.
+    En aktuell observation i market_history har högre prioritet,
+    eftersom en annons kan få en ny URL under bilens livstid.
     """
     data = read_json(
         VEHICLE_IDENTITY_FILE,
@@ -81,64 +98,145 @@ def _load_vehicle_identity_urls() -> dict[str, str]:
     )
     if not isinstance(data, dict):
         return {}
-    identifiers = data.get("identifiers", {})
+    identifiers = data.get(
+        "identifiers",
+        {},
+    )
     if not isinstance(identifiers, dict):
         return {}
     result: dict[str, str] = {}
     for identifier, vehicle_id in identifiers.items():
-        if not isinstance(identifier, str):
+        if not isinstance(
+            identifier,
+            str,
+        ):
             continue
         if not identifier.startswith("url:"):
             continue
-        url = identifier[len("url:"):].strip()
-        normalized_vehicle_id = _normalisera_vehicle_id(
-            vehicle_id
+        url = identifier[
+            len("url:")
+        ].strip()
+        normalized_vehicle_id = (
+            _normalisera_vehicle_id(
+                vehicle_id
+            )
         )
-        if not normalized_vehicle_id or not url:
+        if (
+            not normalized_vehicle_id
+            or not url
+        ):
             continue
-        result[normalized_vehicle_id] = url
+        result[
+            normalized_vehicle_id
+        ] = url
+    return result
+def _load_latest_market_urls(
+    market_history: list[dict],
+) -> dict[str, str]:
+    """
+    Bygger en mapping:
+        vehicle_id -> senast observerade annons-URL
+    Market history är den bästa källan för aktuell URL eftersom
+    samma fysiska bil kan få en ny annons-URL efter att den
+    ursprungliga annonsen försvunnit.
+    read_all_jsonl() läser historiken i tidsordning, så senare
+    observationer skriver över tidigare URL för samma vehicle_id.
+    """
+    result: dict[str, str] = {}
+    for row in market_history:
+        if not isinstance(
+            row,
+            dict,
+        ):
+            continue
+        vehicle_id = _get_vehicle_id(
+            row
+        )
+        if not vehicle_id:
+            continue
+        url = _get_url(
+            row
+        )
+        if not url:
+            continue
+        result[
+            vehicle_id
+        ] = url
     return result
 def _berika_fynd_med_url(
     findings: list[dict],
     vehicle_identity_urls: dict[str, str],
+    latest_market_urls: dict[str, str],
 ) -> list[dict]:
     """
-    Kompletterar ML-fynd med URL via den permanenta fordonsidentiteten.
-    Matchningen sker endast via Identity/vehicle_id. Vi försöker inte
-    gissa URL genom modell, miltal eller pris eftersom projektet redan
-    har en exakt identitetsmappning i vehicle_identity.json.
+    Kompletterar ML-fynd med annons-URL.
+    Prioritet:
+    1. URL som redan finns direkt på fyndet
+    2. Senast observerade URL i market_history
+    3. URL från vehicle_identity.json
+    Det innebär att en gammal annons-URL i identity-store:n
+    inte kan skriva över en nyare URL från en aktuell
+    marknadsobservation.
     """
-    if not findings or not vehicle_identity_urls:
+    if not findings:
         return findings
     enriched: list[dict] = []
-    matched = 0
+    direct_matches = 0
+    market_matches = 0
+    identity_matches = 0
     for finding in findings:
-        result = dict(finding)
-        existing_url = _get_url(result)
+        result = dict(
+            finding
+        )
+        vehicle_id = _get_vehicle_id(
+            result
+        )
+        existing_url = _get_url(
+            result
+        )
         if existing_url:
-            result["url"] = existing_url
-            matched += 1
-            enriched.append(result)
+            result["url"] = (
+                existing_url
+            )
+            direct_matches += 1
+            enriched.append(
+                result
+            )
             continue
-        identity = (
-            result.get("Identity")
-            or result.get("vehicle_id")
+        market_url = (
+            latest_market_urls.get(
+                vehicle_id
+            )
         )
-        normalized_identity = _normalisera_vehicle_id(
-            identity
+        if market_url:
+            result["url"] = (
+                market_url
+            )
+            market_matches += 1
+            enriched.append(
+                result
+            )
+            continue
+        identity_url = (
+            vehicle_identity_urls.get(
+                vehicle_id
+            )
         )
-        url = vehicle_identity_urls.get(
-            normalized_identity
-        )
-        if url:
-            result["url"] = url
-            matched += 1
+        if identity_url:
+            result["url"] = (
+                identity_url
+            )
+            identity_matches += 1
         else:
             result["url"] = ""
-        enriched.append(result)
+        enriched.append(
+            result
+        )
     print(
-        f"URL-komplettering: "
-        f"{matched}/{len(findings)} fynd har annons-URL"
+        "URL-komplettering: "
+        f"{direct_matches} direkta, "
+        f"{market_matches} från market_history, "
+        f"{identity_matches} från vehicle_identity"
     )
     return enriched
 def get_ml_data() -> dict:
@@ -168,17 +266,29 @@ def get_ml_data() -> dict:
         ),
         "predictions": predictions,
     }
-def get_ml_findings() -> list[dict]:
-    """Läser aktuella ML-fynd och kompletterar deras annons-URL."""
+def get_ml_findings(
+    market_history: list[dict],
+) -> list[dict]:
+    """
+    Läser aktuella ML-fynd och kompletterar deras annons-URL.
+    URL hämtas i första hand från den senaste observationen
+    i market_history och därefter från vehicle_identity.json.
+    """
     findings = read_jsonl(
         ML_FINDINGS_FILE
     )
     vehicle_identity_urls = (
         _load_vehicle_identity_urls()
     )
+    latest_market_urls = (
+        _load_latest_market_urls(
+            market_history
+        )
+    )
     findings = _berika_fynd_med_url(
         findings,
         vehicle_identity_urls,
+        latest_market_urls,
     )
     def fynd_score(
         row: dict,
@@ -212,7 +322,9 @@ def build_payload() -> dict:
     market_history = read_all_jsonl(
         MARKET_HISTORY_DIR,
     )
-    current_findings = get_ml_findings()
+    current_findings = get_ml_findings(
+        market_history
+    )
     price_reductions = get_price_reductions(
         feedback,
     )
