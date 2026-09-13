@@ -111,7 +111,6 @@ def _modeller():
                 ),
             ]
         ),
-
         "random_forest": Pipeline(
             steps=[
                 (
@@ -138,11 +137,11 @@ def _metrics(
 ):
     actual = pd.Series(
         actual
-    )
+    ).reset_index(drop=True)
 
     prediction = pd.Series(
         prediction
-    )
+    ).reset_index(drop=True)
 
     error = (
         prediction
@@ -166,6 +165,19 @@ def _metrics(
             prediction,
         ),
         "bias": error.mean(),
+        "mape": (
+            (
+                error.abs()
+                / actual.abs()
+            )
+            .replace(
+                [float("inf")],
+                pd.NA,
+            )
+            .dropna()
+            .mean()
+            * 100
+        ),
     }
 
 
@@ -233,6 +245,121 @@ def _feature_importance(
         print(
             f"{name}: "
             f"{value:.4f}"
+        )
+
+
+def _modell_variant_diagnostik(
+    test,
+    prediction,
+):
+    """
+    Visar modellens fel uppdelat per
+    bilmodell och variant.
+
+    Diagnostiken använder samma testset
+    som den vanliga modellutvärderingen.
+    Den påverkar inte träningen.
+    """
+
+    diagnostik = test[
+        [
+            "Model",
+            "Variant",
+            "Price",
+        ]
+    ].copy()
+
+    diagnostik["Prediction"] = (
+        prediction
+    )
+
+    diagnostik["Error"] = (
+        diagnostik["Prediction"]
+        - diagnostik["Price"]
+    )
+
+    diagnostik["AbsoluteError"] = (
+        diagnostik["Error"]
+        .abs()
+    )
+
+    diagnostik["AbsolutePercentageError"] = (
+        (
+            diagnostik["AbsoluteError"]
+            / diagnostik["Price"].abs()
+        )
+        * 100
+    )
+
+    grupper = []
+
+    for (
+        model_name,
+        variant_name,
+    ), grupp in diagnostik.groupby(
+        ["Model", "Variant"],
+        dropna=False,
+    ):
+        antal = len(grupp)
+
+        mae = (
+            grupp["AbsoluteError"]
+            .mean()
+        )
+
+        mape = (
+            grupp[
+                "AbsolutePercentageError"
+            ]
+            .replace(
+                [float("inf")],
+                pd.NA,
+            )
+            .dropna()
+            .mean()
+        )
+
+        bias = (
+            grupp["Error"]
+            .mean()
+        )
+
+        grupper.append(
+            {
+                "Model": model_name,
+                "Variant": variant_name,
+                "Antal": antal,
+                "MAE": mae,
+                "MAPE": mape,
+                "Bias": bias,
+            }
+        )
+
+    resultat = pd.DataFrame(
+        grupper
+    )
+
+    if resultat.empty:
+        return
+
+    resultat = resultat.sort_values(
+        "MAE",
+        ascending=False,
+    )
+
+    print()
+    print(
+        "--- FEL PER MODELL / VARIANT ---"
+    )
+
+    for _, row in resultat.iterrows():
+        print(
+            f"  {row['Model']} / "
+            f"{row['Variant']}: "
+            f"n={int(row['Antal'])}, "
+            f"MAE={row['MAE']:,.0f} kr, "
+            f"MAPE={row['MAPE']:.2f}%, "
+            f"Bias={row['Bias']:+,.0f} kr"
         )
 
 
@@ -410,12 +537,22 @@ def main():
 
         print(
             f"Bias: "
-            f"{metrics['bias']:,.0f} kr"
+            f"{metrics['bias']:+,.0f} kr"
+        )
+
+        print(
+            f"MAPE: "
+            f"{metrics['mape']:.2f}%"
         )
 
         if name == "random_forest":
             _feature_importance(
                 model
+            )
+
+            _modell_variant_diagnostik(
+                test,
+                prediction,
             )
 
     vald = min(
