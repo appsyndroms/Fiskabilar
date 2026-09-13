@@ -14,13 +14,8 @@ from data_loader import (
 
 
 MODEL_NAMES = {
-
-    "random_forest":
-        "Random Forest",
-
-    "linear_regression":
-        "Linear Regression",
-
+    "random_forest": "Random Forest",
+    "linear_regression": "Linear Regression",
 }
 
 
@@ -40,7 +35,6 @@ def _get_metric(
         name.upper(),
         name.lower(),
     ):
-
         if key in metrics:
             return metrics[key]
 
@@ -57,13 +51,11 @@ def render_ml(
     )
 
     if not metadata:
-
         return """
         <div class="empty">
             Ingen tränad ML-modell hittades ännu.
         </div>
         """
-
 
     model_key = str(
         metadata.get(
@@ -75,21 +67,15 @@ def render_ml(
         )
     )
 
-
-    model_name = (
-        MODEL_NAMES.get(
-            model_key,
-            model_key
-            or "Okänd",
-        )
+    model_name = MODEL_NAMES.get(
+        model_key,
+        model_key or "Okänd",
     )
-
 
     features = metadata.get(
         "features",
         [],
     )
-
 
     metrics = metadata.get(
         "metrics",
@@ -100,9 +86,7 @@ def render_ml(
         metrics,
         dict,
     ):
-
         metrics = {}
-
 
     r2 = _get_metric(
         metrics,
@@ -129,56 +113,76 @@ def render_ml(
         "MAPE",
     )
 
-
-    predictions = ml.get(
-        "predictions",
-        [],
+    # Antalet observationer ska komma från modellens metadata.
+    # predictions.jsonl innehåller inte nödvändigtvis
+    # testprediktionerna och kan därför vara tom.
+    observations = metadata.get(
+        "observations",
+        metadata.get(
+            "training_rows",
+            None,
+        ),
     )
 
-    observations = (
-        len(predictions)
-        if isinstance(
-            predictions,
-            list,
+    # Bakåtkompatibilitet för äldre metadata.
+    if observations is None:
+        predictions = ml.get(
+            "predictions",
+            [],
         )
-        else 0
-    )
 
+        observations = (
+            len(predictions)
+            if isinstance(
+                predictions,
+                list,
+            )
+            else 0
+        )
+
+    trained_at = metadata.get(
+        "trained_at",
+        metadata.get(
+            "training_date",
+            None,
+        ),
+    )
 
     features_text = (
-
         ", ".join(
             str(feature)
-            for feature
-            in features
+            for feature in features
         )
-
         if isinstance(
             features,
             list,
         )
-
         else str(features)
-
     )
 
+    trained_at_html = ""
+
+    if trained_at:
+        trained_at_html = f"""
+            <p>
+                <strong>
+                    Senast tränad:
+                </strong>
+                {safe(trained_at)}
+            </p>
+        """
 
     return f"""
-
-    <div
-        data-ml-section
-    >
+    <div data-ml-section>
 
         <div
             class="ml-filter-status"
             data-ml-filter-status
         ></div>
 
-
         <div class="ml-grid">
 
             <div class="ml-card">
-
                 <span>
                     Aktiv modell
                 </span>
@@ -186,28 +190,19 @@ def render_ml(
                 <strong>
                     {safe(model_name)}
                 </strong>
-
             </div>
 
-
             <div class="ml-card">
-
                 <span>
                     R²
                 </span>
 
                 <strong>
-                    {fmt_number(
-                        r2,
-                        3,
-                    )}
+                    {fmt_number(r2, 3)}
                 </strong>
-
             </div>
 
-
             <div class="ml-card">
-
                 <span>
                     MAE
                 </span>
@@ -215,12 +210,9 @@ def render_ml(
                 <strong>
                     {fmt_price(mae)}
                 </strong>
-
             </div>
 
-
             <div class="ml-card">
-
                 <span>
                     RMSE
                 </span>
@@ -228,12 +220,9 @@ def render_ml(
                 <strong>
                     {fmt_price(rmse)}
                 </strong>
-
             </div>
 
-
             <div class="ml-card">
-
                 <span>
                     Bias
                 </span>
@@ -241,66 +230,49 @@ def render_ml(
                 <strong>
                     {fmt_price(bias)}
                 </strong>
-
             </div>
 
-
             <div class="ml-card">
-
                 <span>
                     MAPE
                 </span>
 
                 <strong>
-                    {fmt_number(
-                        mape,
-                        2,
-                    )} %
+                    {fmt_number(mape, 2)} %
                 </strong>
-
             </div>
 
         </div>
 
-
         <div class="ml-info">
 
             <p>
-
                 <strong>
                     Modell:
                 </strong>
 
                 {safe(model_name)}
-
             </p>
 
-
             <p>
-
                 <strong>
                     Features:
                 </strong>
 
                 {safe(features_text)}
-
             </p>
 
-
             <p>
-
                 <strong>
                     Värderingsobservationer:
                 </strong>
 
-                {fmt_number(
-                    observations
-                )}
-
+                {fmt_number(observations)}
             </p>
 
-        </div>
+            {trained_at_html}
 
+        </div>
 
         <div class="table-wrap">
 
@@ -320,10 +292,7 @@ def render_ml(
                     <tr>
                         <td>R²</td>
                         <td>
-                            {fmt_number(
-                                r2,
-                                3,
-                            )}
+                            {fmt_number(r2, 3)}
                         </td>
                     </tr>
 
@@ -351,10 +320,7 @@ def render_ml(
                     <tr>
                         <td>MAPE</td>
                         <td>
-                            {fmt_number(
-                                mape,
-                                2,
-                            )} %
+                            {fmt_number(mape, 2)} %
                         </td>
                     </tr>
 
@@ -365,5 +331,4 @@ def render_ml(
         </div>
 
     </div>
-
     """
