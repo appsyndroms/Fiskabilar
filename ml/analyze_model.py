@@ -405,6 +405,125 @@ def _diagnostik_per_modell(test, prediction):
                 )
 
 
+def _diagnostik_330e_historik(dataset, test, prediction):
+    """
+    Analyserar historiken för BMW 330e-observationer i testmängden.
+
+    För varje 330e i test visas hur många observationer samma bil har i
+    hela datasetet samt prisutvecklingen över tid.
+
+    Syftet är att se om stora modellfel kan kopplas till exempelvis
+    prissänkningar eller ovanlig prisutveckling som modellen inte fångar.
+
+    Detta påverkar inte modellträningen.
+    """
+
+    if (
+        "Model" not in test.columns
+        or "Identity" not in dataset.columns
+    ):
+        return
+
+    mask_330e = (
+        test["Model"]
+        .astype(str)
+        .str.contains(
+            "330e",
+            case=False,
+            na=False,
+        )
+    )
+
+    test_330e = test[mask_330e].copy()
+
+    if test_330e.empty:
+        return
+
+    prediction = pd.Series(
+        prediction
+    ).reset_index(drop=True)
+
+    mask_330e_array = mask_330e.to_numpy()
+
+    diagnostik = _skapa_diagnostik(
+        test_330e,
+        prediction[mask_330e_array],
+    )
+
+    print("\nBMW 330e – historik för testobservationerna:")
+
+    historik = dataset.copy()
+
+    if "Tid" in historik.columns:
+        historik["Tid"] = pd.to_datetime(
+            historik["Tid"],
+            errors="coerce",
+            utc=True,
+        )
+
+    for _, row in diagnostik.sort_values(
+        "AbsoluteError",
+        ascending=False,
+    ).iterrows():
+
+        identity = row.get("Identity")
+
+        if pd.isna(identity) or not str(identity).strip():
+            continue
+
+        bil = historik[
+            historik["Identity"].astype(str) == str(identity)
+        ].copy()
+
+        if bil.empty:
+            continue
+
+        if "Tid" in bil.columns:
+            bil = bil.sort_values("Tid")
+
+        första_pris = bil["Price"].iloc[0]
+        sista_pris = bil["Price"].iloc[-1]
+        prisförändring = sista_pris - första_pris
+
+        min_pris = bil["Price"].min()
+        max_pris = bil["Price"].max()
+
+        datum_första = "?"
+        datum_sista = "?"
+
+        if "Tid" in bil.columns and bil["Tid"].notna().any():
+            giltiga_datum = bil["Tid"].dropna()
+
+            datum_första = (
+                giltiga_datum.iloc[0].strftime("%Y-%m-%d")
+            )
+
+            datum_sista = (
+                giltiga_datum.iloc[-1].strftime("%Y-%m-%d")
+            )
+
+        print(
+            f"\n  {row.get('Model', '')} "
+            f"{row.get('ModelYear', '')} "
+            f"| {row.get('Mil', 0):,.0f} mil "
+            f"| faktisk={row['Price']:,.0f} kr "
+            f"| pred={row['Prediction']:,.0f} kr "
+            f"| fel={row['Error']:+,.0f} kr"
+        )
+
+        print(
+            f"    Historik: {len(bil)} obs | "
+            f"{datum_första} → {datum_sista} | "
+            f"pris {första_pris:,.0f} → {sista_pris:,.0f} kr "
+            f"({prisförändring:+,.0f} kr)"
+        )
+
+        print(
+            f"    Prisintervall: "
+            f"{min_pris:,.0f}–{max_pris:,.0f} kr"
+        )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -510,6 +629,12 @@ def main():
     )
 
     _diagnostik_per_modell(
+        test,
+        rf["prediction"],
+    )
+
+    _diagnostik_330e_historik(
+        dataset,
         test,
         rf["prediction"],
     )
