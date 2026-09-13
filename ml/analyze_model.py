@@ -1,31 +1,14 @@
-"""
-Diagnostik för Fiskabilars ML-modell.
-
-Normalt:
-    python -m ml.analyze_model
-
-Detaljerad diagnostik:
-    python -m ml.analyze_model --debug
-"""
-
-from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
 
 import joblib
 import pandas as pd
-
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import (
-    mean_absolute_error,
-    mean_squared_error,
-    r2_score,
-)
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
@@ -43,57 +26,30 @@ from ml.train_market_model import (
 )
 
 
-MODEL_FIL = Path(
-    "data/ml/market_model.joblib"
-)
-
-METADATA_FIL = Path(
-    "data/ml/model_metadata.json"
-)
+MODEL_FIL = Path("data/ml/market_model.joblib")
+METADATA_FIL = Path("data/ml/model_metadata.json")
 
 
-def _skapa_preprocessor():
-    numeric = Pipeline(
+def _skapa_preprocessor() -> ColumnTransformer:
+    numeric_pipeline = Pipeline(
         steps=[
-            (
-                "imputer",
-                SimpleImputer(
-                    strategy="median"
-                ),
-            )
+            ("imputer", SimpleImputer(strategy="median")),
         ]
     )
 
-    categorical = Pipeline(
+    categorical_pipeline = Pipeline(
         steps=[
-            (
-                "imputer",
-                SimpleImputer(
-                    strategy="most_frequent"
-                ),
-            ),
-            (
-                "onehot",
-                OneHotEncoder(
-                    handle_unknown="ignore"
-                ),
-            ),
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("onehot", OneHotEncoder(handle_unknown="ignore")),
         ]
     )
 
     return ColumnTransformer(
         transformers=[
-            (
-                "numeric",
-                numeric,
-                FEATURES_NUMERIC,
-            ),
-            (
-                "categorical",
-                categorical,
-                FEATURES_KATEGORISK,
-            ),
-        ]
+            ("numeric", numeric_pipeline, FEATURES_NUMERIC),
+            ("categorical", categorical_pipeline, FEATURES_KATEGORISK),
+        ],
+        remainder="drop",
     )
 
 
@@ -101,22 +57,13 @@ def _modeller():
     return {
         "linear_regression": Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    _skapa_preprocessor(),
-                ),
-                (
-                    "model",
-                    LinearRegression(),
-                ),
+                ("preprocessor", _skapa_preprocessor()),
+                ("model", LinearRegression()),
             ]
         ),
         "random_forest": Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    _skapa_preprocessor(),
-                ),
+                ("preprocessor", _skapa_preprocessor()),
                 (
                     "model",
                     RandomForestRegressor(
@@ -131,253 +78,161 @@ def _modeller():
     }
 
 
-def _metrics(
-    actual,
-    prediction,
-):
-    actual = pd.Series(
-        actual
-    ).reset_index(drop=True)
+def _metrics(y_true, y_pred):
+    y_true = pd.Series(y_true).reset_index(drop=True)
+    y_pred = pd.Series(y_pred).reset_index(drop=True)
 
-    prediction = pd.Series(
-        prediction
-    ).reset_index(drop=True)
+    errors = y_pred - y_true
 
-    error = (
-        prediction
-        - actual
-    )
+    non_zero = y_true != 0
 
     return {
-        "mae": mean_absolute_error(
-            actual,
-            prediction,
-        ),
-        "rmse": (
-            mean_squared_error(
-                actual,
-                prediction,
-            )
-            ** 0.5
-        ),
-        "r2": r2_score(
-            actual,
-            prediction,
-        ),
-        "bias": error.mean(),
-        "mape": (
-            (
-                error.abs()
-                / actual.abs()
-            )
-            .replace(
-                [float("inf")],
-                pd.NA,
-            )
-            .dropna()
-            .mean()
-            * 100
+        "MAE": mean_absolute_error(y_true, y_pred),
+        "RMSE": mean_squared_error(y_true, y_pred) ** 0.5,
+        "R2": r2_score(y_true, y_pred),
+        "Bias": errors.mean(),
+        "MAPE": (
+            (errors[non_zero].abs() / y_true[non_zero].abs()).mean() * 100
+            if non_zero.any()
+            else float("nan")
         ),
     }
 
 
-def _feature_importance(
-    modell,
-):
-    """
-    Visar Random Forests betydelse per
-    faktisk feature efter one-hot encoding.
-    """
+def _feature_importance(model):
+    preprocessor = model.named_steps["preprocessor"]
+    estimator = model.named_steps["model"]
 
-    preprocessor = (
-        modell.named_steps[
-            "preprocessor"
-        ]
-    )
+    try:
+        feature_names = preprocessor.get_feature_names_out()
+        importances = estimator.feature_importances_
+    except AttributeError:
+        return None
 
-    forest = (
-        modell.named_steps[
-            "model"
-        ]
-    )
+    rows = []
 
-    names = (
-        preprocessor
-        .get_feature_names_out()
-    )
-
-    importances = (
-        forest.feature_importances_
-    )
-
-    data = pd.DataFrame(
-        {
-            "feature": names,
-            "importance": importances,
-        }
-    )
-
-    data["base_feature"] = (
-        data["feature"]
-        .str.replace(
-            r"^[^_]+__",
-            "",
-            regex=True,
+    for feature_name, importance in zip(feature_names, importances):
+        rows.append(
+            {
+                "feature": feature_name,
+                "importance": importance,
+            }
         )
-    )
+
+    result = pd.DataFrame(rows)
+
+    if result.empty:
+        return result
+
+    def base_feature(name):
+        name = name.replace("numeric__", "")
+        name = name.replace("categorical__", "")
+
+        for feature in FEATURES:
+            if name == feature or name.startswith(feature + "_"):
+                return feature
+
+        return name
+
+    result["base_feature"] = result["feature"].map(base_feature)
 
     grouped = (
-        data.groupby(
-            "base_feature"
-        )["importance"]
+        result.groupby("base_feature", as_index=False)["importance"]
         .sum()
-        .sort_values(
-            ascending=False
-        )
+        .sort_values("importance", ascending=False)
     )
 
-    print()
-    print(
-        "--- FEATURE IMPORTANCE ---"
-    )
-
-    for name, value in grouped.items():
-        print(
-            f"{name}: "
-            f"{value:.4f}"
-        )
+    return grouped
 
 
-def _modell_variant_diagnostik(
-    test,
-    prediction,
-):
-    """
-    Visar modellens fel uppdelat per
-    bilmodell och variant.
-
-    Diagnostiken använder samma testset
-    som den vanliga modellutvärderingen.
-    Den påverkar inte träningen.
-    """
-
-    diagnostik = test[
-        [
-            "Model",
-            "Variant",
-            "Price",
-        ]
-    ].copy()
-
-    diagnostik["Prediction"] = (
-        prediction
-    )
+def _modell_variant_diagnostik(test, prediction):
+    diagnostik = test.copy().reset_index(drop=True)
+    diagnostik["Prediction"] = pd.Series(prediction).reset_index(drop=True)
 
     diagnostik["Error"] = (
-        diagnostik["Prediction"]
-        - diagnostik["Price"]
+        diagnostik["Prediction"] - diagnostik["Price"]
     )
 
-    diagnostik["AbsoluteError"] = (
-        diagnostik["Error"]
-        .abs()
-    )
+    diagnostik["AbsoluteError"] = diagnostik["Error"].abs()
 
     diagnostik["AbsolutePercentageError"] = (
-        (
-            diagnostik["AbsoluteError"]
-            / diagnostik["Price"].abs()
-        )
+        diagnostik["AbsoluteError"]
+        / diagnostik["Price"].abs()
         * 100
     )
 
     grupper = []
 
-    for (
-        model_name,
-        variant_name,
-    ), grupp in diagnostik.groupby(
-        ["Model", "Variant"],
-        dropna=False,
-    ):
-        antal = len(grupp)
+    if "Model" in diagnostik.columns and "Variant" in diagnostik.columns:
+        group_columns = ["Model", "Variant"]
+    elif "Model" in diagnostik.columns:
+        group_columns = ["Model"]
+    else:
+        return
 
-        mae = (
-            grupp["AbsoluteError"]
-            .mean()
-        )
+    for keys, group in diagnostik.groupby(group_columns):
+        if not isinstance(keys, tuple):
+            keys = (keys,)
 
-        mape = (
-            grupp[
-                "AbsolutePercentageError"
-            ]
-            .replace(
-                [float("inf")],
-                pd.NA,
-            )
-            .dropna()
-            .mean()
-        )
+        antal = len(group)
 
-        bias = (
-            grupp["Error"]
-            .mean()
-        )
+        if antal == 0:
+            continue
 
         grupper.append(
             {
-                "Model": model_name,
-                "Variant": variant_name,
-                "Antal": antal,
-                "MAE": mae,
-                "MAPE": mape,
-                "Bias": bias,
+                "Model": keys[0],
+                "Variant": keys[1] if len(keys) > 1 else "",
+                "n": antal,
+                "MAE": group["AbsoluteError"].mean(),
+                "MAPE": group["AbsolutePercentageError"].mean(),
+                "Bias": group["Error"].mean(),
             }
         )
 
-    resultat = pd.DataFrame(
-        grupper
-    )
-
-    if resultat.empty:
+    if not grupper:
         return
 
-    resultat = resultat.sort_values(
-        "MAE",
-        ascending=False,
-    )
+    result = pd.DataFrame(grupper)
 
-    print()
+    print("\nModell/variant-diagnostik:")
     print(
-        "--- FEL PER MODELL / VARIANT ---"
+        result.to_string(
+            index=False,
+            formatters={
+                "MAE": lambda x: f"{x:,.0f} kr",
+                "MAPE": lambda x: f"{x:.2f} %",
+                "Bias": lambda x: f"{x:+,.0f} kr",
+            },
+        )
     )
 
-    for _, row in resultat.iterrows():
-        print(
-            f"  {row['Model']} / "
-            f"{row['Variant']}: "
-            f"n={int(row['Antal'])}, "
-            f"MAE={row['MAE']:,.0f} kr, "
-            f"MAPE={row['MAPE']:.2f}%, "
-            f"Bias={row['Bias']:+,.0f} kr"
-        )
 
+def _största_felen(test, prediction, antal=20):
+    diagnostik = test.copy().reset_index(drop=True)
 
-def _största_felen(
-    test,
-    prediction,
-    antal=20,
-):
-    """
-    Visar de testobservationer där Random Forest
-    har störst absoluta fel.
+    diagnostik["Prediction"] = (
+        pd.Series(prediction).reset_index(drop=True)
+    )
 
-    Även relativt fel i procent visas för att
-    göra stora och små bilaffärer jämförbara.
+    diagnostik["Error"] = (
+        diagnostik["Prediction"] - diagnostik["Price"]
+    )
 
-    Detta är en ren diagnostik och påverkar inte
-    modellträningen eller vilken modell som väljs.
-    """
+    diagnostik["AbsoluteError"] = diagnostik["Error"].abs()
+
+    diagnostik["AbsolutePercentageError"] = (
+        diagnostik["AbsoluteError"]
+        / diagnostik["Price"].abs()
+        * 100
+    )
+
+    diagnostik = diagnostik.sort_values(
+        "AbsoluteError",
+        ascending=False,
+    ).reset_index(drop=True)
+
+    topp = diagnostik.head(antal)
 
     kolumner = [
         "Model",
@@ -385,137 +240,117 @@ def _största_felen(
         "ModelYear",
         "Mil",
         "Price",
+        "Prediction",
+        "Error",
+        "AbsolutePercentageError",
     ]
 
-    extra_kolumner = [
+    identitetskolumner = [
         "Identity",
         "vehicle_id",
         "annons_id",
         "url",
     ]
 
-    diagnostik = test.copy().reset_index(
-        drop=True
-    )
+    kolumner = [
+        column
+        for column in kolumner + identitetskolumner
+        if column in topp.columns
+    ]
 
-    diagnostik["Prediction"] = (
-        pd.Series(prediction)
+    print(f"\nDe {len(topp)} största absoluta felen:")
+
+    utskrift = topp[kolumner].copy()
+
+    if "Price" in utskrift.columns:
+        utskrift["Price"] = utskrift["Price"].map(
+            lambda x: f"{x:,.0f} kr"
+        )
+
+    if "Prediction" in utskrift.columns:
+        utskrift["Prediction"] = utskrift["Prediction"].map(
+            lambda x: f"{x:,.0f} kr"
+        )
+
+    if "Error" in utskrift.columns:
+        utskrift["Error"] = utskrift["Error"].map(
+            lambda x: f"{x:+,.0f} kr"
+        )
+
+    if "AbsolutePercentageError" in utskrift.columns:
+        utskrift["AbsolutePercentageError"] = (
+            utskrift["AbsolutePercentageError"].map(
+                lambda x: f"{x:.2f} %"
+            )
+        )
+
+    print(utskrift.to_string(index=False))
+
+    _sammanfatta_största_felen(topp)
+
+
+def _sammanfatta_största_felen(topp):
+    """
+    Sammanfattar toppfelen per modell/variant.
+
+    Detta är ett diagnostiskt lager ovanpå listan över de
+    största individuella felen. Det påverkar inte träningen
+    eller modellvalet.
+    """
+
+    if "Model" not in topp.columns:
+        return
+
+    group_columns = ["Model"]
+
+    if "Variant" in topp.columns:
+        group_columns.append("Variant")
+
+    grupper = []
+
+    for keys, group in topp.groupby(group_columns):
+        if not isinstance(keys, tuple):
+            keys = (keys,)
+
+        antal = len(group)
+
+        grupper.append(
+            {
+                "Model": keys[0],
+                "Variant": keys[1] if len(keys) > 1 else "",
+                "Antal toppfel": antal,
+                "MAE": group["AbsoluteError"].mean(),
+                "Största fel": group["AbsoluteError"].max(),
+                "Genomsnittligt fel": group["Error"].mean(),
+                "MAPE": group["AbsolutePercentageError"].mean(),
+            }
+        )
+
+    if not grupper:
+        return
+
+    result = (
+        pd.DataFrame(grupper)
+        .sort_values(
+            ["Antal toppfel", "MAE"],
+            ascending=[False, False],
+        )
         .reset_index(drop=True)
     )
 
-    diagnostik["Error"] = (
-        diagnostik["Prediction"]
-        - diagnostik["Price"]
-    )
+    print("\nSammanfattning av topp 20-felen per modell/variant:")
 
-    diagnostik["AbsoluteError"] = (
-        diagnostik["Error"].abs()
-    )
-
-    diagnostik["AbsolutePercentageError"] = (
-        (
-            diagnostik["AbsoluteError"]
-            / diagnostik["Price"].abs()
-        )
-        * 100
-    )
-
-    diagnostik = diagnostik.sort_values(
-        "AbsoluteError",
-        ascending=False,
-    )
-
-    tillgängliga = [
-        kolumn
-        for kolumn in kolumner + extra_kolumner
-        if kolumn in diagnostik.columns
-    ]
-
-    tillgängliga += [
-        "Prediction",
-        "Error",
-        "AbsolutePercentageError",
-    ]
-
-    resultat = diagnostik[
-        tillgängliga
-    ].head(antal)
-
-    print()
     print(
-        f"--- TOPP {antal} STÖRSTA FEL ---"
+        result.to_string(
+            index=False,
+            formatters={
+                "MAE": lambda x: f"{x:,.0f} kr",
+                "Största fel": lambda x: f"{x:,.0f} kr",
+                "Genomsnittligt fel": lambda x: f"{x:+,.0f} kr",
+                "MAPE": lambda x: f"{x:.2f} %",
+            },
+        )
     )
-
-    for _, row in resultat.iterrows():
-        model = row.get(
-            "Model",
-            "?",
-        )
-
-        variant = row.get(
-            "Variant",
-            "?",
-        )
-
-        model_year = row.get(
-            "ModelYear",
-            "?",
-        )
-
-        mil = row.get(
-            "Mil",
-            "?",
-        )
-
-        price = row.get(
-            "Price",
-            float("nan"),
-        )
-
-        prediction_value = row.get(
-            "Prediction",
-            float("nan"),
-        )
-
-        error = row.get(
-            "Error",
-            float("nan"),
-        )
-
-        absolute_percentage_error = row.get(
-            "AbsolutePercentageError",
-            float("nan"),
-        )
-
-        identity = row.get(
-            "Identity",
-            "",
-        )
-
-        url = row.get(
-            "url",
-            "",
-        )
-
-        print(
-            f"  {model} / {variant} | "
-            f"år={model_year} | "
-            f"mil={mil} | "
-            f"pris={price:,.0f} kr | "
-            f"prognos={prediction_value:,.0f} kr | "
-            f"fel={error:+,.0f} kr | "
-            f"fel%={absolute_percentage_error:.2f}%"
-        )
-
-        if identity:
-            print(
-                f"    Identity: {identity}"
-            )
-
-        if url:
-            print(
-                f"    URL: {url}"
-            )
 
 
 def main():
@@ -524,7 +359,7 @@ def main():
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Visa detaljerad diagnostik.",
+        help="Kör diagnostik av tränad marknadsmodell.",
     )
 
     args = parser.parse_args()
@@ -532,265 +367,126 @@ def main():
     if not args.debug:
         return
 
-    print(
-        "=========================================="
-    )
+    print("Laddar marknadsdata...")
 
-    print(
-        "FISKABILAR ML-DIAGNOSTIK"
-    )
+    observations = _ladda_jsonl()
 
-    print(
-        "=========================================="
-    )
+    print(f"Råa observationer: {len(observations):,}")
 
-    rådata = _ladda_jsonl()
+    dataset = _bygg_dataset(observations)
 
-    print()
-    print(
-        f"Råa observationer: "
-        f"{len(rådata)}"
-    )
+    print(f"Dataset före deduplicering: {len(dataset):,}")
 
-    dataset = _bygg_dataset(
-        rådata
-    )
+    dataset = _deduplicera_dataset(dataset)
 
-    dataset = _deduplicera_dataset(
-        dataset
-    )
+    print(f"Dataset efter deduplicering: {len(dataset):,}")
 
-    print()
-    print(
-        "--- DATASET ---"
-    )
+    train, test = _tidsmässig_split(dataset)
 
-    print(
-        f"Observationer: "
-        f"{len(dataset)}"
-    )
+    print(f"Train: {len(train):,}")
+    print(f"Test:  {len(test):,}")
 
-    print(
-        f"Modeller: "
-        f"{dataset['Model'].nunique()}"
-    )
+    X_train = build_features(train)
+    X_test = build_features(test)
 
-    print(
-        f"Varianter: "
-        f"{dataset['Variant'].nunique()}"
-    )
+    y_train = train["Price"]
+    y_test = test["Price"]
 
-    print()
-    print(
-        "Observationer per modell:"
-    )
-
-    for name, count in (
-        dataset["Model"]
-        .value_counts()
-        .items()
-    ):
-        print(
-            f"  {name}: {count}"
-        )
-
-    train, test = (
-        _tidsmässig_split(
-            dataset
-        )
-    )
-
-    print()
-    print(
-        "--- TRAIN / TEST ---"
-    )
-
-    print(
-        f"Träning: "
-        f"{len(train)}"
-    )
-
-    print(
-        f"Test: "
-        f"{len(test)}"
-    )
-
-    print(
-        f"Träningsmedelpris: "
-        f"{train['Price'].mean():,.0f} kr"
-    )
-
-    print(
-        f"Testmedelpris: "
-        f"{test['Price'].mean():,.0f} kr"
-    )
-
-    print()
-    print(
-        "--- FEATURES ---"
-    )
-
-    for feature in FEATURES:
-        print(
-            f"  {feature}"
-        )
-
-    print()
-    print(
-        "--- MODELLJÄMFÖRELSE ---"
-    )
+    modeller = _modeller()
 
     resultat = {}
 
-    for name, model in (
-        _modeller().items()
-    ):
+    for namn, model in modeller.items():
+        print(f"\nTränar {namn}...")
 
-        model.fit(
-            build_features(
-                train
-            ),
-            train["Price"],
-        )
+        model.fit(X_train, y_train)
 
-        prediction = (
-            model.predict(
-                build_features(
-                    test
-                )
+        prediction = model.predict(X_test)
+
+        metrics = _metrics(y_test, prediction)
+
+        resultat[namn] = {
+            "model": model,
+            "prediction": prediction,
+            "metrics": metrics,
+        }
+
+        print(f"\n{namn}:")
+
+        for key, value in metrics.items():
+            if key == "R2":
+                print(f"  {key}: {value:.4f}")
+            elif key == "MAPE":
+                print(f"  {key}: {value:.2f} %")
+            else:
+                print(f"  {key}: {value:,.0f} kr")
+
+    rf = resultat["random_forest"]
+
+    print("\nRandom Forest feature importance:")
+
+    importance = _feature_importance(rf["model"])
+
+    if importance is not None:
+        print(
+            importance.to_string(
+                index=False,
+                formatters={
+                    "importance": lambda x: f"{x:.4f}"
+                },
             )
         )
 
-        metrics = _metrics(
-            test["Price"],
-            prediction,
-        )
-
-        resultat[
-            name
-        ] = metrics
-
-        print()
-        print(
-            f"--- {name} ---"
-        )
-
-        print(
-            f"MAE: "
-            f"{metrics['mae']:,.0f} kr"
-        )
-
-        print(
-            f"RMSE: "
-            f"{metrics['rmse']:,.0f} kr"
-        )
-
-        print(
-            f"R²: "
-            f"{metrics['r2']:.4f}"
-        )
-
-        print(
-            f"Bias: "
-            f"{metrics['bias']:+,.0f} kr"
-        )
-
-        print(
-            f"MAPE: "
-            f"{metrics['mape']:.2f}%"
-        )
-
-        if name == "random_forest":
-            _feature_importance(
-                model
-            )
-
-            _modell_variant_diagnostik(
-                test,
-                prediction,
-            )
-
-            _största_felen(
-                test,
-                prediction,
-            )
-
-    vald = min(
-        resultat,
-        key=lambda name:
-            resultat[name]["mae"],
+    _modell_variant_diagnostik(
+        test,
+        rf["prediction"],
     )
 
-    print()
-    print(
-        "=========================================="
+    _största_felen(
+        test,
+        rf["prediction"],
+        antal=20,
     )
 
-    print(
-        f"Vinnare enligt MAE: "
-        f"{vald}"
+    winner = min(
+        resultat.items(),
+        key=lambda item: item[1]["metrics"]["MAE"],
     )
 
-    print(
-        "=========================================="
+    winner_name = winner[0]
+    winner_model = winner[1]["model"]
+
+    print(f"\nVinnande modell: {winner_name}")
+
+    MODEL_FIL.parent.mkdir(
+        parents=True,
+        exist_ok=True,
     )
 
-    if MODEL_FIL.exists():
-        saved_model = joblib.load(
-            MODEL_FIL
-        )
-
-        print()
-        print(
-            "--- SPARAD MODELL ---"
-        )
-
-        if hasattr(
-            saved_model,
-            "named_steps",
-        ):
-            model_step = (
-                saved_model
-                .named_steps
-                .get("model")
-            )
-
-            if model_step is not None:
-                print(
-                    f"Typ: "
-                    f"{type(model_step).__name__}"
-                )
-
-    if METADATA_FIL.exists():
-
-        with METADATA_FIL.open(
-            "r",
-            encoding="utf-8",
-        ) as file:
-
-            metadata = json.load(
-                file
-            )
-
-        print()
-        print(
-            "--- METADATA ---"
-        )
-
-        print(
-            f"Vald modell: "
-            f"{metadata.get('model')}"
-        )
-
-        print(
-            f"Antal features: "
-            f"{len(metadata.get('features', []))}"
-        )
-
-    print()
-    print(
-        "DIAGNOSTIK KLAR"
+    joblib.dump(
+        winner_model,
+        MODEL_FIL,
     )
+
+    metadata = {
+        "model_type": winner_name,
+        "features": FEATURES,
+        "metrics": winner[1]["metrics"],
+    }
+
+    with METADATA_FIL.open(
+        "w",
+        encoding="utf-8",
+    ) as f:
+        json.dump(
+            metadata,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    print(f"Modell sparad: {MODEL_FIL}")
+    print(f"Metadata sparad: {METADATA_FIL}")
 
 
 if __name__ == "__main__":
