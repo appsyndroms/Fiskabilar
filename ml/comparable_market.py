@@ -1,9 +1,5 @@
 import pandas as pd
 
-from ml.model_diagnostics import (
-    _skapa_diagnostik,
-)
-
 
 MAX_JÄMFÖRBARA = 20
 
@@ -211,3 +207,167 @@ def _jämförbara_observationer(
         errors="coerce",
         utc=True,
     )
+
+    kandidater = kandidater[
+        kandidater["_ModelNorm"]
+        == model
+    ].copy()
+
+    if variant:
+        kandidater = kandidater[
+            kandidater["_VariantNorm"]
+            == variant
+        ].copy()
+
+    kandidater = kandidater[
+        kandidater["_ModelYearNum"].between(
+            model_year - max_year_diff,
+            model_year + max_year_diff,
+        )
+    ]
+
+    kandidater = kandidater[
+        (
+            kandidater["_MilNum"]
+            - mileage
+        ).abs().le(
+            max_mileage_diff
+        )
+    ]
+
+    kandidater = kandidater[
+        kandidater["_PriceNum"].notna()
+    ].copy()
+
+    if "Identity" not in kandidater.columns:
+        return pd.DataFrame()
+
+    kandidater["_IdentityNorm"] = (
+        kandidater["Identity"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    kandidater = kandidater[
+        kandidater["_IdentityNorm"].ne("")
+    ].copy()
+
+    if kandidater.empty:
+        return pd.DataFrame()
+
+    identity = row.get("Identity")
+
+    if (
+        identity is not None
+        and not pd.isna(identity)
+        and str(identity).strip()
+    ):
+        kandidater = kandidater[
+            kandidater["_IdentityNorm"]
+            != str(identity).strip()
+        ].copy()
+
+    if kandidater.empty:
+        return pd.DataFrame()
+
+    kandidater["MileageDifference"] = (
+        kandidater["_MilNum"]
+        - mileage
+    ).abs()
+
+    kandidater["YearDifference"] = (
+        kandidater["_ModelYearNum"]
+        - model_year
+    ).abs()
+
+    kandidater["SimilarityDistance"] = (
+        kandidater["MileageDifference"]
+        + kandidater["YearDifference"]
+        * 1500
+    )
+
+    kandidater["SimilarityWeight"] = (
+        1
+        / (
+            250
+            + kandidater[
+                "SimilarityDistance"
+            ]
+        )
+    )
+
+    if pd.notna(target_tid):
+        kandidater["_TimeDifference"] = (
+            kandidater["_Tid"]
+            - target_tid
+        ).abs()
+
+        kandidater["_HasValidTime"] = (
+            kandidater[
+                "_TimeDifference"
+            ].notna()
+        )
+
+        kandidater = kandidater.sort_values(
+            [
+                "_IdentityNorm",
+                "_HasValidTime",
+                "_TimeDifference",
+                "SimilarityDistance",
+                "MileageDifference",
+                "YearDifference",
+            ],
+            ascending=[
+                True,
+                False,
+                True,
+                True,
+                True,
+                True,
+            ],
+        )
+
+    else:
+        kandidater = kandidater.sort_values(
+            [
+                "_IdentityNorm",
+                "SimilarityDistance",
+                "MileageDifference",
+                "YearDifference",
+            ],
+            ascending=True,
+        )
+
+    kandidater = (
+        kandidater
+        .drop_duplicates(
+            subset="_IdentityNorm",
+            keep="first",
+        )
+        .copy()
+    )
+
+    kandidater = kandidater.sort_values(
+        [
+            "SimilarityDistance",
+            "MileageDifference",
+            "YearDifference",
+        ],
+        ascending=[
+            True,
+            True,
+            True,
+        ],
+    )
+
+    kandidater = (
+        kandidater
+        .head(max_jämförbara)
+        .reset_index(drop=True)
+    )
+
+    if len(kandidater) < min_comparables:
+        return pd.DataFrame()
+
+    return kandidater
