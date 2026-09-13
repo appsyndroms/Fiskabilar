@@ -1,6 +1,5 @@
 {
-  "model": "random_forest",
-  "selection_metric": "mae",
+  "model_type": "random_forest",
   "features": [
     "Mil",
     "ModelYear",
@@ -14,75 +13,11 @@
     "ModelVariant",
     "ObservationMonth"
   ],
-  "numeric_features": [
-    "Mil",
-    "ModelYear",
-    "VehicleAge",
-    "MileagePerYear",
-    "LogMil",
-    "ObservationDays",
-    "MileageAgeInteraction"
-  ],
-  "categorical_features": [
-    "Model",
-    "Variant",
-    "ModelVariant",
-    "ObservationMonth"
-  ],
-  "dataset_observations": 1005,
-  "train_observations": 772,
-  "test_observations": 233,
-  "unique_identified_vehicles": 539,
-  "split_diagnostics": {
-    "test_andel": 0.2,
-    "prelim_test_observationer": 201,
-    "historiska_observationer_flyttade_till_test": 32,
-    "train_observationer": 772,
-    "test_observationer": 233,
-    "unika_identifierade_fordon_totalt": 539,
-    "unika_identifierade_fordon_train": 342,
-    "unika_identifierade_fordon_test": 197,
-    "fordon_i_bade_train_och_test": 0,
-    "train_tid_min": "2026-08-18T18:22:05+00:00",
-    "train_tid_max": "2026-08-30T09:52:42+00:00",
-    "test_tid_min": "2026-08-24T12:04:57+00:00",
-    "test_tid_max": "2026-09-12T17:54:41+00:00"
-  },
   "metrics": {
-    "linear_regression": {
-      "antal_observationer": 233,
-      "mae": 25546.3,
-      "median_absolutfel": 21502.3,
-      "mape_procent": 5.98,
-      "rmse": 32566.86,
-      "r2": 0.6869,
-      "bias": 12483.54,
-      "faktiskt_medelpris": 442463.52,
-      "predikterat_medelpris": 454947.06
-    },
-    "random_forest": {
-      "antal_observationer": 233,
-      "mae": 19482.13,
-      "median_absolutfel": 16022.59,
-      "mape_procent": 4.56,
-      "rmse": 24983.16,
-      "r2": 0.8157,
-      "bias": 8155.08,
-      "faktiskt_medelpris": 442463.52,
-      "predikterat_medelpris": 450618.59
-    }
-  },
-  "deduplication": {
-    "uses_vehicle_identity": true,
-    "fallback_without_identity": [
-      "Mil",
-      "ModelYear",
-      "Model",
-      "Variant",
-      "Price"
-    ],
-    "grouped_vehicle_split": true,
-    "test_contains_moved_historical_observations": true
-  },
-  "trained_at": "2026-09-13T10:33:18.953722+02:00"
+    "MAE": 19482.12522182662,
+    "RMSE": 24983.16189847396,
+    "R2": 0.8157209244225574,
+    "Bias": 8155.075454216452,
+    "MAPE": 4.563148449460776
+  }
 }
