@@ -36,16 +36,30 @@ from ml.comparable_market import (
 from ml.fynddetektor import (
     detektera_fynd,
 )
+from ml.fynd_export import (
+    exportera_fynd,
+)
 
 
-MODEL_FIL = Path("data/ml/market_model.joblib")
-METADATA_FIL = Path("data/ml/model_metadata.json")
+MODEL_FIL = Path(
+    "data/ml/market_model.joblib"
+)
+
+METADATA_FIL = Path(
+    "data/ml/model_metadata.json"
+)
 
 
 def _skapa_preprocessor() -> ColumnTransformer:
+
     numeric_pipeline = Pipeline(
         steps=[
-            ("imputer", SimpleImputer(strategy="median")),
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy="median"
+                ),
+            ),
         ]
     )
 
@@ -84,6 +98,7 @@ def _skapa_preprocessor() -> ColumnTransformer:
 
 
 def _modeller():
+
     return {
         "linear_regression": Pipeline(
             steps=[
@@ -118,12 +133,16 @@ def _modeller():
 
 
 def main():
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Kör diagnostik av tränad marknadsmodell.",
+        help=(
+            "Kör diagnostik av tränad "
+            "marknadsmodell."
+        ),
     )
 
     args = parser.parse_args()
@@ -131,36 +150,27 @@ def main():
     if not args.debug:
         return
 
-    print("Laddar marknadsdata...")
-
     observations = _ladda_jsonl()
 
-    print(
-        f"Råa observationer: "
-        f"{len(observations):,}"
+    dataset = _bygg_dataset(
+        observations
     )
 
-    dataset = _bygg_dataset(observations)
-
-    print(
-        f"Dataset före deduplicering: "
-        f"{len(dataset):,}"
+    dataset = _deduplicera_dataset(
+        dataset
     )
 
-    dataset = _deduplicera_dataset(dataset)
-
-    print(
-        f"Dataset efter deduplicering: "
-        f"{len(dataset):,}"
+    train, test = _tidsmässig_split(
+        dataset
     )
 
-    train, test = _tidsmässig_split(dataset)
+    X_train = build_features(
+        train
+    )
 
-    print(f"Train: {len(train):,}")
-    print(f"Test:  {len(test):,}")
-
-    X_train = build_features(train)
-    X_test = build_features(test)
+    X_test = build_features(
+        test
+    )
 
     y_train = train["Price"]
     y_test = test["Price"]
@@ -170,7 +180,6 @@ def main():
     resultat = {}
 
     for namn, model in modeller.items():
-        print(f"\nTränar {namn}...")
 
         model.fit(
             X_train,
@@ -192,30 +201,9 @@ def main():
             "metrics": metrics,
         }
 
-        print(f"\n{namn}:")
-
-        for key, value in metrics.items():
-            if key == "R2":
-                print(
-                    f"  {key}: "
-                    f"{value:.4f}"
-                )
-            elif key == "MAPE":
-                print(
-                    f"  {key}: "
-                    f"{value:.2f} %"
-                )
-            else:
-                print(
-                    f"  {key}: "
-                    f"{value:,.0f} kr"
-                )
-
-    rf = resultat["random_forest"]
-
-    print(
-        "\nRandom Forest feature importance:"
-    )
+    rf = resultat[
+        "random_forest"
+    ]
 
     importance = _feature_importance(
         rf["model"]
@@ -223,11 +211,15 @@ def main():
 
     if importance is not None:
         print(
+            "\nRandom Forest feature importance:"
+        )
+        print(
             importance.to_string(
                 index=False,
                 formatters={
                     "importance":
-                        lambda x: f"{x:.4f}"
+                        lambda x:
+                        f"{x:.4f}"
                 },
             )
         )
@@ -260,11 +252,23 @@ def main():
         rf["prediction"],
     )
 
-    detektera_fynd(
+    # --------------------------------------------------------
+    # FYNDEKTION + EXPORT
+    # --------------------------------------------------------
+
+    fynd = detektera_fynd(
         dataset,
         test,
         rf["prediction"],
     )
+
+    exportera_fynd(
+        fynd
+    )
+
+    # --------------------------------------------------------
+    # VINNANDE MODELL
+    # --------------------------------------------------------
 
     winner = min(
         resultat.items(),
@@ -274,11 +278,6 @@ def main():
 
     winner_name = winner[0]
     winner_model = winner[1]["model"]
-
-    print(
-        f"\nVinnande modell: "
-        f"{winner_name}"
-    )
 
     MODEL_FIL.parent.mkdir(
         parents=True,
@@ -300,22 +299,13 @@ def main():
         "w",
         encoding="utf-8",
     ) as f:
+
         json.dump(
             metadata,
             f,
             ensure_ascii=False,
             indent=2,
         )
-
-    print(
-        f"Modell sparad: "
-        f"{MODEL_FIL}"
-    )
-
-    print(
-        f"Metadata sparad: "
-        f"{METADATA_FIL}"
-    )
 
 
 if __name__ == "__main__":
