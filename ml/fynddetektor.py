@@ -80,9 +80,15 @@ def _evidensvikt(jämförbara):
 
 def _get_ad_url(
     row,
+    dataset=None,
 ):
     """
-    Hämtar annons-URL oavsett vilket URL-fält som används.
+    Hämtar annons-URL från fyndraden.
+
+    Om URL saknas på diagnostikraden används Identity för att slå
+    upp samma fordon i det fullständiga datasetet. Detta är viktigt
+    eftersom diagnostik-/testkedjan inte alltid behåller alla
+    originalfält i exakt samma representation.
     """
 
     for key in (
@@ -97,8 +103,66 @@ def _get_ad_url(
     ):
         value = row.get(key)
 
-        if value:
-            return value
+        if (
+            value is not None
+            and str(value).strip()
+        ):
+            return str(value).strip()
+
+    identity = row.get(
+        "Identity"
+    )
+
+    if (
+        dataset is not None
+        and identity is not None
+        and str(identity).strip()
+        and "Identity" in dataset.columns
+    ):
+        identity_text = str(
+            identity
+        ).strip()
+
+        matches = dataset[
+            dataset["Identity"]
+            .astype(str)
+            .str.strip()
+            == identity_text
+        ].copy()
+
+        if not matches.empty:
+
+            if "Tid" in matches.columns:
+                matches = matches.sort_values(
+                    "Tid",
+                    na_position="last",
+                )
+
+            for _, match in (
+                matches.iloc[::-1]
+                .iterrows()
+            ):
+                for key in (
+                    "url",
+                    "URL",
+                    "ad_url",
+                    "adUrl",
+                    "annons_url",
+                    "annonsUrl",
+                    "listing_url",
+                    "listingUrl",
+                ):
+                    value = match.get(
+                        key
+                    )
+
+                    if (
+                        value is not None
+                        and str(value).strip()
+                    ):
+                        return str(
+                            value
+                        ).strip()
 
     return ""
 
@@ -270,8 +334,12 @@ def _bygg_fyndkandidater(
                     fynd_score
                 ),
 
-                # Behåll annonslänken i fyndposten.
-                "url": _get_ad_url(row),
+                # Hämta URL direkt från fyndraden
+                # eller via Identity från datasetet.
+                "url": _get_ad_url(
+                    row,
+                    dataset,
+                ),
 
                 "Identity": row.get(
                     "Identity",
@@ -299,7 +367,9 @@ def _bygg_fyndkandidater(
                 False,
             ],
         )
-        .reset_index(drop=True)
+        .reset_index(
+            drop=True
+        )
     )
 
     fynd["Fyndklass"] = fynd[
