@@ -245,6 +245,8 @@ def render_global_filter() -> str:
         return first(
             row,
             [
+                "ModelYear",
+                "modelYear",
                 "arsmodell",
                 "modell_ar",
                 "model_year",
