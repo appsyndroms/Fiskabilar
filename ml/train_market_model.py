@@ -1,44 +1,25 @@
 """
 Träning av datadriven marknadsvärdering.
 
-Modellen tränas på sparad historik i:
-
+Historik:
     data/market_history/*.jsonl
 
 Målvariabel:
+    Price
 
-    Price = annonspris
-
-Features:
-
-    - Mil
-    - ModelYear
-    - Model
-    - Variant
-
-Två modeller testas:
-
+Modeller:
     1. Linjär regression
     2. Random Forest
 
-Modellerna utvärderas på den senaste delen av
-marknadshistoriken.
+Feature engineering:
+    ml.features
 
-Den modell som ger lägst MAE väljs eftersom
-Fiskabilars huvudsakliga användningsfall är att
-uppskatta marknadsvärde i kronor.
-
-Resultatet sparas i:
-
-    data/ml/market_model.joblib
-    data/ml/model_metadata.json
+Den modell som ger lägst MAE väljs.
 """
 
 from __future__ import annotations
 
-import argparse
 import json
-
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -50,16 +31,21 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
     r2_score,
 )
-
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
+from ml.features import (
+    FEATURES_KATEGORISK,
+    FEATURES_NUMERIC,
+    FEATURES,
+    TARGET,
+    build_features,
+)
 from ml.normalization import (
     normalisera_modell,
     normalisera_variant,
@@ -89,24 +75,6 @@ METADATA_FIL = (
 )
 
 MIN_TRAINING_OBSERVATIONER = 30
-
-
-FEATURES_NUMERIC = [
-    "Mil",
-    "ModelYear",
-]
-
-FEATURES_KATEGORISK = [
-    "Model",
-    "Variant",
-]
-
-FEATURES = (
-    FEATURES_NUMERIC
-    + FEATURES_KATEGORISK
-)
-
-TARGET = "Price"
 
 
 def _ladda_jsonl() -> pd.DataFrame:
@@ -141,10 +109,10 @@ def _ladda_jsonl() -> pd.DataFrame:
         with fil.open(
             "r",
             encoding="utf-8",
-        ) as f:
+        ) as file:
 
             for radnummer, rad in enumerate(
-                f,
+                file,
                 start=1,
             ):
 
@@ -154,35 +122,25 @@ def _ladda_jsonl() -> pd.DataFrame:
                     continue
 
                 try:
-
                     post = json.loads(
                         rad
                     )
-
                 except json.JSONDecodeError:
-
                     print(
                         f"Varning: kunde inte läsa "
                         f"{fil}:{radnummer}"
                     )
-
                     continue
 
                 if isinstance(
                     post,
                     dict,
                 ):
-
-                    post[
-                        "_historikfil"
-                    ] = fil.name
-
                     poster.append(
                         post
                     )
 
     if not poster:
-
         raise ValueError(
             "Historikfilerna innehåller inga "
             "giltiga JSONL-poster."
@@ -196,7 +154,7 @@ def _ladda_jsonl() -> pd.DataFrame:
 def _bygg_dataset(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Bygger träningsdataset från rå historik."""
+    """Bygger grunddatasetet."""
 
     resultat = pd.DataFrame()
 
@@ -205,9 +163,7 @@ def _bygg_dataset(
         errors="coerce",
     )
 
-    resultat[
-        "ModelYear"
-    ] = pd.to_numeric(
+    resultat["ModelYear"] = pd.to_numeric(
         df.get("arsmodell"),
         errors="coerce",
     )
@@ -272,26 +228,22 @@ def _bygg_dataset(
         .fillna("okänd")
     )
 
-    resultat = resultat.sort_values(
-        "Tid",
-        na_position="last",
-    ).reset_index(
-        drop=True
+    return (
+        resultat
+        .sort_values(
+            "Tid",
+            na_position="last",
+        )
+        .reset_index(
+            drop=True
+        )
     )
-
-    return resultat
 
 
 def _deduplicera_dataset(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    """
-    Tar bort identiska observationer efter
-    normalisering.
-
-    Samma bil kan ha sparats flera gånger med
-    olika versaler eller skrivsätt.
-    """
+    """Tar bort identiska observationer."""
 
     nycklar = [
         "Mil",
@@ -325,9 +277,8 @@ def _deduplicera_dataset(
     return resultat
 
 
-def _skapa_preprocessor(
-) -> ColumnTransformer:
-    """Skapar preprocessing."""
+def _skapa_preprocessor():
+    """Skapar gemensam preprocessing."""
 
     numeric_pipeline = Pipeline(
         steps=[
@@ -373,80 +324,75 @@ def _skapa_preprocessor(
     )
 
 
-def _bygg_modeller(
-) -> dict[str, Pipeline]:
-    """Returnerar modellerna."""
+def _bygg_modeller():
+    """Skapar modellerna."""
 
     return {
+        "linear_regression": Pipeline(
+            steps=[
+                (
+                    "preprocessor",
+                    _skapa_preprocessor(),
+                ),
+                (
+                    "model",
+                    LinearRegression(),
+                ),
+            ]
+        ),
 
-        "linear_regression":
-
-            Pipeline(
-                steps=[
-                    (
-                        "preprocessor",
-                        _skapa_preprocessor(),
+        "random_forest": Pipeline(
+            steps=[
+                (
+                    "preprocessor",
+                    _skapa_preprocessor(),
+                ),
+                (
+                    "model",
+                    RandomForestRegressor(
+                        n_estimators=400,
+                        max_depth=None,
+                        min_samples_leaf=2,
+                        random_state=42,
+                        n_jobs=-1,
                     ),
-                    (
-                        "model",
-                        LinearRegression(),
-                    ),
-                ]
-            ),
-
-        "random_forest":
-
-            Pipeline(
-                steps=[
-                    (
-                        "preprocessor",
-                        _skapa_preprocessor(),
-                    ),
-                    (
-                        "model",
-                        RandomForestRegressor(
-                            n_estimators=300,
-                            max_depth=None,
-                            min_samples_leaf=2,
-                            random_state=42,
-                            n_jobs=-1,
-                        ),
-                    ),
-                ]
-            ),
+                ),
+            ]
+        ),
     }
 
 
-def _beräkna_metrics(
-    faktiskt: pd.Series,
-    predikterat,
+def _metrics(
+    actual,
+    predicted,
 ) -> dict:
-    """Beräknar modellens felstatistik."""
 
-    faktiskt = pd.Series(
-        faktiskt,
+    actual = pd.Series(
+        actual,
         dtype="float64",
     ).reset_index(
         drop=True
     )
 
-    predikterat = pd.Series(
-        predikterat,
+    predicted = pd.Series(
+        predicted,
         dtype="float64",
     ).reset_index(
         drop=True
     )
 
-    fel = (
-        predikterat
-        - faktiskt
+    error = (
+        predicted
+        - actual
     )
 
-    absolut_fel = fel.abs()
+    absolute_error = (
+        error.abs()
+    )
 
-    procent_fel = (
-        absolut_fel
-        / faktiskt.replace(
+    percentage_error = (
+        absolute_error
+        / actual.replace(
             0,
             pd.NA,
         )
@@ -454,296 +400,108 @@ def _beräkna_metrics(
     )
 
     return {
+        "antal_observationer": int(
+            len(actual)
+        ),
 
-        "antal_observationer":
-
-            int(
-                len(faktiskt)
+        "mae": round(
+            float(
+                mean_absolute_error(
+                    actual,
+                    predicted,
+                )
             ),
+            2,
+        ),
 
-        "mae":
-
-            round(
-                float(
-                    mean_absolute_error(
-                        faktiskt,
-                        predikterat,
-                    )
-                ),
-                2,
+        "median_absolutfel": round(
+            float(
+                absolute_error.median()
             ),
+            2,
+        ),
 
-        "medianfel":
-
-            round(
-                float(
-                    fel.median()
-                ),
-                2,
+        "mape_procent": round(
+            float(
+                percentage_error
+                .dropna()
+                .mean()
             ),
+            2,
+        ),
 
-        "median_absolutfel":
-
-            round(
-                float(
-                    absolut_fel.median()
-                ),
-                2,
+        "rmse": round(
+            float(
+                mean_squared_error(
+                    actual,
+                    predicted,
+                )
+                ** 0.5
             ),
+            2,
+        ),
 
-        "mape_procent":
-
-            round(
-                float(
-                    procent_fel
-                    .dropna()
-                    .mean()
-                ),
-                2,
+        "r2": round(
+            float(
+                r2_score(
+                    actual,
+                    predicted,
+                )
             ),
+            4,
+        ),
 
-        "rmse":
-
-            round(
-                float(
-                    mean_squared_error(
-                        faktiskt,
-                        predikterat,
-                    )
-                    ** 0.5
-                ),
-                2,
+        "bias": round(
+            float(
+                error.mean()
             ),
+            2,
+        ),
 
-        "r2":
-
-            round(
-                float(
-                    r2_score(
-                        faktiskt,
-                        predikterat,
-                    )
-                ),
-                4,
+        "faktiskt_medelpris": round(
+            float(
+                actual.mean()
             ),
+            2,
+        ),
 
-        "faktiskt_medelpris":
-
-            round(
-                float(
-                    faktiskt.mean()
-                ),
-                2,
+        "predikterat_medelpris": round(
+            float(
+                predicted.mean()
             ),
-
-        "predikterat_medelpris":
-
-            round(
-                float(
-                    predikterat.mean()
-                ),
-                2,
-            ),
-
-        "bias":
-
-            round(
-                float(
-                    fel.mean()
-                ),
-                2,
-            ),
+            2,
+        ),
     }
-
-
-def _utvärdera_per_grupp(
-    test: pd.DataFrame,
-    prediktioner,
-    kolumn: str,
-) -> dict:
-    """Beräknar resultat per grupp."""
-
-    data = test[
-        [
-            kolumn,
-            TARGET,
-        ]
-    ].copy()
-
-    data[
-        "_prediktion"
-    ] = prediktioner
-
-    resultat = {}
-
-    for grupp, gruppdata in (
-        data.groupby(
-            kolumn,
-            dropna=False,
-        )
-    ):
-
-        gruppnamn = (
-            "okänd"
-            if pd.isna(grupp)
-            else str(grupp)
-        )
-
-        resultat[
-            gruppnamn
-        ] = _beräkna_metrics(
-            gruppdata[TARGET],
-            gruppdata[
-                "_prediktion"
-            ],
-        )
-
-    return resultat
-
-
-def _utvärdera(
-    modell: Pipeline,
-    test: pd.DataFrame,
-) -> dict:
-    """Beräknar fullständig modellstatistik."""
-
-    x_test = test[
-        FEATURES
-    ]
-
-    y_test = test[
-        TARGET
-    ]
-
-    prediktioner = (
-        modell.predict(
-            x_test
-        )
-    )
-
-    return {
-
-        "totalt":
-
-            _beräkna_metrics(
-                y_test,
-                prediktioner,
-            ),
-
-        "per_modell":
-
-            _utvärdera_per_grupp(
-                test,
-                prediktioner,
-                "Model",
-            ),
-
-        "per_variant":
-
-            _utvärdera_per_grupp(
-                test,
-                prediktioner,
-                "Variant",
-            ),
-
-        "per_årsmodell":
-
-            _utvärdera_per_grupp(
-                test,
-                prediktioner,
-                "ModelYear",
-            ),
-    }
-
-
-def _skriv_ut_metrics(
-    namn: str,
-    metrics: dict,
-) -> None:
-    """Skriver modellresultat."""
-
-    totalt = metrics[
-        "totalt"
-    ]
-
-    print()
-    print(
-        f"=== {namn} ==="
-    )
-
-    print(
-        f"Observationer: "
-        f"{totalt['antal_observationer']}"
-    )
-
-    print(
-        f"MAE: "
-        f"{totalt['mae']:,.0f} kr"
-    )
-
-    print(
-        f"Median absolutfel: "
-        f"{totalt['median_absolutfel']:,.0f} kr"
-    )
-
-    print(
-        f"MAPE: "
-        f"{totalt['mape_procent']:.2f} %"
-    )
-
-    print(
-        f"RMSE: "
-        f"{totalt['rmse']:,.0f} kr"
-    )
-
-    print(
-        f"R²: "
-        f"{totalt['r2']:.4f}"
-    )
-
-    print(
-        f"Bias: "
-        f"{totalt['bias']:,.0f} kr"
-    )
 
 
 def _tidsmässig_split(
     df: pd.DataFrame,
     test_andel: float = 0.20,
-) -> tuple[
-    pd.DataFrame,
-    pd.DataFrame,
-]:
-    """
-    Delar datasetet tidsmässigt.
+):
+    """Äldsta 80 % träning, senaste 20 % test."""
 
-    Äldsta observationerna används för träning.
-    Nyaste observationerna används för test.
-    """
-
-    df = df.sort_values(
-        "Tid",
-        na_position="first",
-    ).reset_index(
-        drop=True
-    )
-
-    antal = len(
-        df
+    df = (
+        df.sort_values(
+            "Tid",
+            na_position="first",
+        )
+        .reset_index(
+            drop=True
+        )
     )
 
     test_antal = max(
         1,
         int(
             round(
-                antal
+                len(df)
                 * test_andel
             )
         ),
     )
 
     train_antal = (
-        antal
+        len(df)
         - test_antal
     )
 
@@ -751,12 +509,8 @@ def _tidsmässig_split(
         train_antal
         < MIN_TRAINING_OBSERVATIONER
     ):
-
         raise ValueError(
-            "För få träningsobservationer. "
-            f"Minst "
-            f"{MIN_TRAINING_OBSERVATIONER} "
-            f"krävs."
+            "För få träningsobservationer."
         )
 
     train = df.iloc[
@@ -767,207 +521,218 @@ def _tidsmässig_split(
         train_antal:
     ].copy()
 
-    if test.empty:
+    return train, test
 
-        raise ValueError(
-            "Testdatasetet blev tomt."
-        )
 
-    return (
-        train,
-        test,
+def _utvärdera(
+    modell,
+    test,
+):
+    """Utvärderar modellen."""
+
+    x_test = build_features(
+        test
     )
 
-
-def _metadata(
-    vald_modell: str,
-    dataset: pd.DataFrame,
-    train: pd.DataFrame,
-    test: pd.DataFrame,
-    metrics: dict,
-) -> dict:
-    """Bygger metadatafil."""
-
-    return {
-
-        "skapad":
-
-            datetime.now(
-                TIDSZON
-            ).isoformat(),
-
-        "modell":
-
-            vald_modell,
-
-        "urvalsprincip":
-
-            "lägst_mae",
-
-        "features":
-
-            FEATURES,
-
-        "target":
-
-            TARGET,
-
-        "antal_observationer":
-
-            int(
-                len(dataset)
-            ),
-
-        "antal_traning":
-
-            int(
-                len(train)
-            ),
-
-        "antal_test":
-
-            int(
-                len(test)
-            ),
-
-        "metrics":
-
-            metrics,
-
-        "historik_dir":
-
-            str(
-                HISTORIK_DIR
-            ),
-    }
-
-
-def träna(
-    verbose: bool = True,
-) -> dict:
-    """Tränar och utvärderar modellen."""
-
-    rådata = (
-        _ladda_jsonl()
-    )
-
-    dataset = (
-        _bygg_dataset(
-            rådata
-        )
-    )
-
-    dataset = (
-        _deduplicera_dataset(
-            dataset
-        )
-    )
-
-    if (
-        len(dataset)
-        < MIN_TRAINING_OBSERVATIONER
-    ):
-
-        raise ValueError(
-            "För få användbara observationer: "
-            f"{len(dataset)}."
-        )
-
-    train, test = (
-        _tidsmässig_split(
-            dataset
-        )
-    )
-
-    x_train = train[
-        FEATURES
-    ]
-
-    y_train = train[
+    y_test = test[
         TARGET
     ]
 
-    modeller = (
-        _bygg_modeller()
+    prediction = modell.predict(
+        x_test
     )
 
-    metrics = {}
-
-    for namn, modell in (
-        modeller.items()
-    ):
-
-        modell.fit(
-            x_train,
-            y_train,
-        )
-
-        metrics[
-            namn
-        ] = _utvärdera(
-            modell,
-            test,
-        )
-
-        if verbose:
-
-            _skriv_ut_metrics(
-                namn,
-                metrics[
-                    namn
-                ],
-            )
-
-    vald_modell = min(
-        metrics,
-        key=lambda namn: (
-            metrics[namn]
-            ["totalt"]
-            ["mae"]
-        ),
+    return _metrics(
+        y_test,
+        prediction,
     )
 
-    slutlig_modell = (
-        modeller[
-            vald_modell
-        ]
+
+def _skriv_metrics(
+    namn,
+    metrics,
+):
+    print()
+    print(
+        f"=== {namn} ==="
     )
 
-    slutlig_modell.fit(
-        dataset[
-            FEATURES
-        ],
-        dataset[
-            TARGET
-        ],
+    print(
+        f"Observationer: "
+        f"{metrics['antal_observationer']}"
     )
+
+    print(
+        f"MAE: "
+        f"{metrics['mae']:,.0f} kr"
+    )
+
+    print(
+        f"Median absolutfel: "
+        f"{metrics['median_absolutfel']:,.0f} kr"
+    )
+
+    print(
+        f"MAPE: "
+        f"{metrics['mape_procent']:.2f} %"
+    )
+
+    print(
+        f"RMSE: "
+        f"{metrics['rmse']:,.0f} kr"
+    )
+
+    print(
+        f"R²: "
+        f"{metrics['r2']:.4f}"
+    )
+
+    print(
+        f"Bias: "
+        f"{metrics['bias']:,.0f} kr"
+    )
+
+
+def main():
+    """Tränar och sparar bästa modell."""
 
     OUTPUT_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
+    rådata = _ladda_jsonl()
+
+    print(
+        f"Råa observationer: "
+        f"{len(rådata)}"
+    )
+
+    dataset = _bygg_dataset(
+        rådata
+    )
+
+    dataset = _deduplicera_dataset(
+        dataset
+    )
+
+    train, test = _tidsmässig_split(
+        dataset
+    )
+
+    print()
+    print(
+        "=== DATASET ==="
+    )
+
+    print(
+        f"Observationer: "
+        f"{len(dataset)}"
+    )
+
+    print(
+        f"Träning: "
+        f"{len(train)}"
+    )
+
+    print(
+        f"Test: "
+        f"{len(test)}"
+    )
+
+    print()
+    print(
+        "Nya features:"
+    )
+
+    for feature in FEATURES:
+        print(
+            f"  {feature}"
+        )
+
+    modeller = _bygg_modeller()
+
+    resultat = {}
+
+    for namn, modell in (
+        modeller.items()
+    ):
+
+        x_train = build_features(
+            train
+        )
+
+        y_train = train[
+            TARGET
+        ]
+
+        modell.fit(
+            x_train,
+            y_train,
+        )
+
+        metrics = _utvärdera(
+            modell,
+            test,
+        )
+
+        resultat[
+            namn
+        ] = metrics
+
+        _skriv_metrics(
+            namn,
+            metrics,
+        )
+
+    vald_modell = min(
+        resultat,
+        key=lambda namn:
+            resultat[namn]["mae"],
+    )
+
+    slutmodell = modeller[
+        vald_modell
+    ]
+
+    slutmodell.fit(
+        build_features(
+            dataset
+        ),
+        dataset[TARGET],
+    )
+
     joblib.dump(
-        slutlig_modell,
+        slutmodell,
         MODEL_FIL,
     )
 
-    metadata = _metadata(
-        vald_modell,
-        dataset,
-        train,
-        test,
-        metrics,
-    )
+    metadata = {
+        "model": vald_modell,
+        "selection_metric": "mae",
+        "features": FEATURES,
+        "numeric_features": FEATURES_NUMERIC,
+        "categorical_features": FEATURES_KATEGORISK,
+        "dataset_observations": len(dataset),
+        "train_observations": len(train),
+        "test_observations": len(test),
+        "metrics": resultat,
+        "trained_at": datetime.now(
+            TIDSZON
+        ).isoformat(),
+    }
 
-    METADATA_FIL.write_text(
-        json.dumps(
+    with METADATA_FIL.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+
+        json.dump(
             metadata,
+            file,
             ensure_ascii=False,
             indent=2,
-        ),
-        encoding="utf-8",
-    )
+        )
 
     print()
     print(
@@ -980,8 +745,7 @@ def träna(
     )
 
     print(
-        "Urvalsprincip: "
-        "lägst MAE"
+        "Urvalsprincip: lägst MAE"
     )
 
     print(
@@ -996,30 +760,6 @@ def träna(
 
     print(
         "=========================================="
-    )
-
-    return metadata
-
-
-def main() -> None:
-    """CLI-entrypoint."""
-
-    parser = (
-        argparse.ArgumentParser()
-    )
-
-    parser.add_argument(
-        "--quiet",
-        action="store_true",
-        help="Minska utskriften.",
-    )
-
-    args = (
-        parser.parse_args()
-    )
-
-    träna(
-        verbose=not args.quiet
     )
 
 
