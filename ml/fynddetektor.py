@@ -13,6 +13,76 @@ MIN_COMPARABLES = 3
 MAX_RESULTS = 20
 
 
+def _evidensvikt(jämförbara):
+    """
+    Beräknar hur starkt jämförelseunderlaget är.
+
+    Antalet oberoende bilar ökar säkerheten, men många jämförelser
+    är inte automatiskt bra om marknaden samtidigt är mycket spretig.
+
+    Därför vägs två saker ihop:
+      1. antal oberoende jämförelseobjekt
+      2. hur samlade deras priser är
+
+    Prisets spridning mäts med MAD (Median Absolute Deviation),
+    vilket är robust mot enstaka extrema annonser.
+    """
+
+    antal = len(jämförbara)
+
+    if antal < MIN_COMPARABLES:
+        return 0.0, 0.0
+
+    priser = pd.to_numeric(
+        jämförbara["_PriceNum"],
+        errors="coerce",
+    ).dropna()
+
+    if priser.empty:
+        return 0.0, 0.0
+
+    median = float(priser.median())
+
+    if median <= 0:
+        return 0.0, 0.0
+
+    mad = float(
+        (priser - median)
+        .abs()
+        .median()
+    )
+
+    robust_spread_pct = (
+        mad
+        / median
+        * 100
+    )
+
+    # 10 oberoende jämförelseobjekt ger full antal-vikt.
+    n_confidence = min(
+        1.0,
+        antal / 10.0,
+    )
+
+    # En tät marknad ger högre evidens.
+    #
+    # 20 % robust spridning ger ungefär 0,50 i vikt.
+    spread_confidence = 1.0 / (
+        1.0
+        + robust_spread_pct / 20.0
+    )
+
+    confidence = (
+        n_confidence
+        * spread_confidence
+    )
+
+    return (
+        confidence,
+        robust_spread_pct,
+    )
+
+
 def _bygg_fyndkandidater(
     dataset,
     test,
@@ -29,6 +99,11 @@ def _bygg_fyndkandidater(
     Fynddetektorn använder jämförelsemarknaden som ett oberoende
     marknadslager och använder inte modellens tidigare bias som en
     hårdkodad korrigering.
+
+    FyndScore tar därefter hänsyn till:
+      - storleken på avvikelsen
+      - antalet jämförbara bilar
+      - hur stabil prisbilden bland jämförelseobjekten är
     """
 
     diagnostik = _skapa_diagnostik(
@@ -48,19 +123,30 @@ def _bygg_fyndkandidater(
         if jämförbara.empty:
             continue
 
-        faktisk_pris = float(row["Price"])
-        prediction_value = float(row["Prediction"])
+        faktisk_pris = float(
+            row["Price"]
+        )
+
+        prediction_value = float(
+            row["Prediction"]
+        )
 
         viktad_median = _weighted_median(
             jämförbara["_PriceNum"],
             jämförbara["SimilarityWeight"],
         )
 
-        if pd.isna(viktad_median) or viktad_median <= 0:
+        if (
+            pd.isna(viktad_median)
+            or viktad_median <= 0
+        ):
             continue
 
         model_signal_pct = (
-            (prediction_value - faktisk_pris)
+            (
+                prediction_value
+                - faktisk_pris
+            )
             / faktisk_pris
             * 100
             if faktisk_pris > 0
@@ -68,20 +154,29 @@ def _bygg_fyndkandidater(
         )
 
         market_signal_pct = (
-            (faktisk_pris - viktad_median)
+            (
+                faktisk_pris
+                - viktad_median
+            )
             / viktad_median
             * 100
         )
 
         model_cheap = (
-            model_signal_pct >= MODEL_THRESHOLD_PCT
+            model_signal_pct
+            >= MODEL_THRESHOLD_PCT
         )
 
         market_cheap = (
-            market_signal_pct <= MARKET_THRESHOLD_PCT
+            market_signal_pct
+            <= MARKET_THRESHOLD_PCT
         )
 
-        if not (model_cheap and market_cheap):
+        # Båda signalerna måste peka åt samma håll.
+        if not (
+            model_cheap
+            and market_cheap
+        ):
             continue
 
         model_gap_pct = max(
@@ -94,47 +189,90 @@ def _bygg_fyndkandidater(
             -market_signal_pct,
         )
 
+        # Själva avvikelsen mellan pris och värde/marknad.
         combined_score = (
             model_gap_pct
             + market_gap_pct
         )
 
-        comparable_count = len(jämförbara)
-
-        # 10 oberoende jämförelseobjekt ger full stabilitetsvikt.
-        comparable_confidence = min(
-            1.0,
-            comparable_count / 10.0,
+        comparable_count = len(
+            jämförbara
         )
 
-        # Själva fyndpoängen består av:
+        (
+            evidence_confidence,
+            robust_spread_pct,
+        ) = _evidensvikt(
+            jämförbara
+        )
+
+        # Evidensen ska påverka rankingen, men inte kunna slå
+        # ut ett stort fynd enbart för att antalet jämförelser
+        # råkar vara lägre.
         #
-        # styrkan i ML-signalen
-        # +
-        # styrkan i marknadssignalen
+        # Intervallet blir:
         #
-        # multiplicerat med hur mycket marknadsunderlag vi har.
+        #   0.50 -> svag evidens
+        #   1.00 -> mycket stark evidens
+        #
+        # CombinedScore förblir samtidigt synligt separat.
         fynd_score = (
             combined_score
-            * comparable_confidence
+            * (
+                0.5
+                + 0.5
+                * evidence_confidence
+            )
         )
 
         resultat.append(
             {
-                "Model": row.get("Model", ""),
-                "Variant": row.get("Variant", ""),
-                "ModelYear": row.get("ModelYear", ""),
-                "Mil": row.get("Mil", 0),
+                "Model": row.get(
+                    "Model",
+                    "",
+                ),
+                "Variant": row.get(
+                    "Variant",
+                    "",
+                ),
+                "ModelYear": row.get(
+                    "ModelYear",
+                    "",
+                ),
+                "Mil": row.get(
+                    "Mil",
+                    0,
+                ),
                 "Price": faktisk_pris,
                 "Prediction": prediction_value,
-                "ModelVsActualPct": model_signal_pct,
-                "ComparableWeightedMedian": viktad_median,
-                "ComparableDeviationPct": market_signal_pct,
-                "ComparableN": comparable_count,
-                "CombinedScore": combined_score,
-                "ComparableConfidence": comparable_confidence,
-                "FyndScore": fynd_score,
-                "Identity": row.get("Identity", ""),
+                "ModelVsActualPct": (
+                    model_signal_pct
+                ),
+                "ComparableWeightedMedian": (
+                    viktad_median
+                ),
+                "ComparableDeviationPct": (
+                    market_signal_pct
+                ),
+                "ComparableN": (
+                    comparable_count
+                ),
+                "CombinedScore": (
+                    combined_score
+                ),
+                "EvidenceConfidence": (
+                    evidence_confidence
+                ),
+                "ComparableRobustSpreadPct": (
+                    robust_spread_pct
+                ),
+                "FyndScore": (
+                    fynd_score
+                ),
+                "Identity": row.get(
+                    "Identity",
+                    "",
+                ),
             }
         )
 
@@ -147,15 +285,19 @@ def _bygg_fyndkandidater(
             [
                 "FyndScore",
                 "CombinedScore",
+                "EvidenceConfidence",
                 "ComparableN",
             ],
             ascending=[
                 False,
                 False,
                 False,
+                False,
             ],
         )
-        .reset_index(drop=True)
+        .reset_index(
+            drop=True
+        )
     )
 
 
@@ -191,24 +333,37 @@ def detektera_fynd(
         prediction,
     )
 
-    print("\n" + "=" * 70)
-    print("FYNDPOSITION – AKTIV FYNDETEKTOR")
-    print("=" * 70)
+    print(
+        "\n"
+        + "=" * 70
+    )
+
+    print(
+        "FYNDPOSITION – AKTIV FYNDETEKTOR"
+    )
+
+    print(
+        "=" * 70
+    )
 
     if fynd.empty:
         print(
-            "\nInga bilar uppfyller både ML- och "
-            "jämförelsemarknadens fyndkriterier."
+            "\nInga bilar uppfyller både ML- "
+            "och jämförelsemarknadens "
+            "fyndkriterier."
         )
 
         return fynd
 
     fynd["Fyndklass"] = fynd[
         "FyndScore"
-    ].map(_fyndklass)
+    ].map(
+        _fyndklass
+    )
 
     print(
-        f"\nFyndkandidater: {len(fynd)}"
+        f"\nFyndkandidater: "
+        f"{len(fynd)}"
     )
 
     print(
@@ -242,6 +397,7 @@ def detektera_fynd(
     for column in [
         "ModelVsActualPct",
         "ComparableDeviationPct",
+        "ComparableRobustSpreadPct",
     ]:
         utskrift[column] = utskrift[
             column
@@ -251,26 +407,27 @@ def detektera_fynd(
         )
 
     utskrift["CombinedScore"] = (
-        utskrift["CombinedScore"]
-        .map(
+        utskrift[
+            "CombinedScore"
+        ].map(
             lambda x:
             f"{x:.2f}"
         )
     )
 
-    utskrift["ComparableConfidence"] = (
-        utskrift[
-            "ComparableConfidence"
-        ]
-        .map(
-            lambda x:
-            f"{x:.2f}"
-        )
+    utskrift[
+        "EvidenceConfidence"
+    ] = utskrift[
+        "EvidenceConfidence"
+    ].map(
+        lambda x:
+        f"{x:.2f}"
     )
 
     utskrift["FyndScore"] = (
-        utskrift["FyndScore"]
-        .map(
+        utskrift[
+            "FyndScore"
+        ].map(
             lambda x:
             f"{x:.2f}"
         )
@@ -289,12 +446,15 @@ def detektera_fynd(
         "ComparableWeightedMedian",
         "ComparableDeviationPct",
         "ComparableN",
+        "ComparableRobustSpreadPct",
+        "EvidenceConfidence",
         "CombinedScore",
-        "ComparableConfidence",
         "Identity",
     ]
 
-    print("\nRankad fyndlista:")
+    print(
+        "\nRankad fyndlista:"
+    )
 
     print(
         utskrift[
