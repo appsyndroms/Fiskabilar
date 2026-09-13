@@ -1,5 +1,6 @@
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
@@ -16,11 +17,13 @@ from ml.features import (
     FEATURES_NUMERIC,
     build_features,
 )
+
 from ml.train_market_model import (
     _bygg_dataset,
     _deduplicera_dataset,
     _ladda_jsonl,
 )
+
 from ml.model_diagnostics import (
     _diagnostik_330e_historik,
     _diagnostik_per_modell,
@@ -29,9 +32,11 @@ from ml.model_diagnostics import (
     _modell_variant_diagnostik,
     _största_felen,
 )
+
 from ml.fynddetektor import (
     detektera_fynd,
 )
+
 from ml.fynd_export import (
     exportera_fynd,
 )
@@ -180,6 +185,7 @@ def _modeller():
                 ),
             ]
         ),
+
         "random_forest": Pipeline(
             steps=[
                 (
@@ -241,6 +247,7 @@ def main():
     )
 
     y_train = train["Price"]
+
     y_test = test["Price"]
 
     modeller = _modeller()
@@ -278,6 +285,7 @@ def main():
     )
 
     if importance is not None:
+
         print(
             "\nRandom Forest feature importance:"
         )
@@ -340,6 +348,7 @@ def main():
     )
 
     winner_name = winner[0]
+
     winner_model = winner[1]["model"]
 
     MODEL_FIL.parent.mkdir(
@@ -352,10 +361,28 @@ def main():
         MODEL_FIL,
     )
 
+    # Metadata används av webbappen.
+    #
+    # observations = hela datasetet efter deduplicering.
+    # training_rows = den del som faktiskt används för träning.
+    # test_rows = den del som används för utvärdering.
+    # trained_at = exakt tidpunkt då modellen tränades.
     metadata = {
         "model_type": winner_name,
         "features": FEATURES,
         "metrics": winner[1]["metrics"],
+        "trained_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "observations": int(
+            len(dataset)
+        ),
+        "training_rows": int(
+            len(train)
+        ),
+        "test_rows": int(
+            len(test)
+        ),
     }
 
     with METADATA_FIL.open(
