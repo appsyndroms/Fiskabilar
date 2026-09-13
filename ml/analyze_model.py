@@ -83,7 +83,6 @@ def _metrics(y_true, y_pred):
     y_pred = pd.Series(y_pred).reset_index(drop=True)
 
     errors = y_pred - y_true
-
     non_zero = y_true != 0
 
     return {
@@ -409,12 +408,6 @@ def _diagnostik_330e_historik(dataset, test, prediction):
     """
     Analyserar historiken för BMW 330e-observationer i testmängden.
 
-    För varje 330e i test visas hur många observationer samma bil har i
-    hela datasetet samt prisutvecklingen över tid.
-
-    Syftet är att se om stora modellfel kan kopplas till exempelvis
-    prissänkningar eller ovanlig prisutveckling som modellen inte fångar.
-
     Detta påverkar inte modellträningen.
     """
 
@@ -427,11 +420,7 @@ def _diagnostik_330e_historik(dataset, test, prediction):
     mask_330e = (
         test["Model"]
         .astype(str)
-        .str.contains(
-            "330e",
-            case=False,
-            na=False,
-        )
+        .str.contains("330e", case=False, na=False)
     )
 
     test_330e = test[mask_330e].copy()
@@ -439,10 +428,7 @@ def _diagnostik_330e_historik(dataset, test, prediction):
     if test_330e.empty:
         return
 
-    prediction = pd.Series(
-        prediction
-    ).reset_index(drop=True)
-
+    prediction = pd.Series(prediction).reset_index(drop=True)
     mask_330e_array = mask_330e.to_numpy()
 
     diagnostik = _skapa_diagnostik(
@@ -465,7 +451,6 @@ def _diagnostik_330e_historik(dataset, test, prediction):
         "AbsoluteError",
         ascending=False,
     ).iterrows():
-
         identity = row.get("Identity")
 
         if pd.isna(identity) or not str(identity).strip():
@@ -484,7 +469,6 @@ def _diagnostik_330e_historik(dataset, test, prediction):
         första_pris = bil["Price"].iloc[0]
         sista_pris = bil["Price"].iloc[-1]
         prisförändring = sista_pris - första_pris
-
         min_pris = bil["Price"].min()
         max_pris = bil["Price"].max()
 
@@ -493,18 +477,11 @@ def _diagnostik_330e_historik(dataset, test, prediction):
 
         if "Tid" in bil.columns and bil["Tid"].notna().any():
             giltiga_datum = bil["Tid"].dropna()
-
-            datum_första = (
-                giltiga_datum.iloc[0].strftime("%Y-%m-%d")
-            )
-
-            datum_sista = (
-                giltiga_datum.iloc[-1].strftime("%Y-%m-%d")
-            )
+            datum_första = giltiga_datum.iloc[0].strftime("%Y-%m-%d")
+            datum_sista = giltiga_datum.iloc[-1].strftime("%Y-%m-%d")
 
         print(
-            f"\n  {row.get('Model', '')} "
-            f"{row.get('ModelYear', '')} "
+            f"\n  {row.get('Model', '')} {row.get('ModelYear', '')} "
             f"| {row.get('Mil', 0):,.0f} mil "
             f"| faktisk={row['Price']:,.0f} kr "
             f"| pred={row['Prediction']:,.0f} kr "
@@ -519,9 +496,264 @@ def _diagnostik_330e_historik(dataset, test, prediction):
         )
 
         print(
-            f"    Prisintervall: "
-            f"{min_pris:,.0f}–{max_pris:,.0f} kr"
+            f"    Prisintervall: {min_pris:,.0f}–{max_pris:,.0f} kr"
         )
+
+
+def _jämförbara_observationer(
+    dataset,
+    row,
+    max_year_diff=1,
+    max_mileage_diff=1500,
+):
+    """
+    Hittar historiska observationer som är jämförbara med en testbil.
+
+    Jämförelsen använder endast marknadsdata och påverkar inte träningen.
+    """
+
+    required = {"Model", "ModelYear", "Mil", "Price"}
+
+    if not required.issubset(dataset.columns):
+        return pd.DataFrame()
+
+    model = row.get("Model")
+
+    model_year = pd.to_numeric(
+        pd.Series([row.get("ModelYear")]),
+        errors="coerce",
+    ).iloc[0]
+
+    mileage = pd.to_numeric(
+        pd.Series([row.get("Mil")]),
+        errors="coerce",
+    ).iloc[0]
+
+    if pd.isna(model_year) or pd.isna(mileage):
+        return pd.DataFrame()
+
+    kandidater = dataset.copy()
+
+    kandidater = kandidater[
+        kandidater["Model"].astype(str).str.casefold()
+        == str(model).casefold()
+    ]
+
+    kandidater["_ModelYearNum"] = pd.to_numeric(
+        kandidater["ModelYear"],
+        errors="coerce",
+    )
+
+    kandidater["_MilNum"] = pd.to_numeric(
+        kandidater["Mil"],
+        errors="coerce",
+    )
+
+    kandidater["_PriceNum"] = pd.to_numeric(
+        kandidater["Price"],
+        errors="coerce",
+    )
+
+    kandidater = kandidater[
+        kandidater["_ModelYearNum"].between(
+            model_year - max_year_diff,
+            model_year + max_year_diff,
+        )
+        & (
+            kandidater["_MilNum"] - mileage
+        ).abs().le(max_mileage_diff)
+        & kandidater["_PriceNum"].notna()
+    ].copy()
+
+    if "Identity" in kandidater.columns and row.get("Identity") is not None:
+        identity = str(row.get("Identity"))
+
+        kandidater = kandidater[
+            kandidater["Identity"].astype(str) != identity
+        ]
+
+    if kandidater.empty:
+        return kandidater
+
+    kandidater["MileageDifference"] = (
+        kandidater["_MilNum"] - mileage
+    ).abs()
+
+    kandidater["YearDifference"] = (
+        kandidater["_ModelYearNum"] - model_year
+    ).abs()
+
+    kandidater["SimilarityScore"] = (
+        kandidater["MileageDifference"]
+        + kandidater["YearDifference"] * 1500
+    )
+
+    return kandidater.sort_values(
+        ["SimilarityScore", "MileageDifference"],
+    )
+
+
+def _diagnostik_jämförbar_marknad(dataset, test, prediction):
+    """
+    Analyserar hur testbilarna ligger prismässigt mot jämförbara annonser.
+
+    Detta är en diagnostik för att hitta potentiellt undervärderade eller
+    övervärderade bilar. Resultatet används inte som träningsfeature ännu.
+    """
+
+    if not {
+        "Model",
+        "ModelYear",
+        "Mil",
+        "Price",
+    }.issubset(test.columns):
+        return
+
+    diagnostik = _skapa_diagnostik(test, prediction)
+    resultat = []
+
+    for _, row in diagnostik.iterrows():
+        jämförbara = _jämförbara_observationer(
+            dataset,
+            row,
+        )
+
+        if jämförbara.empty:
+            continue
+
+        priser = jämförbara["_PriceNum"]
+
+        medianpris = priser.median()
+        q25 = priser.quantile(0.25)
+        q75 = priser.quantile(0.75)
+
+        faktisk_pris = row["Price"]
+
+        avvikelse_kr = faktisk_pris - medianpris
+
+        avvikelse_procent = (
+            avvikelse_kr / medianpris * 100
+            if medianpris
+            else float("nan")
+        )
+
+        resultat.append(
+            {
+                "Model": row.get("Model", ""),
+                "Variant": row.get("Variant", ""),
+                "ModelYear": row.get("ModelYear", ""),
+                "Mil": row.get("Mil", 0),
+                "Price": faktisk_pris,
+                "Prediction": row["Prediction"],
+                "ModelError": row["Error"],
+                "ComparableN": len(jämförbara),
+                "ComparableMedian": medianpris,
+                "ComparableQ25": q25,
+                "ComparableQ75": q75,
+                "ComparableDeviation": avvikelse_kr,
+                "ComparableDeviationPct": avvikelse_procent,
+                "Identity": row.get("Identity", ""),
+            }
+        )
+
+    if not resultat:
+        print(
+            "\nJämförbar marknad: inga tillräckliga "
+            "jämförelseobjekt."
+        )
+        return
+
+    result = pd.DataFrame(resultat)
+
+    fynd = result[
+        result["ComparableDeviationPct"] < 0
+    ].copy()
+
+    fynd = fynd.sort_values(
+        "ComparableDeviationPct"
+    )
+
+    print(
+        "\nJämförbar marknad – potentiellt "
+        "undervärderade bilar:"
+    )
+
+    if fynd.empty:
+        print(
+            "  Inga testbilar ligger under medianen "
+            "för jämförbara observationer."
+        )
+    else:
+        utskrift = fynd.head(20).copy()
+
+        for column in [
+            "Price",
+            "Prediction",
+            "ComparableMedian",
+            "ComparableQ25",
+            "ComparableQ75",
+        ]:
+            utskrift[column] = utskrift[column].map(
+                lambda x: f"{x:,.0f} kr"
+            )
+
+        utskrift["ComparableDeviation"] = (
+            utskrift["ComparableDeviation"].map(
+                lambda x: f"{x:+,.0f} kr"
+            )
+        )
+
+        utskrift["ComparableDeviationPct"] = (
+            utskrift["ComparableDeviationPct"].map(
+                lambda x: f"{x:+.2f} %"
+            )
+        )
+
+        utskrift["ModelError"] = (
+            utskrift["ModelError"].map(
+                lambda x: f"{x:+,.0f} kr"
+            )
+        )
+
+        kolumner = [
+            "Model",
+            "ModelYear",
+            "Mil",
+            "Price",
+            "ComparableMedian",
+            "ComparableDeviation",
+            "ComparableDeviationPct",
+            "ComparableN",
+            "Prediction",
+            "ModelError",
+            "Identity",
+        ]
+
+        print(
+            utskrift[kolumner].to_string(
+                index=False
+            )
+        )
+
+    result["PotentialBargain"] = (
+        result["ComparableDeviationPct"] <= -5
+    )
+
+    print("\nJämförbar marknad – sammanfattning:")
+    print(
+        f"  Testobservationer med jämförelser: "
+        f"{len(result)}"
+    )
+
+    print(
+        f"  Under -5 % mot jämförelsemedian: "
+        f"{int(result['PotentialBargain'].sum())}"
+    )
+
+    print(
+        f"  Medianavvikelse: "
+        f"{result['ComparableDeviationPct'].median():+.2f} %"
+    )
 
 
 def main():
@@ -542,18 +774,23 @@ def main():
 
     observations = _ladda_jsonl()
 
-    print(f"Råa observationer: {len(observations):,}")
+    print(
+        f"Råa observationer: "
+        f"{len(observations):,}"
+    )
 
     dataset = _bygg_dataset(observations)
 
     print(
-        f"Dataset före deduplicering: {len(dataset):,}"
+        f"Dataset före deduplicering: "
+        f"{len(dataset):,}"
     )
 
     dataset = _deduplicera_dataset(dataset)
 
     print(
-        f"Dataset efter deduplicering: {len(dataset):,}"
+        f"Dataset efter deduplicering: "
+        f"{len(dataset):,}"
     )
 
     train, test = _tidsmässig_split(dataset)
@@ -574,9 +811,14 @@ def main():
     for namn, model in modeller.items():
         print(f"\nTränar {namn}...")
 
-        model.fit(X_train, y_train)
+        model.fit(
+            X_train,
+            y_train,
+        )
 
-        prediction = model.predict(X_test)
+        prediction = model.predict(
+            X_test
+        )
 
         metrics = _metrics(
             y_test,
@@ -593,15 +835,26 @@ def main():
 
         for key, value in metrics.items():
             if key == "R2":
-                print(f"  {key}: {value:.4f}")
+                print(
+                    f"  {key}: "
+                    f"{value:.4f}"
+                )
             elif key == "MAPE":
-                print(f"  {key}: {value:.2f} %")
+                print(
+                    f"  {key}: "
+                    f"{value:.2f} %"
+                )
             else:
-                print(f"  {key}: {value:,.0f} kr")
+                print(
+                    f"  {key}: "
+                    f"{value:,.0f} kr"
+                )
 
     rf = resultat["random_forest"]
 
-    print("\nRandom Forest feature importance:")
+    print(
+        "\nRandom Forest feature importance:"
+    )
 
     importance = _feature_importance(
         rf["model"]
@@ -612,7 +865,8 @@ def main():
             importance.to_string(
                 index=False,
                 formatters={
-                    "importance": lambda x: f"{x:.4f}"
+                    "importance":
+                        lambda x: f"{x:.4f}"
                 },
             )
         )
@@ -639,15 +893,25 @@ def main():
         rf["prediction"],
     )
 
+    _diagnostik_jämförbar_marknad(
+        dataset,
+        test,
+        rf["prediction"],
+    )
+
     winner = min(
         resultat.items(),
-        key=lambda item: item[1]["metrics"]["MAE"],
+        key=lambda item:
+            item[1]["metrics"]["MAE"],
     )
 
     winner_name = winner[0]
     winner_model = winner[1]["model"]
 
-    print(f"\nVinnande modell: {winner_name}")
+    print(
+        f"\nVinnande modell: "
+        f"{winner_name}"
+    )
 
     MODEL_FIL.parent.mkdir(
         parents=True,
@@ -676,8 +940,15 @@ def main():
             indent=2,
         )
 
-    print(f"Modell sparad: {MODEL_FIL}")
-    print(f"Metadata sparad: {METADATA_FIL}")
+    print(
+        f"Modell sparad: "
+        f"{MODEL_FIL}"
+    )
+
+    print(
+        f"Metadata sparad: "
+        f"{METADATA_FIL}"
+    )
 
 
 if __name__ == "__main__":
