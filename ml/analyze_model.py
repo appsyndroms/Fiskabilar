@@ -565,15 +565,21 @@ def _jämförbara_observationer(
     """
     Hittar jämförbara observationer.
 
-    Matchningen sker i första hand på:
+    Matchningen sker på:
 
       Model + Variant
       årsmodell ±1
       miltal ±1500
 
-    Om Variant saknas används Model.
-
     Samma fordon exkluderas via Identity.
+
+    För varje unik Identity används högst en observation.
+    Den observation som ligger tidsmässigt närmast målobjektet
+    väljs.
+
+    Observationer utan Identity används inte som jämförelseobjekt,
+    eftersom vi då inte kan säkerställa att varje jämförelseobjekt
+    verkligen representerar en unik bil.
 
     Funktionen används endast diagnostiskt och påverkar inte träningen.
     """
@@ -615,6 +621,10 @@ def _jämförbara_observationer(
 
     kandidater = dataset.copy()
 
+    # ---------------------------------------------------------
+    # Normaliserade matchningsfält
+    # ---------------------------------------------------------
+
     kandidater["_ModelNorm"] = (
         kandidater["Model"]
         .map(_normalisera_text)
@@ -643,21 +653,49 @@ def _jämförbara_observationer(
         errors="coerce",
     )
 
+    # ---------------------------------------------------------
+    # Tid används för att välja rätt snapshot per bil.
+    # ---------------------------------------------------------
+
+    if "Tid" in kandidater.columns:
+        kandidater["_Tid"] = pd.to_datetime(
+            kandidater["Tid"],
+            errors="coerce",
+            utc=True,
+        )
+    else:
+        kandidater["_Tid"] = pd.NaT
+
+    target_tid = pd.to_datetime(
+        row.get("Tid"),
+        errors="coerce",
+        utc=True,
+    )
+
+    # ---------------------------------------------------------
     # Samma modell.
+    # ---------------------------------------------------------
+
     kandidater = kandidater[
         kandidater["_ModelNorm"] == model
     ].copy()
 
+    # ---------------------------------------------------------
     # Samma variant när sådan finns.
     #
     # Vi blandar inte automatiskt olika varianter eftersom det
     # riskerar att göra jämförelsen mindre meningsfull.
+    # ---------------------------------------------------------
+
     if variant:
         kandidater = kandidater[
             kandidater["_VariantNorm"] == variant
         ].copy()
 
+    # ---------------------------------------------------------
     # Årsmodell ±1.
+    # ---------------------------------------------------------
+
     kandidater = kandidater[
         kandidater["_ModelYearNum"].between(
             model_year - max_year_diff,
@@ -665,7 +703,10 @@ def _jämförbara_observationer(
         )
     ]
 
+    # ---------------------------------------------------------
     # Miltal ±1500.
+    # ---------------------------------------------------------
+
     kandidater = kandidater[
         (
             kandidater["_MilNum"] - mileage
@@ -676,22 +717,50 @@ def _jämförbara_observationer(
         kandidater["_PriceNum"].notna()
     ].copy()
 
+    # ---------------------------------------------------------
+    # Vi kräver Identity för att kunna garantera att varje
+    # jämförelseobjekt representerar en unik bil.
+    # ---------------------------------------------------------
+
+    if "Identity" not in kandidater.columns:
+        return pd.DataFrame()
+
+    kandidater["_IdentityNorm"] = (
+        kandidater["Identity"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    kandidater = kandidater[
+        kandidater["_IdentityNorm"].ne("")
+    ].copy()
+
+    if kandidater.empty:
+        return pd.DataFrame()
+
+    # ---------------------------------------------------------
     # Samma bil får inte jämföra med sig själv.
+    # ---------------------------------------------------------
+
     identity = row.get("Identity")
 
     if (
         identity is not None
         and not pd.isna(identity)
         and str(identity).strip()
-        and "Identity" in kandidater.columns
     ):
         kandidater = kandidater[
-            kandidater["Identity"].astype(str)
-            != str(identity)
-        ]
+            kandidater["_IdentityNorm"]
+            != str(identity).strip()
+        ].copy()
 
     if kandidater.empty:
         return kandidater
+
+    # ---------------------------------------------------------
+    # Avstånd till målobjektet.
+    # ---------------------------------------------------------
 
     kandidater["MileageDifference"] = (
         kandidater["_MilNum"] - mileage
@@ -716,15 +785,79 @@ def _jämförbara_observationer(
         )
     )
 
+    # ---------------------------------------------------------
+    # Välj högst en observation per unik bil.
+    #
+    # Om målobjektets Tid finns väljer vi den snapshot som ligger
+    # tidsmässigt närmast målobjektet.
+    #
+    # Om Tid saknas för målobjektet använder vi similarity som
+    # fallback.
+    # ---------------------------------------------------------
+
+    if pd.notna(target_tid):
+        kandidater["_TimeDifference"] = (
+            kandidater["_Tid"] - target_tid
+        ).abs()
+
+        # Observationer utan giltig Tid hamnar sist.
+        kandidater["_HasValidTime"] = (
+            kandidater["_TimeDifference"].notna()
+        )
+
+        kandidater = kandidater.sort_values(
+            [
+                "_IdentityNorm",
+                "_HasValidTime",
+                "_TimeDifference",
+                "SimilarityDistance",
+                "MileageDifference",
+                "YearDifference",
+            ],
+            ascending=[
+                True,
+                False,
+                True,
+                True,
+                True,
+                True,
+            ],
+        )
+
+    else:
+        kandidater = kandidater.sort_values(
+            [
+                "_IdentityNorm",
+                "SimilarityDistance",
+                "MileageDifference",
+                "YearDifference",
+            ],
+            ascending=True,
+        )
+
+    # En och endast en observation per unik bil.
+    kandidater = (
+        kandidater
+        .drop_duplicates(
+            subset="_IdentityNorm",
+            keep="first",
+        )
+        .copy()
+    )
+
+    # Sortera slutligen efter likhet mot målobjektet.
     kandidater = kandidater.sort_values(
         [
             "SimilarityDistance",
             "MileageDifference",
             "YearDifference",
         ]
-    )
+    ).reset_index(drop=True)
 
-    # Minst tre oberoende observationer krävs.
+    # ---------------------------------------------------------
+    # Minst tre oberoende bilar krävs.
+    # ---------------------------------------------------------
+
     if len(kandidater) < min_comparables:
         return pd.DataFrame()
 
@@ -744,7 +877,9 @@ def _diagnostik_jämförbar_marknad(
       - samma Variant när Variant finns
       - årsmodell ±1
       - miltal ±1500
-      - minst 3 jämförelseobjekt
+      - högst en observation per unik Identity
+      - den tidsmässigt närmaste observationen per Identity
+      - minst 3 oberoende jämförelseobjekt
 
     Jämförelsepris:
       - vanlig median
@@ -867,7 +1002,8 @@ def _diagnostik_jämförbar_marknad(
     if not resultat:
         print(
             "\nJämförbar marknad: inga testbilar hade "
-            "minst tre tillräckligt lika jämförelseobjekt."
+            "minst tre tillräckligt lika och oberoende "
+            "jämförelseobjekt."
         )
         return
 
@@ -882,7 +1018,7 @@ def _diagnostik_jämförbar_marknad(
     )
 
     print(
-        f"  Med minst 3 jämförelseobjekt: "
+        f"  Med minst 3 oberoende jämförelseobjekt: "
         f"{len(result)}"
     )
 
@@ -1302,7 +1438,7 @@ def main():
             f,
             ensure_ascii=False,
             indent=2,
-    )
+        )
 
     print(
         f"Modell sparad: "
