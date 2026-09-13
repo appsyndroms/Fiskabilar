@@ -3735,7 +3735,15 @@
     "source:bilweb:375075": "vehicle:00001046",
     "url:https://bilweb.se/jonkopings-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-375075": "vehicle:00001046",
     "fp:1ea8dbc24020bf3b": "vehicle:00001046",
-    "fp:9af4740396d30f7c": "vehicle:00001022"
+    "fp:9af4740396d30f7c": "vehicle:00001022",
+    "reg:YWA25Y": "vehicle:00001047",
+    "source:bilweb:376124": "vehicle:00001047",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-core-edition-2024-kombi-376124": "vehicle:00001047",
+    "fp:f020e0b823138d06": "vehicle:00001047",
+    "reg:USU62X": "vehicle:00001048",
+    "source:bilweb:376095": "vehicle:00001048",
+    "url:https://bilweb.se/kalmar-lan/volvo-v90-t6-plus-dark-nordic-edition-2026-kombi-376095": "vehicle:00001048",
+    "fp:9781f72520158b5a": "vehicle:00001048"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -22558,6 +22566,42 @@
         "vin": null
       },
       "last_seen": "375075",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001047": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "YWA25Y",
+        "vin": null
+      },
+      "last_seen": "376124",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001048": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "USU62X",
+        "vin": null
+      },
+      "last_seen": "376095",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
