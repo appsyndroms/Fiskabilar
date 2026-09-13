@@ -101,6 +101,26 @@ def _första_identitet(row: pd.Series) -> str | None:
     return None
 
 
+def _första_url(row: pd.Series) -> str | None:
+    """Hämtar annonsens URL från de URL-fält som stöds av rådata."""
+
+    for field in (
+        "url",
+        "ad_url",
+        "adUrl",
+        "listing_url",
+        "listingUrl",
+        "annons_url",
+        "annonsUrl",
+    ):
+        value = row.get(field)
+
+        if pd.notna(value) and str(value).strip():
+            return str(value).strip()
+
+    return None
+
+
 def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
     resultat = pd.DataFrame(index=df.index)
 
@@ -133,6 +153,12 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         df.get("tid"),
         errors="coerce",
         utc=True,
+    )
+
+    # Behåll annonsens URL genom hela ML-pipelinen.
+    resultat["url"] = df.apply(
+        _första_url,
+        axis=1,
     )
 
     # Identitet används endast för deduplicering/split,
