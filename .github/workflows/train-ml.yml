@@ -1,60 +1,44 @@
 name: Träna och diagnostisera ML-modellen
-
 on:
   schedule:
     # Kör efter dagens fyndkontroller och uppdaterar modellen en gång per dygn.
     - cron: "30 22 * * *"
       timezone: "Europe/Stockholm"
-
   workflow_dispatch: {}
-
 permissions:
   contents: write
-
 concurrency:
   group: train-ml
   cancel-in-progress: false
-
 jobs:
   train-and-diagnose:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Installera Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
       - name: Installera beroenden
         run: pip install -r requirements.txt
-
       - name: Träna ML-modellen
-        run: python -u ml/train_market_model.py
-
+        run: python -u -m ml.train_market_model
       - name: Kör ML-diagnostik
-        run: python -u ml/analyze_model.py --debug
-
+        run: python -u -m ml.analyze_model --debug
       - name: Spara tränad modell och metadata
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add data/ml/
-
           if git diff --cached --quiet; then
             echo "Ingen förändring av ML-modellen att committa."
             exit 0
           fi
-
           git commit -m "Tränar och uppdaterar ML-modellen"
-
           git fetch origin main
           git rebase origin/main
-
           git push origin HEAD:main
