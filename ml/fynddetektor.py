@@ -58,15 +58,11 @@ def _evidensvikt(jämförbara):
         * 100
     )
 
-    # 10 oberoende jämförelseobjekt ger full antal-vikt.
     n_confidence = min(
         1.0,
         antal / 10.0,
     )
 
-    # En tät marknad ger högre evidens.
-    #
-    # 20 % robust spridning ger ungefär 0,50 i vikt.
     spread_confidence = 1.0 / (
         1.0
         + robust_spread_pct / 20.0
@@ -95,15 +91,6 @@ def _bygg_fyndkandidater(
 
       1. ML-modellen värderar bilen minst 5 % högre än annonspriset.
       2. Jämförbara bilar ligger minst 5 % högre än annonspriset.
-
-    Fynddetektorn använder jämförelsemarknaden som ett oberoende
-    marknadslager och använder inte modellens tidigare bias som en
-    hårdkodad korrigering.
-
-    FyndScore tar därefter hänsyn till:
-      - storleken på avvikelsen
-      - antalet jämförbara bilar
-      - hur stabil prisbilden bland jämförelseobjekten är
     """
 
     diagnostik = _skapa_diagnostik(
@@ -172,7 +159,6 @@ def _bygg_fyndkandidater(
             <= MARKET_THRESHOLD_PCT
         )
 
-        # Båda signalerna måste peka åt samma håll.
         if not (
             model_cheap
             and market_cheap
@@ -189,7 +175,6 @@ def _bygg_fyndkandidater(
             -market_signal_pct,
         )
 
-        # Själva avvikelsen mellan pris och värde/marknad.
         combined_score = (
             model_gap_pct
             + market_gap_pct
@@ -206,16 +191,6 @@ def _bygg_fyndkandidater(
             jämförbara
         )
 
-        # Evidensen ska påverka rankingen, men inte kunna slå
-        # ut ett stort fynd enbart för att antalet jämförelser
-        # råkar vara lägre.
-        #
-        # Intervallet blir:
-        #
-        #   0.50 -> svag evidens
-        #   1.00 -> mycket stark evidens
-        #
-        # CombinedScore förblir samtidigt synligt separat.
         fynd_score = (
             combined_score
             * (
