@@ -242,6 +242,13 @@ def _bygg_fyndkandidater(
                 "FyndScore": (
                     fynd_score
                 ),
+
+                # Behåll annonslänken i fyndposten.
+                "url": row.get(
+                    "url",
+                    "",
+                ),
+
                 "Identity": row.get(
                     "Identity",
                     "",
