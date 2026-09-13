@@ -3,9 +3,20 @@ Rendering av aktuella fynd.
 """
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Any
 
-from analysis import model_label_from_values
+
+# Scriptet körs direkt från scripts/-katalogen i GitHub Actions.
+# Lägg därför projektroten på sys.path innan projektets moduler importeras.
+PROJEKTROT = Path(__file__).resolve().parents[1]
+
+if str(PROJEKTROT) not in sys.path:
+    sys.path.insert(0, str(PROJEKTROT))
+
+
+from web.analysis import model_label_from_values
 
 
 def _safe(
