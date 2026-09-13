@@ -29,6 +29,8 @@ from ml.train_market_model import (
 MODEL_FIL = Path("data/ml/market_model.joblib")
 METADATA_FIL = Path("data/ml/model_metadata.json")
 
+MAX_JÄMFÖRBARA = 20
+
 
 def _skapa_preprocessor() -> ColumnTransformer:
     numeric_pipeline = Pipeline(
@@ -561,6 +563,7 @@ def _jämförbara_observationer(
     max_year_diff=1,
     max_mileage_diff=1500,
     min_comparables=3,
+    max_jämförbara=MAX_JÄMFÖRBARA,
 ):
     """
     Hittar jämförbara observationer.
@@ -576,6 +579,9 @@ def _jämförbara_observationer(
     För varje unik Identity används högst en observation.
     Den observation som ligger tidsmässigt närmast målobjektet
     väljs.
+
+    Därefter används endast de max_jämförbara mest lika
+    oberoende bilarna.
 
     Observationer utan Identity används inte som jämförelseobjekt,
     eftersom vi då inte kan säkerställa att varje jämförelseobjekt
@@ -682,9 +688,6 @@ def _jämförbara_observationer(
 
     # ---------------------------------------------------------
     # Samma variant när sådan finns.
-    #
-    # Vi blandar inte automatiskt olika varianter eftersom det
-    # riskerar att göra jämförelsen mindre meningsfull.
     # ---------------------------------------------------------
 
     if variant:
@@ -718,8 +721,7 @@ def _jämförbara_observationer(
     ].copy()
 
     # ---------------------------------------------------------
-    # Vi kräver Identity för att kunna garantera att varje
-    # jämförelseobjekt representerar en unik bil.
+    # Identity krävs för oberoende jämförelseobjekt.
     # ---------------------------------------------------------
 
     if "Identity" not in kandidater.columns:
@@ -756,10 +758,12 @@ def _jämförbara_observationer(
         ].copy()
 
     if kandidater.empty:
-        return kandidater
+        return pd.DataFrame()
 
     # ---------------------------------------------------------
     # Avstånd till målobjektet.
+    #
+    # 1500 mil motsvarar ett årsmodellsteg i similarity-måttet.
     # ---------------------------------------------------------
 
     kandidater["MileageDifference"] = (
@@ -770,7 +774,6 @@ def _jämförbara_observationer(
         kandidater["_ModelYearNum"] - model_year
     ).abs()
 
-    # Ett avstånd där 1500 mil motsvarar ungefär ett årsmodellsteg.
     kandidater["SimilarityDistance"] = (
         kandidater["MileageDifference"]
         + kandidater["YearDifference"] * 1500
@@ -788,11 +791,8 @@ def _jämförbara_observationer(
     # ---------------------------------------------------------
     # Välj högst en observation per unik bil.
     #
-    # Om målobjektets Tid finns väljer vi den snapshot som ligger
+    # Om målobjektets Tid finns väljer vi snapshoten som ligger
     # tidsmässigt närmast målobjektet.
-    #
-    # Om Tid saknas för målobjektet använder vi similarity som
-    # fallback.
     # ---------------------------------------------------------
 
     if pd.notna(target_tid):
@@ -800,7 +800,6 @@ def _jämförbara_observationer(
             kandidater["_Tid"] - target_tid
         ).abs()
 
-        # Observationer utan giltig Tid hamnar sist.
         kandidater["_HasValidTime"] = (
             kandidater["_TimeDifference"].notna()
         )
@@ -835,7 +834,6 @@ def _jämförbara_observationer(
             ascending=True,
         )
 
-    # En och endast en observation per unik bil.
     kandidater = (
         kandidater
         .drop_duplicates(
@@ -845,14 +843,28 @@ def _jämförbara_observationer(
         .copy()
     )
 
-    # Sortera slutligen efter likhet mot målobjektet.
+    # ---------------------------------------------------------
+    # Nu väljer vi endast de MAX_JÄMFÖRBARA mest lika bilarna.
+    # ---------------------------------------------------------
+
     kandidater = kandidater.sort_values(
         [
             "SimilarityDistance",
             "MileageDifference",
             "YearDifference",
-        ]
-    ).reset_index(drop=True)
+        ],
+        ascending=[
+            True,
+            True,
+            True,
+        ],
+    )
+
+    kandidater = (
+        kandidater
+        .head(max_jämförbara)
+        .reset_index(drop=True)
+    )
 
     # ---------------------------------------------------------
     # Minst tre oberoende bilar krävs.
@@ -879,6 +891,7 @@ def _diagnostik_jämförbar_marknad(
       - miltal ±1500
       - högst en observation per unik Identity
       - den tidsmässigt närmaste observationen per Identity
+      - endast de 20 mest lika oberoende bilarna
       - minst 3 oberoende jämförelseobjekt
 
     Jämförelsepris:
@@ -947,8 +960,6 @@ def _diagnostik_jämförbar_marknad(
             else float("nan")
         )
 
-        # Positivt värde betyder att ML-modellen värderar bilen
-        # högre än faktiskt pris.
         model_vs_actual_kr = (
             prediction_value - faktisk_pris
         )
@@ -961,7 +972,6 @@ def _diagnostik_jämförbar_marknad(
             else float("nan")
         )
 
-        # Två oberoende signaler.
         model_cheap = (
             model_vs_actual_pct >= 5
         )
@@ -1001,7 +1011,7 @@ def _diagnostik_jämförbar_marknad(
 
     if not resultat:
         print(
-            "\nJämförbar marknad: inga testbilar hade "
+            "Jämförbar marknad: inga testbilar hade "
             "minst tre tillräckligt lika och oberoende "
             "jämförelseobjekt."
         )
