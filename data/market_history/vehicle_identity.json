@@ -3746,7 +3746,12 @@
     "fp:9781f72520158b5a": "vehicle:00001048",
     "source:bytbil:19393545": "vehicle:00001049",
     "url:https://www.bytbil.com/vastmanlands-lan/personbil-v90-t8-awd-ultimate-drag-varm-pano-bw-360-skinn-moms-10978-19393545": "vehicle:00001049",
-    "fp:125f347979488547": "vehicle:00001049"
+    "fp:125f347979488547": "vehicle:00001049",
+    "reg:YNC96D": "vehicle:00001050",
+    "source:bilweb:376150": "vehicle:00001050",
+    "url:https://bilweb.se/vastmanlands-lan/volvo-v90-t8-awd-ultimate-drag-varm-pano-b-w-360-skinn-moms-2023-kombi-376150": "vehicle:00001050",
+    "fp:4bc2198e0001c180": "vehicle:00001050",
+    "fp:53f33e1cc8524997": "vehicle:00000892"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -22627,6 +22632,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001050": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T8 AWD",
+        "arsmodell": 2023,
+        "regnr": "YNC96D",
+        "vin": null
+      },
+      "last_seen": "376150",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
