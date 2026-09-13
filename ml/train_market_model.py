@@ -273,7 +273,7 @@ def _skapa_preprocessor():
                 "imputer",
                 SimpleImputer(
                     strategy="median"
-                ),
+                )
             )
         ]
     )
@@ -284,13 +284,13 @@ def _skapa_preprocessor():
                 "imputer",
                 SimpleImputer(
                     strategy="most_frequent"
-                ),
+                )
             ),
             (
                 "onehot",
                 OneHotEncoder(
                     handle_unknown="ignore"
-                ),
+                )
             ),
         ]
     )
@@ -443,10 +443,17 @@ def _metrics(
 def _tidsmässig_split(
     df: pd.DataFrame,
     test_andel: float = 0.20,
+    return_diagnostics: bool = False,
 ):
     """
     Tidsmässig split där samma identifierade bil
     inte hamnar i både train och test.
+
+    De senaste observationerna används som preliminärt test.
+    Om ett identifierat fordon också finns tidigare i train
+    flyttas de tidigare observationerna till test. Det gör
+    utvärderingen fordonsseparerad, men testmängden kan då
+    innehålla historiska observationer.
     """
 
     df = (
@@ -483,6 +490,8 @@ def _tidsmässig_split(
         .dropna()
     )
 
+    flytta = df.iloc[0:0].copy()
+
     if test_id:
         train = (
             df.iloc[:cutoff]
@@ -492,7 +501,7 @@ def _tidsmässig_split(
         flytta = train[
             train["Identity"]
             .isin(test_id)
-        ]
+        ].copy()
 
         train = train[
             ~train["Identity"]
@@ -520,10 +529,65 @@ def _tidsmässig_split(
             "För få träningsobservationer."
         )
 
-    return (
-        train.reset_index(drop=True),
-        test.reset_index(drop=True),
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    if not return_diagnostics:
+        return train, test
+
+    train_id = set(
+        train["Identity"]
+        .dropna()
     )
+
+    final_test_id = set(
+        test["Identity"]
+        .dropna()
+    )
+
+    overlap = train_id & final_test_id
+
+    diagnostics = {
+        "test_andel": test_andel,
+        "prelim_test_observationer": len(prelim_test),
+        "historiska_observationer_flyttade_till_test": len(flytta),
+        "train_observationer": len(train),
+        "test_observationer": len(test),
+        "unika_identifierade_fordon_totalt": int(
+            df["Identity"].nunique(dropna=True)
+        ),
+        "unika_identifierade_fordon_train": len(train_id),
+        "unika_identifierade_fordon_test": len(final_test_id),
+        "fordon_i_bade_train_och_test": len(overlap),
+        "train_tid_min": (
+            train["Tid"].min().isoformat()
+            if train["Tid"].notna().any()
+            else None
+        ),
+        "train_tid_max": (
+            train["Tid"].max().isoformat()
+            if train["Tid"].notna().any()
+            else None
+        ),
+        "test_tid_min": (
+            test["Tid"].min().isoformat()
+            if test["Tid"].notna().any()
+            else None
+        ),
+        "test_tid_max": (
+            test["Tid"].max().isoformat()
+            if test["Tid"].notna().any()
+            else None
+        ),
+    }
+
+    if overlap:
+        raise ValueError(
+            "Split-fel: samma identifierade fordon finns i både "
+            f"train och test ({len(overlap)} st)."
+        )
+
+    return train, test, diagnostics
 
 
 def _utvärdera(
@@ -606,9 +670,10 @@ def main():
         dataset
     )
 
-    train, test = (
+    train, test, split_diagnostics = (
         _tidsmässig_split(
-            dataset
+            dataset,
+            return_diagnostics=True,
         )
     )
 
@@ -635,6 +700,53 @@ def main():
     print(
         f"Unika identifierade fordon: "
         f"{dataset['Identity'].nunique(dropna=True)}"
+    )
+
+    print()
+    print(
+        "=== SPLIT-DIAGNOSTIK ==="
+    )
+
+    print(
+        f"Preliminärt test: "
+        f"{split_diagnostics['prelim_test_observationer']}"
+    )
+
+    print(
+        f"Historiska observationer flyttade till test: "
+        f"{split_diagnostics['historiska_observationer_flyttade_till_test']}"
+    )
+
+    print(
+        f"Unika fordon totalt: "
+        f"{split_diagnostics['unika_identifierade_fordon_totalt']}"
+    )
+
+    print(
+        f"Unika fordon train: "
+        f"{split_diagnostics['unika_identifierade_fordon_train']}"
+    )
+
+    print(
+        f"Unika fordon test: "
+        f"{split_diagnostics['unika_identifierade_fordon_test']}"
+    )
+
+    print(
+        f"Fordon i både train och test: "
+        f"{split_diagnostics['fordon_i_bade_train_och_test']}"
+    )
+
+    print(
+        f"Train tidsintervall: "
+        f"{split_diagnostics['train_tid_min']} → "
+        f"{split_diagnostics['train_tid_max']}"
+    )
+
+    print(
+        f"Test tidsintervall: "
+        f"{split_diagnostics['test_tid_min']} → "
+        f"{split_diagnostics['test_tid_max']}"
     )
 
     print()
@@ -704,6 +816,7 @@ def main():
             dataset["Identity"]
             .nunique(dropna=True)
         ),
+        "split_diagnostics": split_diagnostics,
         "metrics": resultat,
         "deduplication": {
             "uses_vehicle_identity": True,
@@ -715,6 +828,11 @@ def main():
                 "Price",
             ],
             "grouped_vehicle_split": True,
+            "test_contains_moved_historical_observations": (
+                split_diagnostics[
+                    "historiska_observationer_flyttade_till_test"
+                ] > 0
+            ),
         },
         "trained_at": datetime.now(
             TIDSZON
