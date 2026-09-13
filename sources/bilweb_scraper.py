@@ -14,6 +14,7 @@ Här ligger:
 
 import json
 import re
+import time
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -34,6 +35,10 @@ from .bilweb_bmw import (
 
 
 MAX_PARALLELLA_DETALJSIDOR = 6
+
+ANTAL_DETALJSIDE_FORSOK = 3
+DETALJSIDA_TIMEOUT_SEKUNDER = 15
+DETALJSIDA_RETRY_PAUS_SEKUNDER = 1.0
 
 HEADERS = {
     "User-Agent": (
@@ -85,7 +90,9 @@ AUKTION_REGEX = re.compile(
 )
 
 
-def _rensa_tal(text: str) -> int:
+def _rensa_tal(
+    text: str,
+) -> int:
     """
     Omvandlar ett svenskt tal/pris till heltal.
 
@@ -101,20 +108,12 @@ def _rensa_tal(text: str) -> int:
 
     text = str(text).strip()
 
-    # Svenskt decimalformat:
-    #
-    # 214 299,00
-    # 214.299,00
-    #
-    # Om komma följs av exakt två siffror betraktar vi
-    # det som decimaldel och tar bort den.
     text = re.sub(
         r",\d{2}\b",
         "",
         text,
     )
 
-    # Ta bort alla återstående tecken som inte är siffror.
     siffror = re.sub(
         r"\D",
         "",
@@ -269,10 +268,6 @@ def _pris_fran_meta(
 ) -> int | None:
     """
     Försöker hitta pris i vanliga meta-attribut.
-
-    Bilweb har bland annat priset i:
-        <meta name="description"
-              content="... Pris 479 800 kr ...">
     """
 
     kandidater = [
@@ -345,11 +340,6 @@ def _ar_leasingannons(
 ) -> bool:
     """
     Avgör om annonsen sannolikt är en leasingannons.
-
-    Vi tittar endast på de första raderna eftersom
-    vanliga bilannonser kan nämna leasing längre ned
-    i beskrivningen utan att själva bilen är en
-    leasingannons.
     """
 
     for rad in text.splitlines()[:20]:
@@ -365,14 +355,6 @@ def _pris_fran_kontantpris(
 ) -> int | None:
     """
     Försöker hitta ett uttryckligt kontantpris.
-
-    Exempel:
-        Kontantpris 319 700 kr
-        Kontant: 369 800 kr
-        Kontant 499 500 kr
-
-    Detta prioriteras framför generella "Pris"-träffar
-    eftersom Bilweb kan visa leasingbelopp som "Pris".
     """
 
     match = KONTANTPRIS_REGEX.search(
@@ -397,13 +379,6 @@ def _pris_fran_synlig_text(
 ) -> int | None:
     """
     Försöker hitta Bilwebs synliga prisformat.
-
-    Exempel:
-        479 800:-
-        325 000 kr
-        479800:-
-
-    Leasingbelopp per månad ignoreras.
     """
 
     for rad in text.splitlines():
@@ -447,19 +422,6 @@ def _pris_fran_prislabel(
 
         Pris
         319 700 kr
-
-    Ett generellt "Pris"-fält får endast användas
-    om annonsen inte ser ut att vara en leasingannons
-    i rubrik-/inledningsdelen.
-
-    Detta är viktigt eftersom Bilweb för vissa
-    leasingannonser visar exempelvis:
-
-        Pris
-        5 425 kr
-
-    där 5 425 kr egentligen är privatleasing
-    per månad.
     """
 
     if _ar_leasingannons(text):
@@ -525,26 +487,119 @@ def _mil_fran_html_attribut(
     return None
 
 
+def _annons_id_fran_url(
+    url: str,
+) -> str | None:
+    """
+    Hämtar ett eventuellt numeriskt annons-ID från Bilweb-URL:en.
+    """
+
+    match = re.search(
+        r"-(\d+)(?:[/?#]|$)",
+        str(url),
+    )
+
+    if match:
+        return match.group(1)
+
+    return None
+
+
+def _redirect_ser_ut_som_annan_sida(
+    ursprunglig_url: str,
+    slutlig_url: str,
+) -> bool:
+    """
+    Avgör om requests har följt en redirect till en annan Bilweb-sida.
+
+    En borttagen annons kan fortfarande ge HTTP 200 men redirectas
+    till exempelvis en generell Bilweb-sida. Det ska inte tolkas som
+    en giltig detaljsida.
+
+    Om vi kan identifiera annons-ID kräver vi att samma ID fortfarande
+    finns i slut-URL:en.
+    """
+
+    ursprunglig_url = str(
+        ursprunglig_url
+    ).rstrip("/")
+
+    slutlig_url = str(
+        slutlig_url
+    ).rstrip("/")
+
+    if ursprunglig_url == slutlig_url:
+        return False
+
+    ursprungligt_id = _annons_id_fran_url(
+        ursprunglig_url
+    )
+
+    if not ursprungligt_id:
+        return False
+
+    return ursprungligt_id not in slutlig_url
+
+
 def hamta_pris_mil_fran_detaljsida(
     url: str,
 ) -> dict | None:
 
-    try:
-        resp = requests.get(
-            url,
-            headers=HEADERS,
-            timeout=15,
-        )
+    resp = None
+    senaste_fel = None
 
-        resp.raise_for_status()
+    for forsok in range(
+        1,
+        ANTAL_DETALJSIDE_FORSOK + 1,
+    ):
 
-    except Exception as e:
+        try:
+            resp = requests.get(
+                url,
+                headers=HEADERS,
+                timeout=DETALJSIDA_TIMEOUT_SEKUNDER,
+                allow_redirects=True,
+            )
 
-        info(
-            "[bilweb]   FEL vid hämtning "
-            f"av detaljsida {url}: {e}"
-        )
+            resp.raise_for_status()
 
+            if _redirect_ser_ut_som_annan_sida(
+                url,
+                resp.url,
+            ):
+                info(
+                    "[bilweb]   Detaljsidan redirectades "
+                    "till annan sida: "
+                    f"{url} -> {resp.url}"
+                )
+                return None
+
+            break
+
+        except Exception as e:
+            senaste_fel = e
+
+            if forsok < ANTAL_DETALJSIDE_FORSOK:
+                info(
+                    "[bilweb]   Försök "
+                    f"{forsok}/{ANTAL_DETALJSIDE_FORSOK} "
+                    f"misslyckades för {url}: {e}. "
+                    "Försöker igen."
+                )
+
+                time.sleep(
+                    DETALJSIDA_RETRY_PAUS_SEKUNDER
+                )
+
+            else:
+                info(
+                    "[bilweb]   FEL vid hämtning "
+                    f"av detaljsida {url} efter "
+                    f"{ANTAL_DETALJSIDE_FORSOK} försök: "
+                    f"{senaste_fel}"
+                )
+
+    if resp is None:
         return None
 
     html = resp.text
@@ -566,25 +621,11 @@ def hamta_pris_mil_fran_detaljsida(
     pris = None
 
     # 1. Explicit kontantpris.
-    #
-    # Exempel:
-    #
-    # Kontantpris 319 700 kr
-    # Kontant: 369 800 kr
-    #
-    # Detta ska alltid prioriteras framför ett
-    # generellt "Pris"-fält.
     pris = _pris_fran_kontantpris(
         text
     )
 
     # 2. Pris i synlig text.
-    #
-    # Exempel:
-    #
-    # 479 800:-
-    #
-    # Leasingbelopp per månad ignoreras.
     if pris is None:
 
         pris = _pris_fran_synlig_text(
@@ -592,9 +633,6 @@ def hamta_pris_mil_fran_detaljsida(
         )
 
     # 3. Klassisk "Pris 479 800 kr".
-    #
-    # Används endast om annonsen inte ser ut som
-    # en leasingannons i rubrik-/inledningsdelen.
     if pris is None:
 
         pris = _pris_fran_prislabel(
@@ -623,11 +661,10 @@ def hamta_pris_mil_fran_detaljsida(
                 pris = kandidatpris
 
     # 5. Prisregex mot hela texten.
-    #
-    # Detta är endast en fallback och får inte användas
-    # för leasingannonser eftersom Bilweb kan kalla
-    # månadsbeloppet för "Pris".
-    if pris is None and not _ar_leasingannons(text):
+    if (
+        pris is None
+        and not _ar_leasingannons(text)
+    ):
 
         pris_match = PRIS_DETALJ_REGEX.search(
             text.replace("\n", " ")
@@ -643,16 +680,16 @@ def hamta_pris_mil_fran_detaljsida(
                 pris = kandidatpris
 
     # 6. Meta description / price-meta.
-    #
-    # Meta används bara om vi inte redan har hittat
-    # ett pris.
     if pris is None:
 
         pris = _pris_fran_meta(
             soup
         )
 
-        if pris is not None and pris < 100_000:
+        if (
+            pris is not None
+            and pris < 100_000
+        ):
             pris = None
 
     json_ld = _hamta_json_ld(
@@ -666,23 +703,14 @@ def hamta_pris_mil_fran_detaljsida(
             json_ld
         )
 
-        if pris is not None and pris < 100_000:
+        if (
+            pris is not None
+            and pris < 100_000
+        ):
             pris = None
 
     # Leasingannonser utan explicit kontantpris
     # ska inte användas som kontantprisobservationer.
-    #
-    # Detta fångar bland annat Bilwebs fall där
-    # annonsen har:
-    #
-    #   PRIVAT FÖRETAGSLEASING
-    #
-    # och:
-    #
-    #   Pris
-    #   5 425 kr
-    #
-    # men inget kontantpris.
     if (
         pris is not None
         and _ar_leasingannons(text)
@@ -695,12 +723,6 @@ def hamta_pris_mil_fran_detaljsida(
     # ---------------------------------------------------------
 
     miltal = None
-
-    # Bilwebs faktiska format:
-    #
-    # Mätarställning
-    # 6 750 mil
-    #
 
     mil_match = re.search(
         r"(?:^|\n)"
@@ -741,7 +763,6 @@ def hamta_pris_mil_fran_detaljsida(
         )
 
     # Nya bilar kan sakna registrerad mätarställning.
-    # Bilweb visar då "Mätarställning –".
     if miltal is None:
 
         mil_match = re.search(
