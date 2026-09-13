@@ -145,9 +145,12 @@ def _feature_importance(model):
     return grouped
 
 
-def _modell_variant_diagnostik(test, prediction):
+def _skapa_diagnostik(test, prediction):
     diagnostik = test.copy().reset_index(drop=True)
-    diagnostik["Prediction"] = pd.Series(prediction).reset_index(drop=True)
+
+    diagnostik["Prediction"] = (
+        pd.Series(prediction).reset_index(drop=True)
+    )
 
     diagnostik["Error"] = (
         diagnostik["Prediction"] - diagnostik["Price"]
@@ -161,7 +164,11 @@ def _modell_variant_diagnostik(test, prediction):
         * 100
     )
 
-    grupper = []
+    return diagnostik
+
+
+def _modell_variant_diagnostik(test, prediction):
+    diagnostik = _skapa_diagnostik(test, prediction)
 
     if "Model" in diagnostik.columns and "Variant" in diagnostik.columns:
         group_columns = ["Model", "Variant"]
@@ -170,20 +177,17 @@ def _modell_variant_diagnostik(test, prediction):
     else:
         return
 
+    grupper = []
+
     for keys, group in diagnostik.groupby(group_columns):
         if not isinstance(keys, tuple):
             keys = (keys,)
-
-        antal = len(group)
-
-        if antal == 0:
-            continue
 
         grupper.append(
             {
                 "Model": keys[0],
                 "Variant": keys[1] if len(keys) > 1 else "",
-                "n": antal,
+                "n": len(group),
                 "MAE": group["AbsoluteError"].mean(),
                 "MAPE": group["AbsolutePercentageError"].mean(),
                 "Bias": group["Error"].mean(),
@@ -209,23 +213,7 @@ def _modell_variant_diagnostik(test, prediction):
 
 
 def _största_felen(test, prediction, antal=20):
-    diagnostik = test.copy().reset_index(drop=True)
-
-    diagnostik["Prediction"] = (
-        pd.Series(prediction).reset_index(drop=True)
-    )
-
-    diagnostik["Error"] = (
-        diagnostik["Prediction"] - diagnostik["Price"]
-    )
-
-    diagnostik["AbsoluteError"] = diagnostik["Error"].abs()
-
-    diagnostik["AbsolutePercentageError"] = (
-        diagnostik["AbsoluteError"]
-        / diagnostik["Price"].abs()
-        * 100
-    )
+    diagnostik = _skapa_diagnostik(test, prediction)
 
     diagnostik = diagnostik.sort_values(
         "AbsoluteError",
@@ -291,11 +279,9 @@ def _största_felen(test, prediction, antal=20):
 
 def _sammanfatta_största_felen(topp):
     """
-    Sammanfattar toppfelen per modell/variant.
+    Sammanfattar de största felen per modell/variant.
 
-    Detta är ett diagnostiskt lager ovanpå listan över de
-    största individuella felen. Det påverkar inte träningen
-    eller modellvalet.
+    Detta påverkar inte modellträningen.
     """
 
     if "Model" not in topp.columns:
@@ -312,13 +298,11 @@ def _sammanfatta_största_felen(topp):
         if not isinstance(keys, tuple):
             keys = (keys,)
 
-        antal = len(group)
-
         grupper.append(
             {
                 "Model": keys[0],
                 "Variant": keys[1] if len(keys) > 1 else "",
-                "Antal toppfel": antal,
+                "Antal toppfel": len(group),
                 "MAE": group["AbsoluteError"].mean(),
                 "Största fel": group["AbsoluteError"].max(),
                 "Genomsnittligt fel": group["Error"].mean(),
@@ -353,6 +337,74 @@ def _sammanfatta_största_felen(topp):
     )
 
 
+def _diagnostik_per_modell(test, prediction):
+    """
+    Visar samtliga testobservationer för varje modell.
+
+    Syftet är att kunna se om en modell/variant har ett systematiskt
+    problem som inte syns enbart i topp 20 största fel.
+    """
+
+    diagnostik = _skapa_diagnostik(test, prediction)
+
+    if "Model" not in diagnostik.columns:
+        return
+
+    print("\nDetaljerad diagnostik per modell:")
+
+    for model, group in diagnostik.groupby("Model"):
+        print(f"\n--- {model} ---")
+
+        if "Variant" in group.columns:
+            variants = group["Variant"].dropna().unique()
+
+            if len(variants) > 1:
+                print(
+                    "Varianter: "
+                    + ", ".join(str(value) for value in variants)
+                )
+
+        print(f"Observationer: {len(group)}")
+        print(
+            f"MAE: {group['AbsoluteError'].mean():,.0f} kr"
+        )
+        print(
+            f"Median absolutfel: "
+            f"{group['AbsoluteError'].median():,.0f} kr"
+        )
+        print(
+            f"MAPE: "
+            f"{group['AbsolutePercentageError'].mean():.2f} %"
+        )
+        print(
+            f"Bias: "
+            f"{group['Error'].mean():+,.0f} kr"
+        )
+
+        if "ModelYear" in group.columns:
+            print("\nMAE per årsmodell:")
+
+            per_year = (
+                group.groupby("ModelYear")
+                .agg(
+                    n=("AbsoluteError", "size"),
+                    MAE=("AbsoluteError", "mean"),
+                    MAPE=("AbsolutePercentageError", "mean"),
+                    Bias=("Error", "mean"),
+                )
+                .sort_index()
+            )
+
+            for year, row in per_year.iterrows():
+                print(
+                    f"  {year}: "
+                    f"n={int(row['n'])} | "
+                    f"MAE={row['MAE']:,.0f} kr | "
+                    f"MAPE={row['MAPE']:.2f} % | "
+                    f"Bias={row['Bias']:+,.0f} kr"
+                )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -375,11 +427,15 @@ def main():
 
     dataset = _bygg_dataset(observations)
 
-    print(f"Dataset före deduplicering: {len(dataset):,}")
+    print(
+        f"Dataset före deduplicering: {len(dataset):,}"
+    )
 
     dataset = _deduplicera_dataset(dataset)
 
-    print(f"Dataset efter deduplicering: {len(dataset):,}")
+    print(
+        f"Dataset efter deduplicering: {len(dataset):,}"
+    )
 
     train, test = _tidsmässig_split(dataset)
 
@@ -403,7 +459,10 @@ def main():
 
         prediction = model.predict(X_test)
 
-        metrics = _metrics(y_test, prediction)
+        metrics = _metrics(
+            y_test,
+            prediction,
+        )
 
         resultat[namn] = {
             "model": model,
@@ -425,7 +484,9 @@ def main():
 
     print("\nRandom Forest feature importance:")
 
-    importance = _feature_importance(rf["model"])
+    importance = _feature_importance(
+        rf["model"]
+    )
 
     if importance is not None:
         print(
@@ -446,6 +507,11 @@ def main():
         test,
         rf["prediction"],
         antal=20,
+    )
+
+    _diagnostik_per_modell(
+        test,
+        rf["prediction"],
     )
 
     winner = min(
