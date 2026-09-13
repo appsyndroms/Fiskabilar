@@ -147,9 +147,7 @@ def _feature_importance(model):
 def _skapa_diagnostik(test, prediction):
     diagnostik = test.copy().reset_index(drop=True)
 
-    diagnostik["Prediction"] = (
-        pd.Series(prediction).reset_index(drop=True)
-    )
+    diagnostik["Prediction"] = pd.Series(prediction).reset_index(drop=True)
 
     diagnostik["Error"] = (
         diagnostik["Prediction"] - diagnostik["Price"]
@@ -496,8 +494,65 @@ def _diagnostik_330e_historik(dataset, test, prediction):
         )
 
         print(
-            f"    Prisintervall: {min_pris:,.0f}–{max_pris:,.0f} kr"
+            f"    Prisintervall: "
+            f"{min_pris:,.0f}–{max_pris:,.0f} kr"
         )
+
+
+def _normalisera_text(value):
+    if value is None or pd.isna(value):
+        return ""
+
+    return " ".join(
+        str(value).strip().casefold().split()
+    )
+
+
+def _weighted_median(values, weights):
+    """
+    Viktad median.
+
+    Högre vikt innebär att observationen ligger närmare målobjektet.
+    """
+
+    values = pd.to_numeric(
+        pd.Series(values),
+        errors="coerce",
+    )
+
+    weights = pd.to_numeric(
+        pd.Series(weights),
+        errors="coerce",
+    )
+
+    data = pd.DataFrame(
+        {
+            "value": values,
+            "weight": weights,
+        }
+    ).dropna()
+
+    data = data[data["weight"] > 0]
+
+    if data.empty:
+        return float("nan")
+
+    data = data.sort_values("value")
+
+    cumulative_weight = data["weight"].cumsum()
+    cutoff = data["weight"].sum() / 2
+
+    index = cumulative_weight.searchsorted(
+        cutoff,
+        side="left",
+    )
+
+    index = min(
+        int(index),
+        len(data) - 1,
+    )
+
+    return float(data.iloc[index]["value"])
 
 
 def _jämförbara_observationer(
@@ -505,19 +560,41 @@ def _jämförbara_observationer(
     row,
     max_year_diff=1,
     max_mileage_diff=1500,
+    min_comparables=3,
 ):
     """
-    Hittar historiska observationer som är jämförbara med en testbil.
+    Hittar jämförbara observationer.
 
-    Jämförelsen använder endast marknadsdata och påverkar inte träningen.
+    Matchningen sker i första hand på:
+
+      Model + Variant
+      årsmodell ±1
+      miltal ±1500
+
+    Om Variant saknas används Model.
+
+    Samma fordon exkluderas via Identity.
+
+    Funktionen används endast diagnostiskt och påverkar inte träningen.
     """
 
-    required = {"Model", "ModelYear", "Mil", "Price"}
+    required = {
+        "Model",
+        "ModelYear",
+        "Mil",
+        "Price",
+    }
 
     if not required.issubset(dataset.columns):
         return pd.DataFrame()
 
-    model = row.get("Model")
+    model = _normalisera_text(
+        row.get("Model")
+    )
+
+    variant = _normalisera_text(
+        row.get("Variant")
+    )
 
     model_year = pd.to_numeric(
         pd.Series([row.get("ModelYear")]),
@@ -529,15 +606,27 @@ def _jämförbara_observationer(
         errors="coerce",
     ).iloc[0]
 
-    if pd.isna(model_year) or pd.isna(mileage):
+    if (
+        not model
+        or pd.isna(model_year)
+        or pd.isna(mileage)
+    ):
         return pd.DataFrame()
 
     kandidater = dataset.copy()
 
-    kandidater = kandidater[
-        kandidater["Model"].astype(str).str.casefold()
-        == str(model).casefold()
-    ]
+    kandidater["_ModelNorm"] = (
+        kandidater["Model"]
+        .map(_normalisera_text)
+    )
+
+    if "Variant" in kandidater.columns:
+        kandidater["_VariantNorm"] = (
+            kandidater["Variant"]
+            .map(_normalisera_text)
+        )
+    else:
+        kandidater["_VariantNorm"] = ""
 
     kandidater["_ModelYearNum"] = pd.to_numeric(
         kandidater["ModelYear"],
@@ -554,22 +643,51 @@ def _jämförbara_observationer(
         errors="coerce",
     )
 
+    # Samma modell.
+    kandidater = kandidater[
+        kandidater["_ModelNorm"] == model
+    ].copy()
+
+    # Samma variant när sådan finns.
+    #
+    # Vi blandar inte automatiskt olika varianter eftersom det
+    # riskerar att göra jämförelsen mindre meningsfull.
+    if variant:
+        kandidater = kandidater[
+            kandidater["_VariantNorm"] == variant
+        ].copy()
+
+    # Årsmodell ±1.
     kandidater = kandidater[
         kandidater["_ModelYearNum"].between(
             model_year - max_year_diff,
             model_year + max_year_diff,
         )
-        & (
+    ]
+
+    # Miltal ±1500.
+    kandidater = kandidater[
+        (
             kandidater["_MilNum"] - mileage
         ).abs().le(max_mileage_diff)
-        & kandidater["_PriceNum"].notna()
+    ]
+
+    kandidater = kandidater[
+        kandidater["_PriceNum"].notna()
     ].copy()
 
-    if "Identity" in kandidater.columns and row.get("Identity") is not None:
-        identity = str(row.get("Identity"))
+    # Samma bil får inte jämföra med sig själv.
+    identity = row.get("Identity")
 
+    if (
+        identity is not None
+        and not pd.isna(identity)
+        and str(identity).strip()
+        and "Identity" in kandidater.columns
+    ):
         kandidater = kandidater[
-            kandidater["Identity"].astype(str) != identity
+            kandidater["Identity"].astype(str)
+            != str(identity)
         ]
 
     if kandidater.empty:
@@ -583,33 +701,79 @@ def _jämförbara_observationer(
         kandidater["_ModelYearNum"] - model_year
     ).abs()
 
-    kandidater["SimilarityScore"] = (
+    # Ett avstånd där 1500 mil motsvarar ungefär ett årsmodellsteg.
+    kandidater["SimilarityDistance"] = (
         kandidater["MileageDifference"]
         + kandidater["YearDifference"] * 1500
     )
 
-    return kandidater.sort_values(
-        ["SimilarityScore", "MileageDifference"],
+    # Närmare bilar får högre vikt.
+    kandidater["SimilarityWeight"] = (
+        1
+        / (
+            250
+            + kandidater["SimilarityDistance"]
+        )
     )
 
+    kandidater = kandidater.sort_values(
+        [
+            "SimilarityDistance",
+            "MileageDifference",
+            "YearDifference",
+        ]
+    )
 
-def _diagnostik_jämförbar_marknad(dataset, test, prediction):
+    # Minst tre oberoende observationer krävs.
+    if len(kandidater) < min_comparables:
+        return pd.DataFrame()
+
+    return kandidater
+
+
+def _diagnostik_jämförbar_marknad(
+    dataset,
+    test,
+    prediction,
+):
     """
     Analyserar hur testbilarna ligger prismässigt mot jämförbara annonser.
 
-    Detta är en diagnostik för att hitta potentiellt undervärderade eller
-    övervärderade bilar. Resultatet används inte som träningsfeature ännu.
+    Matchning:
+      - samma Model
+      - samma Variant när Variant finns
+      - årsmodell ±1
+      - miltal ±1500
+      - minst 3 jämförelseobjekt
+
+    Jämförelsepris:
+      - vanlig median
+      - viktad median
+      - Q25
+      - Q75
+
+    Dessutom identifieras fall där:
+      1. Random Forest tycker att bilen är billig
+      2. marknaden samtidigt tycker att bilen är billig
+
+    Detta är diagnostik-only och används inte som träningsfeature.
     """
 
-    if not {
+    required = {
         "Model",
         "ModelYear",
         "Mil",
         "Price",
-    }.issubset(test.columns):
+    }
+
+    if not required.issubset(test.columns):
         return
 
-    diagnostik = _skapa_diagnostik(test, prediction)
+    diagnostik = _skapa_diagnostik(
+        test,
+        prediction,
+    )
+
     resultat = []
 
     for _, row in diagnostik.iterrows():
@@ -624,17 +788,56 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
         priser = jämförbara["_PriceNum"]
 
         medianpris = priser.median()
+
+        viktad_median = _weighted_median(
+            jämförbara["_PriceNum"],
+            jämförbara["SimilarityWeight"],
+        )
+
         q25 = priser.quantile(0.25)
         q75 = priser.quantile(0.75)
 
-        faktisk_pris = row["Price"]
+        faktisk_pris = float(row["Price"])
+        prediction_value = float(row["Prediction"])
 
-        avvikelse_kr = faktisk_pris - medianpris
+        avvikelse_kr = (
+            faktisk_pris - viktad_median
+        )
 
         avvikelse_procent = (
-            avvikelse_kr / medianpris * 100
-            if medianpris
+            avvikelse_kr
+            / viktad_median
+            * 100
+            if viktad_median
             else float("nan")
+        )
+
+        # Positivt värde betyder att ML-modellen värderar bilen
+        # högre än faktiskt pris.
+        model_vs_actual_kr = (
+            prediction_value - faktisk_pris
+        )
+
+        model_vs_actual_pct = (
+            model_vs_actual_kr
+            / faktisk_pris
+            * 100
+            if faktisk_pris
+            else float("nan")
+        )
+
+        # Två oberoende signaler.
+        model_cheap = (
+            model_vs_actual_pct >= 5
+        )
+
+        market_cheap = (
+            avvikelse_procent <= -5
+        )
+
+        double_undervaluation = (
+            model_cheap
+            and market_cheap
         )
 
         resultat.append(
@@ -644,26 +847,157 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
                 "ModelYear": row.get("ModelYear", ""),
                 "Mil": row.get("Mil", 0),
                 "Price": faktisk_pris,
-                "Prediction": row["Prediction"],
+                "Prediction": prediction_value,
                 "ModelError": row["Error"],
+                "ModelVsActualPct": model_vs_actual_pct,
                 "ComparableN": len(jämförbara),
                 "ComparableMedian": medianpris,
+                "ComparableWeightedMedian": viktad_median,
                 "ComparableQ25": q25,
                 "ComparableQ75": q75,
                 "ComparableDeviation": avvikelse_kr,
                 "ComparableDeviationPct": avvikelse_procent,
+                "ModelCheap": model_cheap,
+                "MarketCheap": market_cheap,
+                "DoubleUndervaluation": double_undervaluation,
                 "Identity": row.get("Identity", ""),
             }
         )
 
     if not resultat:
         print(
-            "\nJämförbar marknad: inga tillräckliga "
-            "jämförelseobjekt."
+            "\nJämförbar marknad: inga testbilar hade "
+            "minst tre tillräckligt lika jämförelseobjekt."
         )
         return
 
     result = pd.DataFrame(resultat)
+
+    print(
+        "\nJämförbar marknad – diagnostik:"
+    )
+
+    print(
+        f"  Testobservationer: {len(test)}"
+    )
+
+    print(
+        f"  Med minst 3 jämförelseobjekt: "
+        f"{len(result)}"
+    )
+
+    print(
+        f"  Medianavvikelse mot jämförelsemarknad: "
+        f"{result['ComparableDeviationPct'].median():+.2f} %"
+    )
+
+    result["PotentialBargain"] = (
+        result["ComparableDeviationPct"] <= -5
+    )
+
+    print(
+        f"  Under -5 % mot marknadsmedian: "
+        f"{int(result['PotentialBargain'].sum())}"
+    )
+
+    print(
+        f"  RF minst 5 % över faktiskt pris: "
+        f"{int(result['ModelCheap'].sum())}"
+    )
+
+    print(
+        f"  Både RF + marknad signalerar fynd: "
+        f"{int(result['DoubleUndervaluation'].sum())}"
+    )
+
+    # ---------------------------------------------------------
+    # Starkaste kombinerade fynd
+    # ---------------------------------------------------------
+
+    dubbla = result[
+        result["DoubleUndervaluation"]
+    ].copy()
+
+    if not dubbla.empty:
+        dubbla["CombinedScore"] = (
+            dubbla["ModelVsActualPct"].clip(lower=0)
+            + (-dubbla["ComparableDeviationPct"]).clip(lower=0)
+        )
+
+        dubbla = dubbla.sort_values(
+            "CombinedScore",
+            ascending=False,
+        )
+
+    print(
+        "\nStarkaste fynd – både ML-modell och jämförelsemarknad:"
+    )
+
+    if dubbla.empty:
+        print(
+            "  Inga objekt uppfyller båda kriterierna."
+        )
+    else:
+        utskrift = dubbla.head(20).copy()
+
+        for column in [
+            "Price",
+            "Prediction",
+            "ComparableWeightedMedian",
+        ]:
+            utskrift[column] = utskrift[column].map(
+                lambda x: f"{x:,.0f} kr"
+            )
+
+        utskrift["ModelVsActualPct"] = (
+            utskrift["ModelVsActualPct"].map(
+                lambda x: f"{x:+.2f} %"
+            )
+        )
+
+        utskrift["ComparableDeviationPct"] = (
+            utskrift["ComparableDeviationPct"].map(
+                lambda x: f"{x:+.2f} %"
+            )
+        )
+
+        utskrift["CombinedScore"] = (
+            utskrift["CombinedScore"].map(
+                lambda x: f"{x:.2f}"
+            )
+        )
+
+        utskrift["ModelError"] = (
+            utskrift["ModelError"].map(
+                lambda x: f"{x:+,.0f} kr"
+            )
+        )
+
+        kolumner = [
+            "Model",
+            "Variant",
+            "ModelYear",
+            "Mil",
+            "Price",
+            "Prediction",
+            "ModelVsActualPct",
+            "ComparableWeightedMedian",
+            "ComparableDeviationPct",
+            "ComparableN",
+            "CombinedScore",
+            "ModelError",
+            "Identity",
+        ]
+
+        print(
+            utskrift[kolumner].to_string(
+                index=False
+            )
+        )
+
+    # ---------------------------------------------------------
+    # Starkaste marknadsfynd
+    # ---------------------------------------------------------
 
     fynd = result[
         result["ComparableDeviationPct"] < 0
@@ -674,14 +1008,13 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
     )
 
     print(
-        "\nJämförbar marknad – potentiellt "
-        "undervärderade bilar:"
+        "\nStarkaste marknadsfynd:"
     )
 
     if fynd.empty:
         print(
-            "  Inga testbilar ligger under medianen "
-            "för jämförbara observationer."
+            "  Inga testbilar ligger under "
+            "jämförelsemedianen."
         )
     else:
         utskrift = fynd.head(20).copy()
@@ -689,9 +1022,7 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
         for column in [
             "Price",
             "Prediction",
-            "ComparableMedian",
-            "ComparableQ25",
-            "ComparableQ75",
+            "ComparableWeightedMedian",
         ]:
             utskrift[column] = utskrift[column].map(
                 lambda x: f"{x:,.0f} kr"
@@ -709,23 +1040,24 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
             )
         )
 
-        utskrift["ModelError"] = (
-            utskrift["ModelError"].map(
-                lambda x: f"{x:+,.0f} kr"
+        utskrift["ModelVsActualPct"] = (
+            utskrift["ModelVsActualPct"].map(
+                lambda x: f"{x:+.2f} %"
             )
         )
 
         kolumner = [
             "Model",
+            "Variant",
             "ModelYear",
             "Mil",
             "Price",
-            "ComparableMedian",
+            "ComparableWeightedMedian",
             "ComparableDeviation",
             "ComparableDeviationPct",
             "ComparableN",
             "Prediction",
-            "ModelError",
+            "ModelVsActualPct",
             "Identity",
         ]
 
@@ -735,25 +1067,57 @@ def _diagnostik_jämförbar_marknad(dataset, test, prediction):
             )
         )
 
-    result["PotentialBargain"] = (
-        result["ComparableDeviationPct"] <= -5
-    )
+    # ---------------------------------------------------------
+    # Diagnostik per modell/variant
+    # ---------------------------------------------------------
 
-    print("\nJämförbar marknad – sammanfattning:")
-    print(
-        f"  Testobservationer med jämförelser: "
-        f"{len(result)}"
-    )
+    if "Model" in result.columns:
+        print(
+            "\nJämförbar marknad per modell/variant:"
+        )
 
-    print(
-        f"  Under -5 % mot jämförelsemedian: "
-        f"{int(result['PotentialBargain'].sum())}"
-    )
+        group_columns = ["Model"]
 
-    print(
-        f"  Medianavvikelse: "
-        f"{result['ComparableDeviationPct'].median():+.2f} %"
-    )
+        if (
+            "Variant" in result.columns
+            and result["Variant"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .ne("")
+            .any()
+        ):
+            group_columns.append("Variant")
+
+        grupper = (
+            result.groupby(group_columns)
+            .agg(
+                n=("ComparableDeviationPct", "size"),
+                MedianDeviationPct=(
+                    "ComparableDeviationPct",
+                    "median",
+                ),
+                Under5Pct=(
+                    "PotentialBargain",
+                    "sum",
+                ),
+                DoubleUndervaluation=(
+                    "DoubleUndervaluation",
+                    "sum",
+                ),
+            )
+            .reset_index()
+        )
+
+        print(
+            grupper.to_string(
+                index=False,
+                formatters={
+                    "MedianDeviationPct":
+                        lambda x: f"{x:+.2f} %",
+                },
+            )
+        )
 
 
 def main():
@@ -938,7 +1302,7 @@ def main():
             f,
             ensure_ascii=False,
             indent=2,
-        )
+    )
 
     print(
         f"Modell sparad: "
