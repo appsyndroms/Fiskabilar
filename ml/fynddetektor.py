@@ -38,7 +38,9 @@ def _evidensvikt(jämförbara):
     if priser.empty:
         return 0.0, 0.0
 
-    median = float(priser.median())
+    median = float(
+        priser.median()
+    )
 
     if median <= 0:
         return 0.0, 0.0
@@ -74,6 +76,31 @@ def _evidensvikt(jämförbara):
         confidence,
         robust_spread_pct,
     )
+
+
+def _get_ad_url(
+    row,
+):
+    """
+    Hämtar annons-URL oavsett vilket URL-fält som används.
+    """
+
+    for key in (
+        "url",
+        "URL",
+        "ad_url",
+        "adUrl",
+        "annons_url",
+        "annonsUrl",
+        "listing_url",
+        "listingUrl",
+    ):
+        value = row.get(key)
+
+        if value:
+            return value
+
+    return ""
 
 
 def _bygg_fyndkandidater(
@@ -244,10 +271,7 @@ def _bygg_fyndkandidater(
                 ),
 
                 # Behåll annonslänken i fyndposten.
-                "url": row.get(
-                    "url",
-                    "",
-                ),
+                "url": _get_ad_url(row),
 
                 "Identity": row.get(
                     "Identity",
@@ -288,6 +312,7 @@ def _bygg_fyndkandidater(
 
 
 def _fyndklass(score):
+
     if score >= 30:
         return "A – mycket starkt fynd"
 
