@@ -29,9 +29,6 @@ from ml.model_diagnostics import (
     _modell_variant_diagnostik,
     _största_felen,
 )
-from ml.comparable_market import (
-    _diagnostik_jämförbar_marknad,
-)
 from ml.fynddetektor import (
     detektera_fynd,
 )
@@ -313,12 +310,6 @@ def main():
     )
 
     _diagnostik_330e_historik(
-        dataset,
-        test,
-        rf["prediction"],
-    )
-
-    _diagnostik_jämförbar_marknad(
         dataset,
         test,
         rf["prediction"],
