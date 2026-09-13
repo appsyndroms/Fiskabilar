@@ -20,7 +20,6 @@ from ml.train_market_model import (
     _bygg_dataset,
     _deduplicera_dataset,
     _ladda_jsonl,
-    _tidsmässig_split,
 )
 from ml.model_diagnostics import (
     _diagnostik_330e_historik,
@@ -48,6 +47,78 @@ MODEL_FIL = Path(
 METADATA_FIL = Path(
     "data/ml/model_metadata.json"
 )
+
+
+def _tidsmässig_split(
+    dataset,
+    testandel=0.2,
+):
+    """
+    Delar datasetet tidsmässigt.
+
+    Äldre observationer används för träning och de
+    senaste observationerna används för test.
+
+    Detta undviker att framtida observationer läcker
+    in i träningsdata.
+    """
+
+    if dataset.empty:
+        raise ValueError(
+            "Datasetet är tomt."
+        )
+
+    if not 0 < testandel < 1:
+        raise ValueError(
+            "testandel måste ligga mellan 0 och 1."
+        )
+
+    dataset = (
+        dataset
+        .sort_values(
+            "Tid",
+            na_position="last",
+        )
+        .reset_index(drop=True)
+    )
+
+    split_index = int(
+        len(dataset) * (1 - testandel)
+    )
+
+    split_index = max(
+        1,
+        min(
+            split_index,
+            len(dataset) - 1,
+        ),
+    )
+
+    train = (
+        dataset
+        .iloc[:split_index]
+        .copy()
+    )
+
+    test = (
+        dataset
+        .iloc[split_index:]
+        .copy()
+    )
+
+    print(
+        "\nTidsmässig split:"
+    )
+
+    print(
+        f"Träning: {len(train)} observationer"
+    )
+
+    print(
+        f"Test: {len(test)} observationer"
+    )
+
+    return train, test
 
 
 def _skapa_preprocessor() -> ColumnTransformer:
@@ -213,6 +284,7 @@ def main():
         print(
             "\nRandom Forest feature importance:"
         )
+
         print(
             importance.to_string(
                 index=False,
