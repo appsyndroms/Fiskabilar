@@ -9,11 +9,16 @@ from typing import Any
 
 
 # Scriptet körs direkt från scripts/-katalogen i GitHub Actions.
-# Lägg därför projektroten på sys.path innan projektets moduler importeras.
+# Lägg därför både projektroten och web/-katalogen på sys.path.
 PROJEKTROT = Path(__file__).resolve().parents[1]
+WEB_DIR = PROJEKTROT / "web"
 
-if str(PROJEKTROT) not in sys.path:
-    sys.path.insert(0, str(PROJEKTROT))
+for path in (
+    PROJEKTROT,
+    WEB_DIR,
+):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
 
 from web.analysis import model_label_from_values
