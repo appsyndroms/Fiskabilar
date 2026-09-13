@@ -8,6 +8,9 @@ Modellen använder:
     Model
     Variant
 
+Modell och variant normaliseras alltid på
+samma sätt som träningsdatan.
+
 Om modellen saknas eller indata är ogiltig
 returneras None.
 """
@@ -18,6 +21,11 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+
+from ml.normalization import (
+    normalisera_modell,
+    normalisera_variant,
+)
 
 
 MODEL_FIL = Path(
@@ -35,6 +43,7 @@ def ladda_modell():
     """Laddar den senast tränade modellen."""
 
     if not modell_finns():
+
         raise FileNotFoundError(
             f"Ingen tränad ML-modell finns i "
             f"{MODEL_FIL}"
@@ -54,20 +63,9 @@ def prediktera_borpris(
     """
     Predikterar bör-pris.
 
-    Parametrar:
-        modell:
-            Bilmodell, exempelvis "V60" eller "V90".
-
-        mil:
-            Bilens miltal.
-
-        arsmodell:
-            Bilens årsmodell.
-
-        variant:
-            Modellvariant, exempelvis
-            "T6 AWD", "T8 AWD" eller
-            "530e xDrive Touring".
+    Modell och variant normaliseras före
+    prediktionen så att samma bil alltid
+    använder samma ML-kategorier.
     """
 
     if not modell_finns():
@@ -80,12 +78,20 @@ def prediktera_borpris(
         return None
 
     try:
-        mil = float(mil)
-        arsmodell = int(arsmodell)
+
+        mil = float(
+            mil
+        )
+
+        arsmodell = int(
+            arsmodell
+        )
+
     except (
         TypeError,
         ValueError,
     ):
+
         return None
 
     if mil < 0:
@@ -94,13 +100,17 @@ def prediktera_borpris(
     if arsmodell < 1990:
         return None
 
-    modellnamn = str(
-        modell
-    ).strip()
+    modellnamn = (
+        normalisera_modell(
+            modell
+        )
+    )
 
-    variantnamn = str(
-        variant
-    ).strip()
+    variantnamn = (
+        normalisera_variant(
+            variant
+        )
+    )
 
     if not modellnamn:
         return None
@@ -112,22 +122,33 @@ def prediktera_borpris(
         [
             {
                 "Mil": mil,
-                "ModelYear": arsmodell,
-                "Model": modellnamn,
-                "Variant": variantnamn,
+
+                "ModelYear":
+                    arsmodell,
+
+                "Model":
+                    modellnamn,
+
+                "Variant":
+                    variantnamn,
             }
         ]
     )
 
     try:
-        tränad_modell = ladda_modell()
+
+        tränad_modell = (
+            ladda_modell()
+        )
 
         prediktion = (
             tränad_modell.predict(
                 data
             )
         )
+
     except Exception:
+
         return None
 
     if len(prediktion) != 1:
