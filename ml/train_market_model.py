@@ -1,21 +1,4 @@
-"""
-Träning av datadriven marknadsvärdering.
-
-Historik:
-    data/market_history/*.jsonl
-
-Målvariabel:
-    Price
-
-Modeller:
-    1. Linjär regression
-    2. Random Forest
-
-Feature engineering:
-    ml.features
-
-Den modell som ger lägst MAE väljs.
-"""
+"""Träning av datadriven marknadsvärdering."""
 
 from __future__ import annotations
 
@@ -26,105 +9,58 @@ from zoneinfo import ZoneInfo
 
 import joblib
 import pandas as pd
-
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import (
-    mean_absolute_error,
-    mean_squared_error,
-    r2_score,
-)
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
 from ml.features import (
+    FEATURES,
     FEATURES_KATEGORISK,
     FEATURES_NUMERIC,
-    FEATURES,
     TARGET,
     build_features,
 )
-from ml.normalization import (
-    normalisera_modell,
-    normalisera_variant,
-)
+from ml.normalization import normalisera_modell, normalisera_variant
 
 
-TIDSZON = ZoneInfo(
-    "Europe/Stockholm"
-)
-
-HISTORIK_DIR = Path(
-    "data/market_history"
-)
-
-OUTPUT_DIR = Path(
-    "data/ml"
-)
-
-MODEL_FIL = (
-    OUTPUT_DIR
-    / "market_model.joblib"
-)
-
-METADATA_FIL = (
-    OUTPUT_DIR
-    / "model_metadata.json"
-)
+TIDSZON = ZoneInfo("Europe/Stockholm")
+HISTORIK_DIR = Path("data/market_history")
+OUTPUT_DIR = Path("data/ml")
+MODEL_FIL = OUTPUT_DIR / "market_model.joblib"
+METADATA_FIL = OUTPUT_DIR / "model_metadata.json"
 
 MIN_TRAINING_OBSERVATIONER = 30
 
 
 def _ladda_jsonl() -> pd.DataFrame:
-    """Läser all sparad marknadshistorik."""
+    filer = sorted(HISTORIK_DIR.glob("market_history_*.jsonl"))
 
-    filer = sorted(
-        HISTORIK_DIR.glob(
-            "market_history_*.jsonl"
-        )
-    )
-
-    legacy = (
-        HISTORIK_DIR
-        / "market_history.jsonl"
-    )
+    legacy = HISTORIK_DIR / "market_history.jsonl"
 
     if legacy.exists():
-        filer.append(
-            legacy
-        )
+        filer.append(legacy)
 
     if not filer:
         raise FileNotFoundError(
-            f"Ingen marknadshistorik hittades i "
-            f"{HISTORIK_DIR}"
+            f"Ingen marknadshistorik hittades i {HISTORIK_DIR}"
         )
 
     poster = []
 
     for fil in filer:
-
-        with fil.open(
-            "r",
-            encoding="utf-8",
-        ) as file:
-
-            for radnummer, rad in enumerate(
-                file,
-                start=1,
-            ):
-
+        with fil.open("r", encoding="utf-8") as file:
+            for radnummer, rad in enumerate(file, start=1):
                 rad = rad.strip()
 
                 if not rad:
                     continue
 
                 try:
-                    post = json.loads(
-                        rad
-                    )
+                    post = json.loads(rad)
                 except json.JSONDecodeError:
                     print(
                         f"Varning: kunde inte läsa "
@@ -132,31 +68,41 @@ def _ladda_jsonl() -> pd.DataFrame:
                     )
                     continue
 
-                if isinstance(
-                    post,
-                    dict,
-                ):
-                    poster.append(
-                        post
-                    )
+                if isinstance(post, dict):
+                    poster.append(post)
 
     if not poster:
         raise ValueError(
-            "Historikfilerna innehåller inga "
-            "giltiga JSONL-poster."
+            "Historikfilerna innehåller inga giltiga JSONL-poster."
         )
 
-    return pd.DataFrame(
-        poster
-    )
+    return pd.DataFrame(poster)
 
 
-def _bygg_dataset(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """Bygger grunddatasetet."""
+def _första_identitet(row: pd.Series) -> str | None:
+    """Använder befintlig fysisk fordonsidentitet före annons-/URL-identitet."""
 
-    resultat = pd.DataFrame()
+    for field in (
+        "vehicle_id",
+        "vehicleId",
+        "car_id",
+        "carId",
+        "annons_id",
+        "annonsId",
+        "ad_id",
+        "adId",
+        "url",
+    ):
+        value = row.get(field)
+
+        if pd.notna(value) and str(value).strip():
+            return f"{field}:{str(value).strip()}"
+
+    return None
+
+
+def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    resultat = pd.DataFrame(index=df.index)
 
     resultat["Mil"] = pd.to_numeric(
         df.get("miltal"),
@@ -170,16 +116,12 @@ def _bygg_dataset(
 
     resultat["Model"] = (
         df.get("modell")
-        .apply(
-            normalisera_modell
-        )
+        .apply(normalisera_modell)
     )
 
     resultat["Variant"] = (
         df.get("variant")
-        .apply(
-            normalisera_variant
-        )
+        .apply(normalisera_variant)
     )
 
     resultat["Price"] = pd.to_numeric(
@@ -191,6 +133,13 @@ def _bygg_dataset(
         df.get("tid"),
         errors="coerce",
         utc=True,
+    )
+
+    # Identitet används endast för deduplicering/split,
+    # aldrig som ML-feature.
+    resultat["Identity"] = df.apply(
+        _första_identitet,
+        axis=1,
     )
 
     resultat = resultat.dropna(
@@ -212,9 +161,7 @@ def _bygg_dataset(
     resultat = resultat[
         resultat["ModelYear"].between(
             1990,
-            datetime.now(
-                TIDSZON
-            ).year + 1,
+            datetime.now(TIDSZON).year + 1,
         )
     ]
 
@@ -234,16 +181,24 @@ def _bygg_dataset(
             "Tid",
             na_position="last",
         )
-        .reset_index(
-            drop=True
-        )
+        .reset_index(drop=True)
     )
 
 
 def _deduplicera_dataset(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Tar bort identiska observationer."""
+    """
+    Tar bort identiska snapshots utan att slå ihop olika fysiska bilar.
+    """
+
+    före = len(df)
+
+    resultat = df.copy()
+
+    med_identitet = (
+        resultat["Identity"].notna()
+    )
 
     nycklar = [
         "Mil",
@@ -253,19 +208,48 @@ def _deduplicera_dataset(
         "Price",
     ]
 
-    före = len(df)
-
-    resultat = (
-        df.drop_duplicates(
-            subset=nycklar
-        )
-        .reset_index(
-            drop=True
+    # Har bilen en stabil identitet ska den ingå i nyckeln.
+    # Annars kan två olika bilar med samma egenskaper slås ihop.
+    resultat_med_id = (
+        resultat.loc[med_identitet]
+        .drop_duplicates(
+            subset=["Identity"] + nycklar,
+            keep="last",
         )
     )
 
-    efter = len(
+    # Saknas identitet använder vi gamla fallback-regeln.
+    resultat_utan_id = (
+        resultat.loc[~med_identitet]
+        .drop_duplicates(
+            subset=nycklar,
+            keep="last",
+        )
+    )
+
+    resultat = pd.concat(
+        [
+            resultat_med_id,
+            resultat_utan_id,
+        ],
+        ignore_index=True,
+    )
+
+    resultat = (
         resultat
+        .sort_values(
+            "Tid",
+            na_position="last",
+        )
+        .reset_index(drop=True)
+    )
+
+    efter = len(resultat)
+
+    identiteter = int(
+        resultat["Identity"]
+        .notna()
+        .sum()
     )
 
     print(
@@ -274,12 +258,15 @@ def _deduplicera_dataset(
         f"({före - efter} borttagna)"
     )
 
+    print(
+        f"Observationer med fordonsidentitet: "
+        f"{identiteter}"
+    )
+
     return resultat
 
 
 def _skapa_preprocessor():
-    """Skapar gemensam preprocessing."""
-
     numeric_pipeline = Pipeline(
         steps=[
             (
@@ -325,8 +312,6 @@ def _skapa_preprocessor():
 
 
 def _bygg_modeller():
-    """Skapar modellerna."""
-
     return {
         "linear_regression": Pipeline(
             steps=[
@@ -340,7 +325,6 @@ def _bygg_modeller():
                 ),
             ]
         ),
-
         "random_forest": Pipeline(
             steps=[
                 (
@@ -367,35 +351,31 @@ def _metrics(
     predicted,
 ) -> dict:
 
-    actual = pd.Series(
-        actual,
-        dtype="float64",
-    ).reset_index(
-        drop=True
+    actual = (
+        pd.Series(
+            actual,
+            dtype="float64",
+        )
+        .reset_index(drop=True)
     )
 
-    predicted = pd.Series(
-        predicted,
-        dtype="float64",
-    ).reset_index(
-        drop=True
+    predicted = (
+        pd.Series(
+            predicted,
+            dtype="float64",
+        )
+        .reset_index(drop=True)
     )
 
     error = (
-        predicted
-        - actual
+        predicted - actual
     )
 
-    absolute_error = (
-        error.abs()
-    )
+    absolute_error = error.abs()
 
     percentage_error = (
         absolute_error
-        / actual.replace(
-            0,
-            pd.NA,
-        )
+        / actual.replace(0, pd.NA)
         * 100
     )
 
@@ -403,7 +383,6 @@ def _metrics(
         "antal_observationer": int(
             len(actual)
         ),
-
         "mae": round(
             float(
                 mean_absolute_error(
@@ -413,14 +392,12 @@ def _metrics(
             ),
             2,
         ),
-
         "median_absolutfel": round(
             float(
                 absolute_error.median()
             ),
             2,
         ),
-
         "mape_procent": round(
             float(
                 percentage_error
@@ -429,7 +406,6 @@ def _metrics(
             ),
             2,
         ),
-
         "rmse": round(
             float(
                 mean_squared_error(
@@ -440,7 +416,6 @@ def _metrics(
             ),
             2,
         ),
-
         "r2": round(
             float(
                 r2_score(
@@ -450,25 +425,16 @@ def _metrics(
             ),
             4,
         ),
-
         "bias": round(
-            float(
-                error.mean()
-            ),
+            float(error.mean()),
             2,
         ),
-
         "faktiskt_medelpris": round(
-            float(
-                actual.mean()
-            ),
+            float(actual.mean()),
             2,
         ),
-
         "predikterat_medelpris": round(
-            float(
-                predicted.mean()
-            ),
+            float(predicted.mean()),
             2,
         ),
     }
@@ -478,16 +444,18 @@ def _tidsmässig_split(
     df: pd.DataFrame,
     test_andel: float = 0.20,
 ):
-    """Äldsta 80 % träning, senaste 20 % test."""
+    """
+    Tidsmässig split där samma identifierade bil
+    inte hamnar i både train och test.
+    """
 
     df = (
-        df.sort_values(
+        df
+        .sort_values(
             "Tid",
             na_position="first",
         )
-        .reset_index(
-            drop=True
-        )
+        .reset_index(drop=True)
     )
 
     test_antal = max(
@@ -500,50 +468,74 @@ def _tidsmässig_split(
         ),
     )
 
-    train_antal = (
+    cutoff = (
         len(df)
         - test_antal
     )
 
-    if (
-        train_antal
-        < MIN_TRAINING_OBSERVATIONER
-    ):
+    prelim_test = (
+        df.iloc[cutoff:]
+        .copy()
+    )
+
+    test_id = set(
+        prelim_test["Identity"]
+        .dropna()
+    )
+
+    if test_id:
+        train = (
+            df.iloc[:cutoff]
+            .copy()
+        )
+
+        flytta = train[
+            train["Identity"]
+            .isin(test_id)
+        ]
+
+        train = train[
+            ~train["Identity"]
+            .isin(test_id)
+        ].copy()
+
+        test = pd.concat(
+            [
+                flytta,
+                prelim_test,
+            ],
+            ignore_index=True,
+        )
+
+    else:
+        train = (
+            df.iloc[:cutoff]
+            .copy()
+        )
+
+        test = prelim_test
+
+    if len(train) < MIN_TRAINING_OBSERVATIONER:
         raise ValueError(
             "För få träningsobservationer."
         )
 
-    train = df.iloc[
-        :train_antal
-    ].copy()
-
-    test = df.iloc[
-        train_antal:
-    ].copy()
-
-    return train, test
+    return (
+        train.reset_index(drop=True),
+        test.reset_index(drop=True),
+    )
 
 
 def _utvärdera(
     modell,
     test,
 ):
-    """Utvärderar modellen."""
-
-    x_test = build_features(
-        test
-    )
-
-    y_test = test[
-        TARGET
-    ]
-
     prediction = modell.predict(
-        x_test
+        build_features(test)
     )
 
     return _metrics(
-        y_test,
+        test[TARGET],
         prediction,
     )
 
@@ -594,8 +586,6 @@ def _skriv_metrics(
 
 
 def main():
-    """Tränar och sparar bästa modell."""
-
     OUTPUT_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -616,8 +606,10 @@ def main():
         dataset
     )
 
-    train, test = _tidsmässig_split(
-        dataset
+    train, test = (
+        _tidsmässig_split(
+            dataset
+        )
     )
 
     print()
@@ -640,6 +632,11 @@ def main():
         f"{len(test)}"
     )
 
+    print(
+        f"Unika identifierade fordon: "
+        f"{dataset['Identity'].nunique(dropna=True)}"
+    )
+
     print()
     print(
         "Nya features:"
@@ -657,18 +654,9 @@ def main():
     for namn, modell in (
         modeller.items()
     ):
-
-        x_train = build_features(
-            train
-        )
-
-        y_train = train[
-            TARGET
-        ]
-
         modell.fit(
-            x_train,
-            y_train,
+            build_features(train),
+            train[TARGET],
         )
 
         metrics = _utvärdera(
@@ -676,9 +664,7 @@ def main():
             test,
         )
 
-        resultat[
-            namn
-        ] = metrics
+        resultat[namn] = metrics
 
         _skriv_metrics(
             namn,
@@ -696,9 +682,7 @@ def main():
     ]
 
     slutmodell.fit(
-        build_features(
-            dataset
-        ),
+        build_features(dataset),
         dataset[TARGET],
     )
 
@@ -716,7 +700,22 @@ def main():
         "dataset_observations": len(dataset),
         "train_observations": len(train),
         "test_observations": len(test),
+        "unique_identified_vehicles": int(
+            dataset["Identity"]
+            .nunique(dropna=True)
+        ),
         "metrics": resultat,
+        "deduplication": {
+            "uses_vehicle_identity": True,
+            "fallback_without_identity": [
+                "Mil",
+                "ModelYear",
+                "Model",
+                "Variant",
+                "Price",
+            ],
+            "grouped_vehicle_split": True,
+        },
         "trained_at": datetime.now(
             TIDSZON
         ).isoformat(),
@@ -726,7 +725,6 @@ def main():
         "w",
         encoding="utf-8",
     ) as file:
-
         json.dump(
             metadata,
             file,
