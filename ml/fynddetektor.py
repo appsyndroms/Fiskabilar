@@ -10,7 +10,6 @@ from ml.model_diagnostics import _skapa_diagnostik
 MODEL_THRESHOLD_PCT = 5.0
 MARKET_THRESHOLD_PCT = -5.0
 MIN_COMPARABLES = 3
-MAX_RESULTS = 20
 
 
 def _evidensvikt(jämförbara):
@@ -409,12 +408,11 @@ def detektera_fynd(
     dataset,
     test,
     prediction,
-    max_results=MAX_RESULTS,
 ):
     """
     Kör fynddetektorn.
 
-    Returnerar en rankad DataFrame med fynd.
+    Returnerar alla kvalificerade fynd, rankade efter FyndScore.
 
     Funktionen skriver inte ut något och har inga sidoeffekter.
     """
@@ -425,11 +423,6 @@ def detektera_fynd(
         prediction,
     )
 
-    if fynd.empty:
-        return fynd
-
-    return fynd.head(
-        max_results
-    ).reset_index(
+    return fynd.reset_index(
         drop=True
     )
