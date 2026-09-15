@@ -1,70 +1,90 @@
-"""
-Bygger Fiskabilars statiska webbplats.
-
-Detta är endast orchestratorn.
-Logik för inläsning, analys, diagram och HTML-rendering
-ligger i separata moduler.
-"""
-
 from __future__ import annotations
 
 import json
+import math
+import re
 from datetime import datetime
 from pathlib import Path
-
-from data_loader import (
-    DATA_DIR,
-    FIND_FEEDBACK_DIR,
-    MARKET_HISTORY_DIR,
-    OUTPUT_DIR,
-    STATE_FILE,
-    read_all_jsonl,
-    read_json,
-    read_jsonl,
-)
-
-from analysis import (
-    get_find_outcomes,
-    get_market_history_analysis,
-    get_price_reductions,
-    get_score_analysis,
-)
-
-from renderer import build_html
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
-ML_DIR = DATA_DIR / "ml"
-ML_FINDINGS_FILE = ML_DIR / "fynd.jsonl"
+ML_DATA_FILE = ROOT / "data" / "ml_valuation.jsonl"
+ML_FINDINGS_FILE = ROOT / "data" / "ml" / "fynd.jsonl"
+MARKET_HISTORY_DIR = ROOT / "data" / "market_history"
 
-VEHICLE_IDENTITY_FILE = (
-    DATA_DIR
-    / "market_history"
-    / "vehicle_identity.json"
-)
+OUTPUT_HTML = ROOT / "index.html"
+OUTPUT_DATA = ROOT / "data.json"
+
+# Samma grundprincip som history/lifecycle.py:
+# en annons betraktas som aktiv om den observerats inom detta antal dagar.
+AKTIVITETSDAGAR = 2
 
 
-def _is_valid_url(value) -> bool:
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+
+    rows: list[dict[str, Any]] = []
+
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+
+            if not line:
+                continue
+
+            try:
+                value = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if isinstance(value, dict):
+                rows.append(value)
+
+    return rows
+
+
+def _write_json(path: Path, value: Any) -> None:
+    path.write_text(
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            indent=2,
+            default=_json_default,
+        ),
+        encoding="utf-8",
+    )
+
+
+def _json_default(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+
+    if hasattr(value, "item"):
+        try:
+            return value.item()
+        except Exception:
+            pass
+
+    if isinstance(value, float) and math.isnan(value):
+        return None
+
+    return str(value)
+
+
+def _is_valid_url(value: Any) -> bool:
     """
-    Returnerar True endast för en faktisk användbar HTTP(S)-URL.
+    Returnerar True endast för riktiga HTTP(S)-URL:er.
 
-    Detta är viktigt eftersom pandas/JSON kan ge oss värden som:
-
-        NaN
-        "nan"
-        None
-        "null"
-        ""
-
-    Dessa får aldrig bli klickbara länkar på webbplatsen.
+    Viktigt eftersom pandas NaN annars kan bli strängen "nan".
     """
-
     if value is None:
         return False
 
     try:
-        if value != value:
+        if isinstance(value, float) and math.isnan(value):
             return False
     except Exception:
         pass
@@ -74,73 +94,59 @@ def _is_valid_url(value) -> bool:
     if not text:
         return False
 
-    if text.lower() in {
-        "nan",
-        "none",
-        "null",
-    }:
+    if text.lower() in {"nan", "none", "null"}:
         return False
 
-    return text.startswith((
-        "http://",
-        "https://",
-    ))
+    return text.startswith("http://") or text.startswith("https://")
 
 
-def _normalisera_vehicle_id(value) -> str:
-    """
-    Normaliserar vehicle_id så att både:
-
-        vehicle_id:vehicle:00000255
-
-    och:
-
-        vehicle:00000255
-
-    jämförs som samma identitet.
-    """
-
+def _normalisera_vehicle_id(value: Any) -> str | None:
     if value is None:
-        return ""
+        return None
 
     text = str(value).strip()
 
+    if not text:
+        return None
+
+    # Hantera eventuella varianter som:
+    # vehicle_id:vehicle:00000123
+    # vehicle:00000123
     if text.startswith("vehicle_id:"):
-        return text[len("vehicle_id:"):]
+        text = text[len("vehicle_id:") :]
 
     return text
 
 
-def _get_vehicle_id(row: dict) -> str:
+def _get_vehicle_id(row: dict[str, Any]) -> str | None:
     """
-    Hämtar vehicle_id från ett record.
-
-    ML-fynd använder normalt:
-        Identity = vehicle_id:vehicle:00000255
-
-    Market history använder:
-        vehicle_id = vehicle:00000255
+    Försöker hitta vehicle_id/Identity i ett fynd eller
+    en marknadshistorikpost.
     """
+    for key in (
+        "vehicle_id",
+        "vehicleId",
+        "VehicleId",
+        "identity",
+        "Identity",
+    ):
+        value = row.get(key)
 
-    value = (
-        row.get("Identity")
-        or row.get("identity")
-        or row.get("vehicle_id")
-        or row.get("VehicleId")
-        or row.get("VehicleID")
-    )
+        if value is None:
+            continue
 
-    return _normalisera_vehicle_id(value)
+        normalized = _normalisera_vehicle_id(value)
+
+        if normalized:
+            return normalized
+
+    return None
 
 
-def _get_url(row: dict):
+def _get_url(row: dict[str, Any]) -> str | None:
     """
-    Hämtar en giltig annons-URL från ett record.
-
-    Ogiltiga värden som NaN, "nan", None, null och
-    tomma strängar ignoreras.
+    Hämtar URL från en rad och accepterar endast riktiga HTTP(S)-URL:er.
     """
-
     for key in (
         "url",
         "URL",
@@ -154,616 +160,437 @@ def _get_url(row: dict):
     ):
         value = row.get(key)
 
-        if isinstance(value, list):
-
-            for item in value:
-
-                if _is_valid_url(item):
-                    return str(item).strip()
-
-        elif _is_valid_url(value):
-
+        if _is_valid_url(value):
             return str(value).strip()
 
     return None
 
 
-def _parse_tid(value):
+def _parse_tid(value: Any) -> datetime | None:
     """
-    Försöker tolka historikens tidsstämpel.
-
-    Market history använder exempelvis:
-
-        2026-09-13T10:23:45+02:00
+    Tolkar tid från marknadshistoriken.
     """
-
-    if not value:
+    if value is None:
         return None
 
+    if isinstance(value, datetime):
+        return value
+
+    text = str(value).strip()
+
+    if not text:
+        return None
+
+    # ISO 8601, inklusive Z.
     try:
-        return datetime.fromisoformat(
-            str(value)
-        )
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        pass
 
-    except (
-        TypeError,
-        ValueError,
-    ):
-        return None
-
-
-def _load_vehicle_identity_urls() -> dict[str, str]:
-    """
-    Läser vehicle_identity.json och bygger en mapping:
-
-        vehicle:00000255 -> https://...
-
-    Endast giltiga URL:er används.
-
-    Om flera URL-identiteter finns för samma vehicle_id
-    behålls den senast påträffade giltiga URL:en.
-    """
-
-    data = read_json(
-        VEHICLE_IDENTITY_FILE,
-        {},
+    # Några vanliga alternativa format.
+    formats = (
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d",
     )
 
-    if not isinstance(
-        data,
-        dict,
-    ):
-        return {}
-
-    identifiers = data.get(
-        "identifiers",
-        {},
-    )
-
-    if not isinstance(
-        identifiers,
-        dict,
-    ):
-        return {}
-
-    result: dict[str, str] = {}
-
-    for identifier, vehicle_id in identifiers.items():
-
-        if not isinstance(
-            identifier,
-            str,
-        ):
+    for fmt in formats:
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
             continue
 
-        if not identifier.startswith(
-            "url:"
-        ):
-            continue
-
-        url = identifier[
-            len("url:"):
-        ].strip()
-
-        if not _is_valid_url(url):
-            continue
-
-        normalized_vehicle_id = (
-            _normalisera_vehicle_id(
-                vehicle_id
-            )
-        )
-
-        if not normalized_vehicle_id:
-            continue
-
-        result[
-            normalized_vehicle_id
-        ] = url
-
-    return result
+    return None
 
 
-def _load_latest_market_urls(
-    market_history: list[dict],
-) -> dict[str, str]:
+def _load_market_history() -> list[dict[str, Any]]:
+    """
+    Läser all marknadshistorik från data/market_history/*.jsonl.
+    """
+    if not MARKET_HISTORY_DIR.exists():
+        return []
+
+    rows: list[dict[str, Any]] = []
+
+    for path in sorted(MARKET_HISTORY_DIR.glob("*.jsonl")):
+        rows.extend(_read_jsonl(path))
+
+    return rows
+
+
+def _load_active_market_ads(
+    market_history: list[dict[str, Any]],
+) -> dict[str, tuple[datetime, str]]:
     """
     Bygger en mapping:
 
-        vehicle_id -> senaste kända giltiga annons-URL
+        vehicle_id -> (senaste observationstid, aktuell URL)
 
-    Endast riktiga annonsobservationer används.
+    Endast annonser som observerats inom AKTIVITETSDAGAR räknas som
+    aktuella.
 
-    Den senaste observationen avgörs av 'tid', inte av
-    ordningen i listan.
-
-    Detta är viktigt eftersom samma fysiska bil kan få
-    ett nytt Bilweb-annons-ID och därmed en helt ny URL.
+    Detta är viktigt: en gammal URL från vehicle_identity.json får inte
+    göra ett historiskt ML-fynd till ett aktuellt fynd.
     """
+    latest: dict[str, tuple[datetime, str]] = {}
 
-    latest: dict[
-        str,
-        tuple[datetime, str],
-    ] = {}
+    now = datetime.now().astimezone()
 
     for row in market_history:
-
-        if not isinstance(
-            row,
-            dict,
-        ):
+        if not isinstance(row, dict):
             continue
 
+        # Vi vill bara använda faktiska annonsobservationer.
         if row.get("typ") != "annons":
             continue
 
-        vehicle_id = _get_vehicle_id(
-            row
-        )
+        vehicle_id = _get_vehicle_id(row)
 
         if not vehicle_id:
             continue
 
-        url = _get_url(
-            row
-        )
+        url = _get_url(row)
 
         if not url:
             continue
 
-        tid = _parse_tid(
-            row.get("tid")
-        )
+        tid = _parse_tid(row.get("tid"))
 
         if tid is None:
             continue
 
-        previous = latest.get(
-            vehicle_id
-        )
+        # Gör tidsjämförelsen timezone-aware.
+        if tid.tzinfo is None:
+            tid = tid.astimezone()
 
-        if (
-            previous is None
-            or tid > previous[0]
-        ):
-            latest[
-                vehicle_id
-            ] = (
-                tid,
-                url,
-            )
+        dagar = (now - tid).total_seconds() / 86400
 
-    return {
-        vehicle_id: value[1]
-        for vehicle_id, value
-        in latest.items()
-    }
+        # Framtida observationer ska inte räknas som aktuella.
+        if dagar < 0:
+            continue
+
+        # Samma princip som lifecycle.py.
+        if dagar > AKTIVITETSDAGAR:
+            continue
+
+        previous = latest.get(vehicle_id)
+
+        if previous is None or tid > previous[0]:
+            latest[vehicle_id] = (tid, url)
+
+    return latest
 
 
-def _berika_fynd_med_url(
-    findings: list[dict],
-    market_history: list[dict],
-    vehicle_identity_urls: dict[str, str],
-) -> list[dict]:
+def _berika_fynd_med_aktuell_url(
+    findings: list[dict[str, Any]],
+    market_history: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """
-    Kompletterar ML-fynd med aktuell annons-URL.
+    Kopplar ML-fynd till den aktuella annonsen.
 
-    Prioritetsordning:
+    Ett fynd får endast en URL om samma vehicle_id har en aktiv
+    annonsobservation i marknadshistoriken.
 
-    1. Giltig URL som redan finns direkt på ML-fyndet
-    2. Senaste giltiga annonsobservationen i market_history
-    3. vehicle_identity.json som fallback
-
-    Ogiltiga värden, exempelvis "nan", betraktas som
-    om URL saknas.
+    Vi använder alltså INTE gamla URL:er från vehicle_identity.json.
     """
+    active_ads = _load_active_market_ads(market_history)
 
-    if not findings:
-        return findings
-
-    latest_market_urls = (
-        _load_latest_market_urls(
-            market_history
-        )
-    )
-
-    enriched: list[dict] = []
-
-    direct_matches = 0
-    market_matches = 0
-    identity_matches = 0
-    missing_matches = 0
+    enriched: list[dict[str, Any]] = []
 
     for finding in findings:
+        result = dict(finding)
 
-        result = dict(
-            finding
-        )
+        vehicle_id = _get_vehicle_id(result)
+        active = active_ads.get(vehicle_id)
 
-        existing_url = _get_url(
-            result
-        )
-
-        if existing_url:
-
-            result["url"] = (
-                existing_url
-            )
-
-            direct_matches += 1
-
-            enriched.append(
-                result
-            )
-
-            continue
-
-        vehicle_id = _get_vehicle_id(
-            result
-        )
-
-        market_url = (
-            latest_market_urls.get(
-                vehicle_id
-            )
-        )
-
-        if _is_valid_url(
-            market_url
-        ):
-
-            result["url"] = (
-                market_url
-            )
-
-            market_matches += 1
-
-            enriched.append(
-                result
-            )
-
-            continue
-
-        identity_url = (
-            vehicle_identity_urls.get(
-                vehicle_id
-            )
-        )
-
-        if _is_valid_url(
-            identity_url
-        ):
-
-            result["url"] = (
-                identity_url
-            )
-
-            identity_matches += 1
-
-        else:
-
+        if active is None:
             result["url"] = ""
+        else:
+            result["url"] = active[1]
 
-            missing_matches += 1
-
-        enriched.append(
-            result
-        )
-
-    print(
-        "URL-komplettering: "
-        f"{direct_matches} direkt, "
-        f"{market_matches} via market_history, "
-        f"{identity_matches} via vehicle_identity, "
-        f"{missing_matches} saknas"
-    )
-
-    print(
-        "Aktuella URL-mappningar: "
-        f"{len(latest_market_urls)} fordon"
-    )
+        enriched.append(result)
 
     return enriched
 
 
-def get_ml_data() -> dict:
+def get_ml_data() -> list[dict[str, Any]]:
     """
-    Läser ML-metadata och prediktioner.
+    Läser ML-värderingarna.
     """
-
-    metadata = read_json(
-        ML_DIR / "model_metadata.json",
-        {},
-    )
-
-    prediction_file = (
-        ML_DIR
-        / "predictions.jsonl"
-    )
-
-    if prediction_file.exists():
-
-        predictions = read_jsonl(
-            prediction_file
-        )
-
-    else:
-
-        predictions = []
-
-    return {
-        "metadata": (
-            metadata
-            if isinstance(
-                metadata,
-                dict,
-            )
-            else {}
-        ),
-        "predictions": predictions,
-    }
+    return _read_jsonl(ML_DATA_FILE)
 
 
-def get_ml_findings(
-    market_history: list[dict],
-) -> list[dict]:
+def get_ml_findings() -> list[dict[str, Any]]:
     """
-    Läser aktuella ML-fynd.
+    Hämtar ML-fynd och begränsar dem till aktuella annonser.
 
-    Ett fynd räknas som aktivt endast om det finns
-    en fungerande annons-URL.
-
-    Fynd utan URL ligger kvar i fynd.jsonl som rådata,
-    men tas bort från webbplatsens current_findings.
+    Ett ML-fynd visas på webbplatsen endast om:
+      1. det finns i fynd.jsonl
+      2. vehicle_id kan matchas
+      3. samma fordon har observerats som annons inom de senaste
+         AKTIVITETSDAGAR
+      4. den aktuella observationen innehåller en giltig HTTP(S)-URL
     """
+    findings = _read_jsonl(ML_FINDINGS_FILE)
 
-    findings = read_jsonl(
-        ML_FINDINGS_FILE
-    )
+    market_history = _load_market_history()
 
-    vehicle_identity_urls = (
-        _load_vehicle_identity_urls()
-    )
-
-    findings = _berika_fynd_med_url(
+    findings = _berika_fynd_med_aktuell_url(
         findings,
         market_history,
-        vehicle_identity_urls,
     )
 
-    # Ett fynd utan fungerande annons-URL är inte
-    # ett aktivt fynd eftersom användaren inte kan agera på det.
+    # Ett fynd utan aktuell, klickbar annons ska inte visas som
+    # "aktuellt fynd".
     findings = [
         row
         for row in findings
-        if _is_valid_url(
-            row.get("url")
-        )
+        if _is_valid_url(row.get("url"))
     ]
 
-    def fynd_score(
-        row: dict,
-    ) -> float:
+    return findings
 
+
+def _clean_value(value: Any) -> Any:
+    """
+    Gör data JSON-säkra och tar bort NaN/Infinity.
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, float):
+        if math.isnan(value) or math.isinf(value):
+            return None
+
+        return value
+
+    if isinstance(value, dict):
+        return {
+            str(key): _clean_value(val)
+            for key, val in value.items()
+        }
+
+    if isinstance(value, list):
+        return [_clean_value(item) for item in value]
+
+    if hasattr(value, "item"):
         try:
+            return _clean_value(value.item())
+        except Exception:
+            pass
 
-            return float(
-                row.get(
-                    "FyndScore",
-                    0,
-                )
-            )
-
-        except (
-            TypeError,
-            ValueError,
-        ):
-
-            return 0
-
-    return sorted(
-        findings,
-        key=fynd_score,
-        reverse=True,
-    )
+    return value
 
 
-def build_payload() -> dict:
+def build_payload(
+    ml_data: list[dict[str, Any]],
+    current_findings: list[dict[str, Any]],
+) -> dict[str, Any]:
     """
-    Läser all data och bygger webbplatsens payload.
+    Bygger hela datamodellen som frontend använder.
     """
-
-    state = read_json(
-        STATE_FILE,
-        {},
-    )
-
-    feedback = read_all_jsonl(
-        FIND_FEEDBACK_DIR,
-    )
-
-    market_history = read_all_jsonl(
-        MARKET_HISTORY_DIR,
-    )
-
-    current_findings = get_ml_findings(
-        market_history
-    )
-
-    price_reductions = (
-        get_price_reductions(
-            feedback,
-        )
-    )
-
-    outcomes = get_find_outcomes(
-        feedback,
-    )
-
-    score_analysis = (
-        get_score_analysis(
-            outcomes,
-        )
-    )
-
-    (
-        history_table,
-        history_series,
-    ) = get_market_history_analysis(
-        market_history,
-    )
-
-    ml = get_ml_data()
-
     return {
-        "generated_at": (
-            datetime.now()
-            .astimezone()
-            .isoformat()
-        ),
-
+        "generated_at": datetime.now().astimezone().isoformat(),
+        "ml_data": _clean_value(ml_data),
+        "current_findings": _clean_value(current_findings),
         "summary": {
-            "current_findings":
-                len(current_findings),
-
-            "find_events":
-                len(outcomes),
-
-            "price_reductions":
-                len(price_reductions),
-
-            "market_observations":
-                len(market_history),
-
-            "model_year_groups":
-                len(history_table),
+            "ml_data": len(ml_data),
+            "current_findings": len(current_findings),
         },
-
-        "current_findings":
-            current_findings,
-
-        "price_reductions":
-            price_reductions,
-
-        "find_outcomes":
-            outcomes,
-
-        "score_analysis":
-            score_analysis,
-
-        "market_history":
-            market_history,
-
-        "history_table":
-            history_table,
-
-        "history_series":
-            history_series,
-
-        "ml":
-            ml,
-
-        "state":
-            state,
     }
 
 
+HTML_TEMPLATE = """<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fiskabilar</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .summary {
+      margin-bottom: 24px;
+    }
+
+    .finding {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .finding a {
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .muted {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Fiskabilar</h1>
+
+  <div id="summary" class="summary"></div>
+
+  <h2>Aktuella fynd</h2>
+  <div id="findings"></div>
+</main>
+
+<script>
+const state = {
+  data: null
+};
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function update() {
+  const data = state.data;
+
+  const summary = document.getElementById("summary");
+  const findings = document.getElementById("findings");
+
+  const currentFindings = data.current_findings || [];
+
+  summary.innerHTML = `
+    <strong>Aktuella fynd: ${currentFindings.length}</strong>
+  `;
+
+  if (!currentFindings.length) {
+    findings.innerHTML = `
+      <p class="muted">
+        Inga aktuella ML-fynd med aktiv annons just nu.
+      </p>
+    `;
+
+    return;
+  }
+
+  findings.innerHTML = currentFindings.map(row => {
+    const url = row.url;
+
+    return `
+      <article class="finding">
+        <strong>${escapeHtml(row.Model || row.model || "")}</strong>
+
+        <div>
+          Pris:
+          ${escapeHtml(row.Price ?? row.price ?? "")}
+        </div>
+
+        <div>
+          Prognos:
+          ${escapeHtml(
+            row.PredictedPrice ??
+            row.predicted_price ??
+            row.prediction ??
+            ""
+          )}
+        </div>
+
+        <div>
+          Avvikelse:
+          ${escapeHtml(
+            row.RelativeError ??
+            row.relative_error ??
+            row.discount ??
+            ""
+          )}
+        </div>
+
+        <a
+          href="${escapeHtml(url)}"
+          target="_blank"
+          rel="noopener"
+        >Öppna annons</a>
+      </article>
+    `;
+  }).join("");
+}
+
+async function init() {
+  const response = await fetch("data.json", {
+    cache: "no-store"
+  });
+
+  state.data = await response.json();
+
+  update();
+}
+
+init();
+</script>
+</body>
+</html>
+"""
+
+
+def build_html() -> None:
+    OUTPUT_HTML.write_text(
+        HTML_TEMPLATE,
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
-    """
-    Bygger web_site/.
-    """
+    ml_data = get_ml_data()
 
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
+    current_findings = get_ml_findings()
+
+    print(
+        f"Aktuella fynd: {len(current_findings)}"
     )
 
-    payload = build_payload()
-
-    data_path = (
-        OUTPUT_DIR
-        / "data.json"
+    payload = build_payload(
+        ml_data,
+        current_findings,
     )
 
-    with data_path.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
-
-        json.dump(
-            payload,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
-
-    html_path = (
-        OUTPUT_DIR
-        / "index.html"
+    _write_json(
+        OUTPUT_DATA,
+        payload,
     )
 
-    html_path.write_text(
-        build_html(payload),
-        encoding="utf-8",
-    )
+    build_html()
 
-    nojekyll = (
-        OUTPUT_DIR
-        / ".nojekyll"
-    )
-
-    nojekyll.write_text(
-        "",
-        encoding="utf-8",
+    print(
+        f"Skrev {OUTPUT_DATA}"
     )
 
     print(
-        "=================================================="
+        f"Skrev {OUTPUT_HTML}"
     )
 
     print(
-        "Fiskabilar statiska webbplats"
-    )
-
-    print(
-        "=================================================="
-    )
-
-    print(
-        f"Aktuella fynd: "
-        f"{len(payload['current_findings'])}"
-    )
-
-    print(
-        f"Fynd-event: "
-        f"{len(payload['find_outcomes'])}"
-    )
-
-    print(
-        f"Prissänkningar: "
-        f"{len(payload['price_reductions'])}"
-    )
-
-    print(
-        f"Marknadsobservationer: "
-        f"{len(payload['market_history'])}"
-    )
-
-    print(
-        f"Modell/årsmodell: "
-        f"{len(payload['history_table'])}"
-    )
-
-    print(
-        f"HTML: {html_path}"
-    )
-
-    print(
-        f"Data: {data_path}"
-    )
-
-    print(
-        "=================================================="
+        f"Aktuella fynd med giltig aktuell URL: "
+        f"{len(current_findings)}"
     )
 
 
