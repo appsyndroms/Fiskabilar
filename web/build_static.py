@@ -45,6 +45,48 @@ VEHICLE_IDENTITY_FILE = (
 )
 
 
+def _is_valid_url(value) -> bool:
+    """
+    Returnerar True endast för en faktisk användbar HTTP(S)-URL.
+
+    Detta är viktigt eftersom pandas/JSON kan ge oss värden som:
+
+        NaN
+        "nan"
+        None
+        "null"
+        ""
+
+    Dessa får aldrig bli klickbara länkar på webbplatsen.
+    """
+
+    if value is None:
+        return False
+
+    try:
+        if value != value:
+            return False
+    except Exception:
+        pass
+
+    text = str(value).strip()
+
+    if not text:
+        return False
+
+    if text.lower() in {
+        "nan",
+        "none",
+        "null",
+    }:
+        return False
+
+    return text.startswith((
+        "http://",
+        "https://",
+    ))
+
+
 def _normalisera_vehicle_id(value) -> str:
     """
     Normaliserar vehicle_id så att både:
@@ -93,7 +135,10 @@ def _get_vehicle_id(row: dict) -> str:
 
 def _get_url(row: dict):
     """
-    Hämtar annons-URL från ett record.
+    Hämtar en giltig annons-URL från ett record.
+
+    Ogiltiga värden som NaN, "nan", None, null och
+    tomma strängar ignoreras.
     """
 
     for key in (
@@ -113,16 +158,11 @@ def _get_url(row: dict):
 
             for item in value:
 
-                if (
-                    item is not None
-                    and str(item).strip()
-                ):
+                if _is_valid_url(item):
                     return str(item).strip()
 
-        elif (
-            value is not None
-            and str(value).strip()
-        ):
+        elif _is_valid_url(value):
+
             return str(value).strip()
 
     return None
@@ -154,17 +194,14 @@ def _parse_tid(value):
 
 def _load_vehicle_identity_urls() -> dict[str, str]:
     """
-    Läser vehicle_identity.json och bygger en fallback-mapping:
+    Läser vehicle_identity.json och bygger en mapping:
 
         vehicle:00000255 -> https://...
 
-    OBS:
+    Endast giltiga URL:er används.
 
-    Detta är endast fallback.
-
-    Samma fysiska bil kan ha flera annonser över tid.
-    Därför ska aktuell market_history prioriteras framför
-    denna mapping.
+    Om flera URL-identiteter finns för samma vehicle_id
+    behålls den senast påträffade giltiga URL:en.
     """
 
     data = read_json(
@@ -208,16 +245,16 @@ def _load_vehicle_identity_urls() -> dict[str, str]:
             len("url:"):
         ].strip()
 
+        if not _is_valid_url(url):
+            continue
+
         normalized_vehicle_id = (
             _normalisera_vehicle_id(
                 vehicle_id
             )
         )
 
-        if (
-            not normalized_vehicle_id
-            or not url
-        ):
+        if not normalized_vehicle_id:
             continue
 
         result[
@@ -233,7 +270,7 @@ def _load_latest_market_urls(
     """
     Bygger en mapping:
 
-        vehicle_id -> senaste kända annons-URL
+        vehicle_id -> senaste kända giltiga annons-URL
 
     Endast riktiga annonsobservationer används.
 
@@ -242,18 +279,6 @@ def _load_latest_market_urls(
 
     Detta är viktigt eftersom samma fysiska bil kan få
     ett nytt Bilweb-annons-ID och därmed en helt ny URL.
-
-    Exempel:
-
-        vehicle:00000255
-
-        äldre:
-            .../12789387
-
-        nyare:
-            .../358555
-
-    Då används den nyare URL:en.
     """
 
     latest: dict[
@@ -325,13 +350,12 @@ def _berika_fynd_med_url(
 
     Prioritetsordning:
 
-    1. URL som redan finns direkt på ML-fyndet
-    2. Senaste annonsobservationen i market_history
+    1. Giltig URL som redan finns direkt på ML-fyndet
+    2. Senaste giltiga annonsobservationen i market_history
     3. vehicle_identity.json som fallback
 
-    Detta gör att en gammal Bilweb-URL inte fortsätter
-    användas bara för att den fortfarande finns registrerad
-    i vehicle_identity.json.
+    Ogiltiga värden, exempelvis "nan", betraktas som
+    om URL saknas.
     """
 
     if not findings:
@@ -348,6 +372,7 @@ def _berika_fynd_med_url(
     direct_matches = 0
     market_matches = 0
     identity_matches = 0
+    missing_matches = 0
 
     for finding in findings:
 
@@ -383,7 +408,9 @@ def _berika_fynd_med_url(
             )
         )
 
-        if market_url:
+        if _is_valid_url(
+            market_url
+        ):
 
             result["url"] = (
                 market_url
@@ -403,7 +430,9 @@ def _berika_fynd_med_url(
             )
         )
 
-        if identity_url:
+        if _is_valid_url(
+            identity_url
+        ):
 
             result["url"] = (
                 identity_url
@@ -415,6 +444,8 @@ def _berika_fynd_med_url(
 
             result["url"] = ""
 
+            missing_matches += 1
+
         enriched.append(
             result
         )
@@ -423,7 +454,8 @@ def _berika_fynd_med_url(
         "URL-komplettering: "
         f"{direct_matches} direkt, "
         f"{market_matches} via market_history, "
-        f"{identity_matches} via vehicle_identity"
+        f"{identity_matches} via vehicle_identity, "
+        f"{missing_matches} saknas"
     )
 
     print(
@@ -476,8 +508,13 @@ def get_ml_findings(
     market_history: list[dict],
 ) -> list[dict]:
     """
-    Läser aktuella ML-fynd och kompletterar
-    deras annons-URL med aktuell market history.
+    Läser aktuella ML-fynd.
+
+    Ett fynd räknas som aktivt endast om det finns
+    en fungerande annons-URL.
+
+    Fynd utan URL ligger kvar i fynd.jsonl som rådata,
+    men tas bort från webbplatsens current_findings.
     """
 
     findings = read_jsonl(
@@ -493,6 +530,16 @@ def get_ml_findings(
         market_history,
         vehicle_identity_urls,
     )
+
+    # Ett fynd utan fungerande annons-URL är inte
+    # ett aktivt fynd eftersom användaren inte kan agera på det.
+    findings = [
+        row
+        for row in findings
+        if _is_valid_url(
+            row.get("url")
+        )
+    ]
 
     def fynd_score(
         row: dict,
