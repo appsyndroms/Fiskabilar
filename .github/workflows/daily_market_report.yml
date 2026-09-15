@@ -91,6 +91,10 @@ jobs:
         run: |
           python -u -m ml.train_market_model
 
+      - name: Uppdatera ML-fynd
+        run: |
+          python -u -m ml.analyze_model --debug
+
       - name: Generera ML-värderingar
         run: |
           python -u -m ml.generate_ml_valuation
