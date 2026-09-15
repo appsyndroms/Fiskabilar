@@ -12,6 +12,36 @@ MARKET_THRESHOLD_PCT = -5.0
 MIN_COMPARABLES = 3
 
 
+def _is_valid_url(value):
+    """Returnerar True endast för en faktisk, användbar URL."""
+
+    if value is None:
+        return False
+
+    try:
+        if pd.isna(value):
+            return False
+    except (TypeError, ValueError):
+        pass
+
+    text = str(value).strip()
+
+    if not text:
+        return False
+
+    if text.lower() in {
+        "nan",
+        "none",
+        "null",
+    }:
+        return False
+
+    return text.startswith((
+        "http://",
+        "https://",
+    ))
+
+
 def _evidensvikt(jämförbara):
     """
     Beräknar hur starkt jämförelseunderlaget är.
@@ -84,14 +114,16 @@ def _get_ad_url(
     """
     Hämtar den mest aktuella annons-URL:en för fyndet.
 
+    Ogiltiga värden som NaN, None och tomma strängar ignoreras.
+
     Om Identity finns i det fullständiga datasetet används alltid den
-    senaste observationen för samma Identity. Det är viktigt eftersom
-    en diagnostikrad kan bära med sig en äldre URL medan samma fysiska
-    bil senare fått en ny annons-URL.
+    senaste giltiga observationen för samma Identity. Det är viktigt
+    eftersom en diagnostikrad kan bära med sig en äldre URL medan samma
+    fysiska bil senare fått en ny annons-URL.
 
     Prioritet:
-      1. senaste matchande observation i datasetet
-      2. URL direkt på raden
+      1. senaste matchande giltiga observation i datasetet
+      2. giltig URL direkt på raden
       3. tom sträng
     """
 
@@ -142,10 +174,7 @@ def _get_ad_url(
                         key
                     )
 
-                    if (
-                        value is not None
-                        and str(value).strip()
-                    ):
+                    if _is_valid_url(value):
                         return str(
                             value
                         ).strip()
@@ -164,10 +193,7 @@ def _get_ad_url(
             key
         )
 
-        if (
-            value is not None
-            and str(value).strip()
-        ):
+        if _is_valid_url(value):
             return str(
                 value
             ).strip()
@@ -342,9 +368,6 @@ def _bygg_fyndkandidater(
                     fynd_score
                 ),
 
-                # Viktigt:
-                # URL hämtas från den senaste observationen
-                # för samma Identity i hela datasetet.
                 "url": _get_ad_url(
                     row,
                     dataset,
