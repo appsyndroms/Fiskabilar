@@ -4213,7 +4213,32 @@
     "fp:053b11e5e20ede7e": "vehicle:00001168",
     "source:bytbil:19400683": "vehicle:00001169",
     "url:https://www.bytbil.com/sodermanlands-lan/personbil-330e-xdrive-touring-m-sport-drag-m-sportpaket-pro-1159-19400683": "vehicle:00001169",
-    "fp:3d9e5b9c4f44b67a": "vehicle:00001169"
+    "fp:3d9e5b9c4f44b67a": "vehicle:00001169",
+    "url:https://www.wayke.se/objekt/3345e0ce-acd8-45b3-abe0-b536e961baa1": "vehicle:00001170",
+    "fp:c105ea27ac89dc08": "vehicle:00001170",
+    "source:bytbil:19401307": "vehicle:00001171",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-1458-19401307": "vehicle:00001171",
+    "fp:bd7b988ee0b8c97a": "vehicle:00001171",
+    "fp:9ec6a414ae2d05a5": "vehicle:00001161",
+    "fp:a193fefed37d84c4": "vehicle:00001162",
+    "fp:c80a8a17417d04dd": "vehicle:00001163",
+    "url:https://www.wayke.se/objekt/2039a055-62da-4cac-b8e5-656e51354286": "vehicle:00001172",
+    "fp:dba0fdf808b89530": "vehicle:00001172",
+    "fp:71245bdaeddd779d": "vehicle:00000226",
+    "fp:1d4b295181aaaa0a": "vehicle:00000881",
+    "fp:d164d92ec18dc863": "vehicle:00001151",
+    "fp:2718993cb8cc479c": "vehicle:00001156",
+    "fp:bf83018342b1b33d": "vehicle:00001153",
+    "source:bytbil:19344114": "vehicle:00001173",
+    "url:https://www.bytbil.com/sodermanlands-lan/personbil-330e-xdrive-touring-292hk-el-drag-driving-assistant-prof-10526-19344114": "vehicle:00001173",
+    "fp:31a4519922f0a32c": "vehicle:00001173",
+    "url:https://www.wayke.se/objekt/fd322c8a-7e0d-444d-a055-75ee73ca3159": "vehicle:00001174",
+    "fp:ca77555f9adbbe4f": "vehicle:00001174",
+    "source:bytbil:19396826": "vehicle:00001175",
+    "url:https://www.bytbil.com/jonkopings-lan/personbil-330e-xdrive-touring-3-95-m-sport-innovation-hifi-fartpilot-drag-2107-19396826": "vehicle:00001175",
+    "fp:0cd6cd403f3e16b5": "vehicle:00001175",
+    "url:https://www.wayke.se/objekt/d9568cf1-7d9c-4b85-a152-d9c72634df86": "vehicle:00001176",
+    "fp:c2b26d1124b72a0f": "vehicle:00001176"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -25269,6 +25294,132 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001170": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/3345e0ce-acd8-45b3-abe0-b536e961baa1",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001171": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19401307",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001172": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/2039a055-62da-4cac-b8e5-656e51354286",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001173": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19344114",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001174": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/fd322c8a-7e0d-444d-a055-75ee73ca3159",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001175": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19396826",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001176": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/d9568cf1-7d9c-4b85-a152-d9c72634df86",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
