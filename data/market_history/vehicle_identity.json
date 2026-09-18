@@ -4679,7 +4679,117 @@
     "fp:56a8558cf0b2e994": "vehicle:00001285",
     "source:bytbil:19407458": "vehicle:00001286",
     "url:https://www.bytbil.com/sodermanlands-lan/personbil-330e-xdrive-touring-backkamera-h-k-rattvarme-ranta-3-95-2736-19407458": "vehicle:00001286",
-    "fp:10c023097d088b84": "vehicle:00001286"
+    "fp:10c023097d088b84": "vehicle:00001286",
+    "reg:OEG40Y": "vehicle:00001287",
+    "source:bilweb:385526": "vehicle:00001287",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-awd-recharge-350hk-2023-kombi-385526": "vehicle:00001287",
+    "fp:fc6227915f7b5a80": "vehicle:00001287",
+    "reg:TBE78Y": "vehicle:00001288",
+    "source:bilweb:384955": "vehicle:00001288",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-core-kamera-drag-carplay-2023-kombi-384955": "vehicle:00001288",
+    "fp:0211877abec796c7": "vehicle:00001288",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-recharge-t6-awd-core-h-k-skinn-drag-360-varmare-2023-kombi-377507": "vehicle:00001090",
+    "source:bilweb:384886": "vehicle:00000838",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-recharge-t6-awd-geartronic-core-edition-euro-6-2024-kombi-384886": "vehicle:00000838",
+    "fp:c3a8c864b4f3775a": "vehicle:00000838",
+    "reg:HFR94E": "vehicle:00001289",
+    "source:bilweb:384805": "vehicle:00001289",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-ultimate-dark-pano-b-w-360-drag-2024-kombi-384805": "vehicle:00001289",
+    "fp:111622fbf6dbba79": "vehicle:00001289",
+    "reg:RBU45M": "vehicle:00001290",
+    "source:bilweb:385925": "vehicle:00001290",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-360-kamera-hk-2025-kombi-385925": "vehicle:00001290",
+    "fp:eb5e3bef77bc88e8": "vehicle:00001290",
+    "reg:JFW52G": "vehicle:00001291",
+    "source:bilweb:385923": "vehicle:00001291",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-plus-bright-edition-2025-kombi-385923": "vehicle:00001291",
+    "fp:34251d0a52192143": "vehicle:00001291",
+    "reg:SNW02W": "vehicle:00001292",
+    "source:bilweb:385442": "vehicle:00001292",
+    "url:https://bilweb.se/skane-lan/volvo-v60-t6-plus-dark-nordic-edition-360-kamera-navigation-dragrkok-2025-kombi-385442": "vehicle:00001292",
+    "fp:d6e71170c250be5d": "vehicle:00001292",
+    "reg:RJC84A": "vehicle:00001293",
+    "source:bilweb:385444": "vehicle:00001293",
+    "url:https://bilweb.se/skane-lan/volvo-v60-t6-plus-dark-nordic-edition-360-kamera-navigation-dragrkok-2025-kombi-385444": "vehicle:00001293",
+    "fp:88d3832156fb7738": "vehicle:00001293",
+    "reg:SFR41F": "vehicle:00001294",
+    "source:bilweb:385145": "vehicle:00001294",
+    "url:https://bilweb.se/kalmar-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-385145": "vehicle:00001294",
+    "fp:97d077a4daccf970": "vehicle:00001294",
+    "reg:PSW01U": "vehicle:00001295",
+    "source:bilweb:385050": "vehicle:00001295",
+    "url:https://bilweb.se/kronobergs-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-385050": "vehicle:00001295",
+    "fp:db305013dd95e747": "vehicle:00001295",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-h-k-360-kamera-keyless-2025-kombi-384605": "vehicle:00001252",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-dragkrok-360-kamera-2025-kombi-384581": "vehicle:00001254",
+    "reg:RWB21M": "vehicle:00001296",
+    "source:bilweb:384386": "vehicle:00001296",
+    "url:https://bilweb.se/hallands-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-384386": "vehicle:00001296",
+    "fp:cec493d8a0bc0e48": "vehicle:00001296",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-plus-bright-edition-dragkrok-2025-kombi-382672": "vehicle:00001199",
+    "fp:4266e05bfb46ac62": "vehicle:00001182",
+    "reg:WWA30X": "vehicle:00001297",
+    "source:bilweb:385400": "vehicle:00001297",
+    "url:https://bilweb.se/vasternorrlands-lan/volvo-v90-t6-350hk-awd-plus-bright-varmare-skinn-360-navi-2023-kombi-385400": "vehicle:00001297",
+    "fp:0606d55fc4b78ce0": "vehicle:00001297",
+    "reg:RAL57H": "vehicle:00001298",
+    "source:bilweb:385134": "vehicle:00001298",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v90-recharge-t6-core-edition-2024-kombi-385134": "vehicle:00001298",
+    "fp:1d2bc87d996b136d": "vehicle:00001298",
+    "reg:KWR80W": "vehicle:00001299",
+    "source:bilweb:385147": "vehicle:00001299",
+    "url:https://bilweb.se/kalmar-lan/volvo-v90-t6-core-edition-ii-2025-kombi-385147": "vehicle:00001299",
+    "fp:1998e52c9aa41e83": "vehicle:00001299",
+    "fp:2aca45b97a2c6015": "vehicle:00001263",
+    "fp:f0989d1dbcaa0935": "vehicle:00001264",
+    "url:https://bilweb.se/orebro-lan/volvo-v90-t6-core-edition-ii-dragkrok-360-kamera-2025-kombi-384578": "vehicle:00001265",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v90-t6-core-edition-ii-drag-360-kamera-2025-kombi-382673": "vehicle:00001209",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v90-t6-plus-dark-nordic-edition-drag-360-kamera-2025-kombi-380144": "vehicle:00001152",
+    "reg:MHM22C": "vehicle:00001300",
+    "source:bilweb:385897": "vehicle:00001300",
+    "url:https://bilweb.se/sodermanlands-lan/bmw-330-e-xdrive-touring-backkamera-h-k-rattvarme-ranta-3-95-2024-kombi-385897": "vehicle:00001300",
+    "fp:6613a884a5477778": "vehicle:00001300",
+    "reg:RZP39N": "vehicle:00001301",
+    "source:bilweb:385767": "vehicle:00001301",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-backkamera-navi-18-2024-kombi-385767": "vehicle:00001301",
+    "fp:7ed860f01f7b5502": "vehicle:00001301",
+    "reg:SWA55Y": "vehicle:00001302",
+    "source:bilweb:385768": "vehicle:00001302",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-pro-h-k-pano-m-stol-19-2024-kombi-385768": "vehicle:00001302",
+    "fp:02cbf21466833d93": "vehicle:00001302",
+    "source:bytbil:19407912": "vehicle:00001303",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-recharge-t6-core-edition-350hk-drag-carplay-backkamera-11423-19407912": "vehicle:00001303",
+    "fp:d55f23fd01abbae6": "vehicle:00001303",
+    "source:bytbil:19390003": "vehicle:00001304",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-recharge-t6-awd-18-8-kwh-399hk-bright-drag-hk-360kam-8546-19390003": "vehicle:00001304",
+    "fp:2f34ef442ddeb2aa": "vehicle:00001304",
+    "source:bytbil:19111648": "vehicle:00001305",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-h-k-dragkrok-0ranta-5152-19111648": "vehicle:00001305",
+    "fp:fc1bb10306c225bc": "vehicle:00001305",
+    "source:bytbil:19127447": "vehicle:00001306",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-h-k-360-kamera-0ranta-5152-19127447": "vehicle:00001306",
+    "fp:dfe6b14e67940807": "vehicle:00001306",
+    "source:bytbil:18899925": "vehicle:00001307",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v60-t6-plus-bright-op-leasing-5395-vinterhjul-ingar-4694-18899925": "vehicle:00001307",
+    "fp:03d146a6eb181915": "vehicle:00001307",
+    "source:bytbil:19111884": "vehicle:00001308",
+    "url:https://www.bytbil.com/uppsala-lan/personbil-v60-t6-plus-dark-nordic-edt-360-kamera-hk-0-ranta-1603-19111884": "vehicle:00001308",
+    "fp:4221d24b395d4870": "vehicle:00001308",
+    "source:bytbil:19407454": "vehicle:00001309",
+    "url:https://www.bytbil.com/orebro-lan/personbil-v60-recharge-t6-awd-geartronic-core-edition-euro-6-9831-19407454": "vehicle:00001309",
+    "fp:d1460de0eefd118f": "vehicle:00001309",
+    "source:bytbil:19179543": "vehicle:00001310",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v90-t6-plus-dark-nordic-edition-11439-19179543": "vehicle:00001310",
+    "fp:c24795b2e8bc7bda": "vehicle:00001310",
+    "source:bytbil:19188761": "vehicle:00001311",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v90-t6-plus-dark-nordic-edition-360-kamera-hk-11439-19188761": "vehicle:00001311",
+    "fp:16fd4fc3abc156c6": "vehicle:00001311",
+    "source:bytbil:19208960": "vehicle:00001312",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v90-t6-plus-dark-nordic-edition-11439-19208960": "vehicle:00001312",
+    "fp:41fe8c560d682747": "vehicle:00001312",
+    "source:bytbil:19117634": "vehicle:00001313",
+    "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v90-t6-plus-dark-nordic-edition-360-kamera-hk-11439-19117634": "vehicle:00001313",
+    "fp:a84882b9c5844d76": "vehicle:00001313"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -19757,7 +19867,7 @@
         "regnr": "EWU61K",
         "vin": null
       },
-      "last_seen": "368011",
+      "last_seen": "384886",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -27837,6 +27947,492 @@
         "vin": null
       },
       "last_seen": "19407458",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001287": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "OEG40Y",
+        "vin": null
+      },
+      "last_seen": "385526",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001288": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "TBE78Y",
+        "vin": null
+      },
+      "last_seen": "384955",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001289": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "HFR94E",
+        "vin": null
+      },
+      "last_seen": "384805",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001290": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "RBU45M",
+        "vin": null
+      },
+      "last_seen": "385925",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001291": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "JFW52G",
+        "vin": null
+      },
+      "last_seen": "385923",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001292": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "SNW02W",
+        "vin": null
+      },
+      "last_seen": "385442",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001293": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "RJC84A",
+        "vin": null
+      },
+      "last_seen": "385444",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001294": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "SFR41F",
+        "vin": null
+      },
+      "last_seen": "385145",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001295": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "PSW01U",
+        "vin": null
+      },
+      "last_seen": "385050",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001296": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "RWB21M",
+        "vin": null
+      },
+      "last_seen": "384386",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001297": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "WWA30X",
+        "vin": null
+      },
+      "last_seen": "385400",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001298": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "RAL57H",
+        "vin": null
+      },
+      "last_seen": "385134",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001299": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "KWR80W",
+        "vin": null
+      },
+      "last_seen": "385147",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001300": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "MHM22C",
+        "vin": null
+      },
+      "last_seen": "385897",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001301": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "RZP39N",
+        "vin": null
+      },
+      "last_seen": "385767",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001302": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "SWA55Y",
+        "vin": null
+      },
+      "last_seen": "385768",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001303": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19407912",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001304": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19390003",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001305": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19111648",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001306": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19127447",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001307": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "18899925",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001308": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19111884",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001309": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19407454",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001310": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19179543",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001311": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19188761",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001312": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19208960",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001313": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19117634",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
