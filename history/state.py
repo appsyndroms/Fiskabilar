@@ -36,6 +36,18 @@ from .identity import (
 ANTAL_MISSAR_FOR_FORSVUNNEN = 2
 
 
+def _ar_pris(value) -> bool:
+    """
+    Avgör om ett värde är ett giltigt numeriskt pris.
+
+    bool exkluderas eftersom bool ärver från int i Python.
+    """
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+    )
+
+
 def _nyckel(
     bil: dict,
 ) -> str:
@@ -211,10 +223,7 @@ def ladda_state() -> dict:
                     "senaste_pris"
                 )
 
-                if isinstance(
-                    pris,
-                    (int, float),
-                ):
+                if _ar_pris(pris):
                     historik[
                         "notifierad_pris"
                     ] = pris
@@ -300,14 +309,8 @@ def _registrera_prisandring(
     """
 
     if (
-        not isinstance(
-            gammalt_pris,
-            (int, float),
-        )
-        or not isinstance(
-            nytt_pris,
-            (int, float),
-        )
+        not _ar_pris(gammalt_pris)
+        or not _ar_pris(nytt_pris)
         or gammalt_pris == nytt_pris
     ):
         return
@@ -492,23 +495,29 @@ def uppdatera_och_berika(
             state,
         )
 
+        aktuellt_pris = bil.get(
+            "annonspris"
+        )
+
         # --------------------------------------------------------
         # NY BIL
         # --------------------------------------------------------
 
         if historik is None:
 
+            giltigt_pris = (
+                aktuellt_pris
+                if _ar_pris(aktuellt_pris)
+                else None
+            )
+
             state[
                 nyckel
             ] = {
                 "vehicle_id": vehicle_id,
                 "forsta_sedd": idag,
-                "forsta_pris": bil[
-                    "annonspris"
-                ],
-                "senaste_pris": bil[
-                    "annonspris"
-                ],
+                "forsta_pris": giltigt_pris,
+                "senaste_pris": giltigt_pris,
                 "senast_sedd": idag,
                 "notifierad": False,
 
@@ -562,23 +571,91 @@ def uppdatera_och_berika(
                 "annonspris"
             )
 
-            forsta_sedd = date.fromisoformat(
+            # ----------------------------------------------------
+            # PRISVALIDERING
+            #
+            # En misslyckad scraper/parser ska inte skriva över
+            # ett tidigare giltigt pris med None.
+            #
+            # Om aktuell annons saknar pris används det senaste
+            # giltiga priset för historikberäkning.
+            # ----------------------------------------------------
+
+            har_gammalt_pris = _ar_pris(
+                gammalt_pris
+            )
+
+            har_nytt_pris = _ar_pris(
+                nytt_pris
+            )
+
+            if not har_nytt_pris:
+                nytt_pris_for_historik = (
+                    gammalt_pris
+                    if har_gammalt_pris
+                    else None
+                )
+            else:
+                nytt_pris_for_historik = nytt_pris
+
+            # ----------------------------------------------------
+            # FÖRSTA PRIS
+            #
+            # Äldre state kan ha saknat ett giltigt förstagångspris.
+            # Om vi nu får ett giltigt pris fyller vi i det.
+            # ----------------------------------------------------
+
+            forsta_pris = historik.get(
+                "forsta_pris"
+            )
+
+            if (
+                not _ar_pris(forsta_pris)
+                and har_nytt_pris
+            ):
+                forsta_pris = nytt_pris
+
+                historik[
+                    "forsta_pris"
+                ] = forsta_pris
+
+            forsta_sedd_text = historik.get(
+                "forsta_sedd"
+            )
+
+            try:
+                forsta_sedd = date.fromisoformat(
+                    forsta_sedd_text
+                )
+            except (
+                TypeError,
+                ValueError,
+            ):
+                forsta_sedd = date.today()
+
                 historik[
                     "forsta_sedd"
-                ]
-            )
+                ] = idag
 
             dagar_ute = (
                 date.today()
                 - forsta_sedd
             ).days
 
-            sankning = (
-                historik[
-                    "forsta_pris"
-                ]
-                - nytt_pris
-            )
+            # ----------------------------------------------------
+            # PRISSÄNKNING
+            # ----------------------------------------------------
+
+            if (
+                _ar_pris(forsta_pris)
+                and har_nytt_pris
+            ):
+                sankning = (
+                    forsta_pris
+                    - nytt_pris
+                )
+            else:
+                sankning = 0
 
             bil[
                 "dagar_ute"
@@ -602,14 +679,8 @@ def uppdatera_och_berika(
             # ----------------------------------------------------
 
             prisandrad = (
-                isinstance(
-                    gammalt_pris,
-                    (int, float),
-                )
-                and isinstance(
-                    nytt_pris,
-                    (int, float),
-                )
+                har_gammalt_pris
+                and har_nytt_pris
                 and gammalt_pris
                 != nytt_pris
             )
@@ -687,9 +758,24 @@ def uppdatera_och_berika(
                 + 1
             )
 
-            historik[
-                "senaste_pris"
-            ] = nytt_pris
+            # ----------------------------------------------------
+            # SKRIV ALDRIG ÖVER ETT GILTIGT PRIS MED None
+            # ----------------------------------------------------
+
+            if har_nytt_pris:
+
+                historik[
+                    "senaste_pris"
+                ] = nytt_pris
+
+            elif not _ar_pris(
+                historik.get(
+                    "senaste_pris"
+                )
+            ):
+                historik[
+                    "senaste_pris"
+                ] = None
 
             historik[
                 "senast_sedd"
@@ -730,9 +816,8 @@ def redan_notifierad(
         "notifierad_pris"
     )
 
-    if not isinstance(
-        notifierad_pris,
-        (int, float),
+    if not _ar_pris(
+        notifierad_pris
     ):
         return True
 
@@ -740,9 +825,8 @@ def redan_notifierad(
         "annonspris"
     )
 
-    if not isinstance(
-        aktuellt_pris,
-        (int, float),
+    if not _ar_pris(
+        aktuellt_pris
     ):
         return True
 
