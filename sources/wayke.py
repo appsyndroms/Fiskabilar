@@ -70,44 +70,55 @@ HEADERS = {
 }
 
 
-def _bygg_annons_regex(wayke_anchor: str) -> re.Pattern:
-    """
-    Bygger annonsregexen dynamiskt per bilkonfiguration.
-
-    Regexen bygger på de stabila textetiketter som verifierats
-    på Waykes söksidor.
-    """
-
-    return re.compile(
-        r"Plats:(?P<plats>.*?)"
-        r"Återförsäljare:(?P<dealer>.*?)"
-        rf"(?:I lager)?{re.escape(wayke_anchor)}(?P<titel>.*?)"
-        r"Fuel Type:(?P<fuel>.*?)"
-        r"Mätarställning:(?P<mil>[\d\s]+?)\s*mil"
-        r"Model Year:(?P<ar>\d{4})"
-        r"Gearbox Type:(?P<gearbox>.*?)"
-        r"Kontantpris(?P<pris>[\d\s]+?)\s*kr",
-        re.DOTALL,
-    )
-
-
 OBJEKT_LANK_REGEX = re.compile(
     r"/objekt/[0-9a-fA-F-]+"
 )
 
 
-def _normalisera_diagnostiktext(text: str) -> str:
+def _normalisera_text(
+    text: str,
+) -> str:
+    """
+    Normaliserar whitespace så att fält kan extraheras
+    även om Wayke ändrar HTML-rader eller spacing.
+    """
+
+    return re.sub(
+        r"\s+",
+        " ",
+        text or "",
+    ).strip()
+
+
+def _normalisera_diagnostiktext(
+    text: str,
+) -> str:
     """Gör text lämplig för kompakt diagnostik."""
 
-    return (
+    return _normalisera_text(
         text
-        .strip()
-        .replace("\n", " ")
-        .replace("\r", " ")
     )
 
 
-def _hitta_objekt_url(element) -> str | None:
+def _bygg_annons_regex(
+    wayke_anchor: str,
+) -> re.Pattern:
+    """
+    Behålls för kompatibilitet med befintligt anrop.
+
+    Den gamla parsern använde en enda stor regex för hela kortet.
+    Den nya parsern använder i första hand individuella fält.
+    """
+
+    return re.compile(
+        re.escape(wayke_anchor),
+        re.IGNORECASE,
+    )
+
+
+def _hitta_objekt_url(
+    element,
+) -> str | None:
     """
     Letar efter objekt-URL i ett HTML-element.
 
@@ -146,34 +157,231 @@ def _hitta_annonskort(
 ):
     """
     Letar upp det närmaste HTML-element som representerar ett
-    komplett Wayke-annonskort.
+    Wayke-annonskort.
 
-    Vi går uppåt i DOM-trädet och letar efter ett element vars text
-    innehåller de stabila fälten som behövs för att tolka annonsen.
+    Tidigare krävdes att kortet samtidigt innehöll flera exakta
+    textetiketter. Det gjorde att ett mindre HTML-/språkbyte kunde
+    ge 0 tolkade annonser.
 
-    Detta gör att URL och annonsdata kommer från samma DOM-segment.
+    Nu använder vi i stället en kombination av:
+    - objektlänk
+    - rimlig kortstorlek
+    - annonsrelaterad information
+
+    och går sedan uppåt i DOM-trädet.
     """
 
     element = anchor
 
-    for _ in range(10):
+    kandidater = []
+
+    for _ in range(12):
+
         if element is None:
             break
 
-        text = element.get_text(
-            separator=""
+        text = _normalisera_text(
+            element.get_text(
+                separator=" "
+            )
         )
 
-        if (
-            "Plats:" in text
-            and "Återförsäljare:" in text
-            and "Mätarställning:" in text
-            and "Model Year:" in text
-            and "Kontantpris" in text
-        ):
-            return element
+        if not text:
+            element = element.parent
+            continue
+
+        har_annonsdata = (
+            "Mätarställning" in text
+            or "Model Year" in text
+            or "Kontantpris" in text
+            or "Fuel Type" in text
+            or "Gearbox Type" in text
+            or "Återförsäljare" in text
+            or "Plats:" in text
+            or "mil" in text.lower()
+            or "kr" in text.lower()
+        )
+
+        if har_annonsdata:
+            kandidater.append(
+                element
+            )
+
+        # När vi kommer upp till ett mycket stort block har vi
+        # sannolikt lämnat själva annonskortet.
+        if len(text) > 5000:
+            break
 
         element = element.parent
+
+    if not kandidater:
+        return None
+
+    # Välj det minsta rimliga elementet som fortfarande innehåller
+    # annonsinformation.
+    kandidater.sort(
+        key=lambda e: len(
+            _normalisera_text(
+                e.get_text(
+                    separator=" "
+                )
+            )
+        )
+    )
+
+    return kandidater[0]
+
+
+def _extrahera_falt(
+    text: str,
+    labels: list[str],
+) -> str | None:
+    """
+    Extraherar texten efter en etikett fram till nästa kända
+    etikettliknande segment.
+
+    Används som fallback när Waykes HTML-format förändras.
+    """
+
+    normaliserad = _normalisera_text(
+        text
+    )
+
+    for label in labels:
+
+        pattern = re.compile(
+            rf"{re.escape(label)}\s*:?\s*"
+            rf"(.+?)(?="
+            rf"\s+(?:Plats|Återförsäljare|Fuel Type|"
+            rf"Model Year|Gearbox Type|Mätarställning|"
+            rf"Kontantpris|Pris)\s*:?"
+            rf"|$)",
+            re.IGNORECASE,
+        )
+
+        match = pattern.search(
+            normaliserad
+        )
+
+        if match:
+            value = match.group(
+                1
+            ).strip()
+
+            if value:
+                return value
+
+    return None
+
+
+def _extrahera_ar(
+    text: str,
+) -> int | None:
+    """
+    Hämtar årsmodell.
+    """
+
+    patterns = [
+        r"Model Year\s*:?\s*(\d{4})",
+        r"Årsmodell\s*:?\s*(\d{4})",
+        r"Modellår\s*:?\s*(\d{4})",
+    ]
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE,
+        )
+
+        if match:
+            return int(
+                match.group(1)
+            )
+
+    return None
+
+
+def _extrahera_mil(
+    text: str,
+) -> int | None:
+    """
+    Hämtar miltal.
+    """
+
+    patterns = [
+        r"Mätarställning\s*:?\s*([\d\s.,]+)\s*mil",
+        r"([\d\s.,]+)\s*mil",
+    ]
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE,
+        )
+
+        if not match:
+            continue
+
+        value = re.sub(
+            r"[^\d]",
+            "",
+            match.group(1),
+        )
+
+        if value:
+            return int(
+                value
+            )
+
+    return None
+
+
+def _extrahera_pris(
+    text: str,
+) -> int | None:
+    """
+    Hämtar kontantpris.
+
+    Prioriterar uttrycklig Kontantpris men har flera fallback-format.
+    """
+
+    patterns = [
+        r"Kontantpris\s*:?\s*([\d\s.,]+)\s*kr",
+        r"Kontant\s*:?\s*([\d\s.,]+)\s*kr",
+        r"Pris\s*:?\s*([\d\s.,]+)\s*kr",
+        r"([\d\s.,]+)\s*kr",
+    ]
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE,
+        )
+
+        if not match:
+            continue
+
+        value = re.sub(
+            r"[^\d]",
+            "",
+            match.group(1),
+        )
+
+        if not value:
+            continue
+
+        pris = int(
+            value
+        )
+
+        if pris >= 100_000:
+            return pris
 
     return None
 
@@ -185,23 +393,11 @@ def _extrahera_annonskort(
     """
     Extraherar annonser direkt från Waykes HTML-kort.
 
-    Fördelen jämfört med den tidigare metoden är att vi inte längre
-    behöver para ihop:
+    URL och annonsdata kommer från samma DOM-segment.
 
-        objektlänkar[0] -> annons[0]
-        objektlänkar[1] -> annons[1]
-
-    URL:n följer i stället med det DOM-element där annonsen faktiskt
-    finns.
-
-    Returnerar poster med:
-
-        {
-            "url": ...,
-            "match": re.Match,
-        }
-
-    Dubbletter av samma objekt-ID tas bort.
+    Den nya parsern använder individuella fält i stället för
+    en enda stor regex. Det gör parsern tåligare mot mindre
+    ändringar i Waykes HTML.
     """
 
     soup = BeautifulSoup(
@@ -212,13 +408,23 @@ def _extrahera_annonskort(
     resultat: list[dict] = []
     sedda_urler: set[str] = set()
 
-    # Alla länkar till enskilda objekt.
     anchors = soup.find_all(
         "a",
-        href=OBJEKT_LANK_REGEX,
+        href=True,
     )
 
     for anchor in anchors:
+
+        href = anchor.get(
+            "href",
+            "",
+        )
+
+        if not OBJEKT_LANK_REGEX.search(
+            href
+        ):
+            continue
+
         url = _hitta_objekt_url(
             anchor
         )
@@ -236,23 +442,97 @@ def _extrahera_annonskort(
         if kort is None:
             continue
 
-        text = kort.get_text(
-            separator=""
+        text = _normalisera_text(
+            kort.get_text(
+                separator=" "
+            )
         )
 
-        match = annons_regex.search(
+        if not text:
+            continue
+
+        arsmodell = _extrahera_ar(
             text
         )
 
-        if not match:
+        miltal = _extrahera_mil(
+            text
+        )
+
+        pris = _extrahera_pris(
+            text
+        )
+
+        # Titel försöks först hämtas från Waykes anchor-text,
+        # eftersom den ofta ligger närmare själva fordonsnamnet.
+        titel = _normalisera_text(
+            anchor.get_text(
+                separator=" "
+            )
+        )
+
+        if not titel:
+            titel = _extrahera_falt(
+                text,
+                [
+                    "I lager",
+                ],
+            )
+
+        plats = _extrahera_falt(
+            text,
+            [
+                "Plats",
+            ],
+        )
+
+        dealer = _extrahera_falt(
+            text,
+            [
+                "Återförsäljare",
+                "Dealer",
+            ],
+        )
+
+        fuel = _extrahera_falt(
+            text,
+            [
+                "Fuel Type",
+                "Bränsle",
+            ],
+        )
+
+        gearbox = _extrahera_falt(
+            text,
+            [
+                "Gearbox Type",
+                "Växellåda",
+            ],
+        )
+
+        if (
+            arsmodell is None
+            and miltal is None
+            and pris is None
+        ):
             continue
 
-        sedda_urler.add(url)
+        sedda_urler.add(
+            url
+        )
 
         resultat.append(
             {
                 "url": url,
-                "match": match,
+                "titel": titel or "",
+                "plats": plats or "",
+                "dealer": dealer or "",
+                "fuel": fuel or "",
+                "gearbox": gearbox or "",
+                "arsmodell": arsmodell,
+                "miltal": miltal,
+                "pris": pris,
+                "text": text,
             }
         )
 
@@ -266,8 +546,6 @@ def _extrahera_lankar(
     Returnerar alla unika objektlänkar.
 
     Funktionen används endast för diagnostik.
-    URL-länkningen av annonser sker numera via
-    _extrahera_annonskort().
     """
 
     hittade_lankar = OBJEKT_LANK_REGEX.findall(
@@ -278,12 +556,16 @@ def _extrahera_lankar(
     sedda: set[str] = set()
 
     for lank in hittade_lankar:
+
         full_url = WAYKE_BAS + lank
 
         if full_url in sedda:
             continue
 
-        sedda.add(full_url)
+        sedda.add(
+            full_url
+        )
+
         unika_i_ordning.append(
             full_url
         )
@@ -299,16 +581,6 @@ def _logga_lankdiagnostik(
 ) -> None:
     """
     Diagnostik för Waykes URL-/annonsmatchning.
-
-    Den gamla logiken betraktade varje skillnad i antal som ett
-    totalt mismatch.
-
-    Den nya logiken visar i stället:
-
-        alla objektlänkar
-        faktiskt tolkade annonser
-
-    eftersom dessa nu extraheras från samma HTML-struktur.
     """
 
     tolkade_urler = {
@@ -322,9 +594,6 @@ def _logga_lankdiagnostik(
         for lank in alla_lankar
         if lank not in tolkade_urler
     ]
-
-    if not otolkade_lankar:
-        return
 
     warning(
         "[wayke] URL-diagnostik:"
@@ -353,76 +622,20 @@ def _logga_lankdiagnostik(
         f"{len(otolkade_lankar)}"
     )
 
-    warning(
-        "[wayke]   Ej tolkade länkar:"
-    )
-
-    for index, lank in enumerate(
-        otolkade_lankar,
-        start=1,
-    ):
-        warning(
-            f"[wayke]     {index:02d}. "
-            f"{lank}"
-        )
-
-
-def _logga_annonsdiagnostik(
-    annonser: list[dict],
-    bilkonfig: dict,
-    arsmodell: int,
-) -> None:
-    """
-    Kort diagnostik över de annonser som faktiskt tolkades.
-
-    Används bara när URL-diagnostik behövs.
-    """
-
-    warning(
-        "[wayke]   Tolkade annonskort:"
-    )
-
-    for index, annons in enumerate(
-        annonser,
-        start=1,
-    ):
-        match = annons["match"]
-
-        titel = _normalisera_diagnostiktext(
-            match.group("titel")
-        )
-
-        plats = _normalisera_diagnostiktext(
-            match.group("plats")
-        )
-
-        dealer = _normalisera_diagnostiktext(
-            match.group("dealer")
-        )
-
-        pris = _normalisera_diagnostiktext(
-            match.group("pris")
-        )
-
-        mil = _normalisera_diagnostiktext(
-            match.group("mil")
-        )
-
-        ar = _normalisera_diagnostiktext(
-            match.group("ar")
-        )
+    if otolkade_lankar:
 
         warning(
-            f"[wayke]     {index:02d}. "
-            f"{bilkonfig['wayke_anchor']} "
-            f"{titel[:100]} | "
-            f"{ar} | "
-            f"{mil} mil | "
-            f"{pris} kr | "
-            f"{plats[:60]} | "
-            f"{dealer[:60]} | "
-            f"{annons['url']}"
+            "[wayke]   Ej tolkade länkar:"
         )
+
+        for index, lank in enumerate(
+            otolkade_lankar,
+            start=1,
+        ):
+            warning(
+                f"[wayke]     {index:02d}. "
+                f"{lank}"
+            )
 
 
 def _rensa_tal(
@@ -433,7 +646,7 @@ def _rensa_tal(
     siffror = re.sub(
         r"\D",
         "",
-        text,
+        text or "",
     )
 
     return int(
@@ -524,6 +737,7 @@ def hamta_annonser() -> list[dict]:
     bilar: list[dict] = []
 
     for bilkonfig in BILAR:
+
         annons_regex = _bygg_annons_regex(
             bilkonfig[
                 "wayke_anchor"
@@ -544,7 +758,9 @@ def hamta_annonser() -> list[dict]:
             arsmodell_min,
             arsmodell_max + 1,
         ):
+
             try:
+
                 html = _hamta_sida(
                     bilkonfig[
                         "marke_slug"
@@ -556,22 +772,15 @@ def hamta_annonser() -> list[dict]:
                 )
 
             except Exception as exc:
+
                 error(
                     f"[wayke] FEL vid hämtning av "
                     f"{bilkonfig['marke_visning']} "
                     f"{bilkonfig['modell_visning']} "
                     f"årsmodell {ar}: {exc}"
                 )
-                continue
 
-            # --------------------------------------------------------
-            # NY URL-HANTERING
-            #
-            # URL och annonsdata hämtas från samma DOM-kort.
-            #
-            # Det betyder att en extra Wayke-länk inte längre gör att
-            # alla andra URL:er måste kastas bort.
-            # --------------------------------------------------------
+                continue
 
             annonskort = _extrahera_annonskort(
                 html,
@@ -585,6 +794,7 @@ def hamta_annonser() -> list[dict]:
             if len(alla_lankar) != len(
                 annonskort
             ):
+
                 _logga_lankdiagnostik(
                     alla_lankar,
                     annonskort,
@@ -593,50 +803,76 @@ def hamta_annonser() -> list[dict]:
                 )
 
             for annons in annonskort:
-                match = annons["match"]
+
+                titel = annons.get(
+                    "titel",
+                    "",
+                )
+
+                plats = annons.get(
+                    "plats",
+                    "",
+                )
+
+                dealer = annons.get(
+                    "dealer",
+                    "",
+                )
 
                 bil = _tolka_titel(
                     bilkonfig,
-                    match.group(
-                        "titel"
-                    ),
-                    match.group(
-                        "plats"
-                    ),
-                    match.group(
-                        "dealer"
-                    ),
+                    titel,
+                    plats,
+                    dealer,
                 )
 
                 if bil is None:
                     continue
 
+                annonspris = annons.get(
+                    "pris"
+                )
+
+                miltal = annons.get(
+                    "miltal"
+                )
+
+                arsmodell_tolkad = annons.get(
+                    "arsmodell"
+                )
+
+                # Ett annonskort utan pris eller årsmodell
+                # ska inte bli en halv bil som sedan kan
+                # förstöra history-state.
+                if (
+                    annonspris is None
+                    or arsmodell_tolkad is None
+                ):
+                    warning(
+                        "[wayke]   Ofullständigt "
+                        f"annonskort ignoreras: "
+                        f"{annons.get('url')}"
+                    )
+                    continue
+
+                if miltal is None:
+                    miltal = 0
+
+                gearbox = annons.get(
+                    "gearbox",
+                    "",
+                )
+
                 bil.update(
                     {
-                        "annonspris": _rensa_tal(
-                            match.group(
-                                "pris"
-                            )
-                        ),
-                        "arsmodell": int(
-                            match.group(
-                                "ar"
-                            )
-                        ),
-                        "miltal": _rensa_tal(
-                            match.group(
-                                "mil"
-                            )
-                        ),
+                        "annonspris": annonspris,
+                        "arsmodell": arsmodell_tolkad,
+                        "miltal": miltal,
                         "vaxellada": (
                             "Automat"
                             if "aut"
-                            in match.group(
-                                "gearbox"
-                            ).lower()
-                            else match.group(
-                                "gearbox"
-                            ).strip()
+                            in gearbox.lower()
+                            else gearbox.strip()
                         ),
                         "skadad": False,
                         "antal_agare": None,
