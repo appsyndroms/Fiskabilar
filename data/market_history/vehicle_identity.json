@@ -4815,7 +4815,16 @@
     "url:https://www.bytbil.com/skane-lan/personbil-v60-recharge-t6-core-edition-drag-navi-kamera-to-1268-19407538": "vehicle:00001279",
     "source:bytbil:19408133": "vehicle:00001319",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v90-recharge-t6-core-bright-1928-19408133": "vehicle:00001319",
-    "fp:190a5606442142ff": "vehicle:00001319"
+    "fp:190a5606442142ff": "vehicle:00001319",
+    "reg:OGO119": "vehicle:00001320",
+    "source:bilweb:386176": "vehicle:00001320",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-t6-core-bright-2024-kombi-386176": "vehicle:00001320",
+    "fp:2675f529cde41297": "vehicle:00001320",
+    "source:bytbil:19408492": "vehicle:00001321",
+    "url:https://www.bytbil.com/jonkopings-lan/personbil-v60-t6-plus-dark-nordic-edition-360-drag-harman-1291-19408492": "vehicle:00001321",
+    "fp:ccd054ecd092ebbd": "vehicle:00001321",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-h-k-kampanj-privatleasing-5152-19127447": "vehicle:00001306",
+    "fp:1bac2667643b36c7": "vehicle:00001309"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -28382,7 +28391,7 @@
       "metadata": {
         "modell": "V60",
         "variant": "T6 AWD",
-        "arsmodell": 2023,
+        "arsmodell": 2025,
         "regnr": null,
         "vin": null
       },
@@ -28567,6 +28576,42 @@
         "vin": null
       },
       "last_seen": "19408133",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001320": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "OGO119",
+        "vin": null
+      },
+      "last_seen": "386176",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001321": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19408492",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
