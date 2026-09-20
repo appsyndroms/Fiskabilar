@@ -4824,7 +4824,11 @@
     "url:https://www.bytbil.com/jonkopings-lan/personbil-v60-t6-plus-dark-nordic-edition-360-drag-harman-1291-19408492": "vehicle:00001321",
     "fp:ccd054ecd092ebbd": "vehicle:00001321",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-h-k-kampanj-privatleasing-5152-19127447": "vehicle:00001306",
-    "fp:1bac2667643b36c7": "vehicle:00001309"
+    "fp:1bac2667643b36c7": "vehicle:00001309",
+    "reg:JBG92C": "vehicle:00001322",
+    "source:bilweb:386382": "vehicle:00001322",
+    "url:https://bilweb.se/jonkopings-lan/volvo-v60-t6-plus-dark-nordic-edition-360-drag-harman-2025-kombi-386382": "vehicle:00001322",
+    "fp:c9350759eeed6402": "vehicle:00001322"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -28616,6 +28620,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001322": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "JBG92C",
+        "vin": null
+      },
+      "last_seen": "386382",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
