@@ -4837,7 +4837,20 @@
     "fp:509d5030a5f1ebb7": "vehicle:00001324",
     "source:bytbil:19409007": "vehicle:00001325",
     "url:https://www.bytbil.com/kronobergs-lan/personbil-v90-t6-plus-dark-nordic-edition-1167-19409007": "vehicle:00001325",
-    "fp:219463d14c868e4f": "vehicle:00001325"
+    "fp:219463d14c868e4f": "vehicle:00001325",
+    "fp:48fb23e8e195af5f": "vehicle:00001315",
+    "reg:NES33D": "vehicle:00001326",
+    "source:bilweb:386558": "vehicle:00001326",
+    "url:https://bilweb.se/kronobergs-lan/volvo-v60-t6-plus-dark-nordic-edition-2026-kombi-386558": "vehicle:00001326",
+    "fp:e595aa923b5a9a03": "vehicle:00001326",
+    "reg:UBZ09B": "vehicle:00001327",
+    "source:bilweb:386555": "vehicle:00001327",
+    "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-plus-dark-nordic-edition-2025-kombi-386555": "vehicle:00001327",
+    "fp:f33f1589881dfd22": "vehicle:00001327",
+    "reg:XPX95M": "vehicle:00001328",
+    "source:bilweb:386560": "vehicle:00001328",
+    "url:https://bilweb.se/kronobergs-lan/volvo-v90-t6-plus-dark-nordic-edition-2025-kombi-386560": "vehicle:00001328",
+    "fp:d8b7ba1922d7602a": "vehicle:00001328"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -28701,6 +28714,60 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001326": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "NES33D",
+        "vin": null
+      },
+      "last_seen": "386558",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001327": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "UBZ09B",
+        "vin": null
+      },
+      "last_seen": "386555",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001328": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "XPX95M",
+        "vin": null
+      },
+      "last_seen": "386560",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
