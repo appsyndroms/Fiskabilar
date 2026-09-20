@@ -4828,7 +4828,16 @@
     "reg:JBG92C": "vehicle:00001322",
     "source:bilweb:386382": "vehicle:00001322",
     "url:https://bilweb.se/jonkopings-lan/volvo-v60-t6-plus-dark-nordic-edition-360-drag-harman-2025-kombi-386382": "vehicle:00001322",
-    "fp:c9350759eeed6402": "vehicle:00001322"
+    "fp:c9350759eeed6402": "vehicle:00001322",
+    "source:bytbil:19409003": "vehicle:00001323",
+    "url:https://www.bytbil.com/kronobergs-lan/personbil-v60-t6-plus-dark-nordic-edition-1167-19409003": "vehicle:00001323",
+    "fp:b5d979c488ba9a56": "vehicle:00001323",
+    "source:bytbil:19409005": "vehicle:00001324",
+    "url:https://www.bytbil.com/kronobergs-lan/personbil-v90-t6-plus-dark-nordic-edition-1167-19409005": "vehicle:00001324",
+    "fp:509d5030a5f1ebb7": "vehicle:00001324",
+    "source:bytbil:19409007": "vehicle:00001325",
+    "url:https://www.bytbil.com/kronobergs-lan/personbil-v90-t6-plus-dark-nordic-edition-1167-19409007": "vehicle:00001325",
+    "fp:219463d14c868e4f": "vehicle:00001325"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -28638,6 +28647,60 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001323": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19409003",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001324": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19409005",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001325": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19409007",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
