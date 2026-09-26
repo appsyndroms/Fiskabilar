@@ -4544,7 +4544,7 @@
     "reg:EFP24U": "vehicle:00001253",
     "source:bilweb:384608": "vehicle:00001253",
     "url:https://bilweb.se/ostergotlands-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-384608": "vehicle:00001253",
-    "fp:ac776ba7da55c9ca": "vehicle:00001253",
+    "fp:ac776ba7da55c9ca": "vehicle:00001523",
     "reg:FSC08X": "vehicle:00001254",
     "source:bilweb:384581": "vehicle:00001254",
     "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-384581": "vehicle:00001254",
@@ -5703,7 +5703,23 @@
     "fp:7cf632b6018b1c30": "vehicle:00001532",
     "source:bytbil:19423085": "vehicle:00001533",
     "url:https://www.bytbil.com/uppsala-lan/personbil-v90-recharge-t6-plus-dark-luftfjadring-drag-8767-19423085": "vehicle:00001533",
-    "fp:012fbd7d56448e21": "vehicle:00001533"
+    "fp:012fbd7d56448e21": "vehicle:00001533",
+    "source:bilweb:395774": "vehicle:00000438",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v60-recharge-t6-plus-dark-2024-kombi-395774": "vehicle:00000438",
+    "fp:dd928b3496540f1c": "vehicle:00000438",
+    "fp:9470073a28f64f51": "vehicle:00001521",
+    "fp:f9b4dc75c68503ea": "vehicle:00001522",
+    "fp:d3fa763be0bb8084": "vehicle:00001525",
+    "fp:4aa8ea20c5ef820c": "vehicle:00001526",
+    "source:bytbil:19423626": "vehicle:00001534",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-1928-19423626": "vehicle:00001534",
+    "fp:2c1b35bbce039f3b": "vehicle:00001534",
+    "source:bytbil:19404367": "vehicle:00001535",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyles-1789-19404367": "vehicle:00001535",
+    "fp:fc36ddea0f8b91d1": "vehicle:00001535",
+    "source:bytbil:19423586": "vehicle:00001536",
+    "url:https://www.bytbil.com/kalmar-lan/personbil-v90-t6-plus-dark-nordic-edition-1411-19423586": "vehicle:00001536",
+    "fp:6988d4402a4c9dce": "vehicle:00001536"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -13581,7 +13597,7 @@
         "regnr": "MLR01X",
         "vin": null
       },
-      "last_seen": "352504",
+      "last_seen": "395774",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -33133,7 +33149,10 @@
         "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
-      }
+      },
+      "aliases": [
+        "vehicle:00001253"
+      ]
     },
     "vehicle:00001524": {
       "created": true,
@@ -33314,6 +33333,60 @@
         "matched_existing": true,
         "konflikt": false
       }
+    },
+    "vehicle:00001534": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19423626",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001535": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19404367",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001536": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19423586",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
     }
   },
   "aliases": {
@@ -33321,6 +33394,7 @@
     "vehicle:00000428": "vehicle:00001059",
     "vehicle:00000979": "vehicle:00000948",
     "vehicle:00000447": "vehicle:00001062",
-    "vehicle:00000247": "vehicle:00001152"
+    "vehicle:00000247": "vehicle:00001152",
+    "vehicle:00001253": "vehicle:00001523"
   }
 }
