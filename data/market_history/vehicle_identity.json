@@ -5719,7 +5719,25 @@
     "fp:fc36ddea0f8b91d1": "vehicle:00001535",
     "source:bytbil:19423586": "vehicle:00001536",
     "url:https://www.bytbil.com/kalmar-lan/personbil-v90-t6-plus-dark-nordic-edition-1411-19423586": "vehicle:00001536",
-    "fp:6988d4402a4c9dce": "vehicle:00001536"
+    "fp:6988d4402a4c9dce": "vehicle:00001536",
+    "fp:860c0a25d0b05264": "vehicle:00001520",
+    "reg:JBH68E": "vehicle:00001537",
+    "source:bilweb:395935": "vehicle:00001537",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-395935": "vehicle:00001537",
+    "fp:7b1db7a65ad2420f": "vehicle:00001537",
+    "fp:89b6f870d5563010": "vehicle:00001477",
+    "reg:EJA86E": "vehicle:00001538",
+    "source:bilweb:395892": "vehicle:00001538",
+    "url:https://bilweb.se/kalmar-lan/volvo-v90-t6-plus-dark-nordic-edition-2025-kombi-395892": "vehicle:00001538",
+    "fp:8dfcd44aa3209980": "vehicle:00001538",
+    "url:https://bilweb.se/sodermanlands-lan/bmw-330-e-xdrive-touring-backkamera-h-k-rattvarme-ranta-1-99-2024-kombi-385897": "vehicle:00001300",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-ranta-1-99-2025-kombi-350083": "vehicle:00000360",
+    "source:bytbil:19424052": "vehicle:00001539",
+    "url:https://www.bytbil.com/vasternorrlands-lan/personbil-v60-recharge-t6-ii-core-bright-1426-19424052": "vehicle:00001539",
+    "fp:ec680df08d35f0a3": "vehicle:00001539",
+    "source:bytbil:19423988": "vehicle:00001540",
+    "url:https://www.bytbil.com/orebro-lan/personbil-v60-t6-plus-dark-nordic-edition-1481-19423988": "vehicle:00001540",
+    "fp:3979746e2fe62eec": "vehicle:00001540"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -17698,10 +17716,10 @@
         "modell": "330e-xdrive-touring",
         "variant": "330e xDrive Touring",
         "arsmodell": 2026,
-        "regnr": "QNU217",
+        "regnr": "QMU341",
         "vin": null
       },
-      "last_seen": "257246",
+      "last_seen": "257227",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -33380,6 +33398,78 @@
         "vin": null
       },
       "last_seen": "19423586",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001537": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "JBH68E",
+        "vin": null
+      },
+      "last_seen": "395935",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001538": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "EJA86E",
+        "vin": null
+      },
+      "last_seen": "395892",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001539": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19424052",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001540": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19423988",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
