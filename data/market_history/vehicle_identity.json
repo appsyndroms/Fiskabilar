@@ -5858,7 +5858,19 @@
     "url:https://bilweb.se/blekinge-lan/bmw-530-e-xdrive-touring-m-sport-pano-h-k-hud-360-minne-ranta-1-99-2024-kombi-379543": "vehicle:00000140",
     "source:bytbil:19412127": "vehicle:00001562",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v60-recharge-t6-awd-350hk-core-bright-drag-b-kam-varm-navi-8546-19412127": "vehicle:00001562",
-    "fp:c97a09deff4845ea": "vehicle:00001562"
+    "fp:c97a09deff4845ea": "vehicle:00001562",
+    "reg:KWK80U": "vehicle:00001563",
+    "source:bilweb:396192": "vehicle:00001563",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-awd-350hk-core-bright-drag-b-kam-varm-navi-2024-kombi-396192": "vehicle:00001563",
+    "fp:897eafc38d92c630": "vehicle:00001563",
+    "reg:JBR04W": "vehicle:00001564",
+    "source:bilweb:396186": "vehicle:00001564",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-edition-2025-kombi-396186": "vehicle:00001564",
+    "fp:c4c7bda0768b78a1": "vehicle:00001564",
+    "reg:SAP07J": "vehicle:00001565",
+    "source:bilweb:396151": "vehicle:00001565",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-396151": "vehicle:00001565",
+    "fp:3ef380f515e65843": "vehicle:00001565"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -33991,6 +34003,60 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001563": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "KWK80U",
+        "vin": null
+      },
+      "last_seen": "396192",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001564": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "JBR04W",
+        "vin": null
+      },
+      "last_seen": "396186",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001565": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "SAP07J",
+        "vin": null
+      },
+      "last_seen": "396151",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
