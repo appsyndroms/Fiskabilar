@@ -5870,7 +5870,14 @@
     "reg:SAP07J": "vehicle:00001565",
     "source:bilweb:396151": "vehicle:00001565",
     "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-396151": "vehicle:00001565",
-    "fp:3ef380f515e65843": "vehicle:00001565"
+    "fp:3ef380f515e65843": "vehicle:00001565",
+    "reg:DDX98B": "vehicle:00001566",
+    "source:bilweb:396196": "vehicle:00001566",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2026-kombi-396196": "vehicle:00001566",
+    "fp:5757aa047aaa6997": "vehicle:00001566",
+    "source:bytbil:19424500": "vehicle:00001567",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-kampanj-privatleasing-5152-19424500": "vehicle:00001567",
+    "fp:b7e0525b8491e4dd": "vehicle:00001567"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -34057,6 +34064,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001566": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "DDX98B",
+        "vin": null
+      },
+      "last_seen": "396196",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001567": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19424500",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
