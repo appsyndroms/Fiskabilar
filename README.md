@@ -1,127 +1,352 @@
-# V60/V90/BMW 330e/BMW 530e-fyndfilter
+Fiskabilar
 
-Automatiskt filter (kör var 15:e minut, mål ~30 min, 06-22 svensk tid)
-som letar efter Volvo V60/V90 Recharge (T6/T8 AWD) och BMW 330e/530e xDrive
-Touring, räknar fram ett marknadsvärde per bil och mejlar dig
-**direkt** när en annons ligger tydligt under vad den borde kosta.
+Automatiserat fyndfilter för begagnade laddhybrider.
 
-**Notisregel: varje bil mejlas max EN gång, någonsin.** Så fort ett
-fynd upptäcks skickas ett eget mejl direkt för just den bilen (inte
-en samlad sammanfattning i slutet). Nästa körning ser samma bil igen
-men skickar inget nytt mejl om den - historiken i `data/state.json`
-kommer ihåg vilka bilar som redan mejlats, permanent.
+Projektet bevakar utvalda bilmodeller på flera annonssajter, identifierar samma fysiska bil mellan källorna, bygger upp historik över marknaden och beräknar ett uppskattat marknadsvärde. Bilar som ser ut att vara tydligt billigare än marknadsvärdet kan notifieras via e-post.
 
-**Bilar styrs av `BILAR` i `config.py`** - en lista där varje post
-beskriver märke, modell, sökvägar för Wayke/Bilweb och vilka varianter
-som räknas som träff. Lägg till fler bilar genom att lägga till fler
-poster i listan; ta bort genom att ta bort en post. Se kommentarerna
-i `config.py` för hur varje fält används.
+Projektet har utvecklats från ett enkelt regelbaserat fyndfilter till en pipeline med identitet, historik, livscykelanalys, marknadstrender, ML-baserad värdering, fyndutfall och en statisk webbvy.
 
-⚠️ **Migrationsnotis (2026-08-12):** historiknyckeln i `state.json`
-ändrades för att skilja V60 från V90 (annars hade en V60 och en V90
-med råkat lika variant/år/mil kunnat räknas som samma bil). Det gör
-att de V60-bilar som redan notifierats med den GAMLA nyckeln ser ut
-som nya igen och kan mejlas EN gång till efter den här uppdateringen.
-Efter det första varvet fungerar "aldrig upprepning" som vanligt igen.
+Vad bevakas?
 
-## Status per källa (uppdaterad 2026-08-12)
+Aktuella konfigurationer finns i config.py.
 
-| Källa | Status | Kommentar |
-|---|---|---|
-| **Wayke** | ✅ Verifierad (V60+V90) | Server-renderad, fungerar med `requests`. Textmönster-baserad parser, samma mall för båda modellerna. |
-| **Bilweb** | ✅ Verifierad (V60+V90) | Fungerar UTAN JavaScript. Modell/variant/år/ID läses direkt ur annons-URL:en. |
-| **Bytbil** | ⚠️ Ej verifierad | Websökningen hittade inte Bytbils faktiska sökresultat. Koden är fortfarande en overifierad mall. Avaktiverad som standard. |
-| **Blocket** | ⚠️ Ej verifierad, avaktiverad | Aktivt anti-bot-skydd (Datadome). Avaktiverad som standard. |
+Modell	Årsmodell	Varianter
+Volvo V60	2023–2026	T6 AWD, T8 AWD
+Volvo V90	2023–2026	T6 AWD, T8 AWD
+BMW 530e xDrive Touring	2024	530e xDrive Touring
+BMW 330e xDrive Touring	2024–2026	330e xDrive Touring
 
-Om du vill lägga till Bytbil eller Blocket senare:
-1. Öppna sajten i en vanlig webbläsare, sök fram V60/V90 Recharge
-2. Testa om `curl` eller Pythons `requests` (utan webbläsare) ger samma
-   innehåll som webbläsaren visar - om ja, samma teknik som Wayke/Bilweb
-   fungerar. Om sidan bara visar en tom "laddar..."-platshållare utan JS
-   behöver du ett verktyg som kör JavaScript (t.ex. Playwright)
-3. Leta efter stabila textetiketter eller mönster i URL:en att bygga en
-   regex-parser kring, istället för att lita på CSS-klasser som ändras ofta
-4. Lägg till källan i `AKTIVA_KALLOR` i `config.py` när den är klar
+Gemensamma grundkrav:
 
-## Snabbstart
+* Automatisk växellåda
+* 1 000–12 000 mil
+* Skadade bilar kan filtreras bort
+* Årsmodell och varianter styrs per bilmodell i config.py
 
-1. **Skapa ett GitHub-repo** och lägg in alla filer i det här projektet.
-2. **Sätt upp e-post:**
-   - Mottagaradress är redan ifylld i `config.py` (`fazzious@hotmail.com`)
-   - Redigera `EPOST_FRAN` i `config.py` till det konto som ska skicka
-   - Om du använder Gmail: skapa ett "app-lösenord" (inte ditt vanliga
-     lösenord) under Google-kontots säkerhetsinställningar
-   - I GitHub-repot: Settings → Secrets and variables → Actions →
-     New repository secret → namn `EPOST_LOSENORD`, värde = app-lösenordet
-3. **Verifiera/fixa scraperna** enligt avsnittet ovan (viktigast: Wayke och
-   Bytbil, de är sannolikt enklast att komma igång med)
-4. **Testa lokalt** (valfritt men rekommenderas):
-   ```bash
-   pip install -r requirements.txt
-   python main.py
-   ```
-5. **Pusha till GitHub.** Workflow-filen (`.github/workflows/daily.yml`)
-   triggar sedan var 30:e minut mellan 06:00-22:00 svensk tid (både
-   sommar- och vintertid hanteras automatiskt, se kommentar i filen),
-   helt utan att du behöver ha något igång själv - fungerar fint från
-   iPad eftersom du bara hanterar det via GitHub-appen eller webben.
-6. Du kan även trigga en körning manuellt när som helst: gå till
-   **Actions**-fliken i repot → välj workflowen → **Run workflow**.
+Att lägga till eller ta bort en bilmodell görs genom att ändra BILAR i config.py. Scraperlogiken behöver normalt inte ändras för varje ny modell.
 
-## Om Actions-minuter (viktigt om du gör repot privat)
+Datakällor
 
-Schemat begär körningar var 15:e minut (för att i praktiken hamna nära
-30 minuter, se kommentar i `daily.yml`) 06-22 svensk tid, vilket ger
-upp till ~72 körningar/dag, vardera 30-80 sekunder enligt loggarna =
-ungefär 1 500-2 500 minuter/månad.
-- **Publikt repo:** GitHub Actions är gratis och obegränsat.
-- **Privat repo:** Gratisnivån ger 2 000 minuter/månad - med det här
-  schemat kan du faktiskt nå taket. Om du märker att körningar slutar
-  triggas mot slutet av månaden: gör repot publikt (koden avslöjar
-  inget känsligt - lösenordet ligger som secret, inte i koden), eller
-  dra ner till `*/20` istället för `*/15` i `daily.yml`.
+Följande källor är för närvarande konfigurerade som aktiva:
 
-## Justera reglerna
+* Wayke
+* Bilweb
+* Bytbil
 
-Allt du troligen vill ändra finns i `config.py`:
-- Fyndtrösklar (just nu 20 000 / 35 000 kr under marknadsvärde)
-- Max miltal, årsmodellintervall
-- Vilka källor som är aktiva
+Blocket har scraperkod i projektet men är inte en aktiv källa i nuvarande konfiguration.
 
-Marknadsvärderingen (basprisnivåer per modell/år/variant) finns i
-`valuation.py` och bör uppdateras efter vad du faktiskt ser på
-marknaden de första veckorna - modellen är en rimlig startpunkt, inte
-facit. V90-baspriserna sattes efter en snabb koll av verkliga
-Wayke-annonser (visade sig ligga bara måttligt över V60, +15-20k,
-inte den stora premie man kanske skulle gissa) - kalibrera vidare med
-egen data.
+Källspecifik logik ligger i sources/. Källorna ansvarar för att hämta och normalisera annonser; de ska inte känna till scoring, valuation eller notifiering.
 
-**Känd begränsning (upptäckt vid testkörning):** utrustningsjusteringen
-i `valuation.py` matchar bara exakta ord som "core"/"ultimate"/
-"inscription". Fritext som "R-Design Pano Drag HK Elstol" matchar
-inget och får då ingen justering, vilket kan få välutrustade R-Design-
-bilar att se dyrare ut än de "borde" vara. Åtgärda genom att lägga
-till fler nyckelord i `UTRUSTNINGSNIVA_JUSTERING` när du ser mönster
-i verkliga annonser.
+Huvudflödet
 
-## Filstruktur
+Varje körning följer i princip denna kedja:
 
-```
-config.py          - alla inställningar
-valuation.py        - marknadsvärdesmodell
-dedup.py            - slår ihop samma bil från olika sajter
-state.py            - historik: prissänkningar, hur länge en bil legat ute
-scoring.py           - fyndscore 0-100 + formatering av meddelande
-notify.py            - skickar e-post
-main.py              - kör hela flödet
-scrapers/            - en fil per sajt
-.github/workflows/   - schemat som kör allt automatiskt
-```
+Annonssajter
+    │
+    ▼
+sources/
+    │
+    ▼
+Normaliserade annonser
+    │
+    ▼
+matching/
+    │
+    ▼
+Samma fysiska bil identifieras
+    │
+    ▼
+history/
+    │
+    ├── state
+    ├── identity
+    ├── historik
+    ├── trend
+    └── livscykel
+    │
+    ▼
+valuation/
+    │
+    ▼
+Marknadsvärde
+    │
+    ▼
+scoring/
+    │
+    ▼
+Fyndkandidater
+    │
+    ├── notifications/
+    │
+    └── reporting/
 
-## Nästa steg om du vill förbättra det
+main.py orkestrerar flödet. Domänlogiken ligger i separata paket.
 
-- Byt ut den regelbaserade marknadsvärderingen mot en riktig regression
-  när du samlat 30-50 verkliga datapunkter
-- Lägg till Telegram-notis som alternativ/komplement till e-post
-- Lägg till en enkel webbsida (t.ex. GitHub Pages) som visar historik
-  över alla fynd, inte bara dagens
+Mer detaljer finns i ARCHITECTURE.md⁠￼.
+
+Identitet och deduplicering
+
+Samma bil kan finnas på flera annonssajter och dessutom ändra pris eller annonsinformation över tid.
+
+Projektet försöker därför skilja mellan:
+
+* annons – en publicering på en viss sajt
+* fordon – den fysiska bilen
+* observation – hur bilen såg ut vid en viss körning
+
+Det gör att historiken kan följa bilen även när samma fordon förekommer på flera källor.
+
+Identity- och lifecycle-logiken ligger under history/.
+
+Livscykeln kan bland annat beskriva om en annons är:
+
+* NY
+* AKTIV
+* ÅTERKOMMEN
+* FÖRSVUNNEN
+
+Livscykeln används som analysinformation och är separerad från själva score- och valuationlogiken.
+
+Marknadsvärdering
+
+Projektet har två nivåer av värdering.
+
+1. Marknadsunderlag
+
+valuation/ bygger jämförelseunderlag från aktuella och historiska annonser.
+
+2. ML-baserad värdering
+
+ML-delen ligger i ml/ och använder den historik som byggts upp av projektet.
+
+Den nuvarande ML-processen kan:
+
+* profilera marknadsdatasetet
+* träna en marknadsvärderingsmodell
+* diagnostisera modellen
+* generera ML-baserade marknadsvärden
+* använda dessa värden i fyndfiltrets fortsatta bearbetning
+
+ML-värderingen skrivs bland annat till:
+
+data/ml_valuation.jsonl
+
+Tränade modeller och metadata sparas under:
+
+data/ml/
+
+ML-värderingen är ett underlag, inte en garanti för vad en bil faktiskt är värd. Modellen blir bättre när projektet samlar mer verklig marknadsdata.
+
+Vad räknas som ett fynd?
+
+De centrala trösklarna finns i config.py:
+
+* FYND_TROSKEL = 20 000
+* EXTREMT_FYND_TROSKEL = 35 000
+
+Det innebär att fyndlogiken utgår från hur mycket annonsens pris ligger under projektets uppskattade marknadsvärde.
+
+Det finns även logik för bland annat:
+
+* prisförändringar
+* hur länge en bil legat ute
+* marknadstrender
+* stora prissänkningar
+* tidigare notifieringar
+
+Notifieringar
+
+Notifiering sker via e-post.
+
+En redan notifierad bil får inte automatiskt samma notis igen. En ny notis kan däremot skickas om priset därefter sänks tillräckligt mycket.
+
+Nuvarande gräns är:
+
+MIN_PRISSANKNING_FOR_NY_NOTIS = 10000
+
+Notifieringshistoriken sparas i state så att samma bil kan följas över flera körningar.
+
+E-postlösenord ska aldrig ligga i källkoden. GitHub Actions använder repository secret:
+
+EPOST_LOSENORD
+
+Övriga mottagar-/avsändarinställningar finns i config.py.
+
+Historik och rapporter
+
+Projektet sparar marknadsobservationer löpande.
+
+Historik:
+
+data/market_history/
+
+Dagliga rapporter:
+
+data/daily_reports/
+
+Historiken används både för vanlig analys och som underlag för ML-modellen.
+
+Projektet sparar dessutom information om faktiska fyndutfall. Det gör att det går att analysera om de bilar som systemet markerar faktiskt utvecklas till bra köp enligt de kriterier som används.
+
+Daglig webb
+
+Den dagliga rapport-workflowen bygger även en statisk webbplats från projektets data.
+
+Webbbygget innehåller bland annat:
+
+* aktuella fynd
+* prisförändringar
+* fyndutfall
+* score-analys
+* marknadshistorik
+* ML-information
+
+Webbens källkod finns under:
+
+web/
+
+Den publiceras via GitHub Pages.
+
+GitHub Actions
+
+Den ordinarie fyndkontrollen körs automatiskt:
+
+* var 15:e minut
+* 06:00–21:45 svensk tid
+* med GitHub Actions
+* utan att någon lokal dator behöver vara igång
+
+Workflow:
+
+.github/workflows/daily.yml
+
+Den ordinarie körningen:
+
+1. hämtar annonser
+2. deduplicerar och identifierar fordon
+3. uppdaterar historik och state
+4. bygger marknadsunderlag
+5. processar kandidater
+6. skickar eventuella notifieringar
+7. kör analys och diagnostik
+8. sparar förändrad data till repot
+
+Det finns även separata workflows för bland annat:
+
+* daglig marknadsrapport
+* ML-träning och diagnostik
+* test/debug
+* verifiering av historikpriser
+* inspektion av extrema priser
+
+Se .github/workflows/ för aktuella workflows.
+
+Lokal körning
+
+Installera beroenden:
+
+pip install -r requirements.txt
+
+Kör huvudflödet:
+
+python -u main.py
+
+Debug kan aktiveras med miljövariabeln:
+
+DEBUG=true python -u main.py
+
+I debugläge körs pipeline-logiken men notifieringar skickas inte och notifieringsstate markeras inte.
+
+Loggning
+
+Central loggning finns i:
+
+app_logging/logger.py
+
+Nivåerna är:
+
+QUIET < INFO < DEBUG < TRACE
+
+Standardnivån är QUIET.
+
+* QUIET – endast viktiga fel/varningar och avsedda slutresultat
+* INFO – normal körningsinformation
+* DEBUG – detaljerad diagnostik
+* TRACE – maximal diagnostik
+
+Loggnivå kan styras med --log-level.
+
+Projektstruktur
+
+Fiskabilar/
+│
+├── main.py
+├── config.py
+├── requirements.txt
+├── ARCHITECTURE.md
+│
+├── sources/          # hämtning och normalisering från annonssajter
+├── matching/         # identifiering och deduplicering av fordon
+├── history/          # state, identity, historik, trend och lifecycle
+├── valuation/        # marknadsunderlag och marknadsvärde
+├── scoring/          # fyndscore och kandidatlogik
+├── notifications/    # notifieringar
+├── reporting/        # dagliga marknadsrapporter
+├── ml/               # dataset, träning, diagnostik och ML-värdering
+├── pipeline/         # orkestrering av delar av körningen
+├── web/              # analys och statisk webb
+├── app_logging/      # central loggning
+├── scripts/          # analys- och underhållsskript
+│
+├── data/
+│   ├── market_history/
+│   ├── daily_reports/
+│   ├── ml/
+│   └── ml_valuation.jsonl
+│
+└── .github/workflows/  # automatiserade körningar
+
+Konfigurationspunkter
+
+De viktigaste inställningarna finns i config.py.
+
+Där kan du bland annat ändra:
+
+* vilka bilmodeller som bevakas
+* årsmodellintervall
+* miltal
+* aktiva källor
+* fyndtrösklar
+* krav på prisnedsättning för ny notifiering
+* historik- och rapportkataloger
+* e-postinställningar
+
+Kodens struktur är medvetet byggd så att konfiguration och domänlogik hålls isär.
+
+Utvecklingsprincip
+
+Projektet utvecklas stegvis.
+
+Målet är inte att göra en stor omskrivning varje gång en ny funktion behövs, utan att flytta ansvar till rätt del av systemet och behålla fungerande datakontrakt.
+
+Grundprinciperna är:
+
+* sources/ hämtar och normaliserar data
+* matching/ identifierar fordon
+* history/ äger persistence och historisk analys
+* valuation/ beräknar marknadsunderlag och värde
+* scoring/ beräknar fyndscore
+* notifications/ skickar notifieringar
+* reporting/ producerar rapporter
+* web/ presenterar analyser
+* main.py orkestrerar flödet
+
+Det gör det möjligt att utveckla exempelvis ML-värderingen utan att behöva blanda in scraper- eller notifieringslogik.
+
+Status
+
+Projektet är aktivt under utveckling.
+
+Fokus ligger just nu på att bygga upp tillräckligt bra historik och ML-underlag för att gradvis kunna ersätta manuella/reglerade antaganden med modeller som lär sig av den faktiska marknaden.
+
+Det viktiga är därför inte bara att hitta billiga annonser, utan att samla data över tid och kunna mäta vilka signaler som faktiskt leder till intressanta bilfynd.
