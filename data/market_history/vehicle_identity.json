@@ -6909,7 +6909,30 @@
     "fp:19550c918f83d312": "vehicle:00001826",
     "source:bytbil:19439209": "vehicle:00001827",
     "url:https://www.bytbil.com/ostergotlands-lan/personbil-v90-t6-plus-dark-nordic-edition-1475-19439209": "vehicle:00001827",
-    "fp:6468e284dd134a46": "vehicle:00001827"
+    "fp:6468e284dd134a46": "vehicle:00001827",
+    "fp:64410c76b0155f3d": "vehicle:00001401",
+    "fp:41a5f39154123e7e": "vehicle:00001819",
+    "fp:5c0c051b2ad3f5a4": "vehicle:00001820",
+    "fp:de858900596c1ce0": "vehicle:00001793",
+    "fp:d6e450f9d822bf6d": "vehicle:00001794",
+    "fp:4ef5e7e7ecbf4cd0": "vehicle:00001798",
+    "fp:4b7d28601b6b873a": "vehicle:00001801",
+    "source:bytbil:19402760": "vehicle:00001828",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyles-1789-19402760": "vehicle:00001828",
+    "fp:216d896e57614950": "vehicle:00001828",
+    "fp:02a2047d008eec85": "vehicle:00001019",
+    "source:bytbil:19414794": "vehicle:00001829",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyles-1791-19414794": "vehicle:00001829",
+    "fp:236a19ee2e66cb96": "vehicle:00001829",
+    "source:bytbil:19406984": "vehicle:00001830",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-360-kamera-navi-1253-19406984": "vehicle:00001830",
+    "fp:a02b139b178b74ae": "vehicle:00001830",
+    "fp:545b846a83d2dc63": "vehicle:00000791",
+    "source:bytbil:19405627": "vehicle:00001831",
+    "url:https://www.bytbil.com/orebro-lan/personbil-v90-t6-core-edition-ii-dragkrok-360-kamera-1479-19405627": "vehicle:00001831",
+    "fp:1152a462cc443220": "vehicle:00001831",
+    "fp:bcbc3f6a89d2314b": "vehicle:00001245",
+    "fp:9483c6c3bd99593c": "vehicle:00000792"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -39808,6 +39831,78 @@
         "vin": null
       },
       "last_seen": "19439209",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001828": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19402760",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001829": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19414794",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001830": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19406984",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001831": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19405627",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
