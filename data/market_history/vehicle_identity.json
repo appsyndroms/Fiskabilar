@@ -6973,7 +6973,14 @@
     "fp:4e59ba6965b43071": "vehicle:00001807",
     "source:bytbil:19439385": "vehicle:00001841",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plug-in-awd-399hk-plus-dark-360-varm-1-aga-7751-19439385": "vehicle:00001841",
-    "fp:44d6e5da16be3d3b": "vehicle:00001841"
+    "fp:44d6e5da16be3d3b": "vehicle:00001841",
+    "reg:XUN32D": "vehicle:00001842",
+    "source:bilweb:405550": "vehicle:00001842",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plug-in-awd-399hk-plus-dark-360-varm-1-aga-2025-kombi-405550": "vehicle:00001842",
+    "fp:3f642b1601e0786f": "vehicle:00001842",
+    "source:bytbil:19439578": "vehicle:00001843",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyles-1789-19439578": "vehicle:00001843",
+    "fp:7b428d5432d122a1": "vehicle:00001843"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -40124,6 +40131,42 @@
         "vin": null
       },
       "last_seen": "19439385",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001842": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "XUN32D",
+        "vin": null
+      },
+      "last_seen": "405550",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001843": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19439578",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
