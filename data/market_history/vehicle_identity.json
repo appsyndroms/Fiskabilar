@@ -6980,7 +6980,13 @@
     "fp:3f642b1601e0786f": "vehicle:00001842",
     "source:bytbil:19439578": "vehicle:00001843",
     "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyles-1789-19439578": "vehicle:00001843",
-    "fp:7b428d5432d122a1": "vehicle:00001843"
+    "fp:7b428d5432d122a1": "vehicle:00001843",
+    "fp:dc97c814bcb31946": "vehicle:00000651",
+    "fp:80a3d28e08db172a": "vehicle:00000654",
+    "reg:BCG13P": "vehicle:00001844",
+    "source:bilweb:405629": "vehicle:00001844",
+    "url:https://bilweb.se/orebro-lan/bmw-330-e-xdrive-touring-292h-m-sport-navi-kamera-carp-drag-2025-kombi-405629": "vehicle:00001844",
+    "fp:d9607e4b17b34b14": "vehicle:00001844"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -40171,6 +40177,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00001844": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": "BCG13P",
+        "vin": null
+      },
+      "last_seen": "405629",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
