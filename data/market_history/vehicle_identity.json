@@ -7983,7 +7983,36 @@
     "fp:fe93a13c606016e1": "vehicle:00002097",
     "source:bytbil:19455172": "vehicle:00002098",
     "url:https://www.bytbil.com/stockholms-lan/personbil-v90-t6-core-edition-ii-1928-19455172": "vehicle:00002098",
-    "fp:0e9ae6d549f78f57": "vehicle:00002098"
+    "fp:0e9ae6d549f78f57": "vehicle:00002098",
+    "reg:WBZ93P": "vehicle:00002099",
+    "source:bilweb:414164": "vehicle:00002099",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-414164": "vehicle:00002099",
+    "fp:38dca14b4195f6ef": "vehicle:00002099",
+    "reg:XZR58U": "vehicle:00002100",
+    "source:bilweb:414165": "vehicle:00002100",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-414165": "vehicle:00002100",
+    "fp:118f232f19993160": "vehicle:00002100",
+    "reg:LKX74W": "vehicle:00002101",
+    "source:bilweb:414161": "vehicle:00002101",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-414161": "vehicle:00002101",
+    "fp:e79b49203953ab44": "vehicle:00002101",
+    "reg:LFP75F": "vehicle:00002102",
+    "source:bilweb:414169": "vehicle:00002102",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-core-edition-ii-2025-kombi-414169": "vehicle:00002102",
+    "fp:75b10dc66e03fcd2": "vehicle:00002102",
+    "reg:UPT08M": "vehicle:00002103",
+    "source:bilweb:414158": "vehicle:00002103",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-core-edition-ii-2025-kombi-414158": "vehicle:00002103",
+    "fp:823c6fed0de28168": "vehicle:00002103",
+    "source:bytbil:19455689": "vehicle:00002104",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-edition-1930-19455689": "vehicle:00002104",
+    "fp:1469f1c23a8a037d": "vehicle:00002104",
+    "source:bytbil:19455686": "vehicle:00002105",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v90-recharge-t6-plus-dark-1928-19455686": "vehicle:00002105",
+    "fp:f7b005d5df5fe9ac": "vehicle:00002105",
+    "source:bytbil:19455685": "vehicle:00002106",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v90-t6-core-edition-ii-1928-19455685": "vehicle:00002106",
+    "fp:6a0ce4e42429201a": "vehicle:00002106"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -45763,6 +45792,150 @@
         "vin": null
       },
       "last_seen": "19455172",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002099": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "WBZ93P",
+        "vin": null
+      },
+      "last_seen": "414164",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002100": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "XZR58U",
+        "vin": null
+      },
+      "last_seen": "414165",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002101": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "LKX74W",
+        "vin": null
+      },
+      "last_seen": "414161",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002102": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "LFP75F",
+        "vin": null
+      },
+      "last_seen": "414169",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002103": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "UPT08M",
+        "vin": null
+      },
+      "last_seen": "414158",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002104": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19455689",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002105": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19455686",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00002106": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19455685",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
