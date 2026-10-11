@@ -21,7 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app_logging.logger import always, error
@@ -837,9 +837,9 @@ def _bygg_rapport(
     return "\n".join(rader)
 
 
-def _rapportfil() -> str:
+def _rapportfil(datum: str | None = None) -> str:
 
-    now = _nu()
+    rapportdag = date.fromisoformat(datum) if datum else _nu().date()
 
     os.makedirs(
         DAILY_REPORT_KATALOG,
@@ -850,7 +850,7 @@ def _rapportfil() -> str:
         DAILY_REPORT_KATALOG,
         (
             "daily_market_report_"
-            f"{now:%Y-%m}.jsonl"
+            f"{rapportdag:%Y-%m}.jsonl"
         ),
     )
 
@@ -859,7 +859,7 @@ def _las_dagens_logg(
     datum: str,
 ) -> dict | None:
 
-    fil = _rapportfil()
+    fil = _rapportfil(datum)
 
     if not os.path.exists(
         fil
@@ -904,7 +904,7 @@ def _spara_logg(
     post: dict,
 ) -> None:
 
-    fil = _rapportfil()
+    fil = _rapportfil(post["datum"])
 
     poster = []
 
@@ -985,10 +985,11 @@ def _spara_logg(
 
 def skapa_och_skicka_rapport(
     force_email: bool = False,
+    datum: str | None = None,
 ) -> int:
 
     now = _nu()
-    datum = now.date().isoformat()
+    datum = date.fromisoformat(datum).isoformat() if datum else now.date().isoformat()
 
     befintlig = (
         _las_dagens_logg(
@@ -1072,7 +1073,7 @@ def skapa_och_skicka_rapport(
 
         always(
             "[RAPPORT] Loggad: "
-            f"{_rapportfil()}"
+            f"{_rapportfil(datum)}"
         )
 
         always(
@@ -1189,11 +1190,18 @@ def main() -> None:
         ),
     )
 
+    parser.add_argument(
+        "--date",
+        type=date.fromisoformat,
+        help="Dagen som ska sammanställas (ÅÅÅÅ-MM-DD); standard är idag i Sverige.",
+    )
+
     args = parser.parse_args()
 
     raise SystemExit(
         skapa_och_skicka_rapport(
-            force_email=args.force_email
+            force_email=args.force_email,
+            datum=args.date.isoformat() if args.date else None,
         )
     )
 

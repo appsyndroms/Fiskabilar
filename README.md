@@ -184,6 +184,12 @@ Dagliga rapporter:
 
 data/daily_reports/
 
+Rapporten schemaläggs kl. 22.15 svensk tid, efter dagens fyndkontroller,
+och skickas före ML-träningen. Rapportdatum låses från den schemalagda
+körningen så att kötid och förseningar över midnatt inte byter rapportdag.
+Manuell körning avser dagens datum. En annan dag kan sammanställas med
+`python -m reporting.daily_market_report --date ÅÅÅÅ-MM-DD`.
+
 Historiken används både för vanlig analys och som underlag för ML-modellen.
 
 Projektet sparar dessutom information om faktiska fyndutfall. Det gör att det går att analysera om de bilar som systemet markerar faktiskt utvecklas till bra köp enligt de kriterier som används.
