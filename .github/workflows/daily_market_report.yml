@@ -1,7 +1,7 @@
 name: Daglig marknadsrapport Fiskabilar
 on:
   schedule:
-    - cron: "15 22 * * *"
+    - cron: "0 22 * * *"
       timezone: "Europe/Stockholm"
   workflow_dispatch:
     inputs:
@@ -56,7 +56,7 @@ jobs:
               now = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
               now = now.astimezone(timezone)
               # Senast passerade schematid är den dag rapporten avser.
-              if (now.hour, now.minute) < (22, 15):
+              if (now.hour, now.minute) < (22, 0):
                   now -= timedelta(days=1)
           else:
               now = datetime.now(timezone)

@@ -184,7 +184,7 @@ Dagliga rapporter:
 
 data/daily_reports/
 
-Rapporten schemaläggs kl. 22.15 svensk tid, efter dagens fyndkontroller,
+Rapporten schemaläggs kl. 22.00 svensk tid, efter dagens fyndkontroller,
 och skickas före ML-träningen. Rapportdatum låses från den schemalagda
 körningen så att kötid och förseningar över midnatt inte byter rapportdag.
 Manuell körning avser dagens datum. En annan dag kan sammanställas med
