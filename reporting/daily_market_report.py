@@ -39,7 +39,7 @@ from notifications.email import skicka_epost
 
 TIDSZON = ZoneInfo("Europe/Stockholm")
 
-WEBB_URL = (
+WEBB_URL = os.getenv("FISKABILAR_WEBB_URL") or (
     "https://appsyndroms.github.io/"
     "Fiskabilar/#oversikt"
 )
@@ -986,6 +986,7 @@ def _spara_logg(
 def skapa_och_skicka_rapport(
     force_email: bool = False,
     datum: str | None = None,
+    no_email: bool = False,
 ) -> int:
 
     now = _nu()
@@ -1080,6 +1081,10 @@ def skapa_och_skicka_rapport(
             "[RAPPORT] Fiskabilar Analytics: "
             f"{WEBB_URL}"
         )
+
+        if no_email:
+            always("[RAPPORT] Rapport sparad lokalt. Mejl är avstängt.")
+            return 0
 
         if (
             post["email_skickat"]
@@ -1196,12 +1201,19 @@ def main() -> None:
         help="Dagen som ska sammanställas (ÅÅÅÅ-MM-DD); standard är idag i Sverige.",
     )
 
+    parser.add_argument(
+        "--no-email",
+        action="store_true",
+        help="Spara rapporten utan att skicka mejl.",
+    )
+
     args = parser.parse_args()
 
     raise SystemExit(
         skapa_och_skicka_rapport(
             force_email=args.force_email,
             datum=args.date.isoformat() if args.date else None,
+            no_email=args.no_email,
         )
     )
 

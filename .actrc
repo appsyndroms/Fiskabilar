@@ -1,0 +1,3 @@
+-P self-hosted=-self-hosted
+--bind
+--no-cache-server

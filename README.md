@@ -184,10 +184,11 @@ Dagliga rapporter:
 
 data/daily_reports/
 
-Rapporten schemaläggs kl. 22.00 svensk tid, efter dagens fyndkontroller,
-och skickas före ML-träningen. Rapportdatum låses från den schemalagda
-körningen så att kötid och förseningar över midnatt inte byter rapportdag.
-Manuell körning avser dagens datum. En annan dag kan sammanställas med
+Den lokala kvällskörningen startar kl. 22.00 svensk tid. Rapportdatum låses
+när körningen börjar. Rapporten sparas efter datainsamlingen och före ML-träningen.
+Mejl är avstängt i lokala körningar. Om insamlingen passerar midnatt stoppas körningen innan
+rapporten skapas, så att observationer från olika dagar inte blandas.
+En viss dag kan sammanställas med
 `python -m reporting.daily_market_report --date ÅÅÅÅ-MM-DD`.
 
 Historiken används både för vanlig analys och som underlag för ML-modellen.
@@ -196,7 +197,7 @@ Projektet sparar dessutom information om faktiska fyndutfall. Det gör att det g
 
 Daglig webb
 
-Den dagliga rapport-workflowen bygger även en statisk webbplats från projektets data.
+Kvällskörningen bygger en statisk webbplats från projektets data.
 
 Webbbygget innehåller bland annat:
 
@@ -211,41 +212,60 @@ Webbens källkod finns under:
 
 web/
 
-Den publiceras via GitHub Pages.
+Webben visas tills vidare lokalt på http://127.0.0.1:8766.
 
-GitHub Actions
+Lokal kvällskörning med act
 
-Den ordinarie fyndkontrollen körs automatiskt:
+Hela flödet körs en gång per kväll på Macen genom `act`. Inga GitHub Actions-
+minuter, Pages-artifacts eller Docker behövs. De gamla fynd- och rapportschemana
+är avstängda i workflow-filerna; de går fortfarande att starta manuellt på GitHub.
 
-* var 15:e minut
-* 06:00–21:45 svensk tid
-* med GitHub Actions
-* utan att någon lokal dator behöver vara igång
+1. Hämta annonser, deduplicera, uppdatera identitet, historik och state.
+2. Beräkna fynd och följ upp tidigare fyndutfall.
+3. Spara dagens sammanfattning. Alla mejlutskick är avstängda i kvällsflödet.
+4. Träna ML-modellen, kör diagnostik och skapa ML-värderingar.
+5. Bygg och validera den lokala webben.
 
-Workflow:
+Installera Python 3.11 eller senare och `act`. Skapa sedan projektets Pythonmiljö:
 
-.github/workflows/daily.yml
+```sh
+python3 scripts/setup_local.py
+```
 
-Den ordinarie körningen:
+Kör allt manuellt:
 
-1. hämtar annonser
-2. deduplicerar och identifierar fordon
-3. uppdaterar historik och state
-4. bygger marknadsunderlag
-5. processar kandidater
-6. skickar eventuella notifieringar
-7. kör analys och diagnostik
-8. sparar förändrad data till repot
+```sh
+bash scripts/run_evening.sh
+```
 
-Det finns även separata workflows för bland annat:
+Lokala körningar skickar inga mejl och behöver inga mejlhemligheter.
+Rapporten sparas i `data/daily_reports/`. Secrets, loggar och genererad webb
+ignoreras av Git.
 
-* daglig marknadsrapport
-* ML-träning och diagnostik
-* test/debug
-* verifiering av historikpriser
-* inspektion av extrema priser
+Installera kvällsschemat kl. 22.00 och den lokala webbservern:
 
-Se .github/workflows/ för aktuella workflows.
+```sh
+.venv/bin/python scripts/install_local_schedule.py --install
+```
+
+Schemat körs i Macens lokala tidszon, som ska vara Europe/Stockholm. Datorn
+behöver vara på och användaren inloggad; launchd kör en missad tid efter vila.
+Webbservern startar direkt och vid inloggning. Den lyssnar på 127.0.0.1:8766.
+
+Körstatus med steg, tider och mejlstatus finns i `.local/evening-status.json`.
+Loggen finns i `.local/logs/evening.log`. Ett lås hindrar överlappande körningar.
+Misslyckad insamling stoppar kedjan. Mejlstatus är `disabled` för lokala
+körningar. Data sparas i arbetskopian; kvällsflödet
+gör inga automatiska Git-pushar.
+
+För att bara bygga om webben från sparad data:
+
+```sh
+.venv/bin/python -m scripts.evening --build-only
+```
+
+Workflowen är `.github/workflows/evening-local.yml`, som använder en lokal
+host runner via `.actrc`. Övriga workflow-filer finns kvar för manuell felsökning.
 
 Lokal körning
 

@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Lokal kvällskörning, hemligheter och genererad webb
+.local/
+.secrets
+.act.env
+web_site/

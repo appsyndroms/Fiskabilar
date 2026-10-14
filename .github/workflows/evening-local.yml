@@ -1,0 +1,22 @@
+name: Fiskabilar lokal kvällskörning
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evening:
+    runs-on: self-hosted
+    timeout-minutes: 120
+    env:
+      TZ: Europe/Stockholm
+      FISKABILAR_ONLY_DAILY_REPORT: "1"
+      FISKABILAR_WEBB_URL: http://127.0.0.1:8766
+    steps:
+      - name: Datainsamling, rapport, ML och webb
+        shell: bash
+        run: |
+          cd "$FISKABILAR_ROOT"
+          "$FISKABILAR_PYTHON" -u -m scripts.evening

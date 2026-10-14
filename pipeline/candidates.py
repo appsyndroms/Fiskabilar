@@ -13,6 +13,8 @@ Ansvarar för:
 Själva huvudflödet ligger i main.py.
 """
 
+import os
+
 from app_logging.logger import (
     info,
     always,
@@ -193,6 +195,9 @@ def _skicka_kandidat(
     vardering: dict,
     score: int,
 ) -> bool:
+    if os.getenv("FISKABILAR_ONLY_DAILY_REPORT") == "1":
+        return False
+
     diff = vardering.get(
         "diff",
         0,

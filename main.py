@@ -18,6 +18,10 @@ Huvudflöde:
 Detaljerad logik ligger i pipeline-modulerna.
 """
 
+import argparse
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from app_logging.logger import (
     info,
     debug_timer,
@@ -60,12 +64,12 @@ from pipeline.diagnostics import (
 )
 
 
-def main():
+def main(evening: bool = False):
     info(
         "\n=== Bilfyndfilter startar ===\n"
     )
 
-    if not inom_aktiv_tid():
+    if not evening and not inom_aktiv_tid():
         info(
             "Utanför aktiv tid. Avslutar."
         )
@@ -75,6 +79,8 @@ def main():
     # HÄMTNING
     # ------------------------------------------------------------
 
+    observation_day = datetime.now(ZoneInfo("Europe/Stockholm")).date()
+
     raa_annonser = hamta_alla_annonser(
         AKTIVA_KALLOR
     )
@@ -83,6 +89,12 @@ def main():
         f"Totalt {len(raa_annonser)} "
         "annonser innan dedup"
     )
+
+    if evening and datetime.now(ZoneInfo("Europe/Stockholm")).date() != observation_day:
+        raise RuntimeError("Hämtningen passerade midnatt; kör om för den nya dagen.")
+
+    if evening and not raa_annonser:
+        raise RuntimeError("Kvällskörningen fick inga annonser; befintlig historik behålls.")
 
     bilar = deduplicera(
         raa_annonser
@@ -261,5 +273,9 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--evening", action="store_true",
+                        help="Kör datainsamlingen även efter kl. 22.")
+    args, _ = parser.parse_known_args()
     configure_from_argv()
-    main()
+    main(evening=args.evening)
