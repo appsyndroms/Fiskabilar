@@ -1,4 +1,4 @@
-"""Skapa eller installera Macens kvällsschema och lokala webbserver."""
+"""Installera lokal webbserver och ta bort det gamla automatiska kvällsjobbet."""
 import argparse
 import os
 from pathlib import Path
@@ -20,11 +20,6 @@ def definitions() -> list[dict]:
         },
     }
     return [
-        {**common, "Label": "se.fiskabilar.evening",
-         "ProgramArguments": ["/bin/bash", str(ROOT / "scripts/run_evening.sh")],
-         "StartCalendarInterval": {"Hour": 22, "Minute": 0},
-         "StandardOutPath": str(LOCAL / "logs/scheduler.log"),
-         "StandardErrorPath": str(LOCAL / "logs/scheduler-error.log")},
         {**common, "Label": "se.fiskabilar.web",
          "ProgramArguments": [str(ROOT / ".venv/bin/python"), "-m", "http.server",
                               "8766", "--bind", "127.0.0.1", "--directory", str(ROOT / "web_site")],
@@ -38,6 +33,15 @@ def main(install: bool) -> None:
     generated = LOCAL / "launchd"
     generated.mkdir(parents=True, exist_ok=True)
     (LOCAL / "logs").mkdir(exist_ok=True)
+    if install:
+        if sys.platform != "darwin":
+            raise SystemExit("Webbserverns LaunchAgent kräver macOS.")
+        subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}/se.fiskabilar.evening"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        obsolete = Path.home() / "Library/LaunchAgents/se.fiskabilar.evening.plist"
+        obsolete.unlink(missing_ok=True)
+        (generated / "se.fiskabilar.evening.plist").unlink(missing_ok=True)
+        print("Automatiskt kvällsjobb borttaget. Körning startas manuellt efter påminnelse.")
     for definition in definitions():
         source = generated / f"{definition['Label']}.plist"
         source.write_bytes(plistlib.dumps(definition))
@@ -57,5 +61,5 @@ def main(install: bool) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--install", action="store_true", help="Installera och aktivera LaunchAgents.")
+    parser.add_argument("--install", action="store_true", help="Installera webbservern och avinstallera det gamla kvällsschemat.")
     main(parser.parse_args().install)

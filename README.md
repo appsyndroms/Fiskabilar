@@ -184,7 +184,7 @@ Dagliga rapporter:
 
 data/daily_reports/
 
-Den lokala kvällskörningen startar kl. 22.00 svensk tid. Rapportdatum låses
+Codex påminner kl. 19.00 svensk tid. Kvällskörningen startas manuellt. Rapportdatum låses
 när körningen börjar. Rapporten sparas efter datainsamlingen och före ML-träningen.
 Mejl är avstängt i lokala körningar. Om insamlingen passerar midnatt stoppas körningen innan
 rapporten skapas, så att observationer från olika dagar inte blandas.
@@ -216,7 +216,7 @@ Webben visas tills vidare lokalt på http://127.0.0.1:8766.
 
 Lokal kvällskörning med act
 
-Hela flödet körs en gång per kväll på Macen genom `act`. Inga GitHub Actions-
+Hela flödet startas manuellt en gång per kväll på Macen genom `act`. Inga GitHub Actions-
 minuter, Pages-artifacts eller Docker behövs. De gamla fynd- och rapportschemana
 är avstängda i workflow-filerna; de går fortfarande att starta manuellt på GitHub.
 
@@ -242,14 +242,14 @@ Lokala körningar skickar inga mejl och behöver inga mejlhemligheter.
 Rapporten sparas i `data/daily_reports/`. Secrets, loggar och genererad webb
 ignoreras av Git.
 
-Installera kvällsschemat kl. 22.00 och den lokala webbservern:
+Installera den lokala webbservern och ta bort det tidigare automatiska kvällsjobbet:
 
 ```sh
 .venv/bin/python scripts/install_local_schedule.py --install
 ```
 
-Schemat körs i Macens lokala tidszon, som ska vara Europe/Stockholm. Datorn
-behöver vara på och användaren inloggad; launchd kör en missad tid efter vila.
+Kvällskörningen har inget automatiskt jobb i launchd. En påminnelse i Codex
+kl. 19.00 svensk tid ersätter schemat; inga jobb startas av påminnelsen.
 Webbservern startar direkt och vid inloggning. Den lyssnar på 127.0.0.1:8766.
 
 Körstatus med steg, tider och mejlstatus finns i `.local/evening-status.json`.
@@ -257,6 +257,27 @@ Loggen finns i `.local/logs/evening.log`. Ett lås hindrar överlappande körnin
 Misslyckad insamling stoppar kedjan. Mejlstatus är `disabled` för lokala
 körningar. Data sparas i arbetskopian; kvällsflödet
 gör inga automatiska Git-pushar.
+
+HTTP-fel från en aktiv datakälla, inklusive 403, 404, 429 och 5xx, samt timeout
+eller anslutningsfel stoppar hela kedjan med felstatus. Detsamma gäller fel i
+Bilwebs parallella detaljsidor. Inga annonsobservationer eller state-ändringar
+sparas från en ofullständig insamling. Spärrsidor som returnerar HTTP 200
+avvisas också när de känns igen. Tomma resultat ska inte maskera nätverksfel.
+
+Webben byggs i en separat katalog och ersätter den tidigare fungerande webben
+först efter lyckad validering. Ett rent webbbygge skriver sin egen status i
+`.local/web-build-status.json` och skriver inte över kvällskörningens status.
+State och rapportloggar skrivs atomärt. En omkörning samma dag räknas inte som
+en andra missad dag i annonsens livscykel. Trasiga identitets- och rapportfiler
+stoppar körningen i stället för att skrivas över med tomma uppgifter.
+
+ML-träningen använder både `pris` från annonsobservationer och `annonspris`
+från värdeobservationer. Träning och test separeras vid en faktisk tidpunkt,
+så att samma observationstid inte finns i båda delarna. Träningen kräver
+minst 30 giltiga observationer och två olika tidpunkter. Kommandot
+`python -m ml.train_market_model` tränar och diagnostiserar modellen; det
+lokala kvällsflödet kör detta steg en gång. En ofullständig ML-värderingsfil
+får inte ersätta den tidigare filen.
 
 För att bara bygga om webben från sparad data:
 

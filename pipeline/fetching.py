@@ -7,6 +7,8 @@ from zoneinfo import ZoneInfo
 
 from app_logging.logger import info
 
+from sources.errors import SourceFetchError
+
 from sources import (
     blocket,
     wayke,
@@ -68,10 +70,7 @@ def hamta_alla_annonser(
         )
 
         if modul is None:
-            info(
-                f"Okänd källa i config: {kalla}"
-            )
-            continue
+            raise SourceFetchError(f"Okänd källa i config: {kalla}")
 
         # --------------------------------------------------------
         # STARTA SCRAPER
@@ -106,6 +105,7 @@ def hamta_alla_annonser(
                 f"[KÄLLA] {kalla}: "
                 f"FEL vid hämtning: {e}"
             )
+            raise SourceFetchError(f"{kalla}: {e}") from e
 
     # ------------------------------------------------------------
     # TOTALT FÖRE DEDUPLICERING

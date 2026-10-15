@@ -34,17 +34,18 @@ men övriga annonser påverkas inte.
 Sålda bilar filtreras bort explicit eftersom "Sålt"/"Såld" kan förekomma
 i dealer-fältet.
 
-Paginering via ?page=2 har tidigare inte ändrat resultatet vid test.
-Om Wayke laddar ytterligare annonser via JavaScript kan Playwright/Selenium
-behövas.
+Pagineringen följer söksidans Nästa sida-länk. Pris, titel och fordonsfält
+läses från samma article-kort, inklusive dess footer.
 """
 
 from app_logging.logger import error, info, warning
 
 import re
 import time
+from urllib.parse import parse_qs, urlparse
 
 import requests
+from .errors import SourceFetchError, require_html
 from bs4 import BeautifulSoup
 
 from config import ARSMODELL_MIN, ARSMODELL_MAX, BILAR
@@ -62,11 +63,7 @@ BAS_URL = "https://www.wayke.se/sok/{marke}/{modell}/{ar}"
 WAYKE_BAS = "https://www.wayke.se"
 
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0 Safari/537.36"
-    ),
+    "User-Agent": "Fiskabilar/1.0 (+https://github.com/appsyndroms/Fiskabilar)",
 }
 
 
@@ -171,6 +168,11 @@ def _hitta_annonskort(
     och går sedan uppåt i DOM-trädet.
     """
 
+    # Priset ligger i article-kortets footer, utanför dess mindre innehållsdiv.
+    article = anchor.find_parent("article")
+    if article is not None:
+        return article
+
     element = anchor
 
     kandidater = []
@@ -254,7 +256,7 @@ def _extrahera_falt(
             rf"(.+?)(?="
             rf"\s+(?:Plats|Återförsäljare|Fuel Type|"
             rf"Model Year|Gearbox Type|Mätarställning|"
-            rf"Kontantpris|Pris)\s*:?"
+            rf"Kontantpris|Pris|Bränsle|Årsmodell|Modellår|Växellåda)\s*:?"
             rf"|$)",
             re.IGNORECASE,
         )
@@ -386,6 +388,18 @@ def _extrahera_pris(
     return None
 
 
+def _kortfalt(kort, labels: list[str]) -> str | None:
+    """Läs dt/dd-par utan att råka ta nästa bils data eller fordonsrubriken."""
+    names = {label.casefold() for label in labels}
+    for label in kort.find_all("dt"):
+        name = _normalisera_text(label.get_text()).rstrip(":").strip().casefold()
+        if name in names:
+            value = label.find_next_sibling("dd")
+            if value is not None:
+                return _normalisera_text(value.get_text(separator=" "))
+    return None
+
+
 def _extrahera_annonskort(
     html: str,
     annons_regex: re.Pattern,
@@ -466,10 +480,13 @@ def _extrahera_annonskort(
         # Titel försöks först hämtas från Waykes anchor-text,
         # eftersom den ofta ligger närmare själva fordonsnamnet.
         titel = _normalisera_text(
-            anchor.get_text(
-                separator=" "
-            )
+            anchor.get("title") or anchor.get_text(separator=" ")
         )
+        if not anchor.get("title"):
+            description_id = kort.get("aria-describedby")
+            description = kort.find(id=description_id) if description_id else None
+            if description is not None:
+                titel += " " + _normalisera_text(description.get_text(separator=" "))
 
         if not titel:
             titel = _extrahera_falt(
@@ -479,14 +496,14 @@ def _extrahera_annonskort(
                 ],
             )
 
-        plats = _extrahera_falt(
+        plats = _kortfalt(kort, ["Plats"]) or _extrahera_falt(
             text,
             [
                 "Plats",
             ],
         )
 
-        dealer = _extrahera_falt(
+        dealer = _kortfalt(kort, ["Återförsäljare", "Dealer"]) or _extrahera_falt(
             text,
             [
                 "Återförsäljare",
@@ -494,7 +511,7 @@ def _extrahera_annonskort(
             ],
         )
 
-        fuel = _extrahera_falt(
+        fuel = _kortfalt(kort, ["Fuel Type", "Bränsle"]) or _extrahera_falt(
             text,
             [
                 "Fuel Type",
@@ -502,7 +519,7 @@ def _extrahera_annonskort(
             ],
         )
 
-        gearbox = _extrahera_falt(
+        gearbox = _kortfalt(kort, ["Gearbox Type", "Växellåda"]) or _extrahera_falt(
             text,
             [
                 "Gearbox Type",
@@ -707,6 +724,7 @@ def _hamta_sida(
     marke: str,
     modell: str,
     arsmodell: int,
+    page: int = 1,
 ) -> str:
     """Hämtar en Wayke-söksida."""
 
@@ -719,12 +737,44 @@ def _hamta_sida(
     resp = requests.get(
         url,
         headers=HEADERS,
-        timeout=15,
+        params={"page": page} if page > 1 else None,
+        timeout=25,
     )
 
-    resp.raise_for_status()
+    require_html(resp, "Wayke")
 
     return resp.text
+
+
+def _hamta_annonskort(marke: str, modell: str, arsmodell: int, annons_regex: re.Pattern) -> list[dict]:
+    """Hämta samtliga resultatsidor och stoppa vid upprepad/felaktig paginering."""
+    cards = []
+    seen = set()
+    page = 1
+    while True:
+        html = _hamta_sida(marke, modell, arsmodell, page=page)
+        parsed = _extrahera_annonskort(html, annons_regex)
+        urls = {card["url"] for card in parsed}
+        if page > 1 and not urls - seen:
+            raise RuntimeError(f"Wayke upprepade en resultatsida vid sida {page}.")
+        cards.extend(card for card in parsed if card["url"] not in seen)
+        seen.update(urls)
+        info(f"[wayke] {marke} {modell} {arsmodell}, sida {page}: {len(parsed)} annonser")
+        soup = BeautifulSoup(html, "html.parser")
+        next_link = soup.find("a", attrs={"data-testid": "search-pagination-next"})
+        if next_link is None:
+            next_link = next((a for a in soup.find_all("a", href=True)
+                              if _normalisera_text(a.get_text()).casefold() == "nästa sida"), None)
+        if next_link is None:
+            return cards
+        parts = urlparse(next_link.get("href", ""))
+        next_page = parse_qs(parts.query).get("page", [""])[0]
+        expected_path = urlparse(BAS_URL.format(marke=marke, modell=modell, ar=arsmodell)).path
+        if (parts.netloc not in ("", "www.wayke.se") or parts.path != expected_path
+                or not next_page.isdigit() or int(next_page) != page + 1 or page >= 100):
+            raise RuntimeError("Wayke gav en ogiltig länk till nästa resultatsida.")
+        page = int(next_page)
+        time.sleep(DELAY_SEKUNDER)
 
 
 def hamta_annonser() -> list[dict]:
@@ -761,46 +811,23 @@ def hamta_annonser() -> list[dict]:
 
             try:
 
-                html = _hamta_sida(
-                    bilkonfig[
-                        "marke_slug"
-                    ],
-                    bilkonfig[
-                        "modell_slug"
-                    ],
+                annonskort = _hamta_annonskort(
+                    bilkonfig["marke_slug"],
+                    bilkonfig["modell_slug"],
                     ar,
+                    annons_regex,
                 )
 
             except Exception as exc:
-
                 error(
                     f"[wayke] FEL vid hämtning av "
                     f"{bilkonfig['marke_visning']} "
                     f"{bilkonfig['modell_visning']} "
                     f"årsmodell {ar}: {exc}"
                 )
-
-                continue
-
-            annonskort = _extrahera_annonskort(
-                html,
-                annons_regex,
-            )
-
-            alla_lankar = _extrahera_lankar(
-                html
-            )
-
-            if len(alla_lankar) != len(
-                annonskort
-            ):
-
-                _logga_lankdiagnostik(
-                    alla_lankar,
-                    annonskort,
-                    bilkonfig,
-                    ar,
-                )
+                raise SourceFetchError(
+                    f"Wayke {bilkonfig['modell_slug']} {ar}: {exc}"
+                ) from exc
 
             for annons in annonskort:
 

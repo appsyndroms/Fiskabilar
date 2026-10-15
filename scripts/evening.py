@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,7 +23,7 @@ def now() -> str:
 
 
 def save_status(status: dict) -> None:
-    path = LOCAL / "evening-status.json"
+    path = LOCAL / ("web-build-status.json" if status.get("mode") == "web" else "evening-status.json")
     temporary = path.with_suffix(".tmp")
     temporary.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n")
     temporary.replace(path)
@@ -48,8 +49,8 @@ def archive_valuations() -> None:
         shutil.copy2(current, archive)
 
 
-def validate_web() -> None:
-    directory = ROOT / "web_site"
+def validate_web(directory: Path | None = None) -> None:
+    directory = directory or ROOT / "web_site"
     for name in ("index.html", "data.json", ".nojekyll"):
         if not (directory / name).is_file():
             raise RuntimeError(f"Webbfil saknas: {name}")
@@ -60,6 +61,21 @@ def validate_web() -> None:
         raise RuntimeError(f"Ofullständig webbdata: {required - data.keys()}")
     if "<html" not in (directory / "index.html").read_text().lower():
         raise RuntimeError("Webbens HTML är ogiltig")
+
+
+def publish_web(staging: Path) -> None:
+    """Ersätt först efter validering och återställ förra webben om flytten misslyckas."""
+    live = ROOT / "web_site"
+    with tempfile.TemporaryDirectory(prefix="previous-web-", dir=LOCAL) as backup_dir:
+        backup = Path(backup_dir) / "web_site"
+        if live.exists():
+            live.rename(backup)
+        try:
+            staging.rename(live)
+        except OSError:
+            if backup.exists():
+                backup.rename(live)
+            raise
 
 
 def run(build_only: bool = False) -> int:
@@ -103,13 +119,16 @@ def run(build_only: bool = False) -> int:
                 report = _las_dagens_logg(day)
                 if not report or report.get("status") == "FEL":
                     raise RuntimeError("Den dagliga rapporten kunde inte byggas.")
-                step("Träna ML-modell", ["-m", "ml.train_market_model"])
-                step("ML-diagnostik", ["-m", "ml.analyze_model", "--debug"])
+                step("Träna ML-modell och diagnostik", ["-m", "ml.train_market_model"])
                 archive_valuations()
                 step("ML-värderingar", ["-m", "ml.generate_ml_valuation"])
                 (LOCAL / "valuation-month.txt").write_text(datetime.now(TZ).strftime("%Y-%m"))
-            step("Bygg lokal webb", ["web/build_static.py"])
-            validate_web()
+            with tempfile.TemporaryDirectory(prefix="web-build-", dir=LOCAL) as directory:
+                staging = Path(directory)
+                env["FISKABILAR_WEB_OUTPUT"] = str(staging)
+                step("Bygg lokal webb", ["web/build_static.py"])
+                validate_web(staging)
+                publish_web(staging)
             status.update(status="complete", finished_at=now())
             save_status(status)
             print(f"Klart: {status['web_url']}", flush=True)

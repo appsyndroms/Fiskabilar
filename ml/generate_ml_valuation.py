@@ -108,7 +108,9 @@ def _generera_rader() -> list[dict]:
                     )
 
                     if borpris is None:
-                        continue
+                        raise ValueError(
+                            f"ML-värdering saknas för {modell} {variant} {arsmodell}, {mil} mil."
+                        )
 
                     rader.append(
                         {

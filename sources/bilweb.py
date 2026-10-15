@@ -14,6 +14,7 @@ import re
 import time
 
 import requests
+from .errors import SourceFetchError, require_html
 from bs4 import BeautifulSoup
 
 from app_logging.logger import info
@@ -104,7 +105,7 @@ def _hamta_kandidat_urler(
             timeout=15,
         )
 
-        resp.raise_for_status()
+        require_html(resp, "Bilweb")
 
     except Exception as e:
 
@@ -115,7 +116,7 @@ def _hamta_kandidat_urler(
             f"årsmodell {ar}: {e}"
         )
 
-        return []
+        raise SourceFetchError(f"Bilweb {sok_url}: {e}") from e
 
     time.sleep(
         SOK_DELAY_SEKUNDER
@@ -303,8 +304,8 @@ def hamta_annonser() -> list[dict]:
 
             (
                 resultat_per_url,
-                cachetraffar,
                 nya_hamtningar,
+                cachetraffar,
             ) = hamta_detaljsidor_parallellt(
                 kandidater,
                 detaljsida_cache,

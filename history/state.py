@@ -17,7 +17,8 @@ from app_logging.logger import info
 
 import json
 import os
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from config import (
     STATE_FIL,
@@ -31,8 +32,12 @@ from .identity import (
 )
 
 
-# En enstaka missad körning ska inte räcka för att kalla en
-# annons försvunnen. Två konsekutiva missade körningar krävs.
+def _idag() -> date:
+    return datetime.now(ZoneInfo("Europe/Stockholm")).date()
+
+
+# En annons måste saknas två olika dagar innan den markeras försvunnen.
+# Manuella omkörningar samma dag räknas bara en gång.
 ANTAL_MISSAR_FOR_FORSVUNNEN = 2
 
 
@@ -250,17 +255,15 @@ def spara_state(
         exist_ok=True,
     )
 
-    with open(
-        STATE_FIL,
-        "w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            state,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
+    # Skriv färdigt innan den fungerande state-filen ersätts.
+    temporary = STATE_FIL + ".tmp"
+    try:
+        with open(temporary, "w", encoding="utf-8") as handle:
+            json.dump(state, handle, ensure_ascii=False, indent=2)
+        os.replace(temporary, STATE_FIL)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _normalisera_livscykel_state(
@@ -355,8 +358,8 @@ def _markera_forsvunna(
     """
     Markerar bilar som inte längre finns i dagens resultat.
 
-    En missad körning ger SAKNAS.
-    Två konsekutiva missade körningar ger FÖRSVUNNEN.
+    En missad dag ger SAKNAS.
+    Två missade dagar ger FÖRSVUNNEN.
 
     När bilen återkommer senare återanvänds samma state
     tack vare identity resolution.
@@ -376,6 +379,11 @@ def _markera_forsvunna(
         _normalisera_livscykel_state(
             historik
         )
+
+        # En manuell omkörning samma dag är inte en andra missad dag.
+        if historik.get("senaste_saknad_datum") == idag:
+            continue
+        historik["senaste_saknad_datum"] = idag
 
         missar = (
             historik.get(
@@ -442,7 +450,7 @@ def uppdatera_och_berika(
       AKTIV
     """
 
-    idag = date.today().isoformat()
+    idag = _idag().isoformat()
 
     # ------------------------------------------------------------
     # IDENTIFIERA DAGENS BILAR INNAN STATE ÄNDRAS
@@ -631,14 +639,14 @@ def uppdatera_och_berika(
                 TypeError,
                 ValueError,
             ):
-                forsta_sedd = date.today()
+                forsta_sedd = _idag()
 
                 historik[
                     "forsta_sedd"
                 ] = idag
 
             dagar_ute = (
-                date.today()
+                _idag()
                 - forsta_sedd
             ).days
 

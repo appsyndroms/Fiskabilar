@@ -855,132 +855,43 @@ def _rapportfil(datum: str | None = None) -> str:
     )
 
 
-def _las_dagens_logg(
-    datum: str,
-) -> dict | None:
-
-    fil = _rapportfil(datum)
-
-    if not os.path.exists(
-        fil
-    ):
-        return None
-
-    try:
-
-        with open(
-            fil,
-            "r",
-            encoding="utf-8",
-        ) as handle:
-
-            for rad in handle:
-
-                if not rad.strip():
-                    continue
-
-                try:
-                    post = json.loads(
-                        rad
-                    )
-                except json.JSONDecodeError:
-                    continue
-
-                if (
-                    post.get(
-                        "datum"
-                    )
-                    == datum
-                ):
-                    return post
-
-    except OSError:
-        return None
-
-    return None
-
-
-def _spara_logg(
-    post: dict,
-) -> None:
-
-    fil = _rapportfil(post["datum"])
-
+def _las_rapportposter(fil: str) -> list[dict]:
+    if not os.path.exists(fil):
+        return []
     poster = []
+    with open(fil, "r", encoding="utf-8") as handle:
+        for number, line in enumerate(handle, start=1):
+            if not line.strip():
+                continue
+            try:
+                post = json.loads(line)
+                if not isinstance(post, dict):
+                    raise ValueError("Rapportposten är inte ett objekt")
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"Ogiltig rapportlogg {fil}:{number}") from exc
+            poster.append(post)
+    return poster
 
-    if os.path.exists(
-        fil
-    ):
 
-        try:
+def _las_dagens_logg(datum: str) -> dict | None:
+    return next((post for post in _las_rapportposter(_rapportfil(datum))
+                 if post.get("datum") == datum), None)
 
-            with open(
-                fil,
-                "r",
-                encoding="utf-8",
-            ) as handle:
 
-                for rad in handle:
-
-                    if not rad.strip():
-                        continue
-
-                    try:
-                        befintlig = (
-                            json.loads(rad)
-                        )
-                    except json.JSONDecodeError:
-                        continue
-
-                    if (
-                        befintlig.get(
-                            "datum"
-                        )
-                        != post.get(
-                            "datum"
-                        )
-                    ):
-                        poster.append(
-                            befintlig
-                        )
-
-        except OSError as exc:
-            error(
-                "[RAPPORT] Kunde inte läsa "
-                f"befintlig rapportlogg: {exc}"
-            )
-
-    poster.append(
-        post
-    )
-
-    poster.sort(
-        key=lambda item:
-        item.get(
-            "datum",
-            "",
-        )
-    )
-
-    with open(
-        fil,
-        "w",
-        encoding="utf-8",
-    ) as handle:
-
-        for item in poster:
-
-            handle.write(
-                json.dumps(
-                    item,
-                    ensure_ascii=False,
-                    separators=(
-                        ",",
-                        ":",
-                    ),
-                )
-                + "\n"
-            )
+def _spara_logg(post: dict) -> None:
+    fil = _rapportfil(post["datum"])
+    poster = [row for row in _las_rapportposter(fil) if row.get("datum") != post["datum"]]
+    poster.append(post)
+    poster.sort(key=lambda row: row.get("datum", ""))
+    temporary = fil + ".tmp"
+    try:
+        with open(temporary, "w", encoding="utf-8") as handle:
+            for row in poster:
+                handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+        os.replace(temporary, fil)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def skapa_och_skicka_rapport(
@@ -1055,6 +966,7 @@ def skapa_och_skicka_rapport(
                 trender["stabil"],
             "rapport":
                 text,
+            "email_skickat_tid": befintlig.get("email_skickat_tid") if befintlig else None,
             "email_skickat":
                 bool(
                     befintlig
@@ -1108,9 +1020,7 @@ def skapa_och_skicka_rapport(
 
         post[
             "email_skickat"
-        ] = bool(
-            skickat
-        )
+        ] = bool(skickat or (befintlig and befintlig.get("email_skickat")))
 
         post[
             "email_skickat_tid"
@@ -1119,7 +1029,7 @@ def skapa_och_skicka_rapport(
                 timespec="seconds"
             )
             if skickat
-            else None
+            else befintlig.get("email_skickat_tid") if befintlig else None
         )
 
         _spara_logg(
@@ -1138,7 +1048,7 @@ def skapa_och_skicka_rapport(
                 "ändå sparad."
             )
 
-        return 0
+        return 0 if skickat else 1
 
     except Exception as exc:
 
@@ -1161,7 +1071,8 @@ def skapa_och_skicka_rapport(
                 "Fiskabilar Analytics:\n"
                 f"{WEBB_URL}"
             ),
-            "email_skickat": False,
+            "email_skickat": bool(befintlig and befintlig.get("email_skickat")),
+            "email_skickat_tid": befintlig.get("email_skickat_tid") if befintlig else None,
         }
 
         try:
@@ -1179,7 +1090,7 @@ def skapa_och_skicka_rapport(
             f"rapportgenerering: {exc}"
         )
 
-        return 0
+        return 1
 
 
 def main() -> None:

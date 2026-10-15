@@ -17,6 +17,7 @@ ser captcha/blockering istället för att kringgå den.
 from app_logging.logger import info
 
 import time
+from .errors import SourceFetchError
 import requests
 
 from sources import matchar_grundkrav, berika_fran_fritext
@@ -82,7 +83,7 @@ def hamta_annonser() -> list[dict]:
     except Exception as e:
         info(f"[blocket] FEL vid hämtning: {e}. "
               f"Endpointen ovan är en placeholder - verifiera riktig URL.")
-        return []
+        raise SourceFetchError(f"Blocket {SOK_URL}: {e}") from e
 
     time.sleep(DELAY_SEKUNDER)
 

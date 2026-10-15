@@ -14,7 +14,6 @@ Här ligger:
 
 import json
 import re
-import time
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -22,6 +21,7 @@ from concurrent.futures import (
 )
 
 import requests
+from .errors import SourceFetchError, require_html
 from bs4 import BeautifulSoup
 
 from app_logging.logger import info
@@ -36,9 +36,7 @@ from .bilweb_bmw import (
 
 MAX_PARALLELLA_DETALJSIDOR = 6
 
-ANTAL_DETALJSIDE_FORSOK = 3
 DETALJSIDA_TIMEOUT_SEKUNDER = 15
-DETALJSIDA_RETRY_PAUS_SEKUNDER = 1.0
 
 HEADERS = {
     "User-Agent": (
@@ -545,62 +543,17 @@ def hamta_pris_mil_fran_detaljsida(
     url: str,
 ) -> dict | None:
 
-    resp = None
-    senaste_fel = None
+    try:
+        resp = requests.get(
+            url, headers=HEADERS, timeout=DETALJSIDA_TIMEOUT_SEKUNDER,
+            allow_redirects=True,
+        )
+        require_html(resp, "Bilweb")
+    except requests.RequestException as exc:
+        raise SourceFetchError(f"Bilweb detaljsida {url}: {exc}") from exc
 
-    for forsok in range(
-        1,
-        ANTAL_DETALJSIDE_FORSOK + 1,
-    ):
-
-        try:
-            resp = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=DETALJSIDA_TIMEOUT_SEKUNDER,
-                allow_redirects=True,
-            )
-
-            resp.raise_for_status()
-
-            if _redirect_ser_ut_som_annan_sida(
-                url,
-                resp.url,
-            ):
-                info(
-                    "[bilweb]   Detaljsidan redirectades "
-                    "till annan sida: "
-                    f"{url} -> {resp.url}"
-                )
-                return None
-
-            break
-
-        except Exception as e:
-            senaste_fel = e
-
-            if forsok < ANTAL_DETALJSIDE_FORSOK:
-                info(
-                    "[bilweb]   Försök "
-                    f"{forsok}/{ANTAL_DETALJSIDE_FORSOK} "
-                    f"misslyckades för {url}: {e}. "
-                    "Försöker igen."
-                )
-
-                time.sleep(
-                    DETALJSIDA_RETRY_PAUS_SEKUNDER
-                )
-
-            else:
-                info(
-                    "[bilweb]   FEL vid hämtning "
-                    f"av detaljsida {url} efter "
-                    f"{ANTAL_DETALJSIDE_FORSOK} försök: "
-                    f"{senaste_fel}"
-                )
-
-    if resp is None:
-        return None
+    if _redirect_ser_ut_som_annan_sida(url, resp.url):
+        raise SourceFetchError(f"Bilweb detaljsida bytte annons: {url} -> {resp.url}")
 
     html = resp.text
 
@@ -913,7 +866,9 @@ def hamta_detaljsidor_parallellt(
                         f"{url}: {e}"
                     )
 
-                    continue
+                    for pending in futures:
+                        pending.cancel()
+                    raise SourceFetchError(f"Bilweb detaljsida {url}: {e}") from e
 
                 if not detaljdata:
                     continue

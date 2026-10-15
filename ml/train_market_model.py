@@ -146,9 +146,11 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         .apply(normalisera_variant)
     )
 
-    resultat["Price"] = pd.to_numeric(
-        df.get("annonspris"),
-        errors="coerce",
+    # Annonsobservationer lagrar priset som "pris"; värdeobservationer
+    # använder "annonspris". Båda är observerade kontantpriser.
+    missing = pd.Series(index=df.index, dtype=float)
+    resultat["Price"] = pd.to_numeric(df.get("pris", missing), errors="coerce").combine_first(
+        pd.to_numeric(df.get("annonspris", missing), errors="coerce")
     )
 
     resultat["Tid"] = pd.to_datetime(
@@ -175,6 +177,7 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
             "Mil",
             "ModelYear",
             "Price",
+            "Tid",
         ]
     )
 
@@ -292,3 +295,13 @@ def _deduplicera_dataset(
     )
 
     return resultat
+
+
+def main() -> None:
+    """Träna och utvärdera modellen med samma pipeline som diagnostiken."""
+    from ml.analyze_model import main as train
+    train(["--debug"])
+
+
+if __name__ == "__main__":
+    main()

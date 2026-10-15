@@ -17,6 +17,7 @@ from __future__ import annotations
 import time
 
 import requests
+from .errors import SourceFetchError, require_html
 from bs4 import BeautifulSoup
 
 from app_logging.logger import info
@@ -70,14 +71,14 @@ def _hamta_sida(
             timeout=20,
         )
 
-        response.raise_for_status()
+        require_html(response, "Bytbil")
 
     except requests.RequestException as exc:
         info(
             "[bytbil] FEL vid hämtning "
             f"av {url}: {exc}"
         )
-        return None
+        raise SourceFetchError(f"Bytbil {url}: {exc}") from exc
 
     time.sleep(
         DELAY_SEKUNDER
@@ -266,7 +267,7 @@ def _hamta_for_konfiguration(
             "sök-URL för "
             f"{modell}"
         )
-        return []
+        raise SourceFetchError(f"Bytbil: saknar sök-URL för {modell}")
 
     soup = _hamta_sida(
         url

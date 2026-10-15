@@ -5,6 +5,7 @@ Prediktion av marknadsvärde med tränad ML-modell.
 from __future__ import annotations
 
 from pathlib import Path
+from functools import lru_cache
 
 import joblib
 
@@ -34,9 +35,12 @@ def ladda_modell():
             f"{MODEL_FIL}"
         )
 
-    return joblib.load(
-        MODEL_FIL
-    )
+    return _ladda_modell_cached(MODEL_FIL.resolve(), MODEL_FIL.stat().st_mtime_ns)
+
+
+@lru_cache(maxsize=1)
+def _ladda_modell_cached(path: Path, modified_ns: int):
+    return joblib.load(path)
 
 
 def prediktera_borpris(
@@ -104,8 +108,8 @@ def prediktera_borpris(
             )
         )
 
-    except Exception:
-        return None
+    except Exception as exc:
+        raise RuntimeError("ML-prediktionen misslyckades") from exc
 
     if len(prediction) != 1:
         return None

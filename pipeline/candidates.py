@@ -354,7 +354,7 @@ def processa_kandidater(
                 f"{_annons_namn(bil)}: "
                 f"{e}"
             )
-            continue
+            raise
 
         if (
             vardering.get(
@@ -405,7 +405,7 @@ def processa_kandidater(
                 f"{_annons_namn(bil)}: "
                 f"{e}"
             )
-            continue
+            raise
 
         # --------------------------------------------------------
         # HISTORIK
@@ -428,6 +428,7 @@ def processa_kandidater(
                 "[HISTORIK] Kunde inte spara "
                 f"värdeobservation: {e}"
             )
+            raise
 
         if (
             score
@@ -485,6 +486,7 @@ def processa_kandidater(
                 "[FEEDBACK] Kunde inte spara "
                 f"fyndfeedback: {e}"
             )
+            raise
 
         # --------------------------------------------------------
         # DUPLICERAD NOTIFIERING

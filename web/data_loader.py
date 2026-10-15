@@ -5,6 +5,7 @@ Data loading för Fiskabilar Analytics.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -15,9 +16,7 @@ DATA_DIR = (
     ROOT / "data"
 )
 
-OUTPUT_DIR = (
-    ROOT / "web_site"
-)
+OUTPUT_DIR = Path(os.environ.get("FISKABILAR_WEB_OUTPUT", str(ROOT / "web_site")))
 
 STATE_FILE = (
     DATA_DIR / "state.json"

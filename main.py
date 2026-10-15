@@ -93,7 +93,7 @@ def main(evening: bool = False):
     if evening and datetime.now(ZoneInfo("Europe/Stockholm")).date() != observation_day:
         raise RuntimeError("Hämtningen passerade midnatt; kör om för den nya dagen.")
 
-    if evening and not raa_annonser:
+    if not raa_annonser:
         raise RuntimeError("Kvällskörningen fick inga annonser; befintlig historik behålls.")
 
     bilar = deduplicera(
@@ -214,6 +214,7 @@ def main(evening: bool = False):
                 "[HISTORIK] Kunde inte spara "
                 f"annonsobservation: {e}"
             )
+            raise
 
     # ------------------------------------------------------------
     # MARKNAD

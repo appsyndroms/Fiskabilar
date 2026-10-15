@@ -62,6 +62,24 @@ class EveningTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Ofullständig"):
             evening.validate_web()
 
+    def test_failed_web_build_preserves_live_website_and_full_run_status(self):
+        website = self.root / "web_site"
+        website.mkdir()
+        (website / "index.html").write_text("previous good website")
+        (self.local / "evening-status.json").write_text('{"status": "failed"}')
+        with patch.object(evening.subprocess, "run", return_value=subprocess.CompletedProcess([], 1)):
+            self.assertEqual(evening.run(build_only=True), 1)
+        self.assertEqual((website / "index.html").read_text(), "previous good website")
+        self.assertEqual(json.loads((self.local / "evening-status.json").read_text())["status"], "failed")
+
+    def test_invalid_web_output_does_not_replace_live_website(self):
+        website = self.root / "web_site"
+        website.mkdir()
+        (website / "index.html").write_text("previous good website")
+        with patch.object(evening.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)):
+            self.assertEqual(evening.run(build_only=True), 1)
+        self.assertEqual((website / "index.html").read_text(), "previous good website")
+
     def test_archive_preserves_previous_month(self):
         data = self.root / "data"
         data.mkdir()
@@ -74,9 +92,12 @@ class EveningTests(unittest.TestCase):
         evening.archive_valuations()
         self.assertEqual(archive.read_text(), '{"borpris": 100000}\n')
 
-    def test_schedule_is_22_and_web_binds_loopback(self):
-        schedule, web = definitions()
-        self.assertEqual(schedule["StartCalendarInterval"], {"Hour": 22, "Minute": 0})
+    def test_only_web_agent_remains_without_evening_schedule(self):
+        agents = definitions()
+        self.assertEqual(len(agents), 1)
+        web = agents[0]
+        self.assertEqual(web["Label"], "se.fiskabilar.web")
+        self.assertNotIn("StartCalendarInterval", web)
         self.assertIn("127.0.0.1", web["ProgramArguments"])
         self.assertIn("8766", web["ProgramArguments"])
 

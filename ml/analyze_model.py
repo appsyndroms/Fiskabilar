@@ -22,6 +22,7 @@ from ml.train_market_model import (
     _bygg_dataset,
     _deduplicera_dataset,
     _ladda_jsonl,
+    MIN_TRAINING_OBSERVATIONER,
 )
 
 from ml.model_diagnostics import (
@@ -96,17 +97,13 @@ def _tidsmässig_split(
         ),
     )
 
-    train = (
-        dataset
-        .iloc[:split_index]
-        .copy()
-    )
-
-    test = (
-        dataset
-        .iloc[split_index:]
-        .copy()
-    )
+    if dataset["Tid"].isna().any() or dataset["Tid"].nunique() < 2:
+        raise ValueError("Tidsmässig split kräver minst två giltiga observationstidpunkter.")
+    cutoff = dataset.iloc[split_index]["Tid"]
+    if cutoff == dataset["Tid"].min():
+        cutoff = dataset.loc[dataset["Tid"] > cutoff, "Tid"].min()
+    train = dataset.loc[dataset["Tid"] < cutoff].copy()
+    test = dataset.loc[dataset["Tid"] >= cutoff].copy()
 
     print(
         "\nTidsmässig split:"
@@ -206,7 +203,7 @@ def _modeller():
     }
 
 
-def main():
+def main(argv=None):
 
     parser = argparse.ArgumentParser()
 
@@ -219,7 +216,7 @@ def main():
         ),
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if not args.debug:
         return
@@ -233,6 +230,9 @@ def main():
     dataset = _deduplicera_dataset(
         dataset
     )
+
+    if len(dataset) < MIN_TRAINING_OBSERVATIONER:
+        raise ValueError(f"Minst {MIN_TRAINING_OBSERVATIONER} giltiga ML-observationer krävs.")
 
     train, test = _tidsmässig_split(
         dataset

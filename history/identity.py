@@ -346,24 +346,14 @@ def _ladda() -> dict:
         ) as f:
             data = json.load(f)
 
-    except (
-        OSError,
-        json.JSONDecodeError,
-    ):
-        info(
-            "[IDENTITY] Kunde inte läsa "
-            f"{IDENTITY_FIL}; börjar med tom identity-store."
-        )
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Kunde inte läsa identity-store {IDENTITY_FIL}; befintlig fil bevaras.") from exc
 
-        _IDENTITY_CACHE = _tom_store()
-        return _IDENTITY_CACHE
-
-    if not isinstance(
-        data,
-        dict,
-    ):
-        _IDENTITY_CACHE = _tom_store()
-        return _IDENTITY_CACHE
+    if not isinstance(data, dict):
+        raise ValueError(f"Ogiltig identity-store: {IDENTITY_FIL}")
+    for field in ("identifiers", "vehicles", "aliases"):
+        if field in data and not isinstance(data[field], dict):
+            raise ValueError(f"Ogiltigt fält {field} i identity-store: {IDENTITY_FIL}")
 
     data.setdefault(
         "version",
