@@ -88,6 +88,7 @@ def _jämförbara_observationer(
     max_mileage_diff=1500,
     min_comparables=3,
     max_jämförbara=MAX_JÄMFÖRBARA,
+    as_of=None,
 ):
     """
     Hittar jämförbara observationer.
@@ -103,8 +104,8 @@ def _jämförbara_observationer(
     För varje unik Identity används
     högst en observation.
 
-    Den tidsmässigt närmaste observationen
-    används när målobjektets Tid finns.
+    Endast observationer som var kända vid målobjektets Tid används.
+    För live-fynd kan en gemensam as_of-tid anges för hela marknadssnapshoten.
 
     Därefter används endast de
     max_jämförbara mest lika
@@ -203,10 +204,14 @@ def _jämförbara_observationer(
         kandidater["_Tid"] = pd.NaT
 
     target_tid = pd.to_datetime(
-        row.get("Tid"),
+        as_of if as_of is not None else row.get("Tid"),
         errors="coerce",
         utc=True,
     )
+
+    # En historisk värdering får bara se de priser som redan var kända.
+    if pd.notna(target_tid):
+        kandidater = kandidater[kandidater["_Tid"].notna() & (kandidater["_Tid"] <= target_tid)].copy()
 
     kandidater = kandidater[
         kandidater["_ModelNorm"]

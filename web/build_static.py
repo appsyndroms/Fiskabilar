@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from data_loader import (
@@ -182,9 +183,9 @@ def _parse_tid(value):
         return None
 
     try:
-        return datetime.fromisoformat(
-            str(value)
-        )
+        result = datetime.fromisoformat(str(value))
+        timezone = ZoneInfo("Europe/Stockholm")
+        return result.replace(tzinfo=timezone) if result.tzinfo is None else result.astimezone(timezone)
 
     except (
         TypeError,
@@ -267,14 +268,15 @@ def _load_vehicle_identity_urls() -> dict[str, str]:
     return result
 
 
-def _load_active_market_urls(
+def _load_active_market_observations(
     market_history: list[dict],
-) -> dict[str, str]:
+) -> dict[str, dict]:
     """
     Bygger en mapping:
 
-        vehicle_id -> aktuell annons-URL
+        vehicle_id -> senaste aktuella annonsobservationen
 
+    Även en senaste observation utan URL ersätter en äldre observation.
     Endast annonsobservationer som är högst
     AKTIVITETSDAGAR gamla används.
 
@@ -289,7 +291,7 @@ def _load_active_market_urls(
 
     latest: dict[
         str,
-        tuple[datetime, str],
+        tuple[datetime, dict],
     ] = {}
 
     now = datetime.now().astimezone()
@@ -315,9 +317,6 @@ def _load_active_market_urls(
         url = _get_url(
             row
         )
-
-        if not url:
-            continue
 
         tid = _parse_tid(
             row.get("tid")
@@ -355,7 +354,7 @@ def _load_active_market_urls(
                 vehicle_id
             ] = (
                 tid,
-                url,
+                {**row, "url": url},
             )
 
     return {
@@ -363,6 +362,19 @@ def _load_active_market_urls(
         for vehicle_id, value
         in latest.items()
     }
+
+
+def _load_active_market_urls(market_history: list[dict]) -> dict[str, str]:
+    return {key: row["url"] for key, row in _load_active_market_observations(market_history).items()
+            if _is_valid_url(row.get("url"))}
+
+
+def _same_snapshot(finding: dict, observation: dict) -> bool:
+    try:
+        return all(float(finding[field]) == float(observation[other])
+                   for field, other in (("Price", "pris"), ("Mil", "miltal"), ("ModelYear", "arsmodell")))
+    except (KeyError, TypeError, ValueError):
+        return False
 
 
 def _berika_fynd_med_aktuell_url(
@@ -385,8 +397,8 @@ def _berika_fynd_med_aktuell_url(
     if not findings:
         return findings
 
-    active_market_urls = (
-        _load_active_market_urls(
+    active_observations = (
+        _load_active_market_observations(
             market_history
         )
     )
@@ -406,11 +418,10 @@ def _berika_fynd_med_aktuell_url(
             result
         )
 
-        active_url = (
-            active_market_urls.get(
-                vehicle_id
-            )
-        )
+        observation = active_observations.get(vehicle_id)
+        active_url = observation.get("url") if observation else None
+        if observation and not _same_snapshot(result, observation):
+            active_url = None
 
         if _is_valid_url(
             active_url
@@ -440,7 +451,7 @@ def _berika_fynd_med_aktuell_url(
 
     print(
         "Aktuella URL-mappningar: "
-        f"{len(active_market_urls)} fordon"
+        f"{len(active_observations)} fordon"
     )
 
     return enriched

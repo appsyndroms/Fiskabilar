@@ -110,6 +110,7 @@ def _evidensvikt(jämförbara):
 def _get_ad_url(
     row,
     dataset=None,
+    as_of=None,
 ):
     """
     Hämtar den mest aktuella annons-URL:en för fyndet.
@@ -151,10 +152,11 @@ def _get_ad_url(
         if not matches.empty:
 
             if "Tid" in matches.columns:
-                matches = matches.sort_values(
-                    "Tid",
-                    na_position="last",
-                )
+                cutoff = pd.to_datetime(as_of if as_of is not None else row.get("Tid"), errors="coerce", utc=True)
+                times = pd.to_datetime(matches["Tid"], errors="coerce", utc=True)
+                if pd.notna(cutoff):
+                    matches = matches[times.notna() & (times <= cutoff)]
+                matches = matches.sort_values("Tid", na_position="last")
 
             for _, match in (
                 matches.iloc[::-1]
@@ -205,6 +207,7 @@ def _bygg_fyndkandidater(
     dataset,
     test,
     prediction,
+    as_of=None,
 ):
     """
     Bygger en rankad lista över potentiella fynd.
@@ -228,6 +231,7 @@ def _bygg_fyndkandidater(
             dataset,
             row,
             min_comparables=MIN_COMPARABLES,
+            as_of=as_of,
         )
 
         if jämförbara.empty:
@@ -371,8 +375,10 @@ def _bygg_fyndkandidater(
                 "url": _get_ad_url(
                     row,
                     dataset,
+                    as_of=as_of,
                 ),
 
+                "ObservationTime": row["Tid"].isoformat() if pd.notna(row.get("Tid")) else None,
                 "Identity": row.get(
                     "Identity",
                     "",
@@ -431,6 +437,7 @@ def detektera_fynd(
     dataset,
     test,
     prediction,
+    as_of=None,
 ):
     """
     Kör fynddetektorn.
@@ -444,6 +451,7 @@ def detektera_fynd(
         dataset,
         test,
         prediction,
+        as_of=as_of,
     )
 
     return fynd.reset_index(

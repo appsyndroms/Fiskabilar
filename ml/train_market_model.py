@@ -8,6 +8,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import joblib
+from history.identity import canonical_vehicle_id
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
@@ -61,12 +62,8 @@ def _ladda_jsonl() -> pd.DataFrame:
 
                 try:
                     post = json.loads(rad)
-                except json.JSONDecodeError:
-                    print(
-                        f"Varning: kunde inte läsa "
-                        f"{fil}:{radnummer}"
-                    )
-                    continue
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"Ogiltig ML-historik {fil}:{radnummer}") from exc
 
                 if isinstance(post, dict):
                     poster.append(post)
@@ -97,7 +94,11 @@ def _första_identitet(row: pd.Series) -> str | None:
         value = row.get(field)
 
         if pd.notna(value) and str(value).strip():
-            return f"{field}:{str(value).strip()}"
+            identity = str(value).strip()
+            if field in ("vehicle_id", "vehicleId", "car_id", "carId"):
+                identity = canonical_vehicle_id(identity)
+                return f"vehicle_id:{identity}"
+            return f"{field}:{identity}"
 
     return None
 

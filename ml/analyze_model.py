@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
+from history.atomic_storage import atomic_output
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -34,9 +35,7 @@ from ml.model_diagnostics import (
     _största_felen,
 )
 
-from ml.fynddetektor import (
-    detektera_fynd,
-)
+from ml.current_findings import build_current_findings
 
 from ml.fynd_export import (
     exportera_fynd,
@@ -323,43 +322,20 @@ def main(argv=None):
         rf["prediction"],
     )
 
-    # --------------------------------------------------------
-    # FYNDEKTION + EXPORT
-    # --------------------------------------------------------
-
-    fynd = detektera_fynd(
-        dataset,
-        test,
-        rf["prediction"],
-    )
-
-    exportera_fynd(
-        fynd
-    )
-
-    # --------------------------------------------------------
-    # VINNANDE MODELL
-    # --------------------------------------------------------
-
-    winner = min(
-        resultat.items(),
-        key=lambda item:
-            item[1]["metrics"]["MAE"],
-    )
-
-    winner_name = winner[0]
-
-    winner_model = winner[1]["model"]
+    # Välj modellen före fyndexporten så att webb och metadata använder samma modell.
+    winner = min(resultat.items(), key=lambda item: item[1]["metrics"]["MAE"])
+    winner_name, winner_result = winner
+    winner_model = winner_result["model"]
+    fynd = build_current_findings(dataset, winner_model)
+    exportera_fynd(fynd)
 
     MODEL_FIL.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    joblib.dump(
-        winner_model,
-        MODEL_FIL,
-    )
+    with atomic_output(MODEL_FIL) as temporary:
+        joblib.dump(winner_model, temporary)
 
     # Metadata används av webbappen.
     #
@@ -385,17 +361,10 @@ def main(argv=None):
         ),
     }
 
-    with METADATA_FIL.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
+    with atomic_output(METADATA_FIL) as temporary:
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(metadata, handle, ensure_ascii=False, indent=2, allow_nan=False)
 
-        json.dump(
-            metadata,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
 
 
 if __name__ == "__main__":

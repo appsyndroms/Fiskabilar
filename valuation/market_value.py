@@ -44,6 +44,7 @@ Marknadsmodellen är avsiktligt enkel och transparent. Den ska kunna
 förbättras när vi får större historiskt underlag.
 """
 from datetime import date
+from history.identity import canonical_vehicle_id
 from statistics import median
 from app_logging.logger import info
 from config import ML_PRISER
@@ -526,6 +527,11 @@ def _ar_samma_annons(
     Detta förhindrar framför allt problemet där aktuell annons
     råkar sakna annons-ID men ändå hamnar i marknadsunderlaget.
     """
+    current_vehicle = canonical_vehicle_id(aktuell_bil.get("vehicle_id"))
+    other_vehicle = canonical_vehicle_id(jamforelse.get("vehicle_id"))
+    if current_vehicle and other_vehicle:
+        return current_vehicle == other_vehicle
+
     aktuell_id = _hamta_annons_id(
         aktuell_bil
     )
@@ -535,6 +541,7 @@ def _ar_samma_annons(
     if (
         aktuell_id
         and jamforelse_id
+        and aktuell_bil.get("kalla") == jamforelse.get("kalla")
         and str(
             aktuell_id
         ).strip()
@@ -665,12 +672,17 @@ def _jamforelseidentitet(
     Funktionen används endast för att rensa dubbletter i
     marknadsunderlaget och påverkar inte värderingen i övrigt.
     """
+    vehicle_id = canonical_vehicle_id(bil.get("vehicle_id"))
+    if vehicle_id:
+        return ("vehicle", vehicle_id)
+
     annons_id = _hamta_annons_id(
         bil
     )
     if annons_id:
         return (
             "id",
+            bil.get("kalla"),
             str(
                 annons_id
             ).strip(),
@@ -792,6 +804,8 @@ def bygg_marknadsunderlag(
                 ),
                 "annons_id": annons_id,
                 "annons_url": annons_url,
+                "vehicle_id": canonical_vehicle_id(bil.get("vehicle_id")),
+                "kalla": bil.get("kalla"),
                 "modell": bil.get(
                     "modell"
                 ),

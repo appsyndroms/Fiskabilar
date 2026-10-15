@@ -341,6 +341,7 @@ def spara_annonsobservation(
 def spara_marknadsvardesobservation(
     bil: dict,
     vardering: dict,
+    score: int | None = None,
 ) -> None:
     """
     Sparar modellens värdering.
@@ -407,6 +408,7 @@ def spara_marknadsvardesobservation(
             "diff"
         ),
 
+        "fyndscore": score,
         "fyndprocent": vardering.get(
             "fyndprocent"
         ),
@@ -514,45 +516,19 @@ def _logga_orimligt_pris(
 
 def _las_observationer() -> list[dict]:
     observationer = []
-
     for fil in _historikfiler():
-        try:
-            with open(
-                fil,
-                "r",
-                encoding="utf-8",
-            ) as f:
-
-                for rad in f:
-                    rad = rad.strip()
-
-                    if not rad:
-                        continue
-
-                    try:
-                        post = json.loads(
-                            rad
-                        )
-
-                    except json.JSONDecodeError:
-                        continue
-
-                    if isinstance(
-                        post,
-                        dict,
-                    ):
-                        _logga_orimligt_pris(
-                            post,
-                            fil,
-                        )
-
-                        observationer.append(
-                            post
-                        )
-
-        except OSError:
-            continue
-
+        with open(fil, "r", encoding="utf-8") as handle:
+            for number, line in enumerate(handle, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    post = json.loads(line)
+                    if not isinstance(post, dict):
+                        raise ValueError("Historikposten är inte ett objekt")
+                except (ValueError, TypeError) as exc:
+                    raise ValueError(f"Ogiltig marknadshistorik {fil}:{number}") from exc
+                _logga_orimligt_pris(post, fil)
+                observationer.append(post)
     return observationer
 
 

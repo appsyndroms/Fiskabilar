@@ -9,6 +9,7 @@ tillgängligt för webbappen och andra konsumenter.
 from __future__ import annotations
 
 import json
+from history.atomic_storage import atomic_output
 from pathlib import Path
 
 import pandas as pd
@@ -81,18 +82,19 @@ def exportera_fynd(
         fynd
     )
 
-    with path.open(
-        "w",
-        encoding="utf-8",
-    ) as fil:
+    with atomic_output(path) as temporary:
+        with temporary.open(
+            "w",
+            encoding="utf-8",
+        ) as fil:
 
-        for record in records:
-            fil.write(
-                json.dumps(
-                    record,
-                    ensure_ascii=False,
+            for record in records:
+                fil.write(
+                    json.dumps(
+                        record,
+                        ensure_ascii=False,
+                    )
+                    + "\n"
                 )
-                + "\n"
-            )
 
     return path

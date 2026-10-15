@@ -279,6 +279,20 @@ minst 30 giltiga observationer och två olika tidpunkter. Kommandot
 lokala kvällsflödet kör detta steg en gång. En ofullständig ML-värderingsfil
 får inte ersätta den tidigare filen.
 
+Aktuella ML-fynd beräknas med den valda modellen på den senaste observationen
+per fysisk bil, separat från testmängden som används för modellutvärdering.
+Både fyndbilen och dess jämförelseobjekt ska vara observerade inom två dagar
+och följa config.py:s modeller, varianter, årsmodeller och milintervall.
+Historiska jämförelser och annonslänkar använder endast uppgifter som var
+kända vid värderingstillfället. Gamla fordons-ID:n följs till samma permanenta
+identitet så att samma bil inte räknas som sitt eget jämförelseobjekt.
+
+Fyndscore sparas i värdehistoriken. Dagrapporten kan även läsa äldre score från
+fyndfeedback, men kräver samma rapportdag, pris och miltal som annonsen.
+Trendmedianen använder det senaste priset per bil och dag, och modellalias
+normaliseras till samma marknadskategori. Trasiga historik- och webbfiler
+stoppar bygget. Modell, metadata, fyndexport och ML-priser skrivs atomärt.
+
 För att bara bygga om webben från sparad data:
 
 ```sh

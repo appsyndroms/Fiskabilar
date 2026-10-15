@@ -46,18 +46,8 @@ def read_json(
     if not path.exists():
         return default
 
-    try:
-        with path.open(
-            "r",
-            encoding="utf-8",
-        ) as f:
-            return json.load(f)
-
-    except (
-        OSError,
-        json.JSONDecodeError,
-    ):
-        return default
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 def read_jsonl(
@@ -66,8 +56,8 @@ def read_jsonl(
     """
     Läser en JSONL-fil.
 
-    Felaktiga enskilda rader hoppas över
-    så att en trasig rad inte stoppar hela bygget.
+    Befintliga filer måste vara giltiga; fel stoppar bygget i stället för
+    att ge en grön webb med tyst bortfall av data.
     """
 
     rows: list[
@@ -77,36 +67,17 @@ def read_jsonl(
     if not path.exists():
         return rows
 
-    try:
-        with path.open(
-            "r",
-            encoding="utf-8",
-        ) as f:
-
-            for line in f:
-                line = line.strip()
-
-                if not line:
-                    continue
-
-                try:
-                    value = json.loads(
-                        line
-                    )
-
-                except json.JSONDecodeError:
-                    continue
-
-                if isinstance(
-                    value,
-                    dict,
-                ):
-                    rows.append(
-                        value
-                    )
-
-    except OSError:
-        pass
+    with path.open("r", encoding="utf-8") as handle:
+        for number, line in enumerate(handle, start=1):
+            if not line.strip():
+                continue
+            try:
+                value = json.loads(line)
+                if not isinstance(value, dict):
+                    raise ValueError("Posten är inte ett objekt")
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"Ogiltig JSONL-post {path}:{number}") from exc
+            rows.append(value)
 
     return rows
 

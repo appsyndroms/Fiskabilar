@@ -421,6 +421,7 @@ def processa_kandidater(
             spara_marknadsvardesobservation(
                 bil,
                 vardering,
+                score=score,
             )
 
         except Exception as e:

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import re
 from statistics import median
 from typing import Any
@@ -230,12 +231,9 @@ def parse_time(
         return None
 
     try:
-        return datetime.fromisoformat(
-            str(value).replace(
-                "Z",
-                "+00:00",
-            )
-        )
+        result = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        timezone = ZoneInfo("Europe/Stockholm")
+        return result.replace(tzinfo=timezone) if result.tzinfo is None else result.astimezone(timezone)
 
     except ValueError:
         return None

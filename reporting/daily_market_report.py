@@ -23,6 +23,7 @@ import json
 import os
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
+from pathlib import Path
 
 from app_logging.logger import always, error
 
@@ -33,6 +34,8 @@ from config import (
 )
 
 from history.analysis_storage import _las_observationer
+from history.identity import canonical_vehicle_id
+from history.find_feedback import HISTORIK_DIR as FEEDBACK_DIR
 from history.analysis_trends import bygg_marknadstrender
 from notifications.email import skicka_epost
 
@@ -165,9 +168,7 @@ def _senaste_per_dag_och_bil(
     for post in observationer:
 
         dag = _datum(post)
-        vehicle_id = post.get(
-            "vehicle_id"
-        )
+        vehicle_id = canonical_vehicle_id(post.get("vehicle_id"))
 
         if not dag or not vehicle_id:
             continue
@@ -381,6 +382,21 @@ def _forandringar(
     }
 
 
+def _fyndfeedback() -> list[dict]:
+    """Äldre värdeposter saknar score; använd den faktiskt sparade fyndfeedbacken."""
+    observations = []
+    for path in Path(FEEDBACK_DIR).glob("find_feedback_*.jsonl"):
+        with path.open(encoding="utf-8") as handle:
+            for line in handle:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                if row.get("typ") == "fynd":
+                    observations.append({**row, "fyndscore": row.get("score"),
+                                         "annonspris": row.get("pris")})
+    return observations
+
+
 def _fynd(
     datum: str,
 ) -> list[dict]:
@@ -393,7 +409,7 @@ def _fynd(
 
     varderingar = (
         _senaste_per_dag_och_bil(
-            _varderingar()
+            _varderingar() + _fyndfeedback()
         )
     )
 
@@ -413,7 +429,7 @@ def _fynd(
         vehicle_id,
     ), post in varderingar.items():
 
-        if dag > datum:
+        if dag != datum:
             continue
 
         tidigare = (
@@ -450,6 +466,11 @@ def _fynd(
             continue
 
         vardering = value[1]
+        # En gammal billigare observation får inte ge fyndstatus åt dagens högre pris.
+        if vardering.get("annonspris") != bil.get("pris"):
+            continue
+        if vardering.get("miltal") != bil.get("miltal"):
+            continue
 
         score = vardering.get(
             "fyndscore"

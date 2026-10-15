@@ -18,6 +18,8 @@ som ett faktiskt marknadsunderlag och inte bara som en prisindikator.
 """
 
 from app_logging.logger import debug
+from history.identity import canonical_vehicle_id
+from ml.normalization import normalisera_modell, normalisera_variant
 
 from collections import defaultdict
 from datetime import timedelta
@@ -101,15 +103,8 @@ def _trendkategori(
     utvecklas över tid.
     """
 
-    modell = str(
-        post.get("modell")
-        or ""
-    ).strip().lower()
-
-    variant = str(
-        post.get("variant")
-        or ""
-    ).strip().lower()
+    modell = normalisera_modell(post.get("modell")) or ""
+    variant = normalisera_variant(post.get("variant")) or ""
 
     arsmodell = post.get(
         "arsmodell"
@@ -149,7 +144,8 @@ def _bygg_dagliga_priser(
     """
     Bygger en observation per dag.
 
-    Om samma bilkategori observerats flera gånger samma dag används medianen.
+    Varje identifierad bil bidrar med sitt senaste pris per dag.
+    Därefter används medianen inom bilkategorin.
 
     Detta är viktigt eftersom en körning kan innehålla många observationer
     av samma marknad under samma dygn. Flera körningar samma dag ska därför
@@ -169,26 +165,19 @@ def _bygg_dagliga_priser(
         list[float],
     ] = defaultdict(list)
 
-    for post in observationer:
-        pris = post.get(
-            "pris"
-        )
-
-        if not _pris_ar_anvandbart_i_trend(
-            pris
-        ):
+    latest = {}
+    for index, post in enumerate(observationer):
+        dag = _observationsdag(post)
+        tid = _parse_tid(post.get("tid"))
+        if not dag or not tid or not _pris_ar_anvandbart_i_trend(post.get("pris")):
             continue
-
-        dag = _observationsdag(
-            post
-        )
-
-        if not dag:
-            continue
-
-        per_dag[dag].append(
-            float(pris)
-        )
+        identity = (canonical_vehicle_id(post.get("vehicle_id")) or post.get("annons_nyckel")
+                    or post.get("url") or f"anonymous:{index}")
+        key = (dag, identity)
+        if key not in latest or tid >= latest[key][0]:
+            latest[key] = (tid, post)
+    for (dag, _), (_, post) in latest.items():
+        per_dag[dag].append(float(post["pris"]))
 
     resultat = []
 

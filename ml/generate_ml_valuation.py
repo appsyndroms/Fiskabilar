@@ -19,6 +19,7 @@ Filen används därefter av valuation-systemet.
 from __future__ import annotations
 
 import json
+from history.atomic_storage import atomic_output
 from pathlib import Path
 
 from config import (
@@ -145,18 +146,19 @@ def skriv_ml_valuation() -> int:
         exist_ok=True,
     )
 
-    with path.open(
-        "w",
-        encoding="utf-8",
-    ) as file:
-        for rad in rader:
-            file.write(
-                json.dumps(
-                    rad,
-                    ensure_ascii=False,
+    with atomic_output(path) as temporary:
+        with temporary.open(
+            "w",
+            encoding="utf-8",
+        ) as file:
+            for rad in rader:
+                file.write(
+                    json.dumps(
+                        rad,
+                        ensure_ascii=False,
+                    )
+                    + "\n"
                 )
-                + "\n"
-            )
 
     return len(rader)
 
