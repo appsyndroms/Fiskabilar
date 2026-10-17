@@ -189,6 +189,24 @@ def render_styles() -> str:
         color: var(--accent);
     }
 
+    .finding-link {
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .finding-link span {
+        display: block;
+        margin-top: 4px;
+        font-size: .8rem;
+        white-space: nowrap;
+        text-decoration: underline;
+    }
+
+    .finding-link:hover strong,
+    .finding-link:focus-visible strong {
+        text-decoration: underline;
+    }
+
     .empty {
         padding: 24px;
         color: var(--muted);

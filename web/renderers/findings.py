@@ -194,12 +194,14 @@ def render_findings(
         if url:
             link = (
                 f'<a href="{_safe(url)}" '
+                f'class="finding-link" '
                 f'target="_blank" '
                 f'rel="noopener">'
-                f'Öppna annons</a>'
+                f'<strong>{title}</strong>'
+                f'<span>Öppna annons ↗</span></a>'
             )
         else:
-            link = "—"
+            link = f"<strong>{title}</strong>"
 
         html_rows.append(
             f"""
@@ -210,9 +212,7 @@ def render_findings(
             >
 
                 <td>
-                    <strong>
-                        {title}
-                    </strong>
+                    {link}
                 </td>
 
                 <td>
@@ -284,10 +284,6 @@ def render_findings(
                     {_safe(fyndklass)}
                 </td>
 
-                <td>
-                    {link}
-                </td>
-
             </tr>
             """
         )
@@ -313,7 +309,6 @@ def render_findings(
                     <th>Combined</th>
                     <th>FyndScore</th>
                     <th>Klass</th>
-                    <th>Annons</th>
                 </tr>
 
             </thead>
