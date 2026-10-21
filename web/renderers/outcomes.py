@@ -403,8 +403,8 @@ def render_score_analysis(
 
                     <tr>
                         <th>Score</th>
-                        <th>Fyndevent</th>
-                        <th>Andel</th>
+                        <th data-sort-type="number">Fyndevent</th>
+                        <th data-sort-type="number">Andel</th>
                         <th>Utfall</th>
                     </tr>
 

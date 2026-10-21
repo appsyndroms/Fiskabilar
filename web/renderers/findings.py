@@ -110,7 +110,7 @@ def render_findings(
 
     html_rows = []
 
-    for row in rows:
+    for index, row in enumerate(rows):
 
         model = (
             row.get("Model")
@@ -207,6 +207,7 @@ def render_findings(
             f"""
             <tr
                 data-current-finding
+                data-filter-index="{index}"
                 data-filter-model="{_safe(model)}"
                 data-filter-year="{_safe(year)}"
             >
@@ -297,17 +298,17 @@ def render_findings(
 
                 <tr>
                     <th>Bil</th>
-                    <th>År</th>
-                    <th>Miltal</th>
-                    <th>Pris</th>
-                    <th>ML-värdering</th>
-                    <th>ML-gap</th>
-                    <th>Marknadsvärde</th>
-                    <th>Marknadsgap</th>
-                    <th>Jämförelser</th>
-                    <th>Evidens</th>
-                    <th>Combined</th>
-                    <th>FyndScore</th>
+                    <th data-sort-type="number">År</th>
+                    <th data-sort-type="number">Miltal</th>
+                    <th data-sort-type="number">Pris</th>
+                    <th data-sort-type="number">ML-värdering</th>
+                    <th data-sort-type="number">ML-gap</th>
+                    <th data-sort-type="number">Marknadsvärde</th>
+                    <th data-sort-type="number" data-sort-default="ascending">Marknadsgap</th>
+                    <th data-sort-type="number">Jämförelser</th>
+                    <th data-sort-type="number">Evidens</th>
+                    <th data-sort-type="number">Combined</th>
+                    <th data-sort-type="number">FyndScore</th>
                     <th>Klass</th>
                 </tr>
 
@@ -336,7 +337,7 @@ def render_price_reductions(
 
     html_rows = []
 
-    for row in rows[:100]:
+    for index, row in enumerate(rows[:100]):
 
         model = (
             row.get("Model")
@@ -370,6 +371,7 @@ def render_price_reductions(
             f"""
             <tr
                 data-price-reduction
+                data-filter-index="{index}"
                 data-filter-model="{_safe(model)}"
                 data-filter-year="{_safe(year)}"
             >
@@ -418,11 +420,11 @@ def render_price_reductions(
 
                 <tr>
                     <th>Bil</th>
-                    <th>År</th>
-                    <th>Första pris</th>
-                    <th>Senaste pris</th>
-                    <th>Sänkning</th>
-                    <th>%</th>
+                    <th data-sort-type="number">År</th>
+                    <th data-sort-type="number">Första pris</th>
+                    <th data-sort-type="number">Senaste pris</th>
+                    <th data-sort-type="number">Sänkning</th>
+                    <th data-sort-type="number">%</th>
                 </tr>
 
             </thead>

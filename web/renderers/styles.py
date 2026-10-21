@@ -181,6 +181,37 @@ def render_styles() -> str:
         background: var(--surface2);
     }
 
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    .table-sort {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .table-sort:hover {
+        color: var(--text);
+    }
+
+    .table-sort:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+    }
+
+    .sort-indicator {
+        color: var(--accent);
+    }
+
     tr:last-child td {
         border-bottom: 0;
     }

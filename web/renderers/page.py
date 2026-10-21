@@ -29,6 +29,8 @@ from .outcomes import (
     render_score_analysis,
 )
 
+from .sorting import render_table_sorting
+
 from .styles import (
     render_styles,
     render_global_filter_styles,
@@ -321,6 +323,8 @@ def build_html(
     Statisk vy byggd automatiskt från data/
 
 </footer>
+
+{render_table_sorting()}
 
 </body>
 

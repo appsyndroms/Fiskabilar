@@ -160,11 +160,11 @@ def render_market_history(
 
                     <tr>
                         <th>Modell</th>
-                        <th>År</th>
-                        <th>Observationer</th>
-                        <th>Medianpris</th>
-                        <th>Snittpris</th>
-                        <th>Medianmiltal</th>
+                        <th data-sort-type="number">År</th>
+                        <th data-sort-type="number">Observationer</th>
+                        <th data-sort-type="number">Medianpris</th>
+                        <th data-sort-type="number">Snittpris</th>
+                        <th data-sort-type="number">Medianmiltal</th>
                     </tr>
 
                 </thead>

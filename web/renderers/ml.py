@@ -282,7 +282,7 @@ def render_ml(
 
                     <tr>
                         <th>Metric</th>
-                        <th>Resultat</th>
+                        <th data-sort-type="number">Resultat</th>
                     </tr>
 
                 </thead>

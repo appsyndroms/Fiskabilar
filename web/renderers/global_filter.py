@@ -231,6 +231,7 @@ def render_global_filter() -> str:
             [
                 "modell",
                 "model",
+                "Model",
             ]
         );
 
@@ -600,12 +601,9 @@ def render_global_filter() -> str:
                 selector
             )
             .forEach(
-                (
-                    element,
-                    index
-                ) => {
+                element => {
                     const row =
-                        rows[index];
+                        rows[Number(element.dataset.filterIndex)];
 
                     if (
                         !row
@@ -990,7 +988,7 @@ def render_global_filter() -> str:
                             element.dataset.filterModel,
                         variant:
                             element.dataset.filterVariant,
-                        arssmodell:
+                        arsmodell:
                             element.dataset.filterYear,
                     };
 
