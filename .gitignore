@@ -222,3 +222,6 @@ __marimo__/
 .secrets
 .act.env
 web_site/
+
+# macOS metadata på externa diskar
+._*

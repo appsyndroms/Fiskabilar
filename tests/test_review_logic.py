@@ -32,6 +32,19 @@ def observation(identity, price, time):
 
 
 class ReviewLogicTests(unittest.TestCase):
+    def test_external_disk_metadata_is_not_read_as_jsonl(self):
+        from scripts.analysera_fyndutfall import _las_jsonl
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            expected = {"typ": "fynd", "score": 70}
+            (folder / "find_feedback_2026-10.jsonl").write_text(json.dumps(expected) + "\n")
+            (folder / "._find_feedback_2026-10.jsonl").write_bytes(b"\x00\x05\x16\x07\xb0")
+            self.assertEqual(_las_jsonl(folder), [expected])
+            self.assertEqual(web_data.read_all_jsonl(folder), [expected])
+            (folder / "corrupt.jsonl").write_text("broken JSON\n")
+            with self.assertRaises(ValueError):
+                web_data.read_all_jsonl(folder)
+
     def test_historical_comparisons_cannot_see_future_prices(self):
         row = observation("target", 300000, "2026-10-10T12:00:00Z")
         data = pd.DataFrame([observation(str(i), 400000, "2026-10-11T12:00:00Z") for i in range(3)])

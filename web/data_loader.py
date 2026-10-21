@@ -100,6 +100,9 @@ def read_all_jsonl(
     for path in sorted(
         directory.glob(pattern)
     ):
+        # macOS metadatafiler är inte datakällor.
+        if path.name.startswith("._"):
+            continue
         rows.extend(
             read_jsonl(path)
         )

@@ -75,6 +75,9 @@ def _las_jsonl(
     for fil in sorted(
         katalog.glob("*.jsonl")
     ):
+        # macOS AppleDouble-filer på externa diskar innehåller metadata, inte JSONL.
+        if fil.name.startswith("._"):
+            continue
         try:
             with fil.open(
                 encoding="utf-8"
