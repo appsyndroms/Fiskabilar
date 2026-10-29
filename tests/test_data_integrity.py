@@ -116,15 +116,25 @@ class DataIntegrityTests(unittest.TestCase):
             self.assertEqual(predict_market_value.ladda_modell(), "second model")
             self.assertEqual(load.call_count, 2)
 
+    def test_invalid_prices_are_excluded_without_valuation_or_notifications(self):
+        for price in (None, 0, -1, float("nan"), float("inf"), "kontakta oss", True):
+            with self.subTest(price=price), patch.object(candidates, "berakna_fynd") as value, patch.object(candidates, "spara_fyndfeedback") as feedback:
+                stats, findings = candidates.processa_kandidater(
+                    [{"modell": "v60", "miltal": 5000, "annonspris": price}], {}, {})
+                self.assertEqual(stats["pris_stoppade"], 1)
+                self.assertEqual(findings, [])
+                value.assert_not_called()
+                feedback.assert_not_called()
+
     def test_valuation_bug_cannot_silently_remove_a_candidate(self):
         with patch.object(candidates, "_ar_leasingannons", return_value=False), patch.object(candidates, "berakna_fynd", side_effect=RuntimeError("bad valuation")):
             with self.assertRaisesRegex(RuntimeError, "bad valuation"):
-                candidates.processa_kandidater([{"modell": "v60", "miltal": 5000}], {}, {})
+                candidates.processa_kandidater([{"modell": "v60", "miltal": 5000, "annonspris": 400000}], {}, {})
 
     def test_failed_observation_write_stops_candidate_processing(self):
         with patch.object(candidates, "_ar_leasingannons", return_value=False), patch.object(candidates, "berakna_fynd", return_value={"niva": "test", "diff": 20000}), patch.object(candidates, "berakna_fyndscore", return_value=70), patch.object(candidates, "spara_marknadsvardesobservation", side_effect=OSError("disk full")), patch.object(candidates, "spara_fyndfeedback") as feedback:
             with self.assertRaises(OSError):
-                candidates.processa_kandidater([{"modell": "v60", "miltal": 5000}], {}, {})
+                candidates.processa_kandidater([{"modell": "v60", "miltal": 5000, "annonspris": 400000}], {}, {})
             feedback.assert_not_called()
 
 

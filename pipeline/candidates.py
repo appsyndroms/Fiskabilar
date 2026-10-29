@@ -13,6 +13,7 @@ Ansvarar för:
 Själva huvudflödet ligger i main.py.
 """
 
+import math
 import os
 
 from app_logging.logger import (
@@ -286,6 +287,7 @@ def processa_kandidater(
     statistik = {
         "totalt": len(bilar),
         "leasing_stoppade": 0,
+        "pris_stoppade": 0,
         "miltal_stoppade": 0,
         "valuation_ok": 0,
         "under_diff": 0,
@@ -302,6 +304,14 @@ def processa_kandidater(
     kandidater = []
 
     for bil in bilar:
+
+        # Ett saknat/ogiltigt pris får inte bli noll kronor eller ett falskt fynd.
+        pris = bil.get("annonspris")
+        if (isinstance(pris, bool) or not isinstance(pris, (int, float))
+                or not math.isfinite(pris) or pris <= 0):
+            statistik["pris_stoppade"] += 1
+            info(f"[FILTER] Annons utan giltigt pris hoppas över: {_annons_namn(bil)}")
+            continue
 
         # --------------------------------------------------------
         # LEASING
