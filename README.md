@@ -411,3 +411,19 @@ Projektet är aktivt under utveckling.
 Fokus ligger just nu på att bygga upp tillräckligt bra historik och ML-underlag för att gradvis kunna ersätta manuella/reglerade antaganden med modeller som lär sig av den faktiska marknaden.
 
 Det viktiga är därför inte bara att hitta billiga annonser, utan att samla data över tid och kunna mäta vilka signaler som faktiskt leder till intressanta bilfynd.
+
+
+## Daglig körning i GitHub Actions
+
+`.github/workflows/daily.yml` kör hela kvällsflödet varje dag kl. 18:00
+i `Europe/Stockholm`, även när sommartiden ändras. GitHub kan fördröja
+schemalagda körningar. Flödet kan också startas manuellt via Actions.
+
+Samma `python -m scripts.evening` används lokalt och i GitHub: annonser,
+historik, fyndutfall, dagens rapport utan mejl, ny ML-träning vid varje
+körning, ML-värderingar och validerad webb. HTTP-fel som 403/429 och andra
+källfel stoppar körningen. Data committas och GitHub Pages publiceras
+endast när hela kedjan lyckats. Övriga workflows är manuella.
+
+Lokalt kan kvällskörningen fortfarande startas med
+`bash /Volumes/T9/Treage/Git/Fiskabilar/scripts/run_evening.sh`.
