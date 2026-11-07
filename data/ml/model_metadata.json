@@ -1,5 +1,5 @@
 {
-  "model_type": "linear_regression",
+  "model_type": "random_forest",
   "features": [
     "Mil",
     "ModelYear",
@@ -14,14 +14,14 @@
     "ObservationMonth"
   ],
   "metrics": {
-    "MAE": 19655.03920464562,
-    "RMSE": 25771.465263620914,
-    "R2": 0.7257076353648416,
-    "Bias": 8130.095499422996,
-    "MAPE": 5.041890034011846
+    "MAE": 22170.250644583146,
+    "RMSE": 54899.47119248837,
+    "R2": 0.3091897212347383,
+    "Bias": 3121.1658857722628,
+    "MAPE": 4.871461078176514
   },
-  "trained_at": "2026-10-13T23:33:18.957416+00:00",
-  "observations": 1189,
-  "training_rows": 951,
-  "test_rows": 238
+  "trained_at": "2026-11-06T17:11:20.490851+00:00",
+  "observations": 6036,
+  "training_rows": 4827,
+  "test_rows": 1209
 }
