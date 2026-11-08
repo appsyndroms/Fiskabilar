@@ -14555,7 +14555,15 @@
     "reg:FBG72K": "vehicle:00003863",
     "source:bilweb:459016": "vehicle:00003863",
     "url:https://bilweb.se/skane-lan/bmw-330-e-touring-m-sport-drag-backkamera-rattvarme-tonade-18-2025-kombi-459016": "vehicle:00003863",
-    "fp:41f0337daa82616e": "vehicle:00003863"
+    "fp:41f0337daa82616e": "vehicle:00003863",
+    "source:bytbil:19517157": "vehicle:00003864",
+    "url:https://www.bytbil.com/vasternorrlands-lan/personbil-v60-t6-350hk-awd-core-360-moms-skinn-drag-carplay-10752-19517157": "vehicle:00003864",
+    "fp:48affb90b0cd0831": "vehicle:00003864",
+    "reg:KDR02E": "vehicle:00003865",
+    "source:bilweb:459706": "vehicle:00003865",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-core-edition-2024-kombi-459706": "vehicle:00003865",
+    "fp:dc7029e8fdee8be6": "vehicle:00003865",
+    "fp:89a57b6d7c46fe14": "vehicle:00003849"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -84121,6 +84129,42 @@
         "vin": null
       },
       "last_seen": "459016",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003864": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19517157",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003865": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "KDR02E",
+        "vin": null
+      },
+      "last_seen": "459706",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
