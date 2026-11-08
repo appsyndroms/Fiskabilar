@@ -1,8 +1,8 @@
-name: Fiskabilar daglig kvällskörning
+name: Fiskabilar fyndkontroll var 15:e minut
 
 on:
   schedule:
-    - cron: '0 18 * * *'
+    - cron: '*/15 6-21 * * *'
       timezone: Europe/Stockholm
   workflow_dispatch: {}
 
@@ -25,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Läs senaste sparade data när jobbet får låset, även efter kötid.
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5

@@ -413,11 +413,14 @@ Fokus ligger just nu på att bygga upp tillräckligt bra historik och ML-underla
 Det viktiga är därför inte bara att hitta billiga annonser, utan att samla data över tid och kunna mäta vilka signaler som faktiskt leder till intressanta bilfynd.
 
 
-## Daglig körning i GitHub Actions
+## Återkommande körningar i GitHub Actions
 
-`.github/workflows/daily.yml` kör hela kvällsflödet varje dag kl. 18:00
-i `Europe/Stockholm`, även när sommartiden ändras. GitHub kan fördröja
-schemalagda körningar. Flödet kan också startas manuellt via Actions.
+`.github/workflows/daily.yml` kör hela flödet var 15:e minut varje dag
+kl. 06:00–21:45 i `Europe/Stockholm`, även när sommartiden ändras.
+Kvällskörningen kl. 18:00 ingår i samma schema, utan en extra dubbelkörning.
+GitHub kan fördröja schemalagda körningar. Flödet kan också startas manuellt
+via Actions. Gemensam concurrency hindrar samtidiga dataskrivningar;
+checkout läser senaste `main` när jobbet startar.
 
 Samma `python -m scripts.evening` används lokalt och i GitHub: annonser,
 historik, fyndutfall, dagens rapport utan mejl, ny ML-träning vid varje
