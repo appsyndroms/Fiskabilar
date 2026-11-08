@@ -21,5 +21,22 @@ def main():
         except Exception as exc:
             print(json.dumps({"client": name, "error": str(exc)}), flush=True)
 
+def browser_check():
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        try:
+            page = browser.new_page(locale="sv-SE")
+            response = page.goto(URL, wait_until="domcontentloaded", timeout=45000)
+            try:
+                page.wait_for_selector("article", timeout=20000)
+            except Exception:
+                pass
+            print(json.dumps({"client": "playwright", "status": response.status if response else None,
+                "title": page.title(), "cards": page.locator("article").count()}), flush=True)
+        finally:
+            browser.close()
+
 if __name__ == "__main__":
     main()
+    browser_check()
