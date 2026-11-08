@@ -1,0 +1,87 @@
+{
+  "ad": {
+    "branch": {
+      "city": "Västerås",
+      "displayName": "Riddermark Bil Västerås",
+      "id": "337152dc-1d4a-4963-9023-3dbe8d833bdd"
+    },
+    "channels": [
+      {
+        "__typename": "PlatformChannel",
+        "inventoryStatus": "InStock",
+        "soldAt": null,
+        "status": "PUBLISHED"
+      }
+    ],
+    "id": "1574c3c8-877a-4ad2-b905-c70312c3e344",
+    "media": {
+      "items": [
+        {
+          "__typename": "AdImage",
+          "url": "https://cdn.wayke.se/cfit/v3/9288c7b1b5d840a4b26a1ed7e498190e/6fc30c9d41f1421cb1767ba17c5ba30b"
+        }
+      ],
+      "totalCount": 34
+    },
+    "offerings": {
+      "warranties": []
+    },
+    "packaging": {
+      "certifiedPreOwned": false
+    },
+    "pricing": {
+      "cash": {
+        "oldPrice": {
+          "amount": "0",
+          "currency": ""
+        },
+        "price": {
+          "amount": "349800",
+          "currency": "SEK"
+        }
+      },
+      "companyLeasing": null,
+      "leasing": null,
+      "primaryPriceType": "Cash"
+    },
+    "salesDescription": {
+      "subtitle": "T6 AWD 350hk Core Edition Drag Värmare Kamera MOMS",
+      "title": "Volvo V60 T6 AWD 350hk Core Edition Drag Värmare Kamera MOMS"
+    }
+  },
+  "iteration": {
+    "id": "337152dc-1d4a-4963-9023-3dbe8d833bdd@1574c3c8-877a-4ad2-b905-c70312c3e344@V-SE-YV1ZWH1V6P1532723.1izhnv6",
+    "item": {
+      "__typename": "Vehicle",
+      "attributes": {
+        "transmission": {
+          "formattedValue": "Automat"
+        }
+      },
+      "displayName": "Volvo V60",
+      "driveline": {
+        "fuelTypesString": {
+          "stringValue": "Bensin+El"
+        }
+      },
+      "manufacturer": {
+        "stringValue": "Volvo"
+      },
+      "modelName": {
+        "stringValue": "V60 Recharge"
+      },
+      "modelSeries": {
+        "stringValue": "V60"
+      },
+      "modelYear": {
+        "intValue": 2023
+      }
+    },
+    "logistics": {
+      "odometerReading": {
+        "unit": "SCANDINAVIAN_MILE",
+        "value": 8273
+      }
+    }
+  }
+}
