@@ -39,8 +39,7 @@ class PublicWaykeTests(unittest.TestCase):
             self.assertIsNone(api.parse_hit(hit, BILAR[0], 2023))
 
     def test_schema_and_filter_changes_fail(self):
-        for mutate in (lambda h: h["iteration"]["item"]["modelYear"].update(intValue=2024),
-                       lambda h: h["iteration"]["item"]["modelSeries"].update(stringValue="V90"),
+        for mutate in (lambda h: h["iteration"]["item"]["modelYear"].update(intValue=None),
                        lambda h: h["iteration"]["logistics"]["odometerReading"].update(unit="UNKNOWN"),
                        lambda h: h["ad"]["pricing"]["cash"]["price"].update(amount="nan")):
             hit = copy.deepcopy(self.hit)
@@ -71,3 +70,10 @@ class PublicWaykeTests(unittest.TestCase):
             with patch.object(api, "fetch_page", side_effect=[first, second]), patch.object(api.time, "sleep"):
                 with self.assertRaises(SourceFetchError):
                     api.hamta_annonskort(BILAR[0], 2023)
+
+    def test_stale_search_index_is_filtered_using_actual_vehicle_fields(self):
+        for mutate in (lambda h: h["iteration"]["item"]["modelYear"].update(intValue=2024),
+                       lambda h: h["iteration"]["item"]["modelSeries"].update(stringValue="V90")):
+            hit = copy.deepcopy(self.hit)
+            mutate(hit)
+            self.assertIsNone(api.parse_hit(hit, BILAR[0], 2023))

@@ -77,13 +77,17 @@ def parse_hit(hit, config, year):
         ad, iteration = hit["ad"], hit["iteration"]
         identity = str(UUID(ad["id"]))
         item = iteration["item"]
-        if item["modelYear"]["intValue"] != year:
-            raise ValueError("fel årsmodell")
+        actual_year = item["modelYear"]["intValue"]
+        if type(actual_year) is not int:
+            raise ValueError("ogiltig årsmodell")
+        if actual_year != year:
+            info(f"[wayke API] Filtrerar bort {identity}: faktisk årsmodell {actual_year}, sökår {year}.")
+            return None
         if item["manufacturer"]["stringValue"].casefold() != config["marke_visning"].casefold():
-            raise ValueError("fel märke")
+            return None
         model_field = "modelSeries" if config["marke_slug"] == "volvo" else "modelName"
         if item[model_field]["stringValue"].casefold() != config["modell_visning"].casefold():
-            raise ValueError("fel modell")
+            return None
         channels = ad["channels"]
         if not isinstance(channels, list) or not channels:
             raise ValueError("kanalstatus saknas")
