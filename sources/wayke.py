@@ -1,8 +1,8 @@
 """
 Scraper för Wayke.
 
-Wayke är server-renderad (fungerar utan JavaScript), så vanlig
-requests.get() räcker.
+Den ordinarie insamlingen använder marknadsplatsens publika GraphQL-sökning
+via wayke_public.py. HTML-parsern finns kvar för jämförelse och regressionstester.
 
 VIKTIGT:
 Annonsens URL och dess innehåll extraheras från samma HTML-kort.
@@ -46,6 +46,7 @@ from urllib.parse import parse_qs, urlparse
 
 import requests
 from .errors import SourceFetchError, require_html
+from .wayke_public import hamta_annonskort as hamta_publika_annonskort
 from bs4 import BeautifulSoup
 
 from config import ARSMODELL_MIN, ARSMODELL_MAX, BILAR
@@ -811,12 +812,7 @@ def hamta_annonser() -> list[dict]:
 
             try:
 
-                annonskort = _hamta_annonskort(
-                    bilkonfig["marke_slug"],
-                    bilkonfig["modell_slug"],
-                    ar,
-                    annons_regex,
-                )
+                annonskort = hamta_publika_annonskort(bilkonfig, ar)
 
             except Exception as exc:
                 error(

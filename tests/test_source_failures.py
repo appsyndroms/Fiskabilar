@@ -28,7 +28,7 @@ class SourceFailureTests(unittest.TestCase):
                    lambda: blocket.hamta_annonser()]
         for status in (403, 404, 429, 500, 503):
             for caller in callers:
-                with self.subTest(status=status, caller=caller), patch("requests.get", return_value=response(status)):
+                with self.subTest(status=status, caller=caller), patch("requests.get", return_value=response(status)), patch("requests.post", return_value=response(status)):
                     with self.assertRaises(SourceFetchError) as error:
                         caller()
                     self.assertIn(str(status), str(error.exception))
@@ -39,12 +39,12 @@ class SourceFailureTests(unittest.TestCase):
                    lambda: bytbil._hamta_sida("https://example.test/search"),
                    lambda: bilweb_scraper.hamta_pris_mil_fran_detaljsida("https://example.test/car/123")]
         for caller in callers:
-            with patch("requests.get", side_effect=requests.Timeout("Timeout")):
+            with patch("requests.get", side_effect=requests.Timeout("Timeout")), patch("requests.post", side_effect=requests.Timeout("Timeout")):
                 with self.assertRaises(SourceFetchError):
                     caller()
 
     def test_http_200_challenge_is_not_an_empty_search(self):
-        with patch("requests.get", return_value=response(200, "<html><title>Just a moment...</title></html>")):
+        with patch("requests.post", return_value=response(200, "<html><title>Just a moment...</title></html>")):
             with self.assertRaises(SourceFetchError):
                 wayke.hamta_annonser()
 

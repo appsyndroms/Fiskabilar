@@ -427,3 +427,18 @@ endast när hela kedjan lyckats. Övriga workflows är manuella.
 
 Lokalt kan kvällskörningen fortfarande startas med
 `bash /Volumes/T9/Treage/Git/Fiskabilar/scripts/run_evening.sh`.
+
+
+### Waykes publika marknadsplatssökning
+
+`sources/wayke_public.py` anropar samma `SearchAdsV2`-operation på
+`https://edge.wayke.se/graphql` som Waykes publika webbplats, utan
+API-nycklar eller inloggning. Den används av den ordinarie insamlingen.
+Detta är skilt från partner-API:et på `api.wayke.se`.
+
+Webbklientens aktuella versions-ID och operationshash ligger i modulen.
+Om Wayke ändrar kontraktet eller ger HTTP-/GraphQL-fel stoppas körningen.
+Paginering och varje annons valideras; delresultat, fel modell/årsmodell,
+okända miltalsenheter och upprepade sidor får inte publiceras.
+Den manuella Actions-körningen `Kontrollera källanslutning` provar alla
+fyra modeller utan att skriva historik eller träna modellen.
