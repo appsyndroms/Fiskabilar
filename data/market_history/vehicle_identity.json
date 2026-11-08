@@ -14563,7 +14563,13 @@
     "source:bilweb:459706": "vehicle:00003865",
     "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-core-edition-2024-kombi-459706": "vehicle:00003865",
     "fp:dc7029e8fdee8be6": "vehicle:00003865",
-    "fp:89a57b6d7c46fe14": "vehicle:00003849"
+    "fp:89a57b6d7c46fe14": "vehicle:00003849",
+    "reg:WAA77D": "vehicle:00003866",
+    "source:bilweb:459711": "vehicle:00003866",
+    "url:https://bilweb.se/vasternorrlands-lan/volvo-v60-t6-350hk-awd-core-360o-moms-skinn-drag-carplay-2023-kombi-459711": "vehicle:00003866",
+    "fp:f354379132e9049a": "vehicle:00003866",
+    "url:https://www.wayke.se/objekt/56481a20-8ac3-4f41-a6dc-3bf654066f8e": "vehicle:00003867",
+    "fp:0a68e9b5dfd8066d": "vehicle:00003867"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -84169,6 +84175,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003866": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "WAA77D",
+        "vin": null
+      },
+      "last_seen": "459711",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003867": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/56481a20-8ac3-4f41-a6dc-3bf654066f8e",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
