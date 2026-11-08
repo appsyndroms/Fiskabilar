@@ -510,7 +510,7 @@
     "url:https://www.wayke.se/objekt/9bba4f63-db60-446b-b99e-a4e17eda2df1": "vehicle:00000175",
     "fp:301008f4ed355561": "vehicle:00000175",
     "url:https://www.wayke.se/objekt/eeee6569-e0bb-4326-ae69-3c1a5bb23e53": "vehicle:00000176",
-    "fp:6c78f529fb315789": "vehicle:00000176",
+    "fp:6c78f529fb315789": "vehicle:00000174",
     "url:https://www.wayke.se/objekt/eb59c6c8-2385-432e-904e-ff1f1c3d327c": "vehicle:00000177",
     "fp:ad31b01d0c95b0fc": "vehicle:00000177",
     "url:https://www.wayke.se/objekt/e9238afd-fa9c-496b-972e-401f223952ea": "vehicle:00000178",
@@ -14184,7 +14184,378 @@
     "fp:6ab7cfdd425b56ce": "vehicle:00003836",
     "source:bytbil:19490307": "vehicle:00003837",
     "url:https://www.bytbil.com/skane-lan/personbil-330e-xdrive-sedan-m-sport-drag-18-hifi-rattvarme-sportstol-2229-19490307": "vehicle:00003837",
-    "fp:96e7d8da469ba6e5": "vehicle:00003837"
+    "fp:96e7d8da469ba6e5": "vehicle:00003837",
+    "reg:WAD58S": "vehicle:00003838",
+    "source:bilweb:459341": "vehicle:00003838",
+    "url:https://bilweb.se/vastmanlands-lan/volvo-v60-t6-awd-350hk-core-edition-drag-varmare-kamera-moms-2023-kombi-459341": "vehicle:00003838",
+    "fp:e80b3ed0621b871a": "vehicle:00003838",
+    "reg:SCP581": "vehicle:00003839",
+    "source:bilweb:458151": "vehicle:00003839",
+    "url:https://bilweb.se/uppsala-lan/volvo-v60-recharge-t6-awd-core-edition-leasbar-blis-drag-350hk-2023-kombi-458151": "vehicle:00003839",
+    "fp:f1c1ddebcdb8e3d7": "vehicle:00003839",
+    "fp:16053df58f4962f8": "vehicle:00003667",
+    "fp:d569cb1a82d74489": "vehicle:00002308",
+    "fp:3779d9d708fbdcc9": "vehicle:00002309",
+    "reg:JAM31H": "vehicle:00003840",
+    "source:bilweb:459247": "vehicle:00003840",
+    "url:https://bilweb.se/kalmar-lan/volvo-v60-recharge-t6-core-edition-2024-kombi-459247": "vehicle:00003840",
+    "fp:9eb07c6cac7e3443": "vehicle:00003840",
+    "fp:396dd4f5c7af9263": "vehicle:00003802",
+    "fp:9db2225d0ba5b367": "vehicle:00003696",
+    "fp:23e7e9953dbfc275": "vehicle:00003529",
+    "fp:b159d9ca1165a125": "vehicle:00002935",
+    "fp:0b3e76da93b9dc06": "vehicle:00002350",
+    "fp:3522d342d2d02e69": "vehicle:00002353",
+    "fp:9b6374a5f06d1371": "vehicle:00002354",
+    "fp:2539406fdaa5e364": "vehicle:00002356",
+    "fp:34f2b2eb3bb92143": "vehicle:00002357",
+    "fp:c8ff495c253bb2d8": "vehicle:00002358",
+    "fp:4966f5e3fdee15a9": "vehicle:00002364",
+    "fp:7d4d027cac607700": "vehicle:00002368",
+    "fp:cbd8c9fccc65ab55": "vehicle:00001104",
+    "fp:8c44ac7a135d6c99": "vehicle:00000531",
+    "fp:ef260d7c8d381427": "vehicle:00000399",
+    "reg:AFP09X": "vehicle:00003841",
+    "source:bilweb:459401": "vehicle:00003841",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-459401": "vehicle:00003841",
+    "fp:f8e5adaa0bbce4ac": "vehicle:00003841",
+    "reg:HSR20R": "vehicle:00003842",
+    "source:bilweb:459471": "vehicle:00003842",
+    "url:https://bilweb.se/skane-lan/volvo-v60-t6-plus-bright-2025-kombi-459471": "vehicle:00003842",
+    "fp:edf58948270cd539": "vehicle:00003842",
+    "url:https://www.wayke.se/objekt/be0c193c-2035-4b28-9352-31f0d53e2f98": "vehicle:00003843",
+    "fp:602003d7b6484934": "vehicle:00003843",
+    "reg:RBX52Y": "vehicle:00003844",
+    "source:bilweb:458953": "vehicle:00003844",
+    "url:https://bilweb.se/orebro-lan/volvo-v60-t6-plus-dark-nordic-edition-2025-kombi-458953": "vehicle:00003844",
+    "fp:4b21eb91a990ced6": "vehicle:00003844",
+    "url:https://www.wayke.se/objekt/bac1a849-9cfd-50cc-8c8f-f7df3ff1b308": "vehicle:00003845",
+    "fp:60ca64bbd5ea91b3": "vehicle:00003845",
+    "fp:e07afc745e7671b2": "vehicle:00003805",
+    "reg:WCA72U": "vehicle:00003846",
+    "source:bilweb:458570": "vehicle:00003846",
+    "url:https://bilweb.se/jonkopings-lan/volvo-v60-t6-plus-dark-nordic-edt-2025-kombi-458570": "vehicle:00003846",
+    "fp:acafc115b479c787": "vehicle:00003846",
+    "fp:fb287be3ed905ad8": "vehicle:00003771",
+    "fp:b771ed6c55575db4": "vehicle:00003739",
+    "fp:95c611dd68f17e9c": "vehicle:00003671",
+    "fp:f56dc5b529df9462": "vehicle:00003637",
+    "url:https://www.wayke.se/objekt/0b25bba1-ed28-4150-9303-a15d2f7ca118": "vehicle:00003847",
+    "fp:4e84e8bd39109839": "vehicle:00003847",
+    "url:https://www.wayke.se/objekt/b58ac3fb-8a74-4da0-9678-ec1070f57dfc": "vehicle:00000774",
+    "fp:386c261ce127439b": "vehicle:00002428",
+    "fp:0d1e59adad3484ef": "vehicle:00003532",
+    "fp:0bcf3b0af7f926f7": "vehicle:00003533",
+    "fp:8754f82d7193b9f2": "vehicle:00003535",
+    "fp:12b5600674159ccb": "vehicle:00003483",
+    "fp:cca8915f51077bbe": "vehicle:00003484",
+    "fp:07e98f184b037316": "vehicle:00003643",
+    "fp:d72eb783dd295e0f": "vehicle:00003592",
+    "fp:4ca55c3d0309ac77": "vehicle:00003413",
+    "fp:27335b128e8f043f": "vehicle:00003314",
+    "fp:3f2d8ced98985103": "vehicle:00003250",
+    "fp:62db65e411ca3f9e": "vehicle:00003598",
+    "fp:a84b7e352a01b71f": "vehicle:00003254",
+    "fp:6ab2af2c4445869e": "vehicle:00003257",
+    "fp:47ce111ace7dd2b0": "vehicle:00003261",
+    "fp:fa8b23b3f7a06281": "vehicle:00003448",
+    "fp:cea19576ee720a69": "vehicle:00003116",
+    "fp:2b87c9ab58591854": "vehicle:00003119",
+    "fp:3b67398c96693ae0": "vehicle:00003039",
+    "fp:c3e89ac0437ba8fc": "vehicle:00003042",
+    "fp:5b052aea8e3129c9": "vehicle:00003328",
+    "fp:0cd2299ed302edf3": "vehicle:00002891",
+    "fp:cd92ff4735d5b9bb": "vehicle:00002893",
+    "fp:0e47bc24d5347fda": "vehicle:00002950",
+    "fp:62cf523bb92df4d6": "vehicle:00002953",
+    "fp:7f2e3b84e27cbc92": "vehicle:00002956",
+    "source:bytbil:19459735": "vehicle:00003848",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-1791-19459735": "vehicle:00003848",
+    "fp:7d45180721e842ec": "vehicle:00003848",
+    "fp:e8a49eb6117bf23f": "vehicle:00002404",
+    "fp:a644082fbdbc6a55": "vehicle:00002409",
+    "fp:457a2fedff3cb2c6": "vehicle:00002424",
+    "fp:fa69cf369464473c": "vehicle:00002425",
+    "fp:d48a7355c6e3c49b": "vehicle:00002426",
+    "fp:9eaf3b2d118e3af1": "vehicle:00002430",
+    "fp:28bf2a923b87aec0": "vehicle:00002433",
+    "fp:49765083a2813767": "vehicle:00002434",
+    "fp:dc4701746ac697e0": "vehicle:00002448",
+    "fp:6dfa7e97409ac21b": "vehicle:00002450",
+    "fp:01100a8db407197c": "vehicle:00002453",
+    "fp:5e9f2cf87b0700e7": "vehicle:00002464",
+    "fp:a907da0d59bc6fde": "vehicle:00002465",
+    "fp:a3f984ae641694cf": "vehicle:00002472",
+    "fp:0228bf0b5fa7bbc6": "vehicle:00002473",
+    "fp:38730a47f01508fe": "vehicle:00002478",
+    "fp:0b0cae2b497c89b5": "vehicle:00002480",
+    "fp:1d514e44e2d87503": "vehicle:00002481",
+    "fp:79c775bb68a42af7": "vehicle:00002487",
+    "fp:1ce1f058e03e5250": "vehicle:00002490",
+    "fp:56a942b6a4a2e406": "vehicle:00002491",
+    "fp:7275649283e7af07": "vehicle:00002492",
+    "fp:92ea96ca41e351d1": "vehicle:00002496",
+    "fp:c5b40dc8cf55213f": "vehicle:00002497",
+    "fp:2c62a10333614826": "vehicle:00002498",
+    "fp:9d0eada43b709054": "vehicle:00002505",
+    "fp:0a83bbd5269ea80e": "vehicle:00002513",
+    "fp:b4c751f9ec90532d": "vehicle:00002518",
+    "fp:f5ff570709f17d14": "vehicle:00002520",
+    "fp:bad98df6da8ba1e1": "vehicle:00002526",
+    "fp:a5eb7e22e8fe54b0": "vehicle:00002527",
+    "fp:d2b5514ac8933317": "vehicle:00002532",
+    "fp:9c130de5a0f340df": "vehicle:00001283",
+    "fp:7ff16112f0791701": "vehicle:00002535",
+    "fp:b2cb5f8ea143f5bd": "vehicle:00002536",
+    "fp:a70f8826d398394b": "vehicle:00002537",
+    "fp:ef4605698944085b": "vehicle:00002538",
+    "fp:cc62cc572278489d": "vehicle:00002543",
+    "fp:86a67bf2143594d1": "vehicle:00002544",
+    "fp:973e406dc6cc6f0f": "vehicle:00002545",
+    "fp:a663392095a3370a": "vehicle:00002546",
+    "fp:a51376f2637600b3": "vehicle:00001139",
+    "fp:0b618c1c45b6bc8c": "vehicle:00000920",
+    "fp:0b12a81720e63bc5": "vehicle:00000864",
+    "fp:56a020db88b1a134": "vehicle:00002550",
+    "fp:feaac8d270375f2e": "vehicle:00000607",
+    "fp:3942e6f7f3e75bf0": "vehicle:00000440",
+    "fp:08b886cd5ece19bf": "vehicle:00000346",
+    "fp:5aeaec79a4318d6d": "vehicle:00000027",
+    "fp:f38fb72a3e1ae41e": "vehicle:00000543",
+    "fp:a8bc666a7321bb2b": "vehicle:00000040",
+    "fp:6874b0ff56cdb1e4": "vehicle:00002557",
+    "fp:92202cbd7b807079": "vehicle:00002558",
+    "fp:2bd655492b1596b9": "vehicle:00002560",
+    "fp:324a92fc9aac00a8": "vehicle:00002562",
+    "url:https://www.wayke.se/objekt/ce3fb177-8a47-40bf-a382-88d1947b7a18": "vehicle:00003849",
+    "fp:6177d18cfb580d08": "vehicle:00003849",
+    "reg:CWE93X": "vehicle:00003850",
+    "source:bilweb:459173": "vehicle:00003850",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-blis-drag-b-kam-2026-kombi-459173": "vehicle:00003850",
+    "fp:64ac5a524f1db8dc": "vehicle:00003850",
+    "fp:5e401984f0a20186": "vehicle:00003811",
+    "fp:dba2389e6e013255": "vehicle:00002599",
+    "fp:a13c9331a2c6046c": "vehicle:00003743",
+    "fp:007355b930eb5dcb": "vehicle:00003678",
+    "fp:f1691e1b1ce4a9de": "vehicle:00002622",
+    "fp:f571c0c051ae3289": "vehicle:00002641",
+    "fp:90935b98acdca8bd": "vehicle:00002595",
+    "fp:01a39df1c2cd0eb5": "vehicle:00002594",
+    "fp:8ec25389bc44e43c": "vehicle:00002646",
+    "fp:8e5bc41698fda6fb": "vehicle:00003420",
+    "fp:28b4989bd1c9248e": "vehicle:00003197",
+    "fp:4e4783631f53d980": "vehicle:00000397",
+    "fp:ef2cfb4d8dfdeb7a": "vehicle:00003133",
+    "fp:844421f9ded8cd5e": "vehicle:00003134",
+    "fp:fd1f169b2659278e": "vehicle:00003137",
+    "fp:de9ef1d981d4cd1c": "vehicle:00002908",
+    "fp:6b3d9bec6df76cfd": "vehicle:00003204",
+    "fp:acba2fca5ed5cad7": "vehicle:00003140",
+    "fp:c5efc62c9e2a1436": "vehicle:00003071",
+    "fp:559362f33a6a2fd3": "vehicle:00002572",
+    "fp:21cc2978796321ad": "vehicle:00003072",
+    "fp:7cf9c43d2cd8093c": "vehicle:00002575",
+    "fp:b24552f60983e079": "vehicle:00002577",
+    "fp:1f59a05d248db0fa": "vehicle:00002578",
+    "fp:b2b04491cf804fb7": "vehicle:00002579",
+    "fp:cd5cd4d89ed6ab06": "vehicle:00002580",
+    "fp:b3abfbe896c77b2d": "vehicle:00002581",
+    "fp:0983c31f2f5ffb34": "vehicle:00002584",
+    "fp:93e01ea4ce6f6f26": "vehicle:00002585",
+    "fp:18b6b4b4fe1771f5": "vehicle:00002586",
+    "fp:03e724e6c57fd14d": "vehicle:00002592",
+    "fp:06c50e279ed035ec": "vehicle:00002597",
+    "fp:cb6dbc3083568e81": "vehicle:00002598",
+    "fp:eaf4658e706af67f": "vehicle:00002978",
+    "fp:02269ae8f0d86336": "vehicle:00002600",
+    "fp:01dbee6ef7f3e2c9": "vehicle:00002602",
+    "fp:2eaee5da0c920df2": "vehicle:00002613",
+    "fp:e1b6d275a4d7c61c": "vehicle:00002617",
+    "fp:d304779417ce6799": "vehicle:00002914",
+    "fp:3b7cdc56d3d3ae2e": "vehicle:00002623",
+    "fp:8d092bfde3133656": "vehicle:00002624",
+    "fp:dda79d09f1acae0b": "vehicle:00002625",
+    "fp:d0c7b183f74ceeb4": "vehicle:00002626",
+    "fp:b1535b0b098a1043": "vehicle:00002629",
+    "fp:a054cc453a77751b": "vehicle:00001093",
+    "fp:e71b5c911fbc3dcb": "vehicle:00000950",
+    "fp:ee25dba543019651": "vehicle:00000782",
+    "fp:3188f5274cf3b657": "vehicle:00000739",
+    "fp:18e4b2b099cdb2f6": "vehicle:00002638",
+    "fp:c1b7b1bd4a3ab032": "vehicle:00002643",
+    "fp:8b8f104576275521": "vehicle:00002644",
+    "fp:3b0c37d84d0e7bf7": "vehicle:00002647",
+    "fp:9d5c78f7b01759fe": "vehicle:00002648",
+    "fp:90dc46c953091290": "vehicle:00002650",
+    "fp:25e3e684d64412a4": "vehicle:00002652",
+    "fp:36815537e103142f": "vehicle:00002655",
+    "fp:2c80ecfea191b731": "vehicle:00002658",
+    "fp:cc7a57a2b88c7669": "vehicle:00002659",
+    "fp:f40791915ef64fc5": "vehicle:00002664",
+    "fp:62baf56b6a7eee34": "vehicle:00002671",
+    "fp:d2ae09465994b21a": "vehicle:00002673",
+    "fp:6360b189b387aefd": "vehicle:00002675",
+    "fp:541d36921342f889": "vehicle:00002676",
+    "fp:aac439a6a2c0e38d": "vehicle:00002677",
+    "fp:7935bb56029c7817": "vehicle:00002678",
+    "fp:50577cc44e1eec67": "vehicle:00003423",
+    "fp:31d5244bb2aee606": "vehicle:00002680",
+    "reg:KDJ01Z": "vehicle:00003851",
+    "source:bilweb:458027": "vehicle:00003851",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v90-recharge-t6-core-edt-2023-kombi-458027": "vehicle:00003851",
+    "fp:ab31dc7cbf598dc3": "vehicle:00003851",
+    "fp:6ad2b3a84d5eeb99": "vehicle:00002685",
+    "fp:019888c676dbb796": "vehicle:00003390",
+    "fp:92062422d0881b87": "vehicle:00002687",
+    "fp:d4c4b5217052b080": "vehicle:00002689",
+    "fp:f217ee4a46fa9415": "vehicle:00002690",
+    "fp:1e18fe8650b9d79b": "vehicle:00002691",
+    "fp:a0e22dbb58da2329": "vehicle:00003405",
+    "fp:80a50547ec47c536": "vehicle:00001076",
+    "fp:64cf8144eb9c155a": "vehicle:00000983",
+    "fp:f5f0dbeeee6ad995": "vehicle:00000892",
+    "fp:c492de0ee4cf957f": "vehicle:00000779",
+    "fp:5ae2d50bb0303a00": "vehicle:00000459",
+    "fp:fc3b2c999c3d7906": "vehicle:00000071",
+    "fp:ccbea8e282cbe2e1": "vehicle:00002695",
+    "source:bytbil:19516402": "vehicle:00003852",
+    "url:https://www.bytbil.com/kalmar-lan/personbil-v90-recharge-t6-core-edt-ii-1411-19516402": "vehicle:00003852",
+    "fp:0cae33da577141bd": "vehicle:00003852",
+    "reg:RCX56C": "vehicle:00003853",
+    "source:bilweb:458528": "vehicle:00003853",
+    "url:https://bilweb.se/jamtlands-lan/volvo-v90-recharge-t6-350hk-awd-varmare-skinn-kamera-drag-2024-kombi-458528": "vehicle:00003853",
+    "fp:180ad6df35568cf1": "vehicle:00003853",
+    "url:https://www.wayke.se/objekt/8cd30cc4-2f14-5362-b105-fcbaed1cd341": "vehicle:00003854",
+    "fp:07275dd518738f2e": "vehicle:00003854",
+    "fp:45a33b8205edaca6": "vehicle:00003681",
+    "url:https://www.wayke.se/objekt/6d8ec155-9cf9-4fd0-bec9-2b72989d8822": "vehicle:00003855",
+    "fp:4eadce1990a7a068": "vehicle:00003855",
+    "fp:6b637f8bcac64cf7": "vehicle:00003274",
+    "fp:cc305d1a14d45c0d": "vehicle:00002711",
+    "fp:326549d924860296": "vehicle:00002716",
+    "fp:d8727026ce102790": "vehicle:00002718",
+    "fp:01ef6d9bcef63113": "vehicle:00002720",
+    "fp:ec4fe613c51cf543": "vehicle:00002722",
+    "fp:7a32f3ba57fed0c3": "vehicle:00002724",
+    "fp:ac728d067b4be4ed": "vehicle:00002725",
+    "fp:583e2af75fd58a0a": "vehicle:00002727",
+    "fp:7c6005222025524f": "vehicle:00001187",
+    "fp:18c44cca39d1ff03": "vehicle:00000938",
+    "fp:616a8f06392870a0": "vehicle:00000896",
+    "fp:058bf7fc2c8797f9": "vehicle:00000818",
+    "fp:2c0fe45900c48e82": "vehicle:00000696",
+    "fp:347f606d17701229": "vehicle:00000084",
+    "fp:4f90aaab45f320ae": "vehicle:00000553",
+    "fp:d22ef62e6a8f3e78": "vehicle:00002731",
+    "fp:08228b20826599bf": "vehicle:00002738",
+    "source:bilweb:459057": "vehicle:00001361",
+    "url:https://bilweb.se/ostergotlands-lan/volvo-v90-t6-core-edition-ii-2025-kombi-459057": "vehicle:00001361",
+    "reg:TYR16F": "vehicle:00003856",
+    "source:bilweb:458361": "vehicle:00003856",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-edition-2025-kombi-458361": "vehicle:00003856",
+    "fp:61e3efcae56f41f7": "vehicle:00003856",
+    "fp:11f91b287b8bde7f": "vehicle:00003821",
+    "reg:NBS14Z": "vehicle:00003857",
+    "source:bilweb:456848": "vehicle:00003857",
+    "url:https://bilweb.se/jonkopings-lan/volvo-v90-t6-core-edition-ii-2025-kombi-456848": "vehicle:00003857",
+    "fp:e48047b510821530": "vehicle:00003857",
+    "fp:d84cfcee6823aa18": "vehicle:00003507",
+    "fp:d1833bd9ffb25b65": "vehicle:00001949",
+    "fp:3771873ce0b8fe9f": "vehicle:00003754",
+    "fp:e6e12bc47c7d863e": "vehicle:00003708",
+    "fp:fc1d6d2df91bc60e": "vehicle:00003684",
+    "fp:135cca0e4a25ebb2": "vehicle:00003685",
+    "fp:f39ad3e01ce646a4": "vehicle:00003557",
+    "fp:3514f1dae9c0d17e": "vehicle:00003559",
+    "fp:febcc78502f5df71": "vehicle:00003428",
+    "url:https://www.wayke.se/objekt/1bf345f3-206d-4e81-80e8-818bda0fb663": "vehicle:00003858",
+    "fp:4d76d894d3b5eb02": "vehicle:00003858",
+    "fp:1f1b4f714eedcacb": "vehicle:00002768",
+    "fp:af738f43800f9d75": "vehicle:00003089",
+    "fp:cbfa20aa95a65bbb": "vehicle:00003618",
+    "fp:82c4aebb9e8f2a37": "vehicle:00003003",
+    "fp:88d4deac4c00d6d6": "vehicle:00003466",
+    "fp:b50ee8d8ba1b8109": "vehicle:00002748",
+    "fp:e89ff9c0c0990c36": "vehicle:00002751",
+    "fp:3f10ab2ae9a2012d": "vehicle:00002753",
+    "fp:27040acb0ad52dd8": "vehicle:00002756",
+    "fp:a8bf91ce92a8455b": "vehicle:00002757",
+    "fp:c1709aaa508348d6": "vehicle:00002771",
+    "fp:24e8d788e83d5224": "vehicle:00002772",
+    "fp:dd8c02b86ecba8da": "vehicle:00002773",
+    "fp:cb82f3d379130f8e": "vehicle:00002779",
+    "fp:970dcfa01f4f996d": "vehicle:00002782",
+    "fp:2421c5f5ce1faa74": "vehicle:00002785",
+    "fp:f64a46865486e61f": "vehicle:00002788",
+    "fp:df7892ad9b10ed65": "vehicle:00002792",
+    "fp:e116a65b858de7e3": "vehicle:00002795",
+    "fp:ad1141023f90090d": "vehicle:00002800",
+    "fp:fda20bb13c451705": "vehicle:00003007",
+    "fp:349b9e3a3839a4da": "vehicle:00002807",
+    "fp:5e39940e2b578511": "vehicle:00002812",
+    "fp:cb19872615f8a1fe": "vehicle:00002813",
+    "fp:389764e915d50ae4": "vehicle:00002819",
+    "fp:6649cd6bca727613": "vehicle:00002820",
+    "fp:d8638810d37f69ea": "vehicle:00002821",
+    "fp:4b187ba2190ef48a": "vehicle:00002830",
+    "fp:1bbfd7454ac5d95a": "vehicle:00002834",
+    "fp:0b110af173907ebb": "vehicle:00002836",
+    "fp:81ff8f1a6d675e99": "vehicle:00002837",
+    "fp:ec40722eb6804a9a": "vehicle:00002838",
+    "fp:9d5513dc08450e28": "vehicle:00002839",
+    "fp:6eba9579b7baad5f": "vehicle:00001188",
+    "fp:b017b0dbe4481937": "vehicle:00001189",
+    "fp:b5c3d407ed50bc29": "vehicle:00001165",
+    "fp:9ef0ea315ea6739f": "vehicle:00001166",
+    "fp:566c9ea06189fa08": "vehicle:00002841",
+    "fp:209b55cf143df1f5": "vehicle:00000984",
+    "fp:b3ac0d05bd339185": "vehicle:00000898",
+    "fp:46ba261fcfa1a5fb": "vehicle:00003094",
+    "fp:53dd1867a87fced8": "vehicle:00000725",
+    "fp:1d763918fbe14792": "vehicle:00000556",
+    "fp:9b890a17ee741ef6": "vehicle:00000094",
+    "fp:08bb6e7a1d949e13": "vehicle:00000099",
+    "fp:5118e56771968dc6": "vehicle:00000101",
+    "fp:51507efb3015d2e5": "vehicle:00002845",
+    "fp:c1cc1470cda6fd3d": "vehicle:00002848",
+    "reg:OLT06K": "vehicle:00003859",
+    "source:bilweb:458099": "vehicle:00003859",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-2026-kombi-458099": "vehicle:00003859",
+    "fp:9a8e03e4f3e63809": "vehicle:00003859",
+    "fp:90a081a69fe9a51c": "vehicle:00003825",
+    "fp:dda8c386871ca634": "vehicle:00002925",
+    "fp:0a8b2308d30b6ea0": "vehicle:00002851",
+    "fp:a2d8d5d99b43ad26": "vehicle:00002853",
+    "fp:3cdf60e097a564f1": "vehicle:00002855",
+    "fp:ed6f38f9e55df9bc": "vehicle:00001125",
+    "fp:9b95c9421f2c1aca": "vehicle:00000654",
+    "fp:5be72de5e5af679a": "vehicle:00000136",
+    "fp:7a7068070654138c": "vehicle:00002862",
+    "fp:275a7dfee5886cbc": "vehicle:00003713",
+    "fp:ed8f0ef1087867f5": "vehicle:00003158",
+    "fp:9fa7ead073521eb5": "vehicle:00003828",
+    "fp:b0ca7fdf705a823d": "vehicle:00003790",
+    "fp:6c68c57409a25bea": "vehicle:00003715",
+    "url:https://www.wayke.se/objekt/5b5c8b97-3105-4a52-817f-e0739aa275a2": "vehicle:00003860",
+    "fp:7d8ba0911be4c381": "vehicle:00003860",
+    "reg:BPF39K": "vehicle:00003861",
+    "source:bilweb:459077": "vehicle:00003861",
+    "url:https://bilweb.se/vastra-gotalands-lan/bmw-330-e-xdrive-touring-m-sport-business-head-up-19-2026-kombi-459077": "vehicle:00003861",
+    "fp:4dc4d0a2cd615332": "vehicle:00003861",
+    "source:bilweb:458041": "vehicle:00000917",
+    "url:https://bilweb.se/varmlands-lan/bmw-330-e-xdrive-touring-m-sport-pro-hk-panorama-2026-kombi-458041": "vehicle:00000917",
+    "fp:8935e64879401954": "vehicle:00000917",
+    "fp:484d4c424c33b693": "vehicle:00001155",
+    "reg:YWA32S": "vehicle:00003862",
+    "source:bilweb:458836": "vehicle:00003862",
+    "url:https://bilweb.se/varmlands-lan/volvo-v60-recharge-t6-350hk-awd-geartronic-plus-dark-2024-kombi-458836": "vehicle:00003862",
+    "fp:ae206a3798ed33c9": "vehicle:00003862",
+    "fp:9829500d6df0e5ad": "vehicle:00003795",
+    "url:https://bilweb.se/jonkopings-lan/bmw-330-e-rantekampanj-3-99-xdrive-292hk-touring-steptronic-2024-kombi-447433": "vehicle:00003628",
+    "reg:FBG72K": "vehicle:00003863",
+    "source:bilweb:459016": "vehicle:00003863",
+    "url:https://bilweb.se/skane-lan/bmw-330-e-touring-m-sport-drag-backkamera-rattvarme-tonade-18-2025-kombi-459016": "vehicle:00003863",
+    "fp:41f0337daa82616e": "vehicle:00003863"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -17317,7 +17688,10 @@
         "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
-      }
+      },
+      "aliases": [
+        "vehicle:00000176"
+      ]
     },
     "vehicle:00000175": {
       "created": true,
@@ -28113,7 +28487,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/6911161f-1fbc-4f86-814a-1ebb6b018de9",
+      "last_seen": "https://www.wayke.se/objekt/b58ac3fb-8a74-4da0-9678-ec1070f57dfc",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -30684,10 +31058,10 @@
         "modell": "330e-xdrive-touring",
         "variant": "330e xDrive Touring",
         "arsmodell": 2026,
-        "regnr": "MFK87D",
+        "regnr": "OOF60X",
         "vin": null
       },
-      "last_seen": "330510",
+      "last_seen": "458041",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -38698,7 +39072,7 @@
         "regnr": "LEP75H",
         "vin": null
       },
-      "last_seen": "391010",
+      "last_seen": "459057",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -83286,6 +83660,474 @@
         "matched_existing": true,
         "konflikt": false
       }
+    },
+    "vehicle:00003838": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "WAD58S",
+        "vin": null
+      },
+      "last_seen": "459341",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003839": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "SCP581",
+        "vin": null
+      },
+      "last_seen": "458151",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003840": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "JAM31H",
+        "vin": null
+      },
+      "last_seen": "459247",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003841": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "AFP09X",
+        "vin": null
+      },
+      "last_seen": "459401",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003842": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "HSR20R",
+        "vin": null
+      },
+      "last_seen": "459471",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003843": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/be0c193c-2035-4b28-9352-31f0d53e2f98",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003844": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "RBX52Y",
+        "vin": null
+      },
+      "last_seen": "458953",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003845": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/bac1a849-9cfd-50cc-8c8f-f7df3ff1b308",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003846": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "WCA72U",
+        "vin": null
+      },
+      "last_seen": "458570",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003847": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/0b25bba1-ed28-4150-9303-a15d2f7ca118",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003848": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19459735",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003849": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/ce3fb177-8a47-40bf-a382-88d1947b7a18",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003850": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "CWE93X",
+        "vin": null
+      },
+      "last_seen": "459173",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003851": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "KDJ01Z",
+        "vin": null
+      },
+      "last_seen": "458027",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003852": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19516402",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003853": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "RCX56C",
+        "vin": null
+      },
+      "last_seen": "458528",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003854": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/8cd30cc4-2f14-5362-b105-fcbaed1cd341",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003855": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/6d8ec155-9cf9-4fd0-bec9-2b72989d8822",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003856": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "TYR16F",
+        "vin": null
+      },
+      "last_seen": "458361",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003857": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "NBS14Z",
+        "vin": null
+      },
+      "last_seen": "456848",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003858": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/1bf345f3-206d-4e81-80e8-818bda0fb663",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003859": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "OLT06K",
+        "vin": null
+      },
+      "last_seen": "458099",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003860": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/5b5c8b97-3105-4a52-817f-e0739aa275a2",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003861": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2026,
+        "regnr": "BPF39K",
+        "vin": null
+      },
+      "last_seen": "459077",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003862": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "YWA32S",
+        "vin": null
+      },
+      "last_seen": "458836",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003863": {
+      "created": true,
+      "metadata": {
+        "modell": "330e-xdrive-touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": "FBG72K",
+        "vin": null
+      },
+      "last_seen": "459016",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
     }
   },
   "aliases": {
@@ -83299,6 +84141,7 @@
     "vehicle:00000663": "vehicle:00000917",
     "vehicle:00002421": "vehicle:00002408",
     "vehicle:00003006": "vehicle:00001949",
-    "vehicle:00002573": "vehicle:00002622"
+    "vehicle:00002573": "vehicle:00002622",
+    "vehicle:00000176": "vehicle:00000174"
   }
 }
