@@ -75,6 +75,7 @@ jobs:
   deploy:
     needs: evening
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -82,3 +83,6 @@ jobs:
       - name: Publicera webb
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # Pages kan fastna länge i syncing_files; standardgränsen är 10 min.
+          timeout: "1800000"
