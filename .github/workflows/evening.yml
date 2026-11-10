@@ -1,0 +1,84 @@
+name: Fiskabilar kvällsrapport och webb
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+      timezone: Europe/Stockholm
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: fiskabilar-data-write
+  cancel-in-progress: false
+
+jobs:
+  evening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      TZ: Europe/Stockholm
+      FISKABILAR_WEBB_URL: https://appsyndroms.github.io/Fiskabilar/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Läs senaste sparade data när jobbet får låset, även efter kötid.
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installera beroenden
+        run: python -m pip install -r requirements.txt
+
+      - name: Datainsamling, rapport utan mejl, ML och webb
+        run: python -u -m scripts.evening
+
+      # Sparas endast efter att hela kedjan lyckats. Fel från källor, rapport,
+      # träning eller webbbygge stoppar både publicering och datacommit.
+      - name: Spara uppdaterad historik, rapport och modell
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Ingen dataförändring att spara."
+            exit 0
+          fi
+          git commit -m "Uppdaterar kvällsrapport, historik och ML-modell"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
+
+      - name: Förbered GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Ladda upp webb
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: web_site
+
+      - name: Spara körstatus för felsökning
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evening-status
+          path: .local/evening-status.json
+          if-no-files-found: ignore
+
+  deploy:
+    needs: evening
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicera webb
+        id: deployment
+        uses: actions/deploy-pages@v4

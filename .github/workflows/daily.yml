@@ -8,24 +8,22 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: fiskabilar-data-write
   cancel-in-progress: false
 
 jobs:
-  evening:
+  kontrollera-fynd:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
       TZ: Europe/Stockholm
-      FISKABILAR_WEBB_URL: https://appsyndroms.github.io/Fiskabilar/
+      FISKABILAR_ONLY_DAILY_REPORT: "0"
+      DEBUG: "false"
     steps:
       - uses: actions/checkout@v4
         with:
-          # Läs senaste sparade data när jobbet får låset, även efter kötid.
           ref: main
           fetch-depth: 0
 
@@ -37,12 +35,19 @@ jobs:
       - name: Installera beroenden
         run: python -m pip install -r requirements.txt
 
-      - name: Datainsamling, rapport utan mejl, ML och webb
-        run: python -u -m scripts.evening
+      - name: Hämta annonser och mejla nya fynd
+        env:
+          EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
+        run: |
+          python -c 'import os; assert os.environ.get("EPOST_LOSENORD", "").strip(), "GitHub-hemligheten EPOST_LOSENORD saknas; fyndmejl kan inte skickas."'
+          python -u main.py
 
-      # Sparas endast efter att hela kedjan lyckats. Fel från källor, rapport,
-      # träning eller webbbygge stoppar både publicering och datacommit.
-      - name: Spara uppdaterad historik, rapport och modell
+      - name: Uppdatera fyndutfall
+        run: python -u scripts/analysera_fyndutfall.py
+
+      # Spara notifieringsstatus före ML så att träningsfel inte orsakar
+      # upprepade mejl om samma fynd i nästa körning.
+      - name: Spara historik, state och skickade fyndnotiser
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -51,34 +56,25 @@ jobs:
             echo "Ingen dataförändring att spara."
             exit 0
           fi
-          git commit -m "Uppdaterar kvällsrapport, historik och ML-modell"
+          git commit -m "Uppdaterar fyndhistorik och notifieringsstatus"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
 
-      - name: Förbered GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Träna ML-modellen
+        run: python -u -m ml.train_market_model
 
-      - name: Ladda upp webb
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: web_site
+      - name: Uppdatera ML-värderingar
+        run: python -u -m ml.generate_ml_valuation
 
-      - name: Spara körstatus för felsökning
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: evening-status
-          path: .local/evening-status.json
-          if-no-files-found: ignore
-
-  deploy:
-    needs: evening
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publicera webb
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Spara modell och värderingar
+        run: |
+          git add data/ml/ data/ml_valuation.jsonl
+          if git diff --cached --quiet; then
+            echo "Ingen modellförändring att spara."
+            exit 0
+          fi
+          git commit -m "Uppdaterar ML efter fyndkontroll"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main

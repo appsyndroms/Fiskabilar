@@ -415,18 +415,21 @@ Det viktiga är därför inte bara att hitta billiga annonser, utan att samla da
 
 ## Återkommande körningar i GitHub Actions
 
-`.github/workflows/daily.yml` kör hela flödet var 15:e minut varje dag
-kl. 06:00–21:45 i `Europe/Stockholm`, även när sommartiden ändras.
-Kvällskörningen kl. 18:00 ingår i samma schema, utan en extra dubbelkörning.
-GitHub kan fördröja schemalagda körningar. Flödet kan också startas manuellt
-via Actions. Gemensam concurrency hindrar samtidiga dataskrivningar;
-checkout läser senaste `main` när jobbet startar.
+`daily.yml` kontrollerar fynd var 15:e minut kl. 06:00–21:45 i
+`Europe/Stockholm`. Jobbet hämtar annonser, uppdaterar historik och
+mejlar nya fynd med `EPOST_LOSENORD` från GitHub Secrets. Befintliga
+notifieringsregler hindrar upprepade mejl om samma fynd. ML tränas vid
+varje körning. Fyndkontrollen bygger eller publicerar ingen webb och
+skapar ingen daglig marknadsrapport. Saknad mejlhemlighet stoppar jobbet.
 
-Samma `python -m scripts.evening` används lokalt och i GitHub: annonser,
-historik, fyndutfall, dagens rapport utan mejl, ny ML-träning vid varje
-körning, ML-värderingar och validerad webb. HTTP-fel som 403/429 och andra
-källfel stoppar körningen. Data committas och GitHub Pages publiceras
-endast när hela kedjan lyckats. Övriga workflows är manuella.
+`evening.yml` kör separat kl. 18:00: insamling, fyndutfall, daglig rapport
+utan mejl, ML-träning, värderingar och GitHub Pages. Det använder samma
+`python -m scripts.evening` som den manuella lokala kvällskörningen.
+
+Båda jobben delar `fiskabilar-data-write` och kan inte skriva data samtidigt.
+Checkout läser senaste `main` när jobbet startar. HTTP-fel som 403/429 och
+andra källfel stoppar insamlingen. GitHub kan fördröja schemalagda körningar;
+sommar-/vintertid följer `Europe/Stockholm`. Övriga workflows är manuella.
 
 Lokalt kan kvällskörningen fortfarande startas med
 `bash /Volumes/T9/Treage/Git/Fiskabilar/scripts/run_evening.sh`.
