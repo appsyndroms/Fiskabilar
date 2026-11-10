@@ -14749,7 +14749,11 @@
     "url:https://bilweb.se/orebro-lan/volvo-v90-recharge-t6-awd-core-long-range-navi-kam-2024-kombi-460753": "vehicle:00003907",
     "fp:f8522afbeed7009e": "vehicle:00003907",
     "fp:7a421adc48237024": "vehicle:00003172",
-    "url:https://www.bytbil.com/sodermanlands-lan/personbil-v90-t6-plug-in-hybrid-awd-350hk-drag-3-99-ranta-2782-19412425": "vehicle:00001369"
+    "url:https://www.bytbil.com/sodermanlands-lan/personbil-v90-t6-plug-in-hybrid-awd-350hk-drag-3-99-ranta-2782-19412425": "vehicle:00001369",
+    "fp:43e1df56e626d3a8": "vehicle:00002350",
+    "fp:25636f7763425d1e": "vehicle:00002599",
+    "fp:e3448e548cc0ba4a": "vehicle:00003854",
+    "fp:f34b57ca3c186f9e": "vehicle:00002862"
   },
   "vehicles": {
     "vehicle:00000001": {
