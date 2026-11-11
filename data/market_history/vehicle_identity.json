@@ -15083,7 +15083,18 @@
     "fp:ea124a9416c66ad5": "vehicle:00003977",
     "source:bytbil:19286319": "vehicle:00003978",
     "url:https://www.bytbil.com/skane-lan/personbil-330e-sedan-adaptiv-farth-hifi-ljudsystem-4-95-1089-19286319": "vehicle:00003978",
-    "fp:e1a3e1f1d4c630b3": "vehicle:00003978"
+    "fp:e1a3e1f1d4c630b3": "vehicle:00003978",
+    "reg:HBZ78X": "vehicle:00003979",
+    "source:bilweb:465291": "vehicle:00003979",
+    "url:https://bilweb.se/gavleborgs-lan/volvo-v60-t6-plug-in-hybrid-awd-dark-edition-h-k-pano-2-99-ranta-2025-kombi-465291": "vehicle:00003979",
+    "fp:d600d45f988edd6b": "vehicle:00003979",
+    "reg:MRA67C": "vehicle:00003980",
+    "source:bilweb:465364": "vehicle:00003980",
+    "url:https://bilweb.se/uppsala-lan/volvo-v60-t6-ultra-bright-2025-kombi-465364": "vehicle:00003980",
+    "fp:fc491e328aeb395a": "vehicle:00003980",
+    "url:https://www.wayke.se/objekt/2bc28e07-974c-5815-b5e6-1e19f755b507": "vehicle:00003981",
+    "fp:fa10f2e38541df82": "vehicle:00003981",
+    "fp:cf029c9bf8256982": "vehicle:00003938"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -86729,6 +86740,60 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003979": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "HBZ78X",
+        "vin": null
+      },
+      "last_seen": "465291",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003980": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": "MRA67C",
+        "vin": null
+      },
+      "last_seen": "465364",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00003981": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/2bc28e07-974c-5815-b5e6-1e19f755b507",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
       }
