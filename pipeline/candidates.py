@@ -23,6 +23,7 @@ from app_logging.logger import (
 
 from config import (
     DEBUG,
+    MIN_PRISSANKNING_FOR_NY_NOTIS,
 )
 
 from valuation.market_value import (
@@ -516,8 +517,8 @@ def processa_kandidater(
                     bil,
                     vardering,
                     score,
-                    "STOPP: väntar på minst "
-                    "15 000 kr lägre prisnivå",
+                    (f"STOPP: väntar på minst {MIN_PRISSANKNING_FOR_NY_NOTIS:_} "
+                     "kr lägre prisnivå").replace("_", " "),
                 )
             )
             continue

@@ -448,3 +448,10 @@ Paginering och varje annons valideras; delresultat, fel modell/årsmodell,
 okända miltalsenheter och upprepade sidor får inte publiceras.
 Den manuella Actions-körningen `Kontrollera källanslutning` provar alla
 fyra modeller utan att skriva historik eller träna modellen.
+
+
+Fyndmejl spärras också per annonslänk i `data/notification_history.json`,
+så att byte av internt fordons-ID inte skickar samma fynd igen. Historiken
+sparas efter lyckat utskick och följer med GitHub-körningarnas datacommit.
+Ny notis tillåts först vid ytterligare prissänkning enligt
+`MIN_PRISSANKNING_FOR_NY_NOTIS` (för närvarande 10 000 kr).

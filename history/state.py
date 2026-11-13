@@ -27,6 +27,8 @@ from config import (
     MIN_PRISSANKNING_FOR_NY_NOTIS,
 )
 
+from . import notification_history
+
 from .identity import (
     resolve_vehicle_id,
 )
@@ -814,41 +816,28 @@ def redan_notifierad(
         or {}
     )
 
-    if not historik.get(
-        "notifierad",
-        False,
-    ):
+    references = notification_history.prices(bil)
+    if historik.get("notifierad", False):
+        notified_price = historik.get("notifierad_pris")
+        if _ar_pris(notified_price):
+            references.append(notified_price)
+        elif not references:
+            return True
+    if not references:
         return False
-
-    notifierad_pris = historik.get(
-        "notifierad_pris"
-    )
-
-    if not _ar_pris(
-        notifierad_pris
-    ):
+    price = bil.get("annonspris")
+    if not _ar_pris(price):
         return True
-
-    aktuellt_pris = bil.get(
-        "annonspris"
-    )
-
-    if not _ar_pris(
-        aktuellt_pris
-    ):
-        return True
-
-    return (
-        aktuellt_pris
-        > notifierad_pris
-        - MIN_PRISSANKNING_FOR_NY_NOTIS
-    )
+    return price > min(references) - MIN_PRISSANKNING_FOR_NY_NOTIS
 
 
 def markera_notifierad(
     bil: dict,
     state: dict,
 ) -> None:
+    # Körs endast efter lyckat SMTP-utskick. Spara länken även om ID byts.
+    notification_history.record(bil)
+
     nyckel, historik = _hamta_historik(
         bil,
         state,
