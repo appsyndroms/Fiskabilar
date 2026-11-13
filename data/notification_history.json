@@ -186,7 +186,7 @@
     "price": 597500
   },
   "https://www.wayke.se/objekt/fecb1786-4b2d-43dc-bbf3-5b10f6e8916a": {
-    "price": 569000
+    "price": 529000
   },
   "https://www.wayke.se/objekt/0d65e92c-4c87-431e-a9b2-2e824465fe0e": {
     "price": 597500
@@ -594,7 +594,7 @@
     "price": 449900
   },
   "https://www.wayke.se/objekt/f42e50f5-e6ad-4684-b93e-9822bda24329": {
-    "price": 479900
+    "price": 462900
   },
   "https://www.wayke.se/objekt/fbd8fe54-da4b-460c-a72f-b6947108b64f": {
     "price": 429800
@@ -1912,5 +1912,137 @@
   },
   "https://www.wayke.se/objekt/28942a15-06fe-4b70-9516-e8212b81695e": {
     "price": 528600
+  },
+  "https://www.wayke.se/objekt/8c62db05-7137-45a2-a7ae-88ee7dec4269": {
+    "price": 313900
+  },
+  "https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-pl5495kr-2946-19530948": {
+    "price": 463900
+  },
+  "https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-pl5495kr-2026-kombi-468677": {
+    "price": 463900
+  },
+  "https://www.wayke.se/objekt/1d42580b-496a-4136-9635-45a20e0bcd41": {
+    "price": 463900
+  },
+  "https://www.wayke.se/objekt/cc7db02b-6442-40a1-bf9e-2efcd36495d1": {
+    "price": 462900
+  },
+  "https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-pl-5495kr-2946-19530931": {
+    "price": 462900
+  },
+  "https://bilweb.se/hallands-lan/volvo-v60-t6-plus-dark-nordic-edt-2026-kombi-468601": {
+    "price": 489900
+  },
+  "https://www.wayke.se/objekt/01a1c576-8bba-7e39-9ca1-8ec692e63d1a": {
+    "price": 489900
+  },
+  "https://www.wayke.se/objekt/17b835c7-ec4d-4a41-8816-4fa3ae20eeaa": {
+    "price": 484900
+  },
+  "https://www.wayke.se/objekt/8970cc06-cdf6-47f7-b215-a1301e5c7578": {
+    "price": 459000
+  },
+  "https://www.wayke.se/objekt/448711d7-ea9f-445b-9b9b-958823831258": {
+    "price": 449000
+  },
+  "https://www.wayke.se/objekt/8d99a4fa-1f7b-40eb-a63f-893fa2e63eb4": {
+    "price": 449000
+  },
+  "https://www.wayke.se/objekt/0f53fa93-4abf-4207-a65b-b3800ac8b98c": {
+    "price": 359500
+  },
+  "https://www.wayke.se/objekt/9bc074f2-307e-49a6-8f47-bc3e0b6ccda1": {
+    "price": 449500
+  },
+  "https://bilweb.se/sodermanlands-lan/volvo-v90-t6-core-edition-ii-2025-kombi-466952": {
+    "price": 449500
+  },
+  "https://www.wayke.se/objekt/4192d9e4-ad8f-4e17-addc-f903429da2af": {
+    "price": 439000
+  },
+  "https://www.wayke.se/objekt/06d3c78d-ff4c-447a-9300-b9089e6183d8": {
+    "price": 449900
+  },
+  "https://www.wayke.se/objekt/39be4a46-54eb-4b3c-a22d-40bbd0c2caa0": {
+    "price": 439800
+  },
+  "https://www.wayke.se/objekt/cbcbf45c-2e4a-4276-8afb-74559f2783dd": {
+    "price": 449900
+  },
+  "https://www.wayke.se/objekt/d4fcb6a8-5ec9-495d-ba08-47544148ea42": {
+    "price": 455000
+  },
+  "https://www.wayke.se/objekt/de3799f1-16d1-4d22-9ee6-3c6f43542dcf": {
+    "price": 439900
+  },
+  "https://www.wayke.se/objekt/3c3dc71d-e17e-4566-9e3d-acc29c7e393b": {
+    "price": 454900
+  },
+  "https://www.wayke.se/objekt/b37ce876-8bb6-4c77-bdb1-e2b6ec888307": {
+    "price": 449900
+  },
+  "https://www.wayke.se/objekt/61ad37bf-8547-4369-af57-1e0cb8b352bb": {
+    "price": 449900
+  },
+  "https://www.wayke.se/objekt/c63c8721-c929-4fc5-a80f-ca84d9793e6c": {
+    "price": 449900
+  },
+  "https://www.wayke.se/objekt/14d275c7-d063-47e9-b138-0c57fe82c3b8": {
+    "price": 444900
+  },
+  "https://www.wayke.se/objekt/aacf38d4-bca6-46f1-bb06-111ab39c6085": {
+    "price": 439500
+  },
+  "https://www.wayke.se/objekt/64b82807-7946-4cc5-b6c4-8f9e4d690834": {
+    "price": 479900
+  },
+  "https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-harman-kardon-360-kamera-2026-kombi-435264": {
+    "price": 479900
+  },
+  "https://www.wayke.se/objekt/5f57cccb-23f5-4dff-a7ee-390c7bd17101": {
+    "price": 479900
+  },
+  "https://bilweb.se/stockholms-lan/volvo-v90-t6-plus-dark-nordic-edition-harman-kardon-360-kamera-2026-kombi-412789": {
+    "price": 479900
+  },
+  "https://www.bytbil.com/stockholms-lan/personbil-330e-xdrive-touring-292hk-varmare-drag-widescreen-moms-8147-19530347": {
+    "price": 299800
+  },
+  "https://bilweb.se/sodermanlands-lan/bmw-330-e-xdrive-touring-292hk-varmare-drag-widescreen-moms-2024-kombi-467812": {
+    "price": 299800
+  },
+  "https://www.wayke.se/objekt/9ecc71f5-e5bb-46eb-9d0e-2ec0276a208a": {
+    "price": 299800
+  },
+  "https://www.bytbil.com/sodermanlands-lan/personbil-330e-xdrive-touring-m-sport-drag-sportstol-adpt-farth-1159-19526377": {
+    "price": 529900
+  },
+  "https://www.wayke.se/objekt/b6331ab2-65d8-4160-9cca-7781a4325787": {
+    "price": 529900
+  },
+  "https://www.wayke.se/objekt/96e95193-1bee-42c1-9355-0d6baad61744": {
+    "price": 528600
+  },
+  "https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-m-sport-active-edt-hifi-aktiv-fart-drag-2026-kombi-467221": {
+    "price": 528600
+  },
+  "https://www.bytbil.com/stockholms-lan/personbil-330e-xdrive-touring-m-sport-active-edt-hifi-aktiv-fart-drag-1141-19523971": {
+    "price": 528600
+  },
+  "https://bilweb.se/skane-lan/bmw-330-e-xdrive-touring-m-sport-drag-adpt-farth-rattv-hifi-18-2026-kombi-439950": {
+    "price": 549000
+  },
+  "https://www.wayke.se/objekt/1897401e-d440-42a0-840b-4d15eff659e9": {
+    "price": 549000
+  },
+  "https://bilweb.se/jamtlands-lan/bmw-330-e-xdrive-touring-m-sport-drag-2026-kombi-391857": {
+    "price": 528700
+  },
+  "https://www.wayke.se/objekt/01a0cd83-eee8-7560-bdc9-7a5ef865bd3f": {
+    "price": 528700
+  },
+  "https://bilweb.se/skane-lan/bmw-330-e-xdrive-touring-m-sport-drag-4-95-adptfarth-hifi-2026-kombi-418440": {
+    "price": 529000
   }
 }
