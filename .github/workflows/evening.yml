@@ -4,7 +4,13 @@ on:
   schedule:
     - cron: '0 18 * * *'
       timezone: Europe/Stockholm
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: "Enbart mejl för redan publicerad rapport (ÅÅÅÅ-MM-DD); lämna tomt för hela kvällsflödet"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -17,6 +23,9 @@ concurrency:
 
 jobs:
   evening:
+    if: ${{ inputs.report_date == '' }}
+    outputs:
+      report_date: ${{ steps.report_date.outputs.date }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -39,6 +48,18 @@ jobs:
 
       - name: Datainsamling, rapport utan mejl, ML och webb
         run: python -u -m scripts.evening
+
+      - name: Läs datum från den färdiga rapportkörningen
+        id: report_date
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          status = json.loads(Path(".local/evening-status.json").read_text())
+          assert status["status"] == "complete"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"date={status['date']}\n")
+          PY
 
       # Sparas endast efter att hela kedjan lyckats. Fel från källor, rapport,
       # träning eller webbbygge stoppar både publicering och datacommit.
@@ -73,6 +94,8 @@ jobs:
           if-no-files-found: ignore
 
   deploy:
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     needs: evening
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -86,3 +109,43 @@ jobs:
         with:
           # Pages kan fastna länge i syncing_files; standardgränsen är 10 min.
           timeout: "1800000"
+
+
+  report-email:
+    name: Mejla kvällsrapport efter publicering
+    needs: [evening, deploy]
+    if: ${{ always() && !cancelled() && ((needs.evening.result == 'success' && needs.deploy.result == 'success') || (github.event_name == 'workflow_dispatch' && inputs.report_date != '')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Europe/Stockholm
+      REPORT_DATE: ${{ inputs.report_date || needs.evening.outputs.report_date }}
+      WEB_URL: ${{ needs.deploy.outputs.page_url || 'https://appsyndroms.github.io/Fiskabilar/' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Installera beroenden
+        run: python -m pip install -r requirements.txt
+      - name: Skicka den sparade rapporten en gång
+        env:
+          EPOST_LOSENORD: ${{ secrets.EPOST_LOSENORD }}
+        run: python -u -m reporting.send_evening_report --date "$REPORT_DATE" --web-url "$WEB_URL"
+      - name: Spara kvitto på skickad kvällsrapport
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/daily_reports/
+          if git diff --cached --quiet; then
+            echo "Rapporten var redan mejlad."
+            exit 0
+          fi
+          git commit -m "Sparar kvitto på skickad kvällsrapport"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main

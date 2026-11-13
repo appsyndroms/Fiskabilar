@@ -423,7 +423,12 @@ varje körning. Fyndkontrollen bygger eller publicerar ingen webb och
 skapar ingen daglig marknadsrapport. Saknad mejlhemlighet stoppar jobbet.
 
 `evening.yml` kör separat kl. 18:00: insamling, fyndutfall, daglig rapport
-utan mejl, ML-träning, värderingar och GitHub Pages. Det använder samma
+utan mejl under bygget, ML-träning, värderingar och GitHub Pages. När
+publiceringen lyckats skickas den sparade kvällsrapporten med webblänk via
+`EPOST_LOSENORD`. Utskicket kvitteras i rapportloggen så att omkörningar
+inte skickar samma dags rapport igen. Vid leveransfel blir jobbet rött.
+Ett tidigare uteblivet mejl kan skickas manuellt med workflow-inputen
+`report_date` utan ny insamling eller publicering. Det använder samma
 `python -m scripts.evening` som den manuella lokala kvällskörningen.
 
 Båda jobben delar `fiskabilar-data-write` och kan inte skriva data samtidigt.
