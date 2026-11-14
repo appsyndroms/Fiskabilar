@@ -15580,7 +15580,15 @@
     "fp:30dbd4de1f25e625": "vehicle:00003658",
     "source:bytbil:19531439": "vehicle:00004097",
     "url:https://www.bytbil.com/vastra-gotalands-lan/personbil-v60-t6-core-bright-11439-19531439": "vehicle:00004097",
-    "fp:e563c3f5445b2aa7": "vehicle:00004097"
+    "fp:e563c3f5445b2aa7": "vehicle:00004097",
+    "source:bytbil:19531830": "vehicle:00004098",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v60-t6-plus-dark-nordic-edition-privatleasing-5495-man-5152-19531830": "vehicle:00004098",
+    "fp:3705dc4ba46d1801": "vehicle:00004098",
+    "fp:b1ab4d018c386374": "vehicle:00004062",
+    "fp:cb4c6cedb409ddc6": "vehicle:00004063",
+    "fp:7542b63dd43763a2": "vehicle:00004064",
+    "fp:19813d1ef51c2ee6": "vehicle:00004065",
+    "url:https://bilweb.se/sodermanlands-lan/volvo-v90-t6-core-edition-ii-360-kamera-harman-kardon-drag-2025-kombi-466952": "vehicle:00004016"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -89364,6 +89372,24 @@
         "vin": null
       },
       "last_seen": "19531439",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004098": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19531830",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
