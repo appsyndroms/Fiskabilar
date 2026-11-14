@@ -15588,7 +15588,12 @@
     "fp:cb4c6cedb409ddc6": "vehicle:00004063",
     "fp:7542b63dd43763a2": "vehicle:00004064",
     "fp:19813d1ef51c2ee6": "vehicle:00004065",
-    "url:https://bilweb.se/sodermanlands-lan/volvo-v90-t6-core-edition-ii-360-kamera-harman-kardon-drag-2025-kombi-466952": "vehicle:00004016"
+    "url:https://bilweb.se/sodermanlands-lan/volvo-v90-t6-core-edition-ii-360-kamera-harman-kardon-drag-2025-kombi-466952": "vehicle:00004016",
+    "fp:f4a73481200ea710": "vehicle:00004049",
+    "reg:OGK50Y": "vehicle:00004099",
+    "source:bilweb:467687": "vehicle:00004099",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-h-k-360kam-2026-kombi-467687": "vehicle:00004099",
+    "fp:3130557030d76912": "vehicle:00004099"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -89394,6 +89399,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004099": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "OGK50Y",
+        "vin": null
+      },
+      "last_seen": "467687",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
