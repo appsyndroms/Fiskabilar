@@ -15593,7 +15593,9 @@
     "reg:OGK50Y": "vehicle:00004099",
     "source:bilweb:467687": "vehicle:00004099",
     "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-h-k-360kam-2026-kombi-467687": "vehicle:00004099",
-    "fp:3130557030d76912": "vehicle:00004099"
+    "fp:3130557030d76912": "vehicle:00004099",
+    "fp:0b5f8f6111a098d0": "vehicle:00004092",
+    "fp:68b57db32de18f96": "vehicle:00002839"
   },
   "vehicles": {
     "vehicle:00000001": {
