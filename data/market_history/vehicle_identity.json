@@ -15601,7 +15601,9 @@
     "fp:16ddfff22b9e534f": "vehicle:00002862",
     "source:bytbil:19529663": "vehicle:00004100",
     "url:https://www.bytbil.com/stockholms-lan/personbil-330e-series-3-xdrive-touring-292hk-m-sport-drag-lader-10701-19529663": "vehicle:00004100",
-    "fp:f949e14be84cc7ca": "vehicle:00004100"
+    "fp:f949e14be84cc7ca": "vehicle:00004100",
+    "url:https://www.wayke.se/objekt/18dcacd3-13eb-40df-8e0f-106cffafe526": "vehicle:00004052",
+    "fp:657ae393ea496203": "vehicle:00003305"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -88574,7 +88576,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/a52edfbc-8b08-4d29-a604-e369c0793e8d",
+      "last_seen": "https://www.wayke.se/objekt/18dcacd3-13eb-40df-8e0f-106cffafe526",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
