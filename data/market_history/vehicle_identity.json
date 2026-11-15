@@ -15595,7 +15595,13 @@
     "url:https://bilweb.se/stockholms-lan/volvo-v60-t6-plus-dark-nordic-edition-drag-h-k-360kam-2026-kombi-467687": "vehicle:00004099",
     "fp:3130557030d76912": "vehicle:00004099",
     "fp:0b5f8f6111a098d0": "vehicle:00004092",
-    "fp:68b57db32de18f96": "vehicle:00002839"
+    "fp:68b57db32de18f96": "vehicle:00002839",
+    "fp:4d5f6cffde557aa1": "vehicle:00004092",
+    "fp:a06ad580170bba91": "vehicle:00004077",
+    "fp:16ddfff22b9e534f": "vehicle:00002862",
+    "source:bytbil:19529663": "vehicle:00004100",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-330e-series-3-xdrive-touring-292hk-m-sport-drag-lader-10701-19529663": "vehicle:00004100",
+    "fp:f949e14be84cc7ca": "vehicle:00004100"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -89419,6 +89425,24 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004100": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19529663",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
