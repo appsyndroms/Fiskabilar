@@ -25,6 +25,12 @@ HEADERS = {
 PAGE_SIZE = 24
 MAX_PAGES = 100
 DELAY_SECONDS = 3
+MAX_SEARCH_ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 5
+
+
+class SearchResultsChanged(SourceFetchError):
+    """Sökresultatet flyttade sig mellan sidor; hela sökningen måste tas om."""
 
 
 def variables(config, year, page):
@@ -119,7 +125,7 @@ def parse_hit(hit, config, year):
         raise SourceFetchError(f"Wayke API: ogiltig eller felmatchad annons: {exc}") from exc
 
 
-def hamta_annonskort(config, year):
+def _hamta_annonskort_en_gang(config, year):
     cards, seen = [], set()
     expected = None
     for page in range(1, MAX_PAGES + 1):
@@ -127,15 +133,15 @@ def hamta_annonskort(config, year):
         if expected is None:
             expected = result["found"]
         if result["found"] != expected:
-            raise SourceFetchError("Wayke API: antal annonser ändrades under pagineringen; kör om.")
+            raise SearchResultsChanged("Wayke API: antal annonser ändrades under pagineringen; kör om.")
         hits = result["hits"]
         if not hits and len(seen) < expected:
-            raise SourceFetchError("Wayke API: tom sida innan alla annonser hämtats.")
+            raise SearchResultsChanged("Wayke API: tom sida innan alla annonser hämtats.")
         for hit in hits:
             card = parse_hit(hit, config, year)
             identity = hit["ad"]["id"]
             if identity in seen:
-                raise SourceFetchError("Wayke API: upprepad annons mellan resultatsidor.")
+                raise SearchResultsChanged("Wayke API: upprepad annons mellan resultatsidor.")
             seen.add(identity)
             if card is not None:
                 cards.append(card)
@@ -143,6 +149,25 @@ def hamta_annonskort(config, year):
         if len(seen) == expected:
             return cards
         if len(seen) > expected:
-            raise SourceFetchError("Wayke API: fler annonser än utlovat.")
+            raise SearchResultsChanged("Wayke API: fler annonser än utlovat.")
         time.sleep(DELAY_SECONDS)
     raise SourceFetchError("Wayke API: sidgränsen nåddes; ofullständig insamling avvisas.")
+
+
+def hamta_annonskort(config, year):
+    """Försök om en instabil sökning; använd aldrig föregående delresultat.
+
+    HTTP-/GraphQL-/schemafel hanteras inte här och stoppar direkt.
+    """
+    for attempt in range(1, MAX_SEARCH_ATTEMPTS + 1):
+        try:
+            return _hamta_annonskort_en_gang(config, year)
+        except SearchResultsChanged as exc:
+            if attempt == MAX_SEARCH_ATTEMPTS:
+                raise SourceFetchError(
+                    f"Wayke API: sökresultatet var instabilt efter {attempt} försök; "
+                    "ofullständig insamling avvisas."
+                ) from exc
+            info(f"[wayke API] {config['modell_visning']} {year}: {exc} "
+                 f"Börjar om från sida 1 (försök {attempt + 1}/{MAX_SEARCH_ATTEMPTS}).")
+            time.sleep(RETRY_DELAY_SECONDS * attempt)

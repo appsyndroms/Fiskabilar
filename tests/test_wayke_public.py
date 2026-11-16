@@ -67,7 +67,7 @@ class PublicWaykeTests(unittest.TestCase):
         with patch.object(api, "fetch_page", side_effect=[first, {"found": 2, "hits": [second_hit]}]), patch.object(api.time, "sleep"):
             self.assertEqual(len(api.hamta_annonskort(BILAR[0], 2023)), 2)
         for second in ({"found": 2, "hits": []}, first, {"found": 3, "hits": [second_hit]}):
-            with patch.object(api, "fetch_page", side_effect=[first, second]), patch.object(api.time, "sleep"):
+            with patch.object(api, "MAX_SEARCH_ATTEMPTS", 1), patch.object(api, "fetch_page", side_effect=[first, second]), patch.object(api.time, "sleep"):
                 with self.assertRaises(SourceFetchError):
                     api.hamta_annonskort(BILAR[0], 2023)
 
@@ -77,3 +77,38 @@ class PublicWaykeTests(unittest.TestCase):
             hit = copy.deepcopy(self.hit)
             mutate(hit)
             self.assertIsNone(api.parse_hit(hit, BILAR[0], 2023))
+
+    def test_changed_result_restarts_at_page_one_and_discards_partial_cards(self):
+        old = copy.deepcopy(self.hit)
+        old["ad"]["id"] = "00000000-0000-4000-8000-000000000001"
+        new = copy.deepcopy(self.hit)
+        new["ad"]["id"] = "00000000-0000-4000-8000-000000000002"
+        responses = [{"found": 2, "hits": [old]}, {"found": 3, "hits": []},
+                     {"found": 2, "hits": [self.hit]}, {"found": 2, "hits": [new]}]
+        with patch.object(api, "fetch_page", side_effect=responses) as fetch, patch.object(api.time, "sleep"):
+            cards = api.hamta_annonskort(BILAR[0], 2023)
+        self.assertEqual([c["url"].rsplit("/", 1)[-1] for c in cards], [self.hit["ad"]["id"], new["ad"]["id"]])
+        self.assertEqual([call.args[2] for call in fetch.call_args_list], [1, 2, 1, 2])
+
+    def test_persistent_changes_are_bounded_and_never_return_partial_data(self):
+        responses = [{"found": 2, "hits": [self.hit]}, {"found": 3, "hits": []}] * 3
+        with patch.object(api, "fetch_page", side_effect=responses) as fetch, patch.object(api.time, "sleep"):
+            with self.assertRaisesRegex(SourceFetchError, "instabilt efter 3 försök"):
+                api.hamta_annonskort(BILAR[0], 2023)
+        self.assertEqual(fetch.call_count, 6)
+
+    def test_http_and_schema_errors_do_not_trigger_search_retries(self):
+        for error in (requests.HTTPError("403"), requests.Timeout("Timeout"),
+                      SourceFetchError("GraphQL-fel"), SourceFetchError("schema har ändrats")):
+            with patch.object(api, "fetch_page", side_effect=error) as fetch, patch.object(api.time, "sleep") as sleep:
+                with self.assertRaises(type(error)):
+                    api.hamta_annonskort(BILAR[0], 2023)
+                fetch.assert_called_once()
+                sleep.assert_not_called()
+
+    def test_duplicate_or_empty_page_can_recover_with_a_fresh_search(self):
+        first = {"found": 2, "hits": [self.hit]}
+        for unstable in (first, {"found": 2, "hits": []}):
+            with patch.object(api, "fetch_page", side_effect=[first, unstable, {"found": 1, "hits": [self.hit]}]) as fetch, patch.object(api.time, "sleep"):
+                self.assertEqual(len(api.hamta_annonskort(BILAR[0], 2023)), 1)
+                self.assertEqual([c.args[2] for c in fetch.call_args_list], [1, 2, 1])
