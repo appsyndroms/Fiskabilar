@@ -1272,7 +1272,7 @@
     "price": 474500
   },
   "https://www.wayke.se/objekt/de9612c2-2e52-44b3-b58f-aa1ad677cf4b": {
-    "price": 449000
+    "price": 439000
   },
   "https://www.wayke.se/objekt/019bdf5b-8e6b-74b5-a447-92dd33878477": {
     "price": 539000
@@ -2056,5 +2056,8 @@
   },
   "https://www.wayke.se/objekt/db971335-73cf-4cf8-87d1-eb1fae160b66": {
     "price": 359000
+  },
+  "https://www.wayke.se/objekt/01a0d382-ce2c-78f5-b5b5-07811bbe7926": {
+    "price": 528700
   }
 }
