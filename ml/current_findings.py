@@ -78,7 +78,7 @@ def _shared_calibrated_findings(current, predictions, calibration):
         model_pct = value["diff"] / price * 100
         market_pct = (price-peer) / peer * 100
         rank = model_pct + max(0, -market_pct)
-        findings.append({"Model":car["modell"], "Variant":car["variant"], "ModelYear":car["arsmodell"],
+        findings.append({"Identity":car["vehicle_id"], "Model":car["modell"], "Variant":car["variant"], "ModelYear":car["arsmodell"],
                          "Mil":car["miltal"], "Price":price, "Prediction":value["marknadsvarde"],
                          "ModelVsActualPct":model_pct, "ComparableWeightedMedian":peer,
                          "ComparableDeviationPct":market_pct, "ComparableN":value["jamforelseantal"],

@@ -145,6 +145,18 @@ class CalibrationTests(unittest.TestCase):
         self.assertEqual(daily[0]["url"],web.iloc[0]["url"])
         self.assertEqual(daily[0]["marknadsvarde"],web.iloc[0]["Prediction"])
         self.assertEqual(daily[0]["fyndmarginal_kr"],web.iloc[0]["RequiredMargin"])
+        # The static publication must retain the finding after matching its
+        # vehicle identity and current price/mileage to the actual ad.
+        from ml.fynd_export import exportera_fynd
+        from web import build_static
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/"fynd.jsonl"
+            exportera_fynd(web,path)
+            active={ad["vehicle_id"]:dict(ad,annonspris=ad["pris"]) for ad in ads}
+            with patch.object(build_static,"ML_FINDINGS_FILE",path), patch.object(build_static,"_load_active_market_observations",return_value=active):
+                published=build_static.get_ml_findings(ads)
+        self.assertEqual(len(published),len(daily))
+        self.assertEqual(published[0]["Identity"],daily[0]["vehicle_id"])
 
     def test_ad_metadata_carries_forward_but_never_from_future(self):
         from ml.train_market_model import _deduplicera_dataset
