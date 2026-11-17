@@ -461,26 +461,26 @@ sparas efter lyckat utskick och följer med GitHub-körningarnas datacommit.
 Ny notis tillåts först vid ytterligare prissänkning enligt
 `MIN_PRISSANKNING_FOR_NY_NOTIS` (för närvarande 10 000 kr).
 
-+
-+## Kalibrerade värderingar och fyndkrav
-+
-+Modeller väljs med tidsmässigt avskilda testdata. Därefter tränas den valda
-+produktionsmodellen på hela det giltiga underlaget, inklusive de senaste
-+observationerna. `metrics` i modellmetadata avser testet före denna återträning;
-+`validation_training_rows` skiljs från produktionens `training_rows`.
-+
-+Positivt genomsnittligt prognosfel dras av från priserna. Korrigering och
-+felmarginal beräknas per modell/variant när minst 30 olika fordonsidentiteter
-+finns i testdelen, annars på den gemensamma testpopulationen. Varje identitet
-+räknas en gång. Felmarginalen använder 90:e percentilen av återstående
-+övervärderingsfel, med minst 20 000 kr och 5 procent av värderingen.
-+Det är en empirisk säkerhetsmarginal, inte garanterad statistisk täckning.
-+
-+Fyndmejl, dagsrapport och webb kräver denna marginal. ML-fynd behöver också
-+aktuellt jämförelseunderlag, och värderingen begränsas av jämförelsepriset.
-+Exakt miltal används för kalibrerade prognoser. Kvällsrapporten görs efter
-+träning och värderingar så att gamla poäng inte avgör dagens fynd.
-+
-+Underlaget är annonserade priser, inte bekräftade försäljningspriser.
-+Fyndpoäng är en regelbaserad rangordning, inte en sannolikhet att tjäna pengar.
-+
+
+## Kalibrerade värderingar och fyndkrav
+
+Modeller väljs med tidsmässigt avskilda testdata. Därefter tränas den valda
+produktionsmodellen på hela det giltiga underlaget, inklusive de senaste
+observationerna. `metrics` i modellmetadata avser testet före denna återträning;
+`validation_training_rows` skiljs från produktionens `training_rows`.
+
+Positivt genomsnittligt prognosfel dras av från priserna. Korrigering och
+felmarginal beräknas per modell/variant när minst 30 olika fordonsidentiteter
+finns i testdelen, annars på den gemensamma testpopulationen. Varje identitet
+räknas en gång. Felmarginalen använder 90:e percentilen av återstående
+övervärderingsfel, med minst 20 000 kr och 5 procent av värderingen.
+Det är en empirisk säkerhetsmarginal, inte garanterad statistisk täckning.
+
+Fyndmejl, dagsrapport och webb kräver denna marginal. ML-fynd behöver också
+aktuellt jämförelseunderlag, och värderingen begränsas av jämförelsepriset.
+Exakt miltal används för kalibrerade prognoser. Kvällsrapporten görs efter
+träning och värderingar så att gamla poäng inte avgör dagens fynd.
+
+Underlaget är annonserade priser, inte bekräftade försäljningspriser.
+Fyndpoäng är en regelbaserad rangordning, inte en sannolikhet att tjäna pengar.
+
