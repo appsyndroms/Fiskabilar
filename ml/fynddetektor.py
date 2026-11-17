@@ -256,6 +256,9 @@ def _bygg_fyndkandidater(
         ):
             continue
 
+        # Samma försiktighetsprincip som mejl/rapport: båda prissignalerna krävs.
+        prediction_value = min(prediction_value, float(viktad_median))
+
         model_signal_pct = (
             (
                 prediction_value
@@ -277,8 +280,8 @@ def _bygg_fyndkandidater(
         )
 
         model_cheap = (
-            model_signal_pct
-            >= MODEL_THRESHOLD_PCT
+            model_signal_pct >= MODEL_THRESHOLD_PCT
+            and prediction_value - faktisk_pris >= float(row.get("RequiredMargin", 20000))
         )
 
         market_cheap = (
@@ -347,6 +350,7 @@ def _bygg_fyndkandidater(
                 ),
                 "Price": faktisk_pris,
                 "Prediction": prediction_value,
+                "RequiredMargin": float(row.get("RequiredMargin", 20000)),
                 "ModelVsActualPct": (
                     model_signal_pct
                 ),

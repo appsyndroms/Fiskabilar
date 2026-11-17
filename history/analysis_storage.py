@@ -409,6 +409,7 @@ def spara_marknadsvardesobservation(
         ),
 
         "fyndscore": score,
+        "fyndmarginal_kr": vardering.get("fyndmarginal_kr"),
         "fyndprocent": vardering.get(
             "fyndprocent"
         ),

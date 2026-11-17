@@ -36,6 +36,7 @@ from ml.model_diagnostics import (
 )
 
 from ml.current_findings import build_current_findings
+from ml.calibration import CalibratedModel, build_calibration
 
 from ml.fynd_export import (
     exportera_fynd,
@@ -325,7 +326,12 @@ def main(argv=None):
     # Välj modellen före fyndexporten så att webb och metadata använder samma modell.
     winner = min(resultat.items(), key=lambda item: item[1]["metrics"]["MAE"])
     winner_name, winner_result = winner
-    winner_model = winner_result["model"]
+    calibration = build_calibration(test, winner_result["prediction"])
+    # Utvärderingsmåtten ovan kommer från den orörda tidsmässiga testdelen.
+    # Produktionsmodellen får därefter även lära av de senaste observationerna.
+    estimator = winner_result["model"]
+    estimator.fit(build_features(dataset), dataset["Price"])
+    winner_model = CalibratedModel(estimator, calibration)
     fynd = build_current_findings(dataset, winner_model)
     exportera_fynd(fynd)
 
@@ -335,12 +341,12 @@ def main(argv=None):
     )
 
     with atomic_output(MODEL_FIL) as temporary:
-        joblib.dump(winner_model, temporary)
+        joblib.dump(winner_model, temporary, compress=3)
 
     # Metadata används av webbappen.
     #
     # observations = hela datasetet efter deduplicering.
-    # training_rows = den del som faktiskt används för träning.
+    # training_rows = hela produktionsunderlaget efter modellvalet.
     # test_rows = den del som används för utvärdering.
     # trained_at = exakt tidpunkt då modellen tränades.
     metadata = {
@@ -354,8 +360,12 @@ def main(argv=None):
             len(dataset)
         ),
         "training_rows": int(
-            len(train)
+            len(dataset)
         ),
+        "validation_training_rows": len(train),
+        "training_latest": str(dataset["Tid"].max()),
+        "calibration": calibration,
+        "metrics_scope": "temporal_holdout_before_full_refit",
         "test_rows": int(
             len(test)
         ),

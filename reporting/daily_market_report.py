@@ -26,6 +26,10 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from app_logging.logger import always, error
+from ml.calibration import required_margin, metadata as model_metadata
+from valuation.market_value import _hamta_ml_borpris, berakna_fynd, _ar_leasingannons, MIN_KONTANTPRIS, bygg_marknadsunderlag
+from config import MIN_MIL, MAX_MIL
+from scoring.score import berakna_fyndscore
 
 from config import (
     DAILY_REPORT_KATALOG,
@@ -450,27 +454,39 @@ def _fynd(
             )
 
     resultat = []
+    market = bygg_marknadsunderlag([dict(car, annonspris=car.get("pris")) for car in dagens.values()]) if model_metadata().get("calibration") else None
 
     for (
         vehicle_id,
         bil,
     ) in dagens.items():
 
-        value = (
-            senaste_vardering.get(
-                vehicle_id
-            )
-        )
-
-        if not value:
-            continue
-
-        vardering = value[1]
-        # En gammal billigare observation får inte ge fyndstatus åt dagens högre pris.
-        if vardering.get("annonspris") != bil.get("pris"):
-            continue
-        if vardering.get("miltal") != bil.get("miltal"):
-            continue
+        # Med kalibrerad modell värderas dagens hela bestånd på nytt.
+        # Rapporten ska inte begränsas till gårdagens fyndkandidater.
+        car = dict(bil, annonspris=bil.get("pris"))
+        calibrated = bool(model_metadata().get("calibration"))
+        prediction = _hamta_ml_borpris(car) if calibrated else None
+        if calibrated and prediction is not None:
+            mileage, price = car.get("miltal"), car.get("annonspris")
+            if (not isinstance(mileage, (int, float)) or not MIN_MIL <= mileage <= MAX_MIL
+                    or not isinstance(price, (int, float)) or price < MIN_KONTANTPRIS
+                    or _ar_leasingannons(car)):
+                continue
+            vardering = berakna_fynd(car, market, ml_prediction=prediction,
+                                     calibration=model_metadata()["calibration"])
+            if vardering["niva"] is None:
+                continue
+            vardering["fyndscore"] = berakna_fyndscore(car, vardering)
+        else:
+            value = senaste_vardering.get(vehicle_id)
+            if not value:
+                continue
+            vardering = value[1]
+            # Äldre billigare eller lägre miltal får inte återuppliva ett fynd.
+            if vardering.get("annonspris") != bil.get("pris"):
+                continue
+            if vardering.get("miltal") != bil.get("miltal"):
+                continue
 
         score = vardering.get(
             "fyndscore"
@@ -495,7 +511,10 @@ def _fynd(
         ):
             continue
 
-        if diff < FYND_TROSKEL:
+        margin = vardering.get("fyndmarginal_kr")
+        if margin is None:
+            margin = required_margin(bil.get("modell"), bil.get("variant"), vardering.get("marknadsvarde") or 0)
+        if diff < max(FYND_TROSKEL, margin):
             continue
 
         resultat.append(
@@ -516,6 +535,7 @@ def _fynd(
                     diff,
                 "score":
                     int(score),
+                "fyndmarginal_kr": margin,
                 "url":
                     bil.get("url"),
             }
@@ -779,6 +799,8 @@ def _bygg_rapport(
         "⭐ DAGENS FYND",
         "------------------------------------------------------------",
     ]
+    if model_metadata().get("calibration"):
+        rader.append("Fynd kräver jämförbara annonser och marginal för modellens prisfel.")
 
     if fynd:
 

@@ -160,11 +160,17 @@ def _bygg_dataset(df: pd.DataFrame) -> pd.DataFrame:
         utc=True,
     )
 
+    resultat["ObservationType"] = df["typ"] if "typ" in df else "annons"
     # Behåll annonsens URL genom hela ML-pipelinen.
     resultat["url"] = df.apply(
         _första_url,
         axis=1,
     )
+
+    # Metadata för samma jämförelse- och poängregler i alla liveflöden.
+    # Dessa kolumner ingår inte i modellens FEATURES.
+    for field in ("utrustningsniva", "dragkrok", "varmare", "volvo_selekt", "stor_batteri"):
+        resultat[field] = df[field] if field in df else None
 
     # Identitet används endast för deduplicering/split,
     # aldrig som ML-feature.
@@ -231,6 +237,20 @@ def _deduplicera_dataset(
     med_identitet = (
         resultat["Identity"].notna()
     )
+
+    fields = [f for f in ("utrustningsniva", "dragkrok", "varmare", "volvo_selekt", "stor_batteri") if f in resultat]
+    if fields:
+        # En senare värdeobservation saknar ofta annonsens metadata. För den
+        # framåt från tidigare observationer av samma bil, aldrig bakåt i tiden.
+        known = resultat.loc[med_identitet].sort_values("Tid", kind="stable")
+        resultat.loc[known.index, fields] = known.groupby("Identity", sort=False)[fields].ffill()
+        if "url" in known and "ObservationType" in known:
+            # Fyll endast saknad URL i värdeposter. En verklig annons som
+            # saknar länk får inte ärva en äldre, eventuellt inaktuell länk.
+            carry = known.groupby("Identity", sort=False)["url"].ffill()
+            missing = known["url"].isna() & known["ObservationType"].ne("annons")
+            resultat.loc[known.index[missing], "url"] = carry.loc[missing]
+
 
     nycklar = [
         "Mil",

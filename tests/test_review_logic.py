@@ -94,7 +94,10 @@ class ReviewLogicTests(unittest.TestCase):
                 stack.enter_context(patch.object(analyze_model, name, value))
             stack.enter_context(patch.object(analyze_model.joblib, "dump"))
             analyze_model.main(["--debug"])
-            self.assertIs(replacements["build_current_findings"].call_args.args[1], linear)
+            exported = replacements["build_current_findings"].call_args.args[1]
+            self.assertIs(exported.estimator, linear)
+            self.assertEqual(len(linear.fit.call_args.args[0]), len(data))
+            self.assertEqual(json.loads((Path(tmp) / "model.json").read_text())["training_rows"], len(data))
             self.assertEqual(json.loads((Path(tmp) / "model.json").read_text())["model_type"], "linear_regression")
 
     def test_identity_aliases_do_not_become_independent_ml_cars(self):
@@ -124,7 +127,7 @@ class ReviewLogicTests(unittest.TestCase):
     def test_report_uses_saved_feedback_but_rejects_old_prices_and_previous_days(self):
         ad = {"typ": "annons", "vehicle_id": "car", "tid": "2026-10-15T19:00:00+02:00", "pris": 400000, "miltal": 5000}
         feedback = {"vehicle_id": "car", "tid": ad["tid"], "annonspris": 400000, "miltal": 5000, "fyndscore": 75, "diff": 40000}
-        with patch.object(report, "_annonsobservationer", return_value=[ad]), patch.object(report, "_varderingar", return_value=[]), patch.object(report, "canonical_vehicle_id", side_effect=lambda x: x), patch.object(report, "_fyndfeedback", return_value=[feedback]):
+        with patch.object(report, "required_margin", return_value=20000), patch.object(report, "_annonsobservationer", return_value=[ad]), patch.object(report, "_varderingar", return_value=[]), patch.object(report, "canonical_vehicle_id", side_effect=lambda x: x), patch.object(report, "_fyndfeedback", return_value=[feedback]):
             self.assertEqual(len(report._fynd("2026-10-15")), 1)
             feedback["annonspris"] = 350000
             self.assertEqual(report._fynd("2026-10-15"), [])

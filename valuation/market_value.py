@@ -1,6 +1,7 @@
 """
 Transparent marknadsvärdesmodell för fyndfiltrets bevakade bilar.
-Modellen använder i första hand ML-baserad värdering från JSONL.
+En kalibrerad modell används direkt vid bilens faktiska miltal.
+Äldre modeller kan använda ML-värdering från JSONL.
 Om ML-underlag saknas används aktuella marknadsannonser som
 jämförelseunderlag.
 Grundtanke:
@@ -47,7 +48,9 @@ from datetime import date
 from history.identity import canonical_vehicle_id
 from statistics import median
 from app_logging.logger import info
-from config import ML_PRISER
+from config import ML_PRISER, MAX_MIL
+from ml.calibration import required_margin, metadata as model_metadata
+from ml.predict_market_value import prediktera_borpris
 # =========================================================
 # ML-VÄRDERING
 # =========================================================
@@ -101,6 +104,12 @@ def _hamta_ml_borpris(
         (int, float),
     ):
         return None
+    if model_metadata().get("calibration"):
+        # Använd bilens faktiska miltal, inte närmaste gamla rutnätsrad.
+        prediction = prediktera_borpris(modell, miltal, arsmodell, variant)
+        if prediction is None:
+            raise RuntimeError("Den kalibrerade modellens prediktion saknas.")
+        return int(round(prediction))
     kandidater = []
     for row in ML_PRISER:
         if not isinstance(
@@ -767,7 +776,7 @@ def bygg_marknadsunderlag(
         # -------------------------------------------------
         # 4. Minsta miltal
         # -------------------------------------------------
-        if miltal < MIN_MILTAL:
+        if miltal < MIN_MILTAL or miltal > MAX_MIL:
             borttagna_miltal += 1
             continue
         # -------------------------------------------------
@@ -932,7 +941,7 @@ def _hamta_jamforelsebilar(
             (int, float),
         ):
             continue
-        if miltal < MIN_MILTAL:
+        if miltal < MIN_MILTAL or miltal > MAX_MIL:
             continue
         filtrerade.append(
             jamforelse
@@ -1662,19 +1671,16 @@ def berakna_marknadsvarde(
 def berakna_fynd(
     bil: dict,
     marknadsunderlag: dict | None = None,
+    *,
+    ml_prediction=None,
+    calibration=None,
 ) -> dict:
-    ml_borpris = _hamta_ml_borpris(
-        bil
-    )
+    ml_borpris = ml_prediction if ml_prediction is not None else _hamta_ml_borpris(bil)
     ml_anvands = (
         ml_borpris is not None
     )
-    marknadsvarde = (
-        berakna_marknadsvarde(
-            bil,
-            marknadsunderlag,
-        )
-    )
+    marknadsvarde = (ml_borpris if ml_borpris is not None
+                    else berakna_marknadsvarde(bil, marknadsunderlag))
     annonspris = bil.get(
         "annonspris",
         0,
@@ -1727,20 +1733,28 @@ def berakna_fynd(
             jamforelser,
         )
     )
+    # En ensam extrem ML-prognos får inte övertrumfa dagens jämförbara annonser.
+    peer_price = marknadsdiagnostik.get("median_justerat")
+    ml_supported = (ml_anvands and antal_jamforelser >= 3
+                    and isinstance(peer_price, (int, float)) and peer_price > 0)
+    if ml_supported:
+        marknadsvarde = min(marknadsvarde, int(round(peer_price)))
+        diff = marknadsvarde - annonspris
+        fyndprocent = diff / marknadsvarde * 100 if marknadsvarde > 0 else 0
+    fyndmarginal = (required_margin(bil.get("modell"), bil.get("variant"), marknadsvarde, calibration=calibration)
+                   if ml_anvands else max(20000, marknadsvarde * 0.05))
     # =====================================================
     # FYNDKLASSNING
     #
-    # ML-värdering räknas som ett godkänt värderingsunderlag.
-    # Den gamla empiriska modellen behåller sina krav på
-    # minst fem jämförelsebilar.
+    # ML kräver minst tre aktuella jämförelsebilar utöver sin felmarginal.
+    # Den rent empiriska modellen behåller kravet på minst fem bilar.
     # =====================================================
     tillrackligt_underlag = (
-        ml_anvands
-        or empiriskt_underlag
+        ml_supported if ml_anvands else empiriskt_underlag
     )
     if (
         tillrackligt_underlag
-        and diff >= 35000
+        and diff >= max(35000, fyndmarginal)
         and fyndprocent >= 8.0
         and (
             ml_anvands
@@ -1754,7 +1768,7 @@ def berakna_fynd(
         niva = "EXTREMT_FYND"
     elif (
         tillrackligt_underlag
-        and diff >= 20000
+        and diff >= fyndmarginal
         and fyndprocent >= 5.0
     ):
         niva = "FYND"
@@ -1779,6 +1793,7 @@ def berakna_fynd(
         "empiriskt_underlag": (
             empiriskt_underlag
         ),
+        "fyndmarginal_kr": fyndmarginal,
         "ml_anvands": (
             ml_anvands
         ),

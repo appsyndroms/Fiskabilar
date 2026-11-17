@@ -114,15 +114,15 @@ def run(build_only: bool = False) -> int:
                 if datetime.now(TZ).date().isoformat() != day:
                     raise RuntimeError("Datainsamlingen passerade midnatt; kör om för den nya dagen.")
                 step("Fyndutfall", ["scripts/analysera_fyndutfall.py"])
+                step("Träna ML-modell och diagnostik", ["-m", "ml.train_market_model"])
+                archive_valuations()
+                step("ML-värderingar", ["-m", "ml.generate_ml_valuation"])
+                (LOCAL / "valuation-month.txt").write_text(datetime.now(TZ).strftime("%Y-%m"))
                 step("Daglig rapport", ["-m", "reporting.daily_market_report", "--date", day, "--no-email"])
                 from reporting.daily_market_report import _las_dagens_logg
                 report = _las_dagens_logg(day)
                 if not report or report.get("status") == "FEL":
                     raise RuntimeError("Den dagliga rapporten kunde inte byggas.")
-                step("Träna ML-modell och diagnostik", ["-m", "ml.train_market_model"])
-                archive_valuations()
-                step("ML-värderingar", ["-m", "ml.generate_ml_valuation"])
-                (LOCAL / "valuation-month.txt").write_text(datetime.now(TZ).strftime("%Y-%m"))
             with tempfile.TemporaryDirectory(prefix="web-build-", dir=LOCAL) as directory:
                 staging = Path(directory)
                 env["FISKABILAR_WEB_OUTPUT"] = str(staging)
