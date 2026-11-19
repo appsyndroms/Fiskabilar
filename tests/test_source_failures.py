@@ -39,7 +39,7 @@ class SourceFailureTests(unittest.TestCase):
                    lambda: bytbil._hamta_sida("https://example.test/search"),
                    lambda: bilweb_scraper.hamta_pris_mil_fran_detaljsida("https://example.test/car/123")]
         for caller in callers:
-            with patch("requests.get", side_effect=requests.Timeout("Timeout")), patch("requests.post", side_effect=requests.Timeout("Timeout")):
+            with patch("requests.get", side_effect=requests.Timeout("Timeout")), patch("requests.post", side_effect=requests.Timeout("Timeout")), patch.object(bilweb_scraper.time, "sleep"):
                 with self.assertRaises(SourceFetchError):
                     caller()
 

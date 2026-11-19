@@ -14,6 +14,7 @@ Här ligger:
 
 import json
 import re
+import time
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -21,6 +22,7 @@ from concurrent.futures import (
 )
 
 import requests
+from urllib3.exceptions import TimeoutError as Urllib3TimeoutError
 from .errors import SourceFetchError, require_html
 from bs4 import BeautifulSoup
 
@@ -37,6 +39,7 @@ from .bilweb_bmw import (
 MAX_PARALLELLA_DETALJSIDOR = 6
 
 DETALJSIDA_TIMEOUT_SEKUNDER = 15
+DETALJSIDA_OMFORSOK_VANTAN_SEKUNDER = 15
 
 HEADERS = {
     "User-Agent": (
@@ -539,18 +542,41 @@ def _redirect_ser_ut_som_annan_sida(
     return ursprungligt_id not in slutlig_url
 
 
+def _ar_timeout(exc: BaseException) -> bool:
+    """Requests kan slå in timeout under svarsläsning i ConnectionError."""
+    pending = [exc]
+    seen = set()
+    while pending:
+        error = pending.pop()
+        if id(error) in seen:
+            continue
+        seen.add(id(error))
+        if isinstance(error, (requests.Timeout, Urllib3TimeoutError)):
+            return True
+        pending.extend(item for item in (
+            error.__cause__, error.__context__, *error.args
+        ) if isinstance(item, BaseException))
+    return False
+
+
 def hamta_pris_mil_fran_detaljsida(
     url: str,
 ) -> dict | None:
 
-    try:
-        resp = requests.get(
-            url, headers=HEADERS, timeout=DETALJSIDA_TIMEOUT_SEKUNDER,
-            allow_redirects=True,
-        )
-        require_html(resp, "Bilweb")
-    except requests.RequestException as exc:
-        raise SourceFetchError(f"Bilweb detaljsida {url}: {exc}") from exc
+    for attempt in range(2):
+        try:
+            resp = requests.get(
+                url, headers=HEADERS, timeout=DETALJSIDA_TIMEOUT_SEKUNDER,
+                allow_redirects=True,
+            )
+            require_html(resp, "Bilweb")
+            break
+        except requests.RequestException as exc:
+            if attempt == 0 and _ar_timeout(exc):
+                info(f"[bilweb] Timeout för {url}; ett omförsök om {DETALJSIDA_OMFORSOK_VANTAN_SEKUNDER} sekunder.")
+                time.sleep(DETALJSIDA_OMFORSOK_VANTAN_SEKUNDER)
+                continue
+            raise SourceFetchError(f"Bilweb detaljsida {url}: {exc}") from exc
 
     if _redirect_ser_ut_som_annan_sida(url, resp.url):
         raise SourceFetchError(f"Bilweb detaljsida bytte annons: {url} -> {resp.url}")
