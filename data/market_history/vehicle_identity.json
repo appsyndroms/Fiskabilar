@@ -16494,7 +16494,20 @@
     "source:bytbil:19528708": "vehicle:00004281",
     "url:https://www.bytbil.com/skane-lan/personbil-330e-xdrive-m-sport-drag-hifi-adpt-fart-ranta-4-95-1120-19528708": "vehicle:00004281",
     "fp:8a25e1e2a248933f": "vehicle:00004281",
-    "fp:8d39e36549e25dd9": "vehicle:00003239"
+    "fp:8d39e36549e25dd9": "vehicle:00003239",
+    "url:https://www.wayke.se/objekt/d4d7a092-967b-43e4-9f68-9a002524ce10": "vehicle:00004282",
+    "fp:b30fd92b0cce14b6": "vehicle:00004282",
+    "url:https://www.bytbil.com/skane-lan/personbil-v60-t6-plus-dark-nordic-edition-dragkrok-keyless-360-1789-19405347": "vehicle:00001240",
+    "fp:c7f83ed150a76f44": "vehicle:00001240",
+    "fp:06c86c8fd0be2b7f": "vehicle:00002595",
+    "fp:3b6ce9d5da191c4d": "vehicle:00002629",
+    "reg:RAG49A": "vehicle:00004283",
+    "source:bilweb:476985": "vehicle:00004283",
+    "url:https://bilweb.se/skane-lan/volvo-v60-recharge-t6-awd-geartronic-core-edition-euro-6-2023-kombi-476985": "vehicle:00004283",
+    "fp:0d66b039fac17bae": "vehicle:00004283",
+    "source:bytbil:19528693": "vehicle:00004284",
+    "url:https://www.bytbil.com/skane-lan/personbil-330e-touring-m-sportpaket-sportstolar-drag-4-95-ranta-1138-19528693": "vehicle:00004284",
+    "fp:b0714ed72ab5dfc2": "vehicle:00004284"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -63724,7 +63737,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/01a12f9e-563d-7cac-b20a-6ffceb4657bc",
+      "last_seen": "https://www.wayke.se/objekt/6173ef22-13f0-482a-82bc-c2287210714e",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -93593,6 +93606,60 @@
         "vin": null
       },
       "last_seen": "19528708",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004282": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/d4d7a092-967b-43e4-9f68-9a002524ce10",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004283": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "RAG49A",
+        "vin": null
+      },
+      "last_seen": "476985",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004284": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19528693",
       "identifier_strength": "source_id",
       "resolution": {
         "matchningstyp": "source_id",
