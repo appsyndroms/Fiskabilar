@@ -14,53 +14,53 @@
     "ObservationMonth"
   ],
   "metrics": {
-    "MAE": 20527.41291810292,
-    "RMSE": 40967.83522234593,
-    "R2": 0.524065453322627,
-    "Bias": 3818.166758699906,
-    "MAPE": 4.648330248211079
+    "MAE": 20610.31399720997,
+    "RMSE": 40738.87677232801,
+    "R2": 0.5293703338629456,
+    "Bias": 3655.581445118006,
+    "MAPE": 4.668705858595413
   },
-  "trained_at": "2026-11-21T20:19:20.344331+00:00",
+  "trained_at": "2026-11-21T22:11:08.706915+00:00",
   "observations": 7185,
   "training_rows": 7185,
   "validation_training_rows": 5747,
-  "training_latest": "2026-11-21 20:18:48+00:00",
+  "training_latest": "2026-11-21 22:10:44+00:00",
   "calibration": {
     "version": 1,
     "quantile": 0.9,
     "min_group_cars": 30,
     "global": {
       "cars": 1184,
-      "overvaluation_kr": 4160.969023248972,
-      "error_margin_kr": 27687.127524370233,
-      "raw_bias_kr": 4160.969023248972,
-      "raw_mae_kr": 20377.825265860174
+      "overvaluation_kr": 4037.8207471765604,
+      "error_margin_kr": 27573.288102029917,
+      "raw_bias_kr": 4037.8207471765604,
+      "raw_mae_kr": 20404.730255517334
     },
     "groups": {
       "330e xdrive touring | 330e xdrive touring": {
         "cars": 123,
         "overvaluation_kr": 0.0,
-        "error_margin_kr": 45571.56873015883,
-        "raw_bias_kr": -4627.528686143549,
-        "raw_mae_kr": 30483.440380428143
+        "error_margin_kr": 46901.971539682505,
+        "raw_bias_kr": -4821.673827205785,
+        "raw_mae_kr": 30427.503187203718
       },
       "v60 | t6 awd": {
         "cars": 627,
-        "overvaluation_kr": 5336.253371018631,
-        "error_margin_kr": 26074.402045648043,
-        "raw_bias_kr": 5336.253371018631,
-        "raw_mae_kr": 16994.176714175133
+        "overvaluation_kr": 4717.955922340619,
+        "error_margin_kr": 25400.13053617313,
+        "raw_bias_kr": 4717.955922340619,
+        "raw_mae_kr": 16842.589702149893
       },
       "v90 | t6 awd": {
         "cars": 366,
-        "overvaluation_kr": 4929.496466234653,
-        "error_margin_kr": 23581.852144876575,
-        "raw_bias_kr": 4929.496466234653,
-        "raw_mae_kr": 21231.000577726703
+        "overvaluation_kr": 5419.122766151989,
+        "error_margin_kr": 24733.739952102107,
+        "raw_bias_kr": 5419.122766151989,
+        "raw_mae_kr": 21519.304974308874
       }
     },
     "evaluated_from": "2026-11-13 13:00:09+00:00",
-    "evaluated_until": "2026-11-21 20:18:48+00:00"
+    "evaluated_until": "2026-11-21 22:10:44+00:00"
   },
   "metrics_scope": "temporal_holdout_before_full_refit",
   "test_rows": 1438
