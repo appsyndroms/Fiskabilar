@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime, timedelta
+from itertools import chain, repeat
 from unittest.mock import patch
 
 from scripts import evening
@@ -33,6 +35,55 @@ class EveningTests(unittest.TestCase):
         self.assertEqual(run.call_count, 1)
         self.assertIn("main.py", run.call_args.args[0])
         self.assertEqual(json.loads((self.local / "evening-status.json").read_text())["status"], "failed")
+
+    def test_midnight_uses_completed_collection_day_even_if_processing_finishes_later(self):
+        for observed_at, expected_day in (("2026-11-20T23:59:00+01:00", "2026-11-20"),
+                                          ("2026-11-21T00:02:00+01:00", "2026-11-21"),
+                                          ("2026-12-01T00:02:00+01:00", "2026-12-01")):
+            with self.subTest(observed_at=observed_at):
+                commands = []
+
+                def execute(command, **kwargs):
+                    commands.append(command)
+                    if "main.py" in command:
+                        path = Path(command[command.index("--collection-status") + 1])
+                        path.write_text(json.dumps({"observed_at": observed_at, "date": expected_day, "ads": 100}))
+                        self.assertNotIn("EPOST_LOSENORD", kwargs["env"])
+                    return subprocess.CompletedProcess(command, 0)
+
+                stamp = datetime.fromisoformat(observed_at)
+                start = stamp - timedelta(minutes=5)
+                finish = stamp + timedelta(minutes=30)
+                with patch.object(evening, "datetime", wraps=datetime) as clock, patch.object(evening.subprocess, "run", side_effect=execute), patch.object(evening, "archive_valuations"), patch.object(evening, "validate_web"), patch.object(report, "_las_dagens_logg", return_value={"status": "OK"}) as saved:
+                    clock.now.side_effect = chain([start], repeat(finish))
+                    self.assertEqual(evening.run(), 0)
+                status = json.loads((self.local / "evening-status.json").read_text())
+                self.assertEqual(status["date"], expected_day)
+                self.assertEqual(status["started_date"], start.date().isoformat())
+                self.assertEqual(status["status"], "complete")
+                saved.assert_called_once_with(expected_day)
+                report_command = next(command for command in commands if "reporting.daily_market_report" in command)
+                self.assertEqual(report_command[report_command.index("--date") + 1], expected_day)
+                self.assertIn("--no-email", report_command)
+
+    def test_old_collection_manifest_cannot_allow_report_after_missing_new_manifest(self):
+        (self.local / "collection-status.json").write_text('{"date":"2026-11-19"}')
+        with patch.object(evening.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)) as execute:
+            self.assertEqual(evening.run(), 1)
+        self.assertEqual(execute.call_count, 1)
+        self.assertFalse((self.local / "collection-status.json").exists())
+
+    def test_invalid_collection_manifest_stops_report_and_model_training(self):
+        for stamp, day, ads in (("2026-11-21T00:02:00", "2026-11-21", 10),
+                                ("2026-11-21T00:02:00+01:00", "2026-11-20", 10),
+                                ("2026-11-21T00:02:00+01:00", "2026-11-21", 0)):
+            with self.subTest(stamp=stamp, day=day, ads=ads):
+                def execute(command, **kwargs):
+                    Path(command[command.index("--collection-status") + 1]).write_text(json.dumps({"observed_at": stamp, "date": day, "ads": ads}))
+                    return subprocess.CompletedProcess(command, 0)
+                with patch.object(evening.subprocess, "run", side_effect=execute) as run:
+                    self.assertEqual(evening.run(), 1)
+                self.assertEqual(run.call_count, 1)
 
     def test_concurrent_run_cannot_collect_or_send(self):
         with (self.local / "evening.lock").open("w") as lock:

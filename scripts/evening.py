@@ -88,7 +88,7 @@ def run(build_only: bool = False) -> int:
             print("En kvällskörning pågår redan.", flush=True)
             return 1
         day = datetime.now(TZ).date().isoformat()
-        status = {"date": day, "started_at": now(), "status": "running",
+        status = {"date": day, "started_date": day, "started_at": now(), "status": "running",
                   "mode": "web" if build_only else "full", "steps": [],
                   "web_url": os.getenv("FISKABILAR_WEBB_URL", "http://127.0.0.1:8766")}
         status["email_status"] = "disabled"
@@ -110,9 +110,21 @@ def run(build_only: bool = False) -> int:
 
         try:
             if not build_only:
-                step("Datainsamling och fyndanalys", ["main.py", "--evening", "--log-level", "INFO"])
-                if datetime.now(TZ).date().isoformat() != day:
-                    raise RuntimeError("Datainsamlingen passerade midnatt; kör om för den nya dagen.")
+                collection_file = LOCAL / "collection-status.json"
+                collection_file.unlink(missing_ok=True)
+                step("Datainsamling och fyndanalys", ["main.py", "--evening", "--log-level", "INFO",
+                                                     "--collection-status", str(collection_file)])
+                collection = json.loads(collection_file.read_text())
+                observed_at = datetime.fromisoformat(collection["observed_at"])
+                if observed_at.utcoffset() is None or collection.get("ads", 0) <= 0:
+                    raise RuntimeError("Insamlingen saknar giltig observationstid eller annonser.")
+                day = observed_at.astimezone(TZ).date().isoformat()
+                if collection.get("date") != day:
+                    raise RuntimeError("Insamlingens rapportdatum stämmer inte med observationstiden.")
+                status.update(date=day, collection=collection)
+                save_status(status)
+                if day != status["started_date"]:
+                    print(f"Insamlingen avslutades efter midnatt; rapportdatum är {day}.", flush=True)
                 step("Fyndutfall", ["scripts/analysera_fyndutfall.py"])
                 step("Träna ML-modell och diagnostik", ["-m", "ml.train_market_model"])
                 archive_valuations()

@@ -19,8 +19,11 @@ Detaljerad logik ligger i pipeline-modulerna.
 """
 
 import argparse
+import json
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
+from history.atomic_storage import atomic_output
 
 from app_logging.logger import (
     info,
@@ -79,19 +82,17 @@ def main(evening: bool = False):
     # HÄMTNING
     # ------------------------------------------------------------
 
-    observation_day = datetime.now(ZoneInfo("Europe/Stockholm")).date()
-
     raa_annonser = hamta_alla_annonser(
         AKTIVA_KALLOR
     )
+    # En komplett insamling är en ögonblicksbild, även om hämtningen
+    # passerat midnatt. Använd samma verkliga sluttid för alla annonser.
+    observed_at = datetime.now(ZoneInfo("Europe/Stockholm"))
 
     info(
         f"Totalt {len(raa_annonser)} "
         "annonser innan dedup"
     )
-
-    if evening and datetime.now(ZoneInfo("Europe/Stockholm")).date() != observation_day:
-        raise RuntimeError("Hämtningen passerade midnatt; kör om för den nya dagen.")
 
     if not raa_annonser:
         raise RuntimeError("Kvällskörningen fick inga annonser; befintlig historik behålls.")
@@ -206,7 +207,7 @@ def main(evening: bool = False):
     for bil in bilar:
         try:
             spara_annonsobservation(
-                bil
+                bil, observed_at=observed_at
             )
 
         except Exception as e:
@@ -271,12 +272,20 @@ def main(evening: bool = False):
     skriv_sammanfattning(
         statistik
     )
+    return {"observed_at": observed_at.isoformat(timespec="seconds"),
+            "date": observed_at.date().isoformat(), "ads": len(bilar)}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--evening", action="store_true",
                         help="Kör datainsamlingen även efter kl. 22.")
+    parser.add_argument("--collection-status", type=Path,
+                        help="Spara datum och tid för en fullständigt lyckad insamling.")
     args, _ = parser.parse_known_args()
     configure_from_argv()
-    main(evening=args.evening)
+    result = main(evening=args.evening)
+    if args.collection_status and result:
+        args.collection_status.parent.mkdir(parents=True, exist_ok=True)
+        with atomic_output(args.collection_status) as temporary:
+            temporary.write_text(json.dumps(result, ensure_ascii=False) + "\n")

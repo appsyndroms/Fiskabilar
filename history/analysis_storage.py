@@ -111,7 +111,7 @@ def _annonsnyckel(
     )
 
 
-def _manadsfil() -> str:
+def _manadsfil(observed_at: datetime | None = None) -> str:
     """
     Returnerar aktuell månads historikfil.
 
@@ -120,7 +120,7 @@ def _manadsfil() -> str:
         data/market_history/market_history_2026-08.jsonl
     """
 
-    nu = datetime.now(
+    nu = observed_at or datetime.now(
         TIDSZON
     )
 
@@ -211,7 +211,7 @@ def _skriv(
 
     _migrera_legacy()
 
-    fil = _manadsfil()
+    fil = _manadsfil(datetime.fromisoformat(post["tid"]).astimezone(TIDSZON))
 
     with open(
         fil,
@@ -233,6 +233,7 @@ def _skriv(
 
 def spara_annonsobservation(
     bil: dict,
+    *, observed_at: datetime | None = None,
 ) -> None:
     """
     Sparar en komplett marknadsobservation.
@@ -240,6 +241,9 @@ def spara_annonsobservation(
     vehicle_id är den permanenta identiteten för det fysiska
     fordonet. Annons-ID och URL sparas fortfarande som diagnostik.
     """
+
+    if observed_at is not None and observed_at.utcoffset() is None:
+        raise ValueError("Observationstiden måste innehålla tidszon.")
 
     vehicle_id = resolve_vehicle_id(
         bil
@@ -255,7 +259,7 @@ def spara_annonsobservation(
 
     post = {
         "typ": "annons",
-        "tid": _nu(),
+        "tid": observed_at.astimezone(TIDSZON).isoformat(timespec="seconds") if observed_at else _nu(),
 
         "vehicle_id": vehicle_id,
 
