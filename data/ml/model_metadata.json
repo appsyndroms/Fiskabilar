@@ -14,61 +14,54 @@
     "ObservationMonth"
   ],
   "metrics": {
-    "MAE": 19742.504346150614,
-    "RMSE": 40446.59783861412,
-    "R2": 0.5706263919638201,
-    "Bias": 1446.521734031274,
-    "MAPE": 4.447710451496529
+    "MAE": 20774.526729441717,
+    "RMSE": 41390.590160109845,
+    "R2": 0.5163611239160086,
+    "Bias": 4101.852164516167,
+    "MAPE": 4.698130938796723
   },
-  "trained_at": "2026-11-20T21:42:47.560752+00:00",
-  "observations": 7079,
-  "training_rows": 7079,
-  "validation_training_rows": 5663,
-  "training_latest": "2026-11-20 14:00:54+00:00",
+  "trained_at": "2026-11-21T08:25:32.460746+00:00",
+  "observations": 7171,
+  "training_rows": 7171,
+  "validation_training_rows": 5736,
+  "training_latest": "2026-11-21 08:25:12+00:00",
   "calibration": {
     "version": 1,
     "quantile": 0.9,
     "min_group_cars": 30,
     "global": {
-      "cars": 1206,
-      "overvaluation_kr": 1866.6792006544163,
-      "error_margin_kr": 25918.161483869302,
-      "raw_bias_kr": 1866.6792006544163,
-      "raw_mae_kr": 19736.106883886085
+      "cars": 1180,
+      "overvaluation_kr": 4591.445133196067,
+      "error_margin_kr": 27978.67720807378,
+      "raw_bias_kr": 4591.445133196067,
+      "raw_mae_kr": 20810.20829841531
     },
     "groups": {
       "330e xdrive touring | 330e xdrive touring": {
-        "cars": 127,
+        "cars": 122,
         "overvaluation_kr": 0.0,
-        "error_margin_kr": 50912.3331706348,
-        "raw_bias_kr": -574.0851433351067,
-        "raw_mae_kr": 29609.485277689033
-      },
-      "530e xdrive touring | 530e xdrive touring": {
-        "cars": 31,
-        "overvaluation_kr": 452.3611399130445,
-        "error_margin_kr": 40602.88115987035,
-        "raw_bias_kr": 452.3611399130445,
-        "raw_mae_kr": 27812.085198936384
+        "error_margin_kr": 45789.40356222955,
+        "raw_bias_kr": -3413.7124526497546,
+        "raw_mae_kr": 30291.20831918569
       },
       "v60 | t6 awd": {
-        "cars": 632,
-        "overvaluation_kr": 2911.540272854076,
-        "error_margin_kr": 23253.041479851476,
-        "raw_bias_kr": 2911.540272854076,
-        "raw_mae_kr": 16418.43400586531
+        "cars": 619,
+        "overvaluation_kr": 5481.0031079724195,
+        "error_margin_kr": 26174.832943614838,
+        "raw_bias_kr": 5481.0031079724195,
+        "raw_mae_kr": 17411.98591880409
       },
       "v90 | t6 awd": {
-        "cars": 377,
-        "overvaluation_kr": 780.3544503389264,
-        "error_margin_kr": 22306.943236169118,
-        "raw_bias_kr": 780.3544503389264,
-        "raw_mae_kr": 20159.510817180904
+        "cars": 371,
+        "overvaluation_kr": 5842.251918032356,
+        "error_margin_kr": 25351.791236729536,
+        "raw_bias_kr": 5842.251918032356,
+        "raw_mae_kr": 21927.464150809705
       }
     },
-    "evaluated_from": "2026-11-12 13:39:06+00:00",
-    "evaluated_until": "2026-11-20 14:00:54+00:00"
+    "evaluated_from": "2026-11-13 12:59:45+00:00",
+    "evaluated_until": "2026-11-21 08:25:12+00:00"
   },
   "metrics_scope": "temporal_holdout_before_full_refit",
-  "test_rows": 1416
+  "test_rows": 1435
 }

@@ -15462,8 +15462,8 @@
     "fp:b103dc5cb8fbb73d": "vehicle:00004070",
     "url:https://www.wayke.se/objekt/a56273d6-b6fb-4599-bf72-dcf33f9dae9e": "vehicle:00004071",
     "fp:724fdcd3cf86fd1c": "vehicle:00004071",
-    "url:https://www.wayke.se/objekt/9a452b92-2e80-5f04-b992-189de6d5f4f4": "vehicle:00004072",
-    "fp:12a5e4914ac8bec5": "vehicle:00004072",
+    "url:https://www.wayke.se/objekt/9a452b92-2e80-5f04-b992-189de6d5f4f4": "vehicle:00000282",
+    "fp:12a5e4914ac8bec5": "vehicle:00000282",
     "url:https://www.wayke.se/objekt/470699f1-e920-5d4b-a9f1-fdee68352eb7": "vehicle:00004073",
     "fp:c5075d993bfb1c25": "vehicle:00004073",
     "url:https://www.wayke.se/objekt/6087461c-6fb5-421c-94d1-b6e5089a3833": "vehicle:00004074",
@@ -16367,7 +16367,134 @@
     "fp:6de9d7f34ed3c268": "vehicle:00004270",
     "source:bytbil:19544425": "vehicle:00004271",
     "url:https://www.bytbil.com/sodermanlands-lan/personbil-330e-xdrive-touring-stolsjustering-elektrisk-med-minne-1159-19544425": "vehicle:00004271",
-    "fp:732daacebcbabd50": "vehicle:00004271"
+    "fp:732daacebcbabd50": "vehicle:00004271",
+    "url:https://www.wayke.se/objekt/4102f3ea-c4be-53bb-b5c4-8dba5b719ad6": "vehicle:00004272",
+    "fp:10de8514f92221c7": "vehicle:00004272",
+    "fp:92c524a2ab61817e": "vehicle:00004250",
+    "url:https://www.wayke.se/objekt/d99eaaf3-0b0f-45c5-8b7c-407edaa136e4": "vehicle:00004273",
+    "fp:f1652de57a496367": "vehicle:00004273",
+    "url:https://www.wayke.se/objekt/666c4388-247c-4540-824f-ba2464b2c0c7": "vehicle:00004274",
+    "fp:cad9aa2301ac7742": "vehicle:00004274",
+    "fp:13bac623b2a3c30b": "vehicle:00002364",
+    "fp:a37d076bb2bde4d3": "vehicle:00002382",
+    "source:bilweb:477500": "vehicle:00001883",
+    "url:https://bilweb.se/vastra-gotalands-lan/volvo-v60-t6-plus-dark-nordic-edt-2025-kombi-477500": "vehicle:00001883",
+    "fp:085a539c6a029c57": "vehicle:00001883",
+    "fp:d23107acf120b23f": "vehicle:00004254",
+    "fp:b2a9bc243d71ae19": "vehicle:00004092",
+    "url:https://www.wayke.se/objekt/41d3835a-135d-4b05-83ba-c079ce921f99": "vehicle:00003769",
+    "source:bytbil:19546533": "vehicle:00004275",
+    "url:https://www.bytbil.com/ostergotlands-lan/personbil-v60-t6-plus-dark-nordic-edition-1475-19546533": "vehicle:00004275",
+    "fp:ad520058dd57645c": "vehicle:00004275",
+    "source:bytbil:19546532": "vehicle:00004276",
+    "url:https://www.bytbil.com/ostergotlands-lan/personbil-v60-t6-plus-dark-nordic-edition-1475-19546532": "vehicle:00004276",
+    "fp:661beafc5a3f703f": "vehicle:00004276",
+    "fp:1e583154b74b631b": "vehicle:00004002",
+    "fp:d2ca726dfa7cd306": "vehicle:00004005",
+    "fp:b282f980938c52b4": "vehicle:00003888",
+    "fp:1779f212977d1876": "vehicle:00002428",
+    "fp:805a0de0d65615be": "vehicle:00003448",
+    "fp:e3d03e81d3ea33a7": "vehicle:00003449",
+    "fp:d96a4bd74e3981d1": "vehicle:00002424",
+    "fp:b2cb6fe06195b919": "vehicle:00002425",
+    "fp:fd04553cce578010": "vehicle:00002426",
+    "fp:fba0a92d6c0adba0": "vehicle:00002430",
+    "fp:2c6a73d23033845e": "vehicle:00002434",
+    "fp:132e8c9ddf0f4c63": "vehicle:00002453",
+    "fp:28f86b95131d4182": "vehicle:00002464",
+    "fp:4a0c5c624b15f016": "vehicle:00002465",
+    "fp:6bd143bd139ed036": "vehicle:00002480",
+    "fp:58d5b19855e9c5ba": "vehicle:00002481",
+    "fp:78116e9131fdc046": "vehicle:00002496",
+    "fp:090e7d19bb7f8696": "vehicle:00002497",
+    "fp:fc65dccdacc50882": "vehicle:00002498",
+    "fp:34949c7e43350a12": "vehicle:00002532",
+    "fp:4b11ec683a259687": "vehicle:00002536",
+    "fp:6510c2f050c19215": "vehicle:00002537",
+    "fp:ace8ab1f5efa7a02": "vehicle:00002538",
+    "fp:2a6944814498affa": "vehicle:00002545",
+    "fp:b8483de3e1d7be21": "vehicle:00002550",
+    "source:bytbil:19546531": "vehicle:00004277",
+    "url:https://www.bytbil.com/ostergotlands-lan/personbil-v60-t6-plus-dark-nordic-edition-1475-19546531": "vehicle:00004277",
+    "fp:23d383699d9ee7ad": "vehicle:00004277",
+    "fp:bb1156afb7914aef": "vehicle:00003389",
+    "fp:f5abdf01f979cb69": "vehicle:00002595",
+    "url:https://www.bytbil.com/kronobergs-lan/personbil-v60-t6-awd-plus-dark-nordic-edition-360-kamera-drag-1167-19399401": "vehicle:00001145",
+    "fp:1e3c48c8f7707867": "vehicle:00001145",
+    "fp:ea98a1864e1f187f": "vehicle:00002644",
+    "fp:e3de5df1d69f9d3f": "vehicle:00002647",
+    "fp:6c0b67b5060d990f": "vehicle:00002638",
+    "fp:fea65d4d023c878d": "vehicle:00002572",
+    "fp:0bf8ada4599d1b87": "vehicle:00002622",
+    "fp:55fd3f5dff9c9f54": "vehicle:00000397",
+    "fp:73708bc8a959e031": "vehicle:00004257",
+    "fp:d3e3ee3f71093b99": "vehicle:00002594",
+    "fp:b144d0fb1e2b2642": "vehicle:00000282",
+    "fp:ea0a8ccba997a067": "vehicle:00004073",
+    "fp:84f365a43eab85f7": "vehicle:00003204",
+    "fp:16a61599298cbccf": "vehicle:00002578",
+    "fp:f38fd6ec5d8d6968": "vehicle:00002579",
+    "fp:f749796ae87b69e8": "vehicle:00002580",
+    "fp:b2e8f3ea7af9fd6a": "vehicle:00002581",
+    "fp:7a5ac2f719512f88": "vehicle:00002585",
+    "fp:897916e3b80767cc": "vehicle:00002586",
+    "fp:2d7a28403e16c4ce": "vehicle:00002592",
+    "fp:3269aaeee71d2988": "vehicle:00002598",
+    "fp:718d06571c12d8bb": "vehicle:00002623",
+    "fp:95d4650357c6210d": "vehicle:00004258",
+    "reg:WBE12L": "vehicle:00004278",
+    "source:bilweb:477510": "vehicle:00004278",
+    "url:https://bilweb.se/dalarnas-lan/volvo-v90-recharge-t6-awd-geartronic-plus-dark-euro-6-2024-kombi-477510": "vehicle:00004278",
+    "fp:862debbaf66df76d": "vehicle:00004278",
+    "fp:21c3952e4bb7bfb3": "vehicle:00004232",
+    "fp:10a0fcf1e150c9ee": "vehicle:00004160",
+    "fp:67aef769d58352fe": "vehicle:00002727",
+    "fp:c7015e50549d4716": "vehicle:00004260",
+    "fp:5a4d8652f2712dbd": "vehicle:00003821",
+    "fp:32263032370aa0e8": "vehicle:00003781",
+    "fp:b1b0f0214794120c": "vehicle:00003656",
+    "fp:025f87eb68dd4479": "vehicle:00000713",
+    "fp:92d71cc9d7445e22": "vehicle:00003974",
+    "fp:f6fb138430cf8545": "vehicle:00003823",
+    "fp:908210429384f2aa": "vehicle:00003618",
+    "fp:c1977d4f21b082ce": "vehicle:00003279",
+    "fp:b776fbe682835ad6": "vehicle:00002749",
+    "fp:2a3792a2454ca227": "vehicle:00002753",
+    "fp:dcd60c9819e096a5": "vehicle:00002757",
+    "fp:049b3604703b0a82": "vehicle:00002765",
+    "fp:a4493603b9c4c3aa": "vehicle:00002772",
+    "fp:4344ba8c891a6306": "vehicle:00002779",
+    "fp:44d2a885c4f560ce": "vehicle:00002785",
+    "fp:286c1387d095bb00": "vehicle:00002790",
+    "fp:40cbb4a4e46fde26": "vehicle:00002792",
+    "fp:e7031dd98daec432": "vehicle:00002795",
+    "fp:fad4639222554edd": "vehicle:00002800",
+    "fp:84873b8b66f79a6e": "vehicle:00003007",
+    "fp:e68c4f40d9011fc6": "vehicle:00002834",
+    "fp:42fede8ea0d9fcf0": "vehicle:00002837",
+    "fp:edd050213a776976": "vehicle:00002838",
+    "fp:b6019f4cfffa696e": "vehicle:00002839",
+    "fp:9de6c928558e32e9": "vehicle:00003094",
+    "reg:OOU06Z": "vehicle:00004279",
+    "source:bilweb:477498": "vehicle:00004279",
+    "url:https://bilweb.se/skane-lan/volvo-v90-t6-plus-dark-nordic-edition-dragkrok-navigation-2026-kombi-477498": "vehicle:00004279",
+    "fp:441886bc939754ec": "vehicle:00004279",
+    "fp:766239f8be4b65c7": "vehicle:00004262",
+    "fp:cfed262ac7ca63e5": "vehicle:00004263",
+    "fp:aa612bb4da999506": "vehicle:00003155",
+    "fp:caccedc333b1d785": "vehicle:00004164",
+    "fp:fd265702a0383334": "vehicle:00004210",
+    "fp:1f90cd2387a24ed8": "vehicle:00004212",
+    "reg:ADL27Z": "vehicle:00004280",
+    "source:bilweb:476970": "vehicle:00004280",
+    "url:https://bilweb.se/stockholms-lan/volvo-v90-recharge-ii-t6-awd-lader-drag-h-k-95-8-soh-1-agare-moms-2023-kombi-476970": "vehicle:00004280",
+    "fp:19d708514c090288": "vehicle:00004280",
+    "fp:29e87e3877b61113": "vehicle:00004267",
+    "fp:9dd3b2bd93898185": "vehicle:00002247",
+    "source:bytbil:19528708": "vehicle:00004281",
+    "url:https://www.bytbil.com/skane-lan/personbil-330e-xdrive-m-sport-drag-hifi-adpt-fart-ranta-4-95-1120-19528708": "vehicle:00004281",
+    "fp:8a25e1e2a248933f": "vehicle:00004281",
+    "fp:8d39e36549e25dd9": "vehicle:00003239"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -21447,7 +21574,10 @@
         "identifier_strength": "url",
         "matched_existing": true,
         "konflikt": false
-      }
+      },
+      "aliases": [
+        "vehicle:00004072"
+      ]
     },
     "vehicle:00000283": {
       "created": true,
@@ -50283,7 +50413,7 @@
         "regnr": "FER18Y",
         "vin": null
       },
-      "last_seen": "461190",
+      "last_seen": "477500",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -84246,7 +84376,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/25d7f034-0096-4cb2-a46d-44a73747d338",
+      "last_seen": "https://www.wayke.se/objekt/41d3835a-135d-4b05-83ba-c079ce921f99",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -93290,6 +93420,186 @@
         "matched_existing": true,
         "konflikt": false
       }
+    },
+    "vehicle:00004272": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/4102f3ea-c4be-53bb-b5c4-8dba5b719ad6",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004273": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/d99eaaf3-0b0f-45c5-8b7c-407edaa136e4",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004274": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T8 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/666c4388-247c-4540-824f-ba2464b2c0c7",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004275": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19546533",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004276": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19546532",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004277": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19546531",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004278": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "WBE12L",
+        "vin": null
+      },
+      "last_seen": "477510",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004279": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": "OOU06Z",
+        "vin": null
+      },
+      "last_seen": "477498",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004280": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "ADL27Z",
+        "vin": null
+      },
+      "last_seen": "476970",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004281": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2025,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19528708",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
     }
   },
   "aliases": {
@@ -93306,6 +93616,7 @@
     "vehicle:00002573": "vehicle:00002622",
     "vehicle:00000176": "vehicle:00000174",
     "vehicle:00003700": "vehicle:00003739",
-    "vehicle:00000691": "vehicle:00002281"
+    "vehicle:00000691": "vehicle:00002281",
+    "vehicle:00004072": "vehicle:00000282"
   }
 }
