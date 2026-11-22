@@ -16532,7 +16532,16 @@
     "reg:NOL97C": "vehicle:00004290",
     "source:bilweb:477739": "vehicle:00004290",
     "url:https://bilweb.se/skane-lan/bmw-330-e-touring-m-sportpaket-sportstolar-drag-4-95-ranta-2025-kombi-477739": "vehicle:00004290",
-    "fp:6b12d40e50b3b995": "vehicle:00004290"
+    "fp:6b12d40e50b3b995": "vehicle:00004290",
+    "source:bytbil:19547197": "vehicle:00004291",
+    "url:https://www.bytbil.com/uppsala-lan/personbil-v60-t6-awd-350hk-core-edition-drag-blis-navi-lader-102876-19547197": "vehicle:00004291",
+    "fp:933084b8a8ed7d1d": "vehicle:00004291",
+    "fp:52883e3b781cf490": "vehicle:00002546",
+    "fp:77f4f83553155316": "vehicle:00003711",
+    "source:bytbil:19526413": "vehicle:00004292",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-330e-xdrive-touring-292hk-p-sens-navigation-cockpit-8546-19526413": "vehicle:00004292",
+    "fp:d1708b951dc048c0": "vehicle:00004292",
+    "fp:579a79b514666bae": "vehicle:00004145"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -63762,7 +63771,7 @@
         "regnr": null,
         "vin": null
       },
-      "last_seen": "https://www.wayke.se/objekt/6173ef22-13f0-482a-82bc-c2287210714e",
+      "last_seen": "https://www.wayke.se/objekt/01a12f9e-563d-7cac-b20a-6ffceb4657bc",
       "identifier_strength": "url",
       "resolution": {
         "matchningstyp": "url",
@@ -93797,6 +93806,42 @@
       "resolution": {
         "matchningstyp": "regnr",
         "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004291": {
+      "created": true,
+      "metadata": {
+        "modell": "V60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19547197",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004292": {
+      "created": true,
+      "metadata": {
+        "modell": "330e xDrive Touring",
+        "variant": "330e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19526413",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
         "matched_existing": true,
         "konflikt": false
       }
