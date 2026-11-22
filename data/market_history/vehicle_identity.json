@@ -16541,7 +16541,16 @@
     "source:bytbil:19526413": "vehicle:00004292",
     "url:https://www.bytbil.com/stockholms-lan/personbil-330e-xdrive-touring-292hk-p-sens-navigation-cockpit-8546-19526413": "vehicle:00004292",
     "fp:d1708b951dc048c0": "vehicle:00004292",
-    "fp:579a79b514666bae": "vehicle:00004145"
+    "fp:579a79b514666bae": "vehicle:00004145",
+    "reg:FJX56S": "vehicle:00004293",
+    "source:bilweb:478074": "vehicle:00004293",
+    "url:https://bilweb.se/uppsala-lan/volvo-v60-t6-awd-350hk-core-edition-drag-blis-navi-lader-2023-kombi-478074": "vehicle:00004293",
+    "fp:b598670ba3252fa4": "vehicle:00004293",
+    "fp:6a9900bff928915e": "vehicle:00004102",
+    "fp:cb194dd737e2fdae": "vehicle:00004272",
+    "url:https://bilweb.se/stockholms-lan/volvo-v60-recharge-t6-core-edition-kamera-driverassistance-2024-kombi-474474": "vehicle:00004191",
+    "fp:e4bc1aa73f49efbd": "vehicle:00004104",
+    "fp:55b218b66bef64b3": "vehicle:00003160"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -93842,6 +93851,24 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004293": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": "FJX56S",
+        "vin": null
+      },
+      "last_seen": "478074",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }

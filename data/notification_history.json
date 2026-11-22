@@ -1308,7 +1308,7 @@
     "price": 439000
   },
   "https://www.wayke.se/objekt/35d46fab-539c-483f-9a9f-4c527ad2a643": {
-    "price": 419000
+    "price": 409000
   },
   "https://www.wayke.se/objekt/7de1c217-09ca-481d-9834-68855b8384ef": {
     "price": 439900
@@ -1350,7 +1350,7 @@
     "price": 429000
   },
   "https://www.wayke.se/objekt/1786d213-d20f-4cb6-84e0-a1cd1959a679": {
-    "price": 409000
+    "price": 399000
   },
   "https://www.wayke.se/objekt/3749c12d-e1d6-43df-854d-dfcac8cfedde": {
     "price": 439900
@@ -1551,7 +1551,7 @@
     "price": 459000
   },
   "https://www.wayke.se/objekt/01a15e12-666a-7a3d-8a39-868c4d3c163d": {
-    "price": 459000
+    "price": 429900
   },
   "https://www.wayke.se/objekt/e63a5265-f848-450d-b0b1-91fd926db836": {
     "price": 489000
@@ -1572,7 +1572,7 @@
     "price": 399900
   },
   "https://www.wayke.se/objekt/54feb74d-15ba-4cea-b31a-87e61cff17f1": {
-    "price": 414000
+    "price": 399000
   },
   "https://www.wayke.se/objekt/cc3d0c1e-cf80-45a4-9693-df30de9263f5": {
     "price": 319900
@@ -2071,5 +2071,26 @@
   },
   "https://www.wayke.se/objekt/6eccb34e-9aa2-499b-bb9e-372dea7db598": {
     "price": 429900
+  },
+  "https://bilweb.se/stockholms-lan/volvo-v60-t6-plug-in-hybrid-awd-core-google-drag-momsbil-2025-kombi-473982": {
+    "price": 349900
+  },
+  "https://www.wayke.se/objekt/01a1ee62-c147-7cb3-965b-806e1382f5de": {
+    "price": 349900
+  },
+  "https://bilweb.se/ostergotlands-lan/bmw-530-e-3-99-ranta-xdrive-v-dack-ingar-skinn-drag-kamera-nav-2024-kombi-468325": {
+    "price": 339900
+  },
+  "https://www.wayke.se/objekt/44945da4-39ea-4497-8477-d42a067b30d6": {
+    "price": 339900
+  },
+  "https://www.wayke.se/objekt/2b37d774-759d-4018-831f-d79a24e0dcfa": {
+    "price": 336800
+  },
+  "https://bilweb.se/stockholms-lan/bmw-330-e-xdrive-touring-steptronic-euro-6-2024-kombi-451415": {
+    "price": 299800
+  },
+  "https://www.bytbil.com/stockholms-lan/personbil-330e-3-xdrive-touring-292hk-drag-100431-19478774": {
+    "price": 365000
   }
 }
