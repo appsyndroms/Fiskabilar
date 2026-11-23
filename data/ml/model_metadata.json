@@ -20,7 +20,7 @@
     "Bias": -18279.495078162494,
     "MAPE": 6.572900267811249
   },
-  "trained_at": "2026-11-22T22:27:21.085001+00:00",
+  "trained_at": "2026-11-23T01:03:37.331205+00:00",
   "observations": 7195,
   "training_rows": 7195,
   "validation_training_rows": 5756,
