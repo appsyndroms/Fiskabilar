@@ -1233,7 +1233,7 @@
     "price": 444000
   },
   "https://www.wayke.se/objekt/aacba9c6-3fc0-4a06-81fc-d8d3f281d0f8": {
-    "price": 449000
+    "price": 439000
   },
   "https://www.wayke.se/objekt/6b0f041f-4970-4b44-b174-16d7d8f22900": {
     "price": 489000
@@ -2104,5 +2104,14 @@
   },
   "https://www.bytbil.com/stockholms-lan/personbil-v90-recharge-t6-core-bright-blis-b-kam-carplay-5152-19549047": {
     "price": 409900
+  },
+  "https://bilweb.se/stockholms-lan/volvo-v90-t6-awd-recharge-350hk-2024-kombi-479102": {
+    "price": 349900
+  },
+  "https://www.wayke.se/objekt/508975b4-ff7f-4a3c-89a7-5b9a6501b62e": {
+    "price": 349900
+  },
+  "https://www.wayke.se/objekt/13b5d87d-1b65-4c7f-ab2e-14aff67a1ad5": {
+    "price": 369900
   }
 }
