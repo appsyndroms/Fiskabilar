@@ -16,11 +16,11 @@
   "metrics": {
     "MAE": 24784.57157998941,
     "RMSE": 76813.9039864994,
-    "R2": -0.7429944396986914,
-    "Bias": 8770.07346918185,
+    "R2": -0.7429944396986912,
+    "Bias": 8770.073469181849,
     "MAPE": 5.677400637505131
   },
-  "trained_at": "2026-11-24T15:43:02.863696+00:00",
+  "trained_at": "2026-11-25T00:08:31.089865+00:00",
   "observations": 7353,
   "training_rows": 7353,
   "validation_training_rows": 5882,
@@ -31,9 +31,9 @@
     "min_group_cars": 30,
     "global": {
       "cars": 1176,
-      "overvaluation_kr": 9352.169220225,
+      "overvaluation_kr": 9352.169220224998,
       "error_margin_kr": 30443.36677183835,
-      "raw_bias_kr": 9352.169220225,
+      "raw_bias_kr": 9352.169220224998,
       "raw_mae_kr": 25879.739556457902
     },
     "groups": {
@@ -41,20 +41,20 @@
         "cars": 123,
         "overvaluation_kr": 0.0,
         "error_margin_kr": 42248.72723214276,
-        "raw_bias_kr": -3793.2744041746037,
-        "raw_mae_kr": 30744.001088557707
+        "raw_bias_kr": -3793.2744041746078,
+        "raw_mae_kr": 30744.0010885577
       },
       "v60 | t6 awd": {
         "cars": 617,
-        "overvaluation_kr": 6464.395737051081,
+        "overvaluation_kr": 6464.395737051079,
         "error_margin_kr": 24316.671624060153,
-        "raw_bias_kr": 6464.395737051081,
+        "raw_bias_kr": 6464.395737051079,
         "raw_mae_kr": 19057.081241531072
       },
       "v90 | t6 awd": {
         "cars": 370,
         "overvaluation_kr": 13521.143540943855,
-        "error_margin_kr": 36936.11420508797,
+        "error_margin_kr": 36936.11420508798,
         "raw_bias_kr": 13521.143540943855,
         "raw_mae_kr": 29326.205447897286
       }
