@@ -14,13 +14,13 @@
     "ObservationMonth"
   ],
   "metrics": {
-    "MAE": 20684.81500888068,
-    "RMSE": 55771.8685774755,
-    "R2": 0.06882708523003778,
-    "Bias": 1654.9324760748075,
-    "MAPE": 4.712520180588649
+    "MAE": 20684.815008880683,
+    "RMSE": 55771.86857747549,
+    "R2": 0.06882708523003789,
+    "Bias": 1654.9324760748088,
+    "MAPE": 4.71252018058865
   },
-  "trained_at": "2026-11-27T14:53:06.657371+00:00",
+  "trained_at": "2026-11-27T23:00:04.624141+00:00",
   "observations": 7574,
   "training_rows": 7574,
   "validation_training_rows": 6058,
@@ -31,37 +31,37 @@
     "min_group_cars": 30,
     "global": {
       "cars": 1212,
-      "overvaluation_kr": 2285.6780717730644,
-      "error_margin_kr": 27531.602179850546,
-      "raw_bias_kr": 2285.6780717730644,
+      "overvaluation_kr": 2285.6780717730667,
+      "error_margin_kr": 27531.60217985055,
+      "raw_bias_kr": 2285.6780717730667,
       "raw_mae_kr": 21540.003670198043
     },
     "groups": {
       "330e xdrive touring | 330e xdrive touring": {
         "cars": 126,
         "overvaluation_kr": 0.0,
-        "error_margin_kr": 38402.98321428569,
-        "raw_bias_kr": -4147.75602910983,
-        "raw_mae_kr": 29690.6358781673
+        "error_margin_kr": 38402.98321428575,
+        "raw_bias_kr": -4147.756029109831,
+        "raw_mae_kr": 29690.635878167308
       },
       "530e xdrive touring | 530e xdrive touring": {
         "cars": 34,
-        "overvaluation_kr": 11496.103828781546,
-        "error_margin_kr": 47274.30074264728,
-        "raw_bias_kr": 11496.103828781546,
-        "raw_mae_kr": 30035.97602299253
+        "overvaluation_kr": 11496.103828781543,
+        "error_margin_kr": 47274.30074264729,
+        "raw_bias_kr": 11496.103828781543,
+        "raw_mae_kr": 30035.976022992527
       },
       "v60 | t6 awd": {
         "cars": 634,
         "overvaluation_kr": 0.0,
         "error_margin_kr": 23294.966924603028,
-        "raw_bias_kr": -54.33414160185887,
-        "raw_mae_kr": 16216.834704675468
+        "raw_bias_kr": -54.334141601855194,
+        "raw_mae_kr": 16216.834704675462
       },
       "v60 | t8 awd": {
         "cars": 32,
         "overvaluation_kr": 63383.93422688934,
-        "error_margin_kr": 6220.904418492738,
+        "error_margin_kr": 6220.9044184927325,
         "raw_bias_kr": 63383.93422688934,
         "raw_mae_kr": 85301.84637545084
       },
