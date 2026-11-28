@@ -17498,7 +17498,36 @@
     "fp:c7bc1b22d16ad365": "vehicle:00004508",
     "source:bytbil:19559252": "vehicle:00004509",
     "url:https://www.bytbil.com/varmlands-lan/personbil-330e-xdrive-sedan-m-sport-taklucka-hud-hifi-1174-19559252": "vehicle:00004509",
-    "fp:ec75732e07a7ba1b": "vehicle:00004509"
+    "fp:ec75732e07a7ba1b": "vehicle:00004509",
+    "url:https://www.wayke.se/objekt/d347ba48-2cfa-4033-afb1-d9895f4f1fe5": "vehicle:00004510",
+    "fp:a59d82ad2828e6a8": "vehicle:00004510",
+    "reg:TNJ98H": "vehicle:00004511",
+    "source:bilweb:485685": "vehicle:00004511",
+    "url:https://bilweb.se/sodermanlands-lan/volvo-v60-recharge-t6-awd-plus-dark-3-99-ranta-drag-kamera-pano-2024-kombi-485685": "vehicle:00004511",
+    "fp:5998b26bc8cb8f85": "vehicle:00004511",
+    "fp:2fe56f3d0e3b6e26": "vehicle:00004484",
+    "fp:980a493ed990380b": "vehicle:00004137",
+    "fp:777eff6410822516": "vehicle:00004298",
+    "fp:78e2c9815a968a27": "vehicle:00004299",
+    "fp:fa6edc6ceb0b390e": "vehicle:00002885",
+    "fp:03bf3376e2883c1f": "vehicle:00002528",
+    "fp:f59db9d26d3bfcfb": "vehicle:00004486",
+    "fp:3b37eec51346a1c6": "vehicle:00004487",
+    "source:bilweb:485660": "vehicle:00001748",
+    "url:https://bilweb.se/skane-lan/volvo-v90-recharge-t6-core-edition-2024-kombi-485660": "vehicle:00001748",
+    "fp:f61b2abfc2bae215": "vehicle:00001748",
+    "url:https://www.wayke.se/objekt/5ab7128a-8a1d-4ce8-abd8-837bc66c78de": "vehicle:00004512",
+    "fp:4c20545e5f9203b9": "vehicle:00004512",
+    "source:bytbil:19560292": "vehicle:00004513",
+    "url:https://www.bytbil.com/stockholms-lan/personbil-v90-t6-plus-dark-nordic-360kam-h-k-lader-rattvarme-5152-19560292": "vehicle:00004513",
+    "fp:94fd06f28719fc7b": "vehicle:00004513",
+    "source:bytbil:19559874": "vehicle:00004514",
+    "url:https://www.bytbil.com/uppsala-lan/personbil-v90-t6-plus-dark-nordic-edt-drag-360-selekt-7019-19559874": "vehicle:00004514",
+    "fp:d2f0b9d97c0d751b": "vehicle:00004514",
+    "reg:YWA34D": "vehicle:00004515",
+    "source:bilweb:485717": "vehicle:00004515",
+    "url:https://bilweb.se/sodermanlands-lan/bmw-530-e-xdrive-touring-steptronic-2024-kombi-485717": "vehicle:00004515",
+    "fp:7d9ac275421e59c3": "vehicle:00004515"
   },
   "vehicles": {
     "vehicle:00000001": {
@@ -48987,7 +49016,7 @@
         "regnr": "BXW38G",
         "vin": null
       },
-      "last_seen": "403188",
+      "last_seen": "485660",
       "identifier_strength": "regnr",
       "resolution": {
         "matchningstyp": "regnr",
@@ -98714,6 +98743,114 @@
       "resolution": {
         "matchningstyp": "source_id",
         "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004510": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2023,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/d347ba48-2cfa-4033-afb1-d9895f4f1fe5",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004511": {
+      "created": true,
+      "metadata": {
+        "modell": "v60",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": "TNJ98H",
+        "vin": null
+      },
+      "last_seen": "485685",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004512": {
+      "created": true,
+      "metadata": {
+        "modell": "v90",
+        "variant": "T6 AWD",
+        "arsmodell": 2024,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "https://www.wayke.se/objekt/5ab7128a-8a1d-4ce8-abd8-837bc66c78de",
+      "identifier_strength": "url",
+      "resolution": {
+        "matchningstyp": "url",
+        "identifier_strength": "url",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004513": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19560292",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004514": {
+      "created": true,
+      "metadata": {
+        "modell": "V90",
+        "variant": "T6 AWD",
+        "arsmodell": 2026,
+        "regnr": null,
+        "vin": null
+      },
+      "last_seen": "19559874",
+      "identifier_strength": "source_id",
+      "resolution": {
+        "matchningstyp": "source_id",
+        "identifier_strength": "source_id",
+        "matched_existing": true,
+        "konflikt": false
+      }
+    },
+    "vehicle:00004515": {
+      "created": true,
+      "metadata": {
+        "modell": "530e-xdrive-touring",
+        "variant": "530e xDrive Touring",
+        "arsmodell": 2024,
+        "regnr": "YWA34D",
+        "vin": null
+      },
+      "last_seen": "485717",
+      "identifier_strength": "regnr",
+      "resolution": {
+        "matchningstyp": "regnr",
+        "identifier_strength": "regnr",
         "matched_existing": true,
         "konflikt": false
       }
